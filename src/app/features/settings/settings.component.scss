@@ -11,6 +11,10 @@
     border-color: #0d6efd;
   }
 }
+ng-select img {
+  width: 20px;
+  height: 20px;
+}
 
 ::ng-deep ng-select.form-input {
   .ng-select-container {

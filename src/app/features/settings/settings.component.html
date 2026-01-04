@@ -1,8 +1,5 @@
 <div class="container-fluid mt-4">
-  <app-title-page 
-    [title]="'SETTINGS.TITLE' | translate" 
-    [subtitle]="'SETTINGS.SUBTITLE' | translate"
-    icon="bi bi-gear"
+  <app-title-page [title]="'SETTINGS.TITLE' | translate" [subtitle]="'SETTINGS.SUBTITLE' | translate" icon="bi bi-gear"
     [breadcrumbs]="breadcrumbs">
   </app-title-page>
 
@@ -12,36 +9,48 @@
         <div class="card-header py-3">
           <h5>
             <i class="bi bi-info-circle-fill"></i>
-            {{ 'SETTINGS.BASIC_INFO' | translate }}</h5>
+            {{ 'SETTINGS.BASIC_INFO' | translate }}
+          </h5>
         </div>
         <div class="card-body">
           <div class="row">
             <div class="col-md-4 mb-3">
-              <label class="form-label fw-bold">{{ 'SETTINGS.LANGUAGE' | translate }}</label>
-              <p class="text-muted small mb-2">{{ 'SETTINGS.LANGUAGE_DESC' | translate }}</p>
-              <ng-select
-                class="form-input"
-                [(ngModel)]="selectedLanguage"
-                [items]="languages"
-                bindLabel="label"
-                bindValue="code"
-                [clearable]="false"
-                [searchable]="false"
-                (change)="switchLanguage(selectedLanguage)">
+              <label class="form-label fw-bold">
+                {{ 'SETTINGS.LANGUAGE' | translate }}
+              </label>
+
+              <p class="text-muted small mb-2">
+                {{ 'SETTINGS.LANGUAGE_DESC' | translate }}
+              </p>
+
+              <ng-select class="form-input" [(ngModel)]="selectedLanguage" [items]="languages" bindValue="code"
+                [clearable]="false" [searchable]="false" (change)="switchLanguage(selectedLanguage)">
+
+                <!-- Valeur sélectionnée -->
+                <ng-template ng-label-tmp let-item="item">
+                  <div class="d-flex align-items-center gap-2">
+                    <img [src]="item.flag" width="20" height="14" alt="{{ item.name }}" />
+                    <span>{{ item.name }}</span>
+                  </div>
+                </ng-template>
+
+                <!-- Options du dropdown -->
+                <ng-template ng-option-tmp let-item="item">
+                  <div class="d-flex align-items-center gap-2">
+                    <img [src]="item.flag" width="20" height="14" alt="{{ item.name }}" />
+                    <span>{{ item.name }}</span>
+                  </div>
+                </ng-template>
+
               </ng-select>
             </div>
+
 
             <div *ngIf="isAdmin" class="col-md-4 mb-3">
               <label class="form-label fw-bold">{{ 'SETTINGS.CURRENCY' | translate }}</label>
               <p class="text-muted small mb-2">{{ 'SETTINGS.CURRENCY_DESC' | translate }}</p>
-              <ng-select
-                class="form-input"
-                [(ngModel)]="selectedCurrency"
-                [items]="currencies"
-                bindValue="code"
-                [clearable]="false"
-                [searchable]="true"
-                (change)="onCurrencyChange()">
+              <ng-select class="form-input" [(ngModel)]="selectedCurrency" [items]="currencies" bindValue="code"
+                [clearable]="false" [searchable]="true" (change)="onCurrencyChange()">
                 <ng-template ng-label-tmp let-item="item">
                   {{ item.symbol }} - {{ item.name }} ({{ item.code }})
                 </ng-template>
@@ -54,22 +63,30 @@
             <div *ngIf="isAdmin" class="col-md-4 mb-3">
               <label class="form-label fw-bold">{{ 'SETTINGS.COUNTRY' | translate }}</label>
               <p class="text-muted small mb-2">{{ 'SETTINGS.COUNTRY_DESC' | translate }}</p>
-              <ng-select
-                class="form-input"
-                [(ngModel)]="selectedCountry"
-                [items]="countries"
-                bindLabel="label"
-                bindValue="code"
-                [clearable]="false"
-                [searchable]="true"
-                (change)="onCountryChange()">
+              <ng-select class="form-input" [(ngModel)]="selectedCountry" [items]="countries" bindLabel="label"
+                bindValue="code" [clearable]="false" [searchable]="true" (change)="onCountryChange()">
+                                <!-- Valeur sélectionnée -->
+                <ng-template ng-label-tmp let-item="item">
+                  <div class="d-flex align-items-center gap-2">
+                    <img [src]="item.flag" width="20" height="14" alt="{{ item.name }}" />
+                    <span>{{ item.name }}</span>
+                  </div>
+                </ng-template>
+
+                <!-- Options du dropdown -->
+                <ng-template ng-option-tmp let-item="item">
+                  <div class="d-flex align-items-center gap-2">
+                    <img [src]="item.flag" width="20" height="14" alt="{{ item.name }}" />
+                    <span>{{ item.name }}</span>
+                  </div>
+                </ng-template>
               </ng-select>
             </div>
-              <div class="d-flex justify-content-end">
-                <button class="action-btn custom-btn-2 btn-add-global-2 w-100" (click)="saveLanguage()">
-                  <i class="bi bi-floppy me-2"></i>{{ 'SETTINGS.SAVE' | translate }}
-                </button>
-              </div>
+            <div class="d-flex justify-content-end">
+              <button class="action-btn custom-btn-2 btn-add-global-2 w-100" (click)="saveLanguage()">
+                <i class="bi bi-floppy me-2"></i>{{ 'SETTINGS.SAVE' | translate }}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -108,26 +125,30 @@
         <div class="card-header py-3">
           <h5 class="mb-0">
             <i class="bi bi-tag"></i>
-            {{ 'SETTINGS.PREFIXES' | translate }}</h5>
+            {{ 'SETTINGS.PREFIXES' | translate }}
+          </h5>
         </div>
         <div class="card-body">
           <p class="text-muted mb-4">{{ 'SETTINGS.PREFIXES_DESC' | translate }}</p>
           <div class="row">
             <div class="col-md-4 mb-3">
               <label class="form-label fw-bold">{{ 'SETTINGS.CHILD_PREFIX' | translate }}</label>
-              <input type="text" class="form-control" [(ngModel)]="childPrefix" (change)="onPrefixChange('child')" maxlength="20" placeholder="Child, Student, Player">
+              <input type="text" class="form-control" [(ngModel)]="childPrefix" (change)="onPrefixChange('child')"
+                maxlength="20" placeholder="Child, Student, Player">
               <small class="text-muted">e.g., Child, Student, Player</small>
             </div>
 
             <div class="col-md-4 mb-3">
               <label class="form-label fw-bold">{{ 'SETTINGS.PARENT_PREFIX' | translate }}</label>
-              <input type="text" class="form-control" [(ngModel)]="parentPrefix" (change)="onPrefixChange('parent')" maxlength="20" placeholder="Parent, Guardian">
+              <input type="text" class="form-control" [(ngModel)]="parentPrefix" (change)="onPrefixChange('parent')"
+                maxlength="20" placeholder="Parent, Guardian">
               <small class="text-muted">e.g., Parent, Guardian</small>
             </div>
 
             <div class="col-md-4 mb-3">
               <label class="form-label fw-bold">{{ 'SETTINGS.EDUCATOR_PREFIX' | translate }}</label>
-              <input type="text" class="form-control" [(ngModel)]="educatorPrefix" (change)="onPrefixChange('educator')" maxlength="20" placeholder="Educator, Teacher, Coach">
+              <input type="text" class="form-control" [(ngModel)]="educatorPrefix" (change)="onPrefixChange('educator')"
+                maxlength="20" placeholder="Educator, Teacher, Coach">
               <small class="text-muted">e.g., Educator, Teacher, Coach</small>
             </div>
           </div>

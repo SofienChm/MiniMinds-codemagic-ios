@@ -82,8 +82,7 @@
         <div *ngIf="child.parent" class="profile-info-card_parent mb-3">
           <div class="d-flex gap-3 align-items-center" (click)="navigateToParentDetail()">
             <div class="info-image">
-              <img [src]="getProfilePicture(child.parent.profilePicture)"
-                  class="img-fluid" alt="Parent Photo">
+              <img [src]="getProfilePicture(child.parent.profilePicture)" class="img-fluid" alt="Parent Photo">
             </div>
             <div class="info">
               <div class="info-title">{{child.parent.firstName}} {{child.parent.lastName}}</div>
@@ -143,6 +142,9 @@
             <dd class="col-6 description-dt-body-card mb-2">{{ child.dateOfBirth | date:'yy/MM/dd' }}</dd>
             <dt class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.ENROLLMENT_DATE' | translate }}</dt>
             <dd class="col-6 description-dt-body-card mb-2">{{ child.enrollmentDate | date:'yy/MM/dd' }}</dd>
+          </dl>
+          <div *ngIf="child.medicalNotes || child.allergies">
+            <h5 class="mb-3 title-body">Medical Information</h5>
             <div *ngIf="child.medicalNotes">
               <dt class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.MEDICAL_NOTES' | translate }}</dt>
               <dd class="col-6 description-dt-body-card mb-2">{{ child.medicalNotes }}</dd>
@@ -151,7 +153,9 @@
               <dt class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.ALLERGIES' | translate }}</dt>
               <dd class="col-6 description-dt-body-card mb-2">{{ child.allergies }}</dd>
             </div>
-          </dl>
+
+          </div>
+
         </div>
         <div class="card-footer">
           <button *ngIf="!isParent" (click)="openAddFeeModal()" class="btn btn-add-fee btn-sm w-100">{{ 'CHILD_DETAIL.ADD_FEES' | translate }}</button>

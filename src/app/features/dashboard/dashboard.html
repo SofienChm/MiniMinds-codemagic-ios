@@ -383,11 +383,11 @@
       <div class="dashboard-header">
         <div class="header-content">
           <div class="row welcome-text">
-            <div class="col-10">
+            <div class="col-10 text-dash">
               <h2 class="mb-1 mt-4 welcome font-inter">{{ getGreeting() }}, {{ userName }} ! 👋</h2>
               <p class="mb-0 black font-inter ">{{ 'DASHBOARD.MINIMINDS_HOME' | translate }}</p>
             </div>
-            <div class="col-2">
+            <div class="col-2 img-dash">
               <img [src]="userProfilePicture || 'assets/default-avatar.svg'" [alt]="userName"
                 class="rounded-circle profile-image img-fluid" (click)="goToParentProfile()" style="cursor: pointer;">
             </div>

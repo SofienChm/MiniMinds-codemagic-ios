@@ -32,18 +32,18 @@ export class SettingsComponent implements OnInit {
   selectedLanguage: string = '';
 
   languages = [
-    { code: 'en', name: 'English', flag: '🇪🇳', label: '🇪🇳 English' },
-    { code: 'fr', name: 'Français', flag: '🇫🇷', label: '🇫🇷 Français' },
-    { code: 'it', name: 'Italiano', flag: '🇮🇹', label: '🇮🇹 Italiano' }
+    { code: 'en', name: 'English', flag: '/assets/images/us.png', label: '🇪🇳 English' },
+    { code: 'fr', name: 'Français', flag: '/assets/images/fr.png', label: '🇫🇷 Français' },
+    { code: 'it', name: 'Italiano', flag: '/assets/images/it.png', label: '🇮🇹 Italiano' }
   ];
 
   currencies = this.currencyService.getCurrencies();
 
   countries = [
-    { code: 'US', name: 'United States', flag: '🇺🇸', label: '🇺🇸 United States' },
-    { code: 'FR', name: 'France', flag: '🇫🇷', label: '🇫🇷 France' },
-    { code: 'IT', name: 'Italy', flag: '🇮🇹', label: '🇮🇹 Italy' },
-    { code: 'CA', name: 'Canada', flag: '🇨🇦', label: '🇨🇦 Canada' }
+    { code: 'US', name: 'United States', flag: '/assets/images/us.png', label: '🇺🇸 United States' },
+    { code: 'FR', name: 'France', flag: '/assets/images/fr.png', label: '🇫🇷 France' },
+    { code: 'IT', name: 'Italy', flag: '/assets/images/it.png', label: '🇮🇹 Italy' },
+    { code: 'CA', name: 'Canada', flag: '/assets/images/ca.png', label: '🇨🇦 Canada' }
   ];
 
   selectedCurrency: string = this.currencyService.getSelectedCurrencyCode();

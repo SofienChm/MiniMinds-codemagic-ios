@@ -358,7 +358,7 @@
     align-items: center;
     justify-content: center;
     margin-bottom: 16px;
-  }  
+  } 
 }
 
 @keyframes pulse {
@@ -1273,4 +1273,27 @@
   @extend .skeleton-base;
   aspect-ratio: 1;
   border-radius: 12px;
+}
+
+
+
+
+// iphone pro max landscape
+@media only screen 
+  and (min-device-width: 414px) 
+  and (max-device-width: 460px) 
+  and (-webkit-min-device-pixel-ratio: 3) 
+ {
+    .dashboard-header {
+      padding: 65px 20px 16px;
+    }
+    .img-dash {
+      padding-left: 0 !important;
+      img {
+        max-width: 4rem !important;
+        max-height: 4rem !important;
+        width: 3.5rem !important;
+        height: 3.5rem !important;
+      }
+    }
 }

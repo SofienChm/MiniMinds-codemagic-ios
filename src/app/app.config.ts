@@ -6,6 +6,7 @@ import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { Observable } from 'rxjs';
+import { provideIonicAngular } from '@ionic/angular/standalone';
 
 export class CustomTranslateLoader implements TranslateLoader {
   constructor(private http: HttpClient) {}
@@ -24,6 +25,9 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes, withInMemoryScrolling({ scrollPositionRestoration: 'top' })),
     provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
+    provideIonicAngular({
+      swipeBackEnabled: true
+    }),
     importProvidersFrom(
       TranslateModule.forRoot({
         defaultLanguage: 'en',

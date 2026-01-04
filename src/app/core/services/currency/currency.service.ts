@@ -15,7 +15,7 @@ export class CurrencyService {
     { code: 'USD', symbol: '$', name: 'US Dollar' },
     { code: 'EUR', symbol: '€', name: 'Euro' },
     { code: 'TND', symbol: 'د.ت', name: 'Tunisian Dinar' },
-    { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar' },
+    { code: 'CAD', symbol: 'CA$', name: 'Canadian Dollar' },
     { code: 'GBP', symbol: '£', name: 'British Pound' }
   ];
 
