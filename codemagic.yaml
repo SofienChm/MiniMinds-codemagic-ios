@@ -16,7 +16,7 @@ workflows:
           npm install -g @angular/cli @capacitor/cli
       - name: Build Angular app
         script: |
-          ng build --configuration=production
+          ng build --configuration=mobile
       - name: Sync Capacitor iOS
         script: |
           npx cap sync ios
