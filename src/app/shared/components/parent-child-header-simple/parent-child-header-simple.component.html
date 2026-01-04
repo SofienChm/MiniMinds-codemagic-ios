@@ -1,0 +1,17 @@
+<div class="parent-detailchild font-inter">
+ <div class="header-info">
+        <div class="title-icons">
+          <div class="page-back" (click)="back()">
+            <i class="bi bi-arrow-left"></i>
+          </div>
+        </div>
+        <div class="d-flex image-name row_direction flex-grow-1">
+          <div class="overflow-hidden">
+            <h5 class="name simple"> {{ title }} </h5>
+          </div>
+        </div>
+        <div class="header-actions">
+          <ng-content></ng-content>
+        </div>
+      </div>
+</div>

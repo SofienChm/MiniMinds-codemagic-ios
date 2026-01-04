@@ -1,0 +1,154 @@
+<header class="bg-white py-2 px-4" *ngIf="!isParent">
+  <div class="d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center gap-3">
+      <button class="btn btn-link d-lg-none p-0" (click)="toggleMobileMenu()">
+        <i class="bi bi-list fs-3"></i>
+      </button>
+    </div>
+    
+    <div class="d-flex align-items-center gap-2">
+      <app-language-selector></app-language-selector>
+
+      <!-- Quick Links Dropdown -->
+      <div class="position-relative">
+        <button class="btn btn-header btn-outline-light bg-white btn-icon position-relative me-1" (click)="toggleQuickLinks()">
+          <i class="bi bi-plus"></i>
+        </button>
+        
+        <div *ngIf="showQuickLinks" class="quick-links-dropdown">
+          <div class="dropdown-grid">
+            <a routerLink="/children/add" class="grid-item" (click)="closeQuickLinks()">
+              <i class="bi bi-person-plus-fill" style="color: #7dd3c0;"></i>
+              <span>Add Child</span>
+            </a>
+            <a routerLink="/children" class="grid-item" (click)="closeQuickLinks()">
+              <i class="bi bi-people-fill" style="color: #7dd3c0;"></i>
+              <span>Children List</span>
+            </a>
+            <a routerLink="/leaves/add" class="grid-item" (click)="closeQuickLinks()">
+              <i class="bi bi-calendar-plus" style="color: #7dd3c0;"></i>
+              <span>Add Leave</span>
+            </a>
+            <a routerLink="/daily-activities" class="grid-item" (click)="closeQuickLinks()">
+              <i class="bi bi-clipboard-data" style="color: #7dd3c0;"></i>
+              <span>Daily Reports</span>
+            </a>
+            <a routerLink="/fees" class="grid-item" (click)="closeQuickLinks()">
+              <i class="bi bi-credit-card" style="color: #7dd3c0;"></i>
+              <span>Payments</span>
+            </a>
+            <a routerLink="/reclamations" class="grid-item" (click)="closeQuickLinks()">
+              <i class="bi bi-exclamation-triangle" style="color: #7dd3c0;"></i>
+              <span>Reclamations</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notifications -->
+      <div class="position-relative d-flex align-items-center gap-2" style="overflow: visible;">
+        <!-- Messages Icon with unread dot -->
+        <a routerLink="/messages" class="btn btn-header btn-outline-light bg-white btn-icon position-relative me-1">
+          <i class="bi bi-chat-dots"></i>
+          <span *ngIf="messagesUnreadCount > 0" class="notification-status-dot"></span>
+        </a>
+
+        <a class="btn btn-header btn-outline-light bg-white btn-icon position-relative me-1" (click)="toggleNotifications()">
+          <i class="bi bi-bell"></i>
+          <span *ngIf="unreadCount > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+            {{ unreadCount }}
+          </span>
+        </a>
+        
+        <!-- Notifications Dropdown -->
+        <div *ngIf="showNotifications" class="notification-dropdown">
+          <div class="notification-header">
+            <h6 class="mb-0 fw-bold">{{ 'HEADER.NOTIFICATIONS' | translate }}</h6>
+            <button *ngIf="notifications.length > 0" class="btn-mark-all" (click)="markAllAsRead()">
+              <i class="bi bi-check-all me-1"></i>{{ 'HEADER.MARK_ALL_READ' | translate }}
+            </button>
+          </div>
+          
+          <div *ngIf="notifications.length === 0" class="notification-empty">
+            <i class="bi bi-bell-slash fs-1 text-muted mb-2"></i>
+            <p class="text-muted mb-0">{{ 'HEADER.NO_NOTIFICATIONS' | translate }}</p>
+          </div>
+          
+          <div class="notification-list">
+            <div *ngFor="let notification of notifications" 
+                 class="notification-item" 
+                 [class.clickable]="notification.redirectUrl"
+                 [class.read]="notification.isRead"
+                 [class.unread]="!notification.isRead"
+                 (click)="onNotificationClick(notification)">
+              <div class="notificati" [ngClass]="getNotificationIconClass(notification.type)">
+                <i [class]="getNotificationIcon(notification.type)"></i>
+              </div>
+              <div class="notification-content">
+                <div class="d-flex justify-content-between align-items-start mb-1">
+                  <strong class="notification-title">{{ notification.title }}</strong>
+                  <span class="notification-time">{{ getTimeAgo(notification.createdAt) }}</span>
+                </div>
+                <p class="notification-message mb-0">{{ notification.message }}</p>
+                <small *ngIf="notification.redirectUrl" class="notification-action">
+                  <i class="bi bi-arrow-right-circle me-1"></i>{{ 'HEADER.VIEW_DETAILS' | translate }}
+                </small>
+              </div>
+              <div *ngIf="!notification.isRead" class="unread-dot"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- User Profile -->
+      <div class="d-flex align-items-center gap-2">
+       
+        <ng-template #initials>
+          <div class=" bg-primary text-white d-flex align-items-center justify-content-center profilePicture">
+            <strong>{{ getInitials() }}</strong>
+          </div>
+        </ng-template>
+        
+        <div class="dropdown position-relative profile-header">
+          <button class="btn btn-link text-decoration-none text-dark dropdown-toggle" type="button" (click)="toggleUserMenu()">
+            <ng-container *ngIf="currentUser?.profilePicture as profilePic; else initials">
+              <div class="image-profile-header overflow-hidden">
+                <img loading="lazy" [src]="profilePic" alt="Profile" class="w-100 h-100 object-fit-cover">
+              </div>
+            </ng-container>
+            <!--  <span>{{ currentUser?.firstName }} {{ currentUser?.lastName }}</span>-->
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end" [class.show]="showUserMenu" style="position: absolute; right: 0; top: 100%;">
+            <li><a class="dropdown-item" routerLink="/profile" (click)="closeUserMenu()"><i class="bi bi-person me-2"></i>{{ 'HEADER.PROFILE' | translate }}</a></li>
+            <li><a class="dropdown-item" routerLink="/settings" (click)="closeUserMenu()"><i class="bi bi-gear me-2"></i>{{ 'HEADER.SETTINGS' | translate }}</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" (click)="logout()"><i class="bi bi-box-arrow-right me-2"></i>{{ 'HEADER.LOGOUT' | translate }}</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<header *ngIf="isParent" class="parent-menu">
+  <nav class="parent-nav">
+    <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link">
+      <i class="bi bi-house-fill"></i>
+      <p>{{ 'HEADER.DASHBOARD' | translate }}</p>
+    </a>
+    <a routerLink="/activities" routerLinkActive="active" class="nav-link">
+      <i class="bi bi-file-text-fill"></i>
+      <p>{{ 'HEADER.ACTIVITY' | translate }}</p>
+    </a>
+    <a routerLink="/notifications" routerLinkActive="active" class="nav-link">
+      <i class="bi bi-bell-fill"></i>
+      <span class="nav-badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+      <p>{{ 'HEADER.NOTIFICATION' | translate }}</p>
+    </a>
+    <a (click)="goToParentProfile()" routerLinkActive="active" class="nav-link" style="cursor: pointer;">
+      <i class="bi bi-list"></i>
+      <p>{{ 'HEADER.MENU' | translate }}</p>
+    </a>
+  </nav>
+
+</header>

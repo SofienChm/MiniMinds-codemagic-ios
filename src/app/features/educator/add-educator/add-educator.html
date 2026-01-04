@@ -1,0 +1,228 @@
+<div class="add-educator-container">
+  <!-- Image Cropper Modal -->
+  <app-image-cropper-modal
+    #imageCropper
+    [imageFile]="selectedImageFile"
+    [roundCropper]="true"
+    [aspectRatio]="1"
+    [resizeToWidth]="300"
+    [resizeToHeight]="300"
+    (imageCropped)="onImageCropped($event)"
+    (cancelled)="onCropCancelled()">
+  </app-image-cropper-modal>
+
+  <div class="container-fluid mt-4 mb-4">
+    <app-title-page [title]="'ADD_EDUCATOR.TITLE' | translate" [breadcrumbs]="breadcrumbs" [actions]="titleActions">
+    </app-title-page>
+
+    <div class="card-add-pages">
+      <form [formGroup]="educatorForm" (ngSubmit)="saveEducator()" class="add-form">
+        <!-- Section Personal Information -->
+        <div class="form-section">
+          <div class="section-header">
+            <i class="bi bi-person-circle"></i>
+            <h4>{{ 'ADD_EDUCATOR.PERSONAL_INFO' | translate }}</h4>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">{{ 'ADD_EDUCATOR.FIRST_NAME' | translate }} {{ 'ADD_EDUCATOR.REQUIRED' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-person input-icon"></i>
+                <input type="text" class="form-input" [class.is-invalid]="isFieldInvalid('firstName')" formControlName="firstName" [placeholder]="'GLOBAL.FIRST_NAME_PLACEHOLDER' | translate">
+              </div>
+              <div *ngIf="isFieldInvalid('firstName')" class="error-message">
+                {{ getFieldError('firstName') }}
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ 'ADD_EDUCATOR.LAST_NAME' | translate }} {{ 'ADD_EDUCATOR.REQUIRED' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-person input-icon"></i>
+                <input type="text" class="form-input" [class.is-invalid]="isFieldInvalid('lastName')" formControlName="lastName" [placeholder]="'GLOBAL.LAST_NAME_PLACEHOLDER' | translate">
+              </div>
+              <div *ngIf="isFieldInvalid('lastName')" class="error-message">
+                {{ getFieldError('lastName') }}
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ 'ADD_EDUCATOR.DATE_OF_BIRTH' | translate }} {{ 'ADD_EDUCATOR.REQUIRED' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-calendar input-icon"></i>
+                <input type="date" class="form-input" [class.is-invalid]="isFieldInvalid('dateOfBirth')" formControlName="dateOfBirth">
+              </div>
+              <div *ngIf="isFieldInvalid('dateOfBirth')" class="error-message">
+                {{ getFieldError('dateOfBirth') }}
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ 'ADD_EDUCATOR.PHONE' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-telephone input-icon"></i>
+                <input type="text" class="form-input" [class.is-invalid]="isFieldInvalid('phone')" formControlName="phone" [placeholder]="'ADD_EDUCATOR.PHONE_PLACEHOLDER' | translate">
+              </div>
+              <div *ngIf="isFieldInvalid('phone')" class="error-message">
+                {{ getFieldError('phone') }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section Account Information -->
+        <div class="form-section">
+          <div class="section-header">
+            <i class="bi bi-shield-lock"></i>
+            <h4>{{ 'ADD_EDUCATOR.ACCOUNT_INFO' | translate }}</h4>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">{{ 'ADD_EDUCATOR.EMAIL' | translate }} {{ 'ADD_EDUCATOR.REQUIRED' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-envelope input-icon"></i>
+                <input type="email" class="form-input" [class.is-invalid]="isFieldInvalid('email')" formControlName="email" [placeholder]="'ADD_EDUCATOR.EMAIL_PLACEHOLDER' | translate">
+              </div>
+              <small class="form-hint">{{ 'ADD_EDUCATOR.EMAIL_HINT' | translate }}</small>
+              <div *ngIf="isFieldInvalid('email')" class="error-message">
+                {{ getFieldError('email') }}
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ 'ADD_EDUCATOR.PASSWORD' | translate }} {{ 'ADD_EDUCATOR.REQUIRED' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-key input-icon"></i>
+                <input type="password" class="form-input" [class.is-invalid]="isFieldInvalid('password')" formControlName="password" [placeholder]="'ADD_EDUCATOR.PASSWORD_PLACEHOLDER' | translate">
+              </div>
+              <small class="form-hint">{{ 'ADD_EDUCATOR.PASSWORD_HINT' | translate }}</small>
+              <div *ngIf="isFieldInvalid('password')" class="error-message">
+                {{ getFieldError('password') }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section Professional Information -->
+        <div class="form-section">
+          <div class="section-header">
+            <i class="bi bi-briefcase"></i>
+            <h4>{{ 'ADD_EDUCATOR.PROFESSIONAL_INFO' | translate }}</h4>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">{{ 'ADD_EDUCATOR.HIRE_DATE' | translate }} {{ 'ADD_EDUCATOR.REQUIRED' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-calendar-check input-icon"></i>
+                <input type="date" class="form-input" [class.is-invalid]="isFieldInvalid('hireDate')" formControlName="hireDate">
+              </div>
+              <div *ngIf="isFieldInvalid('hireDate')" class="error-message">
+                {{ getFieldError('hireDate') }}
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ 'ADD_EDUCATOR.SPECIALIZATION' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-mortarboard input-icon"></i>
+                <ng-select
+                  class="form-input"
+                  formControlName="specialization"
+                  [items]="specializations"
+                  bindLabel="label"
+                  bindValue="value"
+                  [placeholder]="'ADD_EDUCATOR.SELECT_SPECIALIZATION' | translate"
+                  [clearable]="true"
+                  [searchable]="false">
+                  <ng-template ng-option-tmp let-item="item">
+                    <div class="option-with-image">
+                      <i class="bi {{item.icon}}" style="font-size: 18px; color: #7dd3c0;"></i>
+                      <span class="option-title">{{ item.label }}</span>
+                    </div>
+                  </ng-template>
+                </ng-select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ 'ADD_EDUCATOR.SALARY' | translate }} {{ 'ADD_EDUCATOR.REQUIRED' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-currency-dollar input-icon"></i>
+                <input type="number" class="form-input" [class.is-invalid]="isFieldInvalid('salary')" formControlName="salary" min="0" [placeholder]="'ADD_EDUCATOR.SALARY_PLACEHOLDER' | translate">
+              </div>
+              <div *ngIf="isFieldInvalid('salary')" class="error-message">
+                {{ getFieldError('salary') }}
+              </div>
+            </div>
+            <div class="form-group full-width textarea">
+              <label class="form-label">{{ 'ADD_EDUCATOR.ADDRESS' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-geo-alt input-icon"></i>
+                <textarea class="form-input" [class.is-invalid]="isFieldInvalid('address')" formControlName="address" rows="3" [placeholder]="'ADD_EDUCATOR.ADDRESS_PLACEHOLDER' | translate"></textarea>
+              </div>
+              <div *ngIf="isFieldInvalid('address')" class="error-message">
+                {{ getFieldError('address') }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section Photo and Status -->
+        <div class="form-section">
+          <div class="section-header">
+            <i class="bi bi-image"></i>
+            <h4>{{ 'ADD_EDUCATOR.PHOTO_STATUS' | translate }}</h4>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">{{ 'ADD_EDUCATOR.PROFILE_PICTURE' | translate }}</label>
+              <div class="file-upload-area">
+                <input type="file" #fileInput id="profilePicture" class="file-input" (change)="onImageSelect($event)" accept="image/jpeg,image/png,image/gif,image/webp">
+                <label for="profilePicture" class="file-upload-label">
+                  <div *ngIf="!imagePreview" class="upload-placeholder">
+                    <i class="bi bi-cloud-upload"></i>
+                    <span>{{ 'GLOBAL.UPLOAD_PHOTO' | translate }}</span>
+                  </div>
+                  <img *ngIf="imagePreview" [src]="imagePreview" class="preview-image" [alt]="'GLOBAL.PREVIEW' | translate">
+                </label>
+                <button *ngIf="imagePreview" type="button" class="btn-remove-image" (click)="removeImage()">
+                  <i class="bi bi-x-circle"></i>
+                  {{ 'GLOBAL.REMOVE_PHOTO' | translate }}
+                </button>
+              </div>
+              <small class="form-hint">{{ 'GLOBAL.IMAGE_HINT' | translate }}</small>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ 'ADD_EDUCATOR.STATUS' | translate }}</label>
+              <div class="status-toggle">
+                <label class="toggle-label">{{ 'ADD_EDUCATOR.ACTIVE_STATUS' | translate }}</label>
+                <div class="toggle-switch">
+                  <input type="checkbox" formControlName="isActive" id="isActive" class="toggle-input">
+                  <label for="isActive" class="toggle-slider"></label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Info Note -->
+        <div class="info-note">
+          <div class="note-icon">
+            <i class="bi bi-info-circle"></i>
+          </div>
+          <div class="note-content">
+            <h5>{{ 'ADD_EDUCATOR.INFO_NOTE' | translate }}</h5>
+            <p>{{ 'ADD_EDUCATOR.INFO_MESSAGE' | translate }}</p>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="form-actions">
+          <button type="button" class="custom-btn-2 btn-cancel-2" (click)="cancel()" [disabled]="saving">
+            <i class="bi bi-x-circle"></i>
+            {{ 'ADD_EDUCATOR.CANCEL' | translate }}
+          </button>
+          <button type="submit" class="custom-btn-2 btn-add-global-2" [disabled]="saving || educatorForm.invalid">
+            <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
+            <i *ngIf="!saving" class="bi bi-check-circle"></i>
+            {{ saving ? ('ADD_EDUCATOR.CREATING' | translate) : ('ADD_EDUCATOR.CREATE_EDUCATOR' | translate) }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

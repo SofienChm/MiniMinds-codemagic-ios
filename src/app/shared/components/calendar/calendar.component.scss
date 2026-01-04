@@ -1,0 +1,250 @@
+.calendar-container {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #fff;
+}
+.calendar-header .btn-sm {
+  width: 30px;
+  height: 30px;
+  font-size: 12px;
+  border: 1px solid #E9EDF4;
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  justify-content: center;
+  -webkit-justify-content: center;
+}
+.calendar-header .btn-sm i{
+  color: #202C4B;
+}
+.calendar-header .btn-sm:hover {
+  background-color: #202C4B;
+}
+.calendar-header .btn-sm:hover i {
+  color: #fff;
+}
+.calendar-grid {
+  margin: 1rem;
+  border: 1px solid #E9EDF4;
+}
+
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background: #f4f6fa;
+  padding: 8px 0;
+}
+
+.weekday {
+  text-align: center;
+  color: #202C4B;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 0;
+}
+
+.calendar-days {
+  display: flex;
+  flex-direction: column;
+  /* gap: 1px; */
+}
+
+.calendar-week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  /* gap: 1px; */
+}
+
+.calendar-day {
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  padding: 0px;
+  position: relative;
+  border: 1px solid #E9EDF4;
+  max-width: 92px;
+}
+
+.day-number {
+  font-weight: 600;
+  margin-bottom: 2px;
+  text-align: right;
+  padding-right: 5px;
+  padding-top: 5px;
+}
+
+.events-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.fc-event-container {
+  width: 100%;
+}
+
+.fc-day-grid-event {
+  background: #17a2b8;
+  color: white;
+  border-radius: 2px;
+  padding: 1px 3px;
+  font-size: 0.7rem;
+  margin-bottom: 1px;
+  overflow: hidden;
+}
+
+.fc-content {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fc-title {
+  font-size: 0.65rem;
+  line-height: 1.2;
+}
+
+.fc-day-grid-event {
+  cursor: pointer;
+}
+
+.fc-day-grid-event:hover {
+  background: #138496 !important;
+  transform: scale(1.02);
+  transition: all 0.2s ease;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+}
+
+.modal-dialog {
+  background: white;
+  border-radius: 8px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-content {
+  padding: 0;
+}
+
+.modal-header {
+  padding: 1rem;
+  border-bottom: 1px solid #dee2e6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-body {
+  padding: 1rem;
+}
+
+.modal-footer {
+  padding: 1rem;
+  border-top: 1px solid #dee2e6;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.calendar-day:hover {
+  background: #e9ecef;
+}
+
+.calendar-day.today {
+  background: #007bff;
+  color: white;
+  font-weight: 600;
+}
+
+.calendar-day.selected {
+  background: #28a745;
+  color: white;
+  font-weight: 600;
+}
+
+.calendar-day.other-month {
+  color: #adb5bd;
+}
+
+.calendar-day.other-month:hover {
+  background: #f8f9fa;
+}
+
+.calendar-day.has-event {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+}
+
+.calendar-day.has-event:hover {
+  background: #e9ecef;
+  color: #202C4B;
+  transition: ease .5;
+}
+
+.calendar-day.has-holiday {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+}
+
+.calendar-day.has-holiday:hover {
+  background: #ffeaa7;
+}
+
+.holiday-event {
+  color: white !important;
+  font-weight: 600;
+  border: none;
+}
+
+.holiday-event:hover {
+  opacity: 0.9;
+  transform: scale(1.02);
+}

@@ -1,0 +1,124 @@
+<div class="container-fluid mt-4">
+  <app-title-page
+    [title]="'EVENT_PARTICIPANTS.TITLE' | translate"
+    [subtitle]="event ? event.name : ('EVENT_PARTICIPANTS.SUBTITLE' | translate)"
+    icon="bi bi-people"
+    [breadcrumbs]="breadcrumbs"
+    [actions]="titleActions">
+  </app-title-page>
+
+  <!-- Add Participant Form -->
+  <div class="card card-general add-participant mb-4" *ngIf="canAddParticipants()">
+    <div class="card-header" *ngIf="event">
+      <h6>{{ 'EVENT_PARTICIPANTS.ADD_PARTICIPANT' | translate }}</h6>
+      <div class="h4">{{ participants.length }}/{{ event.capacity }}</div>
+    </div>
+    <div class="card-body">
+      <div class="row align-items-end">
+        <div class="col-md-8">
+          <label class="form-label">{{ 'EVENT_PARTICIPANTS.SELECT_CHILD' | translate }}</label>
+          <ng-select
+            class="form-input"
+            [(ngModel)]="selectedChildId"
+            [items]="availableChildren"
+            bindLabel="firstName"
+            bindValue="id"
+            [placeholder]="'EVENT_PARTICIPANTS.CHOOSE_CHILD' | translate"
+            [clearable]="true"
+            [searchable]="true">
+            <ng-template ng-option-tmp let-item="item">
+              <div class="option-with-image">
+                <img [src]="item?.profilePicture || 'assets/child.png'" class="option-image" alt="">
+                <div class="option-text">
+                  <span class="option-title">{{ item.firstName }} {{ item.lastName }}</span>
+                  <span class="option-subtitle" *ngIf="item.parent">{{ item.parent.firstName }} {{ item.parent.lastName }}</span>
+                </div>
+              </div>
+            </ng-template>
+            <ng-template ng-label-tmp let-item="item">
+              <div class="selected-with-image" *ngIf="item?.id">
+                <img [src]="item?.profilePicture || 'assets/child.png'" class="selected-image" alt="">
+                <span class="selected-text">{{ item.firstName }} {{ item.lastName }}</span>
+              </div>
+            </ng-template>
+          </ng-select>
+        </div>
+        <div class="col-md-4">
+          <button class="btn btn-primary btn-add-global" (click)="addParticipant()"
+                  [disabled]="!selectedChildId || saving">
+            <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
+            {{ saving ? ('EVENT_PARTICIPANTS.ADDING' | translate) : ('EVENT_PARTICIPANTS.ADD_PARTICIPANT_BTN' | translate) }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Participants List -->
+  <div class="card card-general add-participant">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h6>{{ 'EVENT_PARTICIPANTS.REGISTERED_PARTICIPANTS' | translate }} ({{ participants.length }})</h6>
+      <button class="btn btn-secondary btn-cancel-global btn-sm" (click)="goBack()">
+        <i class="bi bi-arrow-left me-1"></i>{{ 'EVENT_PARTICIPANTS.BACK_TO_EVENTS' | translate }}
+      </button>
+    </div>
+    <div class="card-body">
+      <div *ngIf="loading" class="text-center py-4">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">{{ 'EVENT_PARTICIPANTS.LOADING' | translate }}</span>
+        </div>
+      </div>
+
+      <div *ngIf="!loading && participants.length === 0" class="text-center py-4 text-muted">
+        {{ 'EVENT_PARTICIPANTS.NO_PARTICIPANTS' | translate }}
+      </div>
+
+      <div class="table-responsive" *ngIf="!loading && participants.length > 0">
+        <table class="table table-hover">
+          <thead class="table-light">
+            <tr>
+              <th>{{ 'EVENT_PARTICIPANTS.CHILD_NAME' | translate }}</th>
+              <th>{{ 'EVENT_PARTICIPANTS.PARENT' | translate }}</th>
+              <th>{{ 'EVENT_PARTICIPANTS.REGISTERED_DATE' | translate }}</th>
+              <th>{{ 'EVENT_PARTICIPANTS.STATUS' | translate }}</th>
+              <th>{{ 'EVENT_PARTICIPANTS.ACTIONS' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let participant of participants">
+              <td>
+                <strong>{{ participant.child?.firstName }} {{ participant.child?.lastName }}</strong>
+              </td>
+              <td>
+                {{ participant.child?.parent?.firstName }} {{ participant.child?.parent?.lastName }}
+              </td>
+              <td>{{ participant.registeredAt | date:'short' }}</td>
+              <td>
+                <span class="badge" [ngClass]="{
+                  'bg-success': participant.status === 'Registered',
+                  'bg-warning': participant.status === 'Pending',
+                  'bg-danger': participant.status === 'Rejected'
+                }">{{ getStatusLabel(participant.status) }}</span>
+              </td>
+              <td>
+                <div class="btn-group" *ngIf="authService.isAdmin() && participant.status === 'Pending'">
+                  <button class="btn btn-sm btn-success" (click)="approveParticipant(participant.id!)">
+                    <i class="bi bi-check"></i> {{ 'EVENT_PARTICIPANTS.APPROVE' | translate }}
+                  </button>
+                  <button class="btn btn-sm btn-danger" (click)="rejectParticipant(participant.id!)">
+                    <i class="bi bi-x"></i> {{ 'EVENT_PARTICIPANTS.REJECT' | translate }}
+                  </button>
+                </div>
+                <button *ngIf="canRemoveParticipant(participant)"
+                        class="btn btn-sm btn-outline-danger"
+                        (click)="removeParticipant(participant.id!)">
+                  <i class="bi bi-trash"></i> {{ 'EVENT_PARTICIPANTS.REMOVE' | translate }}
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

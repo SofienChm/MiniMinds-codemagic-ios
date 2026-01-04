@@ -1,0 +1,237 @@
+<div [class]="isParent ? '' : 'container-fluid mt-4'" >
+  <app-title-page
+    [title]="'ATTENDANCE_PAGE.TITLE' | translate"
+    [breadcrumbs]="[{label: 'ATTENDANCE_PAGE.DASHBOARD' | translate, url: '/dashboard'}, {label: 'ATTENDANCE_PAGE.ATTENDANCE' | translate}]">
+  </app-title-page>
+</div>
+<div class="container-fluid mt-4">
+
+  <div class="row mb-3">
+    <div class="col-12 col-md-4 live mb-sm-2">
+      <div class="card card-body stats-card live-clock-card">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <div class="live-indicator mb-2">
+            <span class="pulse-dot"></span>
+            <small>{{ 'ATTENDANCE_PAGE.LIVE' | translate }}</small>
+          </div>
+          <h4 class="mb-0">{{ getCurrentTime() }}</h4>
+          <small class="text-muted">{{ currentTime | date:'fullDate' }}</small>
+        </div>
+      </div>
+    </div>
+    </div>
+    <div class="col-12 col-md-8">
+      <div class="row g-2">
+        <div class="col-6 col-md-3">
+          <div class="card card-body stats-card present">
+            <div class="stats-icon mb-2">
+              <i class="bi bi-person-check"></i>
+            </div>
+            <div class="stats-content">
+              <h3>{{ stats.totalPresent }}</h3>
+              <p>{{ 'ATTENDANCE_PAGE.PRESENT_TODAY' | translate }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card card-body stats-card absent">
+            <div class="stats-icon mb-2">
+              <i class="bi bi-person-x"></i>
+            </div>
+            <div class="stats-content">
+              <h3>{{ stats.totalAbsent }}</h3>
+              <p>{{ 'ATTENDANCE_PAGE.ABSENT_TODAY' | translate }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card card-body stats-card checkin">
+            <div class="stats-icon mb-2">
+              <i class="bi bi-clock"></i>
+            </div>
+            <div class="stats-content">
+              <h3>{{ stats.checkInsToday }}</h3>
+              <p>{{ 'ATTENDANCE_PAGE.CHECK_INS' | translate }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card card-body stats-card checkout">
+            <div class="stats-icon mb-2">
+              <i class="bi bi-box-arrow-right"></i>
+            </div>
+            <div class="stats-content">
+              <h3>{{ stats.checkOutsToday }}</h3>
+              <p>{{ 'ATTENDANCE_PAGE.CHECK_OUTS' | translate }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-12 col-md-4 S">
+      <div class="card mb-4">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-md-12 mb-1">
+              <input type="date" class="form-control" [(ngModel)]="selectedDate" (change)="onDateChange()">
+            </div>
+            <div class="col-md-12 mb-1">
+              <input type="text" class="form-control" [placeholder]="'ATTENDANCE_PAGE.SEARCH_PLACEHOLDER' | translate" [(ngModel)]="searchTerm">
+            </div>
+            <div class="col-md-12 d-flex align-items-end">
+              <button class="custom-btn-2 btn-add-global-2 " (click)="loadTodayData()">
+                <i class="bi bi-arrow-clockwise"></i> {{ 'ATTENDANCE_PAGE.REFRESH' | translate }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="col-12 col-md-8">
+      <div class="card card-general shadow-sm mb-4" *ngIf="selectedDate === (currentTime | date:'yyyy-MM-dd')">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="bi bi-person-plus"></i> {{ 'ATTENDANCE_PAGE.QUICK_CHECK_IN' | translate }}</h5>
+        </div>
+        <div class="card-body" >
+          <div class="row align-items-end">
+            <div class="col-md-4">
+              <label class="form-label">{{ 'ATTENDANCE_PAGE.SELECT_CHILD' | translate }}</label>
+              <ng-select
+                [(ngModel)]="selectedChildId"
+                [items]="availableChildren"
+                bindValue="id"
+                [placeholder]="'ATTENDANCE_PAGE.CHOOSE_CHILD' | translate"
+                [searchable]="true"
+                [clearable]="true"
+                appendTo="body">
+                <ng-template ng-label-tmp let-item="item">
+                  {{ item.firstName }} {{ item.lastName }}
+                </ng-template>
+                <ng-template ng-option-tmp let-item="item">
+                  {{ item.firstName }} {{ item.lastName }}
+                </ng-template>
+              </ng-select>
+            </div>
+            <div class="col-md-5">
+              <label class="form-label">{{ 'ATTENDANCE_PAGE.NOTES_OPTIONAL' | translate }}</label>
+              <input type="text" class="form-control" [placeholder]="'ATTENDANCE_PAGE.NOTES_PLACEHOLDER' | translate" [(ngModel)]="checkInNotes">
+            </div>
+            <div class="col-md-3">
+              <button class="btn custom-btn-2 btn-add-global-2" [disabled]="!selectedChildId" (click)="checkInChild()">
+                <i class="bi bi-box-arrow-in-right"></i> {{ 'ATTENDANCE_PAGE.CHECK_IN' | translate }}
+              </button>
+            </div>
+          </div>
+          <div class="mt-2" *ngIf="availableChildren.length === 0">
+            <small class="text-muted"><i class="bi bi-info-circle"></i> {{ 'ATTENDANCE_PAGE.ALL_CHECKED_IN' | translate }}</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Attendance List -->
+  <div class="card flex-fill card-general card-recently mb-3">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">
+        <i class="bi bi-list-task"></i>
+        {{ 'ATTENDANCE_PAGE.ATTENDANCE_RECORDS' | translate }}
+      </h5>
+      <span class="badge bg-primary">{{ filteredAttendances.length }} {{ 'ATTENDANCE_PAGE.RECORDS' | translate }}</span>
+    </div>
+    <div class="card-body">
+      <div *ngIf="loading" class="text-center p-4">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">{{ 'ATTENDANCE_PAGE.LOADING' | translate }}</span>
+        </div>
+      </div>
+
+      <div *ngIf="!loading && filteredAttendances.length === 0" class="text-center p-4 text-muted">
+        <i class="bi bi-calendar-x fs-1"></i>
+        <p class="mt-2">{{ 'ATTENDANCE_PAGE.NO_RECORDS' | translate }}</p>
+      </div>
+
+      <div *ngIf="!loading && filteredAttendances.length > 0" class="table-responsive custom-table">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>{{ 'ATTENDANCE_PAGE.CHILD' | translate }}</th>
+              <th>{{ 'ATTENDANCE_PAGE.PARENT' | translate }}</th>
+              <th>{{ 'ATTENDANCE_PAGE.CHECK_IN_TIME' | translate }}</th>
+              <th>{{ 'ATTENDANCE_PAGE.CHECK_OUT_TIME' | translate }}</th>
+              <th>{{ 'ATTENDANCE_PAGE.STATUS' | translate }}</th>
+              <th>{{ 'ATTENDANCE_PAGE.DURATION' | translate }}</th>
+              <th>{{ 'ATTENDANCE_PAGE.ACTIONS' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let attendance of filteredAttendances" class="attendance-row">
+              <td class="name-last">
+                <div class="d-flex align-items-center">
+                      <a href="#" class="child-avatar flex-shrink-0">
+                        <img loading="lazy" [src]="attendance.child?.profilePicture || 'assets/child.png'" class="img-fluid rounded-circle" alt="Child" width="80" height="80">
+                      </a>
+
+                  <div class="ms-2">
+                    <span class="title-dt-body-card">{{ attendance.child?.firstName }} {{ attendance.child?.lastName }}</span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span>
+                  {{ attendance.child?.parent?.firstName }} {{ attendance.child?.parent?.lastName }}
+                </span>
+              </td>
+              <td>
+                <div class="time-info">
+                  <p class="title-dt-body-card">{{ formatTime(attendance.checkInTime) }}</p>
+                  <small *ngIf="attendance.checkInNotes" class="d-block text-muted">
+                    <i class="bi bi-chat-left-text"></i> {{ attendance.checkInNotes }}
+                  </small>
+                </div>
+              </td>
+              <td>
+                <div *ngIf="attendance.checkOutTime" class="time-info">
+                  <p class="title-dt-body-card">{{ formatTime(attendance.checkOutTime) }}</p>
+                  <small *ngIf="attendance.checkOutNotes" class="d-block text-muted">
+                    <i class="bi bi-chat-left-text"></i> {{ attendance.checkOutNotes }}
+                  </small>
+                </div>
+                <span *ngIf="!attendance.checkOutTime" class="text-muted">-</span>
+              </td>
+              <td>
+                <span class="status-badge" [class]="getStatusClass(attendance)">
+                  {{ getStatusText(attendance) }}
+                </span>
+              </td>
+              <td>
+                <span *ngIf="attendance.checkOutTime" class="text-muted">
+                  {{ calculateDuration(attendance.checkInTime, attendance.checkOutTime) | number:'1.1-1' }}h
+                </span>
+                <span *ngIf="!attendance.checkOutTime" class="text-success live-duration">
+                  <i class="bi bi-clock"></i> {{ getActiveDuration(attendance.checkInTime) }}
+                </span>
+              </td>
+              <td>
+                <button
+                  *ngIf="!attendance.checkOutTime"
+                  class="btn btn-sm btn-remove"
+                  (click)="checkOut(attendance)">
+                  <i class="bi bi-box-arrow-right"></i> {{ 'ATTENDANCE_PAGE.CHECK_OUT' | translate }}
+                </button>
+                <span *ngIf="attendance.checkOutTime" class="title-dt-body-card complited">{{ 'ATTENDANCE_PAGE.COMPLETED' | translate }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card-footer d-flex align-items-center justify-content-between">
+      <span class="text-muted">{{ 'ATTENDANCE_PAGE.TOTAL' | translate }}: {{ filteredAttendances.length }} {{ 'ATTENDANCE_PAGE.RECORD' | translate }}</span>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,185 @@
+<div class="container-fluid mt-4">
+  <app-title-page
+    title="Create Menu"
+    subtitle="Plan meals for a specific day or week"
+    icon="bi bi-plus-circle"
+    [breadcrumbs]="breadcrumbs">
+  </app-title-page>
+
+  <div class="row">
+    <!-- Menu Details -->
+    <div class="col-lg-4">
+      <div class="card card-general mb-4">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Menu Details</h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label">Menu Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" [(ngModel)]="menu.name"
+                   placeholder="e.g., Monday Menu - Week 1">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Date <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" [(ngModel)]="menu.menuDate">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Menu Type</label>
+            <select class="form-select" [(ngModel)]="menu.menuType">
+              <option value="Daily">Daily</option>
+              <option value="Weekly">Weekly</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" rows="2" [(ngModel)]="menu.description"
+                      placeholder="Optional description..."></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Notes</label>
+            <textarea class="form-control" rows="2" [(ngModel)]="menu.notes"
+                      placeholder="Special notes for this menu..."></textarea>
+          </div>
+
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" [(ngModel)]="menu.isTemplate" id="isTemplate">
+            <label class="form-check-label" for="isTemplate">
+              Save as Template
+            </label>
+            <small class="d-block text-muted">Templates can be duplicated for future use</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="d-grid gap-2">
+        <button class="btn custom-btn-2 btn-add-global-2" (click)="saveMenu()" [disabled]="saving">
+          <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
+          {{ saving ? 'Saving...' : 'Save Menu' }}
+        </button>
+        <button class="btn custom-btn-2 btn-cancel-2" (click)="cancel()">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Menu Items by Meal Type -->
+    <div class="col-lg-8">
+      <div class="card card-general">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>Menu Items</h5>
+        </div>
+        <div class="card-body">
+          <div *ngIf="loading" class="text-center py-4">
+            <div class="spinner-border text-primary" role="status"></div>
+          </div>
+
+          <div *ngIf="!loading">
+            <div *ngFor="let mealType of mealTypes" class="meal-section mb-4">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <h6 class="mb-0">
+                  <i class="bi me-2" [class]="getMealTypeIcon(mealType)"></i>
+                  {{ mealType }}
+                </h6>
+                <button class="btn  custom-btn-2 btn-add-border" (click)="openFoodPicker(mealType)">
+                  <i class="bi bi-plus"></i> Add Food
+                </button>
+              </div>
+
+              <div class="meal-items">
+                <div *ngFor="let item of getItemsForMealType(mealType); let i = index"
+                     class="food-item-card d-flex align-items-center p-2 mb-2 border rounded">
+                  <div class="food-icon me-3">
+                    <i class="bi" [class]="getCategoryIcon(item.foodItem?.category || '')"></i>
+                  </div>
+                  <div class="flex-grow-1">
+                    <strong>{{ item.foodItem?.name }}</strong>
+                    <small class="d-block text-muted">{{ item.foodItem?.category }}</small>
+                  </div>
+                  <div class="me-3">
+                    <input type="text" class="form-control form-control-sm" style="width: 100px;"
+                           placeholder="Serving" [(ngModel)]="item.servingSize">
+                  </div>
+                  <button class="btn btn-sm btn-outline-danger" (click)="removeMenuItem(menuItems.indexOf(item))">
+                    <i class="bi bi-x"></i>
+                  </button>
+                </div>
+
+                <div *ngIf="getItemsForMealType(mealType).length === 0"
+                     class="text-center text-muted py-3 border rounded bg-light">
+                  <i class="bi bi-plus-circle mb-2 d-block"></i>
+                  <small>No items added. Click "Add Food" to start.</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Food Picker Modal -->
+<div class="modal-backdrop" *ngIf="showFoodPicker" (click)="closeFoodPicker()"></div>
+<div class="food-picker-modal" *ngIf="showFoodPicker">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title">
+        <i class="bi me-2" [class]="getMealTypeIcon(selectedMealType)"></i>
+        Add Food to {{ selectedMealType }}
+      </h5>
+      <button type="button" class="btn-close" (click)="closeFoodPicker()"></button>
+    </div>
+    <div class="modal-body">
+      <!-- Filters -->
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <input type="text" class="form-control" placeholder="Search food items..."
+                 [(ngModel)]="foodSearchTerm" (input)="filterFoodItems()">
+        </div>
+        <div class="col-md-6">
+          <select class="form-select" [(ngModel)]="selectedCategory" (change)="filterFoodItems()">
+            <option value="">All Categories</option>
+            <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Food Items Grid -->
+      <div class="food-items-grid">
+        <div *ngFor="let food of filteredFoodItems"
+             class="food-item-option p-3 border rounded mb-2 cursor-pointer"
+             (click)="addFoodToMeal(food)">
+          <div class="d-flex align-items-center">
+            <div class="food-icon me-3">
+              <i class="bi" [class]="getCategoryIcon(food.category)"></i>
+            </div>
+            <div class="flex-grow-1">
+              <strong>{{ food.name }}</strong>
+              <small class="d-block text-muted">{{ food.category }}</small>
+              <div class="d-flex gap-2 mt-1" *ngIf="food.calories || food.allergens">
+                <small *ngIf="food.calories" class="text-info">
+                  <i class="bi bi-fire"></i> {{ food.calories }} cal
+                </small>
+                <small *ngIf="food.allergens" class="text-warning">
+                  <i class="bi bi-exclamation-triangle"></i> {{ food.allergens }}
+                </small>
+              </div>
+            </div>
+            <i class="bi bi-plus-circle text-primary"></i>
+          </div>
+        </div>
+
+        <div *ngIf="filteredFoodItems.length === 0" class="text-center text-muted py-4">
+          <i class="bi bi-search display-6 mb-2 d-block"></i>
+          <p>No food items found. Try a different search or category.</p>
+          <a routerLink="/food-menu/food-items" class="btn btn-outline-primary btn-sm">
+            Add New Food Item
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

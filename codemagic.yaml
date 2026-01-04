@@ -1,0 +1,41 @@
+workflows:
+  ios-build:
+    name: iOS Build
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      node: 20
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Install npm dependencies
+        script: |
+          npm install
+      - name: Build Angular app
+        script: |
+          npm run build -- --configuration=production
+      - name: Install CocoaPods dependencies
+        script: |
+          cd ios/App
+          pod install
+      - name: Build iOS app
+        script: |
+          cd ios/App
+          xcodebuild -workspace App.xcworkspace \
+            -scheme App \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath build/App.xcarchive \
+            archive \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+      - name: Create unsigned IPA
+        script: |
+          cd ios/App
+          mkdir -p build/Payload
+          cp -r build/App.xcarchive/Products/Applications/App.app build/Payload/
+          cd build
+          zip -r miniminds-unsigned.ipa Payload
+    artifacts:
+      - ios/App/build/*.ipa

@@ -1,0 +1,251 @@
+<div class="add-parent-container">
+  <!-- Image Cropper Modal -->
+  <app-image-cropper-modal
+    #imageCropper
+    [imageFile]="selectedImageFile"
+    [roundCropper]="true"
+    [aspectRatio]="1"
+    [resizeToWidth]="300"
+    [resizeToHeight]="300"
+    (imageCropped)="onImageCropped($event)"
+    (cancelled)="onCropCancelled()">
+  </app-image-cropper-modal>
+
+  <div class="container-fluid mt-4 mb-4">
+    <app-title-page
+      title="Add Parent"
+      subtitle="Create a new parent/guardian profile"
+      icon="bi bi-person-plus-fill"
+      [breadcrumbs]="breadcrumbs"
+      [actions]="titleActions">
+    </app-title-page>
+
+    <div class="card-add-pages">
+      <form [formGroup]="parentForm" (ngSubmit)="saveParent()" class="add-form">
+        <!-- Section Informations Personnelles -->
+        <div class="form-section">
+          <div class="section-header">
+            <i class="bi bi-person-circle"></i>
+            <h4>{{ 'ADD_PARENT.PERSONAL_INFO' | translate }}</h4>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">{{ 'ADD_PARENT.FIRST_NAME' | translate }} {{ 'ADD_PARENT.REQUIRED' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-person input-icon"></i>
+                <input type="text" class="form-input" [class.is-invalid]="isFieldInvalid('firstName')" formControlName="firstName" [placeholder]="'GLOBAL.FIRST_NAME_PLACEHOLDER' | translate">
+              </div>
+              <div *ngIf="isFieldInvalid('firstName')" class="error-message">
+                {{ getFieldError('firstName') }}
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ 'ADD_PARENT.LAST_NAME' | translate }} {{ 'ADD_PARENT.REQUIRED' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-person input-icon"></i>
+                <input type="text" class="form-input" [class.is-invalid]="isFieldInvalid('lastName')" formControlName="lastName" [placeholder]="'GLOBAL.LAST_NAME_PLACEHOLDER' | translate">
+              </div>
+              <div *ngIf="isFieldInvalid('lastName')" class="error-message">
+                {{ getFieldError('lastName') }}
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ 'ADD_PARENT.GENDER' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-gender-ambiguous input-icon"></i>
+                <ng-select
+                  class="form-input"
+                  formControlName="gender"
+                  [items]="genders"
+                  bindLabel="label"
+                  bindValue="value"
+                  [placeholder]="'ADD_PARENT.SELECT_GENDER' | translate"
+                  [clearable]="true"
+                  [searchable]="false">
+                  <ng-template ng-option-tmp let-item="item">
+                    <div class="option-with-image">
+                      <i class="bi {{item.icon}}" style="font-size: 18px; color: #7dd3c0;"></i>
+                      <span class="option-title">{{ item.label }}</span>
+                    </div>
+                  </ng-template>
+                </ng-select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ 'ADD_PARENT.DATE_OF_BIRTH' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-calendar input-icon"></i>
+                <input type="date" class="form-input" formControlName="dateOfBirth">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section Contact -->
+        <div class="form-section">
+          <div class="section-header">
+            <i class="bi bi-telephone"></i>
+            <h4>{{ 'ADD_PARENT.CONTACT_INFO' | translate }}</h4>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">{{ 'ADD_PARENT.EMAIL' | translate }} {{ 'ADD_PARENT.REQUIRED' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-envelope input-icon"></i>
+                <input type="email" class="form-input" [class.is-invalid]="isFieldInvalid('email')" formControlName="email" [placeholder]="'ADD_PARENT.EMAIL_PLACEHOLDER' | translate">
+              </div>
+              <small class="form-hint">{{ 'ADD_PARENT.EMAIL_HINT' | translate }}</small>
+              <div *ngIf="isFieldInvalid('email')" class="error-message">
+                {{ getFieldError('email') }}
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ 'ADD_PARENT.PHONE' | translate }} {{ 'ADD_PARENT.REQUIRED' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-phone input-icon"></i>
+                <input type="text" class="form-input" [class.is-invalid]="isFieldInvalid('phoneNumber')" formControlName="phoneNumber" [placeholder]="'ADD_PARENT.PHONE_PLACEHOLDER' | translate">
+              </div>
+              <div *ngIf="isFieldInvalid('phoneNumber')" class="error-message">
+                {{ getFieldError('phoneNumber') }}
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ 'ADD_PARENT.EMERGENCY_CONTACT' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-exclamation-triangle input-icon"></i>
+                <input type="text" class="form-input" [class.is-invalid]="isFieldInvalid('emergencyContact')" formControlName="emergencyContact" [placeholder]="'ADD_PARENT.EMERGENCY_PLACEHOLDER' | translate">
+              </div>
+              <div *ngIf="isFieldInvalid('emergencyContact')" class="error-message">
+                {{ getFieldError('emergencyContact') }}
+              </div>
+            </div>
+            <div class="form-group full-width">
+              <label class="form-label">{{ 'ADD_PARENT.ADDRESS' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-geo-alt input-icon"></i>
+                <textarea class="form-input" [class.is-invalid]="isFieldInvalid('address')" formControlName="address" rows="3" [placeholder]="'ADD_PARENT.ADDRESS_PLACEHOLDER' | translate"></textarea>
+              </div>
+              <div *ngIf="isFieldInvalid('address')" class="error-message">
+                {{ getFieldError('address') }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section Professionnelle -->
+        <div class="form-section">
+          <div class="section-header">
+            <i class="bi bi-briefcase"></i>
+            <h4>{{ 'ADD_PARENT.PROFESSIONAL_INFO' | translate }}</h4>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">{{ 'ADD_PARENT.PROFESSION' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-building input-icon"></i>
+                <input type="text" class="form-input" [class.is-invalid]="isFieldInvalid('work')" formControlName="work" [placeholder]="'ADD_PARENT.PROFESSION_PLACEHOLDER' | translate">
+              </div>
+              <div *ngIf="isFieldInvalid('work')" class="error-message">
+                {{ getFieldError('work') }}
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ 'ADD_PARENT.ZIP_CODE' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-mailbox input-icon"></i>
+                <input type="text" class="form-input" [class.is-invalid]="isFieldInvalid('zipCode')" formControlName="zipCode" [placeholder]="'ADD_PARENT.ZIP_CODE_PLACEHOLDER' | translate">
+              </div>
+              <div *ngIf="isFieldInvalid('zipCode')" class="error-message">
+                {{ getFieldError('zipCode') }}
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ 'ADD_PARENT.PARENT_TYPE' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-people input-icon"></i>
+                <ng-select
+                  class="form-input"
+                  formControlName="parentType"
+                  [items]="parentTypes"
+                  bindLabel="label"
+                  bindValue="value"
+                  [placeholder]="'ADD_PARENT.SELECT_TYPE' | translate"
+                  [clearable]="true"
+                  [searchable]="false">
+                  <ng-template ng-option-tmp let-item="item">
+                    <div class="option-with-image">
+                      <i class="bi {{item.icon}}" style="font-size: 18px; color: #7dd3c0;"></i>
+                      <span class="option-title">{{ item.label }}</span>
+                    </div>
+                  </ng-template>
+                </ng-select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section Photo et Statut -->
+        <div class="form-section">
+          <div class="section-header">
+            <i class="bi bi-image"></i>
+            <h4>{{ 'ADD_PARENT.PHOTO_STATUS' | translate }}</h4>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">{{ 'ADD_PARENT.PROFILE_PICTURE' | translate }}</label>
+              <div class="file-upload-area">
+                <input type="file" #fileInput id="profilePicture" class="file-input" (change)="onImageSelect($event)" accept="image/jpeg,image/png,image/gif,image/webp">
+                <label for="profilePicture" class="file-upload-label">
+                  <div *ngIf="!imagePreview" class="upload-placeholder">
+                    <i class="bi bi-cloud-upload"></i>
+                    <span>{{ 'ADD_PARENT.UPLOAD_PHOTO' | translate }}</span>
+                  </div>
+                  <img *ngIf="imagePreview" [src]="imagePreview" class="preview-image" [alt]="'ADD_PARENT.PREVIEW' | translate">
+                </label>
+                <button *ngIf="imagePreview" type="button" class="btn-remove-image" (click)="removeImage()">
+                  <i class="bi bi-x-circle"></i>
+                  {{ 'GLOBAL.REMOVE_PHOTO' | translate }}
+                </button>
+              </div>
+              <small class="form-hint">{{ 'GLOBAL.IMAGE_HINT' | translate }}</small>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ 'ADD_CHILD.Status' | translate }}</label>
+              <div class="status-toggle">
+                <label class="toggle-label">{{ 'ADD_PARENT.ACTIVE_STATUS' | translate }}</label>
+                <div class="toggle-switch">
+                  <input type="checkbox" formControlName="isActive" id="isActive" class="toggle-input">
+                  <label for="isActive" class="toggle-slider"></label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Note d'information -->
+        <div class="info-note">
+          <div class="note-icon">
+            <i class="bi bi-info-circle"></i>
+          </div>
+          <div class="note-content">
+            <h5>{{ 'ADD_PARENT.IMPORTANT_INFO' | translate }}</h5>
+            <p>{{ 'ADD_PARENT.INFO_MESSAGE' | translate }}</p>
+          </div>
+        </div>
+
+        <!-- Boutons d'action -->
+        <div class="form-actions">
+          <button type="button" class="custom-btn-2 btn-cancel-2" (click)="cancel()" [disabled]="saving">
+            <i class="bi bi-x-circle"></i>
+            {{ 'ADD_PARENT.CANCEL' | translate }}
+          </button>
+          <button type="submit" class="custom-btn-2 btn-add-global-2" [disabled]="saving || parentForm.invalid">
+            <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
+            <i *ngIf="!saving" class="bi bi-check-circle"></i>
+            {{ saving ? ('ADD_PARENT.CREATING' | translate) : ('ADD_PARENT.CREATE_PARENT' | translate) }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,132 @@
+<div *ngIf="isParent" class="parent-detailchild font-inter">
+  <app-parent-child-header-simple
+    [title]="'FEES_PAGE.FEE_RECEIPT' | translate"
+  >
+  </app-parent-child-header-simple>
+</div>
+<div class="container-fluid mt-4">
+  <app-title-page *ngIf="!isParent"
+    [title]="'FEES_PAGE.FEE_RECEIPT' | translate"
+    [subtitle]="'FEES_PAGE.VIEW_FEE_DETAILS' | translate"
+    icon="bi bi-receipt"
+    [breadcrumbs]="breadcrumbs">
+  </app-title-page>
+
+</div>
+<div class="container-fluid mt-4">
+
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">{{ 'FEES_PAGE.LOADING' | translate }}</span>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && fee" class="card">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="white-box">
+            <h6><b>{{ 'FEES_PAGE.RECEIPT' | translate }}</b><span class="float-end">#{{ fee.id }}</span></h6>
+            <hr>
+            <div class="row detailfee">
+              <div class="col-12">
+                <address class="from-to">
+                  <div class="row">
+                    <div class="col-6">
+                      <p class="font-bold from">{{ 'FEES_PAGE.BILL_FROM' | translate }} :</p>
+                    </div>
+                    <div class="col-6">
+                      <p class="addr-font-h3 font-bold to">{{ 'FEES_PAGE.BILL_TO' | translate }} :</p>
+                      <p class="addr-font-h3 font-bold to">{{ fee.child?.parent?.firstName }} {{ fee.child?.parent?.lastName }}</p>
+
+                    </div>
+                  </div>
+                </address>
+              </div>
+              <div class="col-md-12">
+                <div class="logo-detail">
+                  <div class="row">
+                    <div class="col-6 left">
+                      <div class="logo">
+                        <img loading="lazy" src="assets/images/invoice_logo.png" alt="logo" class="logo-default" style="max-width: 150px;">
+                        <p class="text-muted m-l-5">
+                          MiniMinds Daycare
+                        </p>
+                      </div>
+                    </div>
+                    <div class="col-6 right">
+                      <p class="m-t-30"><b>{{ 'FEES_PAGE.DUE_DATE' | translate }} :</b> {{ fee.dueDate | date:'mediumDate' }}</p>
+                      <p  [class]="'badge ' + (fee.status === 'paid' ? 'bg-success' : fee.status === 'overdue' ? 'bg-danger' : 'bg-warning')"><b>{{ 'FEES_PAGE.STATUS' | translate }} :</b><span>{{ fee.status | titlecase }}</span></p>
+                      <p *ngIf="fee.paidDate"><b>{{ 'FEES_PAGE.PAID_DATE' | translate }} :</b> {{ fee.paidDate | date:'mediumDate' }}</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="float-end text-end">
+                  <address>
+                    <p class="font-bold addr-font-h4">{{ fee.parentName }}</p>
+                    <p class="text-muted m-l-30">
+                      {{ fee.parentEmail }}
+                    </p>
+                  </address>
+                </div>
+              </div>
+
+              <div class="col-md-12">
+
+                <div class="clearfix"></div>
+                <hr>
+                <div class="table-responsive m-t-40">
+                  <table class="table table-hover">
+                    <thead>
+                      <tr>
+                        <th>{{ 'FEES_PAGE.NAME' | translate }}</th>
+                        <th>{{ 'FEES_PAGE.DESCRIPTION' | translate }}</th>
+                        <th>{{ 'FEES_PAGE.TYPE' | translate }}</th>
+                        <th class="text-end">{{ 'FEES_PAGE.AMOUNT' | translate }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>{{ fee.child?.firstName }} {{ fee.child?.lastName }}</td>
+                        <td>{{ fee.description }}</td>
+                        <td><span [class]="'badge ' + (fee.feeType === 'monthly' ? 'bg-primary' : fee.feeType === 'one-time' ? 'bg-info' : 'bg-danger')">{{ fee.feeType | titlecase }}</span></td>
+                        <td class="text-end">{{ fee.amount | appCurrency }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="float-end m-t-30 text-end">
+                  <h6 class="total"><b>{{ 'FEES_PAGE.TOTAL' | translate }} :</b> {{ fee.amount | appCurrency }}</h6>
+                </div>
+                <div *ngIf="fee.notes" class="mb-3">
+                  <strong>{{ 'FEES_PAGE.NOTES' | translate }}:</strong>
+                  <p class="text-muted">{{ fee.notes }}</p>
+                </div>
+                <div *ngIf="fee.paymentNotes" class="mb-3">
+                  <strong>{{ 'FEES_PAGE.PAYMENT_NOTES' | translate }}:</strong>
+                  <p class="text-muted">{{ fee.paymentNotes }}</p>
+                </div>
+              </div>
+              <div class="col-md-12">
+                <div class="text-end">
+                  <button [class]="'btn me-2 ' + (!isParent ? 'custom-btn-2 btn-cancel-2' : 'btn-secondary')" (click)="goBack()">
+                    <i class="bi bi-arrow-left me-2"></i>{{ 'FEES_PAGE.BACK' | translate }}
+                  </button>
+                  <button *ngIf="isParent && fee.status === 'pending'" class="btn btn-success me-2" (click)="payOnline()" [disabled]="loading">
+                    <i class="bi bi-credit-card me-2"></i>{{ 'FEES_PAGE.PAY_ONLINE' | translate }}
+                  </button>
+                  <button *ngIf="!isParent" class="btn custom-btn-2 btn-edit-global-2 me-2" (click)="editFee()">
+                    <i class="bi bi-pencil me-2"></i>{{ 'FEES_PAGE.EDIT' | translate }}
+                  </button>
+                  <button [class]="'btn me-2 ' + (!isParent ? 'custom-btn-2 btn-view-global-2' : 'btn-info')" (click)="print()">
+                    <i class="bi bi-printer me-2"></i>{{ 'FEES_PAGE.PRINT' | translate }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

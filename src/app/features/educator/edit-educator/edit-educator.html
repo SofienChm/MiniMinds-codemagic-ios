@@ -1,0 +1,171 @@
+<!-- Image Cropper Modal -->
+<app-image-cropper-modal
+  #imageCropper
+  [imageFile]="selectedImageFile"
+  [roundCropper]="true"
+  [aspectRatio]="1"
+  [resizeToWidth]="300"
+  [resizeToHeight]="300"
+  (imageCropped)="onImageCropped($event)"
+  (cancelled)="onCropCancelled()">
+</app-image-cropper-modal>
+
+<div class="edit-educator-container">
+  <div class="container-fluid mt-4">
+    <app-title-page
+      [title]="'EDIT_EDUCATOR.TITLE' | translate"
+      [subtitle]="'EDIT_EDUCATOR.SUBTITLE' | translate"
+      icon="bi bi-person-fill-gear"
+      [breadcrumbs]="breadcrumbs"
+      [actions]="titleActions">
+    </app-title-page>
+
+    <!-- Loading -->
+    <div *ngIf="loading" class="text-center py-5">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">{{ 'EDIT_EDUCATOR.LOADING' | translate }}</span>
+      </div>
+    </div>
+
+    <div *ngIf="!loading">
+      <!-- Educator Form -->
+      <div class="card-add-pages mb-4">
+        <form (ngSubmit)="updateEducator()" class="add-form">
+          <!-- Section Personal Information -->
+          <div class="form-section">
+            <div class="section-header">
+              <i class="bi bi-person-circle"></i>
+              <h4>{{ 'EDIT_EDUCATOR.PERSONAL_INFO' | translate }}</h4>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">{{ 'EDIT_EDUCATOR.FIRST_NAME' | translate }} {{ 'EDIT_EDUCATOR.REQUIRED' | translate }}</label>
+                <div class="input-with-icon">
+                  <i class="bi bi-person input-icon"></i>
+                  <input type="text" class="form-input" [(ngModel)]="educator.firstName" name="firstName" [placeholder]="'EDIT_EDUCATOR.FIRST_NAME_PLACEHOLDER' | translate" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">{{ 'EDIT_EDUCATOR.LAST_NAME' | translate }} {{ 'EDIT_EDUCATOR.REQUIRED' | translate }}</label>
+                <div class="input-with-icon">
+                  <i class="bi bi-person input-icon"></i>
+                  <input type="text" class="form-input" [(ngModel)]="educator.lastName" name="lastName" [placeholder]="'EDIT_EDUCATOR.LAST_NAME_PLACEHOLDER' | translate" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">{{ 'EDIT_EDUCATOR.DATE_OF_BIRTH' | translate }} {{ 'EDIT_EDUCATOR.REQUIRED' | translate }}</label>
+                <div class="input-with-icon">
+                  <i class="bi bi-calendar input-icon"></i>
+                  <input type="date" class="form-input" [(ngModel)]="educator.dateOfBirth" name="dateOfBirth" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">{{ 'EDIT_EDUCATOR.PHONE' | translate }}</label>
+                <div class="input-with-icon">
+                  <i class="bi bi-phone input-icon"></i>
+                  <input type="text" class="form-input" [(ngModel)]="educator.phone" name="phone" [placeholder]="'EDIT_EDUCATOR.PHONE_PLACEHOLDER' | translate">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section Contact Information -->
+          <div class="form-section">
+            <div class="section-header">
+              <i class="bi bi-telephone"></i>
+              <h4>{{ 'EDIT_EDUCATOR.CONTACT_INFO' | translate }}</h4>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">{{ 'EDIT_EDUCATOR.EMAIL' | translate }} {{ 'EDIT_EDUCATOR.REQUIRED' | translate }}</label>
+                <div class="input-with-icon">
+                  <i class="bi bi-envelope input-icon"></i>
+                  <input type="email" class="form-input" [(ngModel)]="educator.email" name="email" [placeholder]="'EDIT_EDUCATOR.EMAIL_PLACEHOLDER' | translate" required>
+                </div>
+              </div>
+              <div class="form-group full-width">
+                <label class="form-label">{{ 'EDIT_EDUCATOR.ADDRESS' | translate }}</label>
+                <div class="input-with-icon">
+                  <i class="bi bi-geo-alt input-icon"></i>
+                  <textarea class="form-input" [(ngModel)]="educator.address" name="address" rows="3" [placeholder]="'EDIT_EDUCATOR.ADDRESS_PLACEHOLDER' | translate"></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section Professional Information -->
+          <div class="form-section">
+            <div class="section-header">
+              <i class="bi bi-briefcase"></i>
+              <h4>{{ 'EDIT_EDUCATOR.PROFESSIONAL_INFO' | translate }}</h4>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">{{ 'EDIT_EDUCATOR.SPECIALIZATION' | translate }}</label>
+                <div class="input-with-icon">
+                  <i class="bi bi-award input-icon"></i>
+                  <input type="text" class="form-input" [(ngModel)]="educator.specialization" name="specialization" [placeholder]="'EDIT_EDUCATOR.SPECIALIZATION_PLACEHOLDER' | translate">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">{{ 'EDIT_EDUCATOR.HIRE_DATE' | translate }} {{ 'EDIT_EDUCATOR.REQUIRED' | translate }}</label>
+                <div class="input-with-icon">
+                  <i class="bi bi-calendar-check input-icon"></i>
+                  <input type="date" class="form-input" [(ngModel)]="educator.hireDate" name="hireDate" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">{{ 'EDIT_EDUCATOR.SALARY' | translate }} {{ 'EDIT_EDUCATOR.REQUIRED' | translate }}</label>
+                <div class="input-with-icon">
+                  <i class="bi bi-currency-dollar input-icon"></i>
+                  <input type="number" class="form-input" [(ngModel)]="educator.salary" name="salary" [placeholder]="'EDIT_EDUCATOR.SALARY_PLACEHOLDER' | translate" required min="0">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section Photo -->
+          <div class="form-section">
+            <div class="section-header">
+              <i class="bi bi-image"></i>
+              <h4>{{ 'EDIT_EDUCATOR.PROFILE_PHOTO' | translate }}</h4>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">{{ 'EDIT_EDUCATOR.PROFILE_PICTURE' | translate }}</label>
+                <div class="file-upload-area">
+                  <input type="file" #fileInput id="profilePicture" class="file-input" (change)="onImageSelect($event)" accept="image/jpeg,image/png,image/gif,image/webp">
+                  <label for="profilePicture" class="file-upload-label">
+                    <div *ngIf="!imagePreview" class="upload-placeholder">
+                      <i class="bi bi-cloud-upload"></i>
+                      <span>{{ 'EDIT_EDUCATOR.UPLOAD_PHOTO' | translate }}</span>
+                    </div>
+                    <img *ngIf="imagePreview" [src]="imagePreview" class="preview-image" [alt]="'GLOBAL.PREVIEW' | translate">
+                  </label>
+                  <button *ngIf="imagePreview" type="button" class="btn-remove-image" (click)="removeImage()">
+                    <i class="bi bi-x-circle"></i>
+                    {{ 'EDIT_EDUCATOR.REMOVE_PHOTO' | translate }}
+                  </button>
+                </div>
+                <small class="form-hint">{{ 'EDIT_EDUCATOR.IMAGE_HINT' | translate }}</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="form-actions">
+            <button type="button" class="custom-btn-2 btn-cancel-2" (click)="cancel()" [disabled]="saving">
+              <i class="bi bi-x-circle"></i>
+              {{ 'EDIT_EDUCATOR.CANCEL' | translate }}
+            </button>
+            <button type="submit" class="custom-btn-2 btn-add-global-2" [disabled]="saving">
+              <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
+              <i *ngIf="!saving" class="bi bi-check-circle"></i>
+              {{ saving ? ('EDIT_EDUCATOR.UPDATING' | translate) : ('EDIT_EDUCATOR.UPDATE_EDUCATOR' | translate) }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

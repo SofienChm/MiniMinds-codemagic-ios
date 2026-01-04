@@ -1,0 +1,244 @@
+<div class="container-fluid py-4 mt-4">
+  <app-title-page
+    [title]="menu?.name || 'Menu Details'"
+    [breadcrumbs]="breadcrumbs"
+    [actions]="titleActions">
+  </app-title-page>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border spinner-custom" role="status"></div>
+    <p class="mt-2 text-muted">Loading menu details...</p>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="!loading && menu">
+    <!-- Menu Header Card -->
+    <div class="card card-general card-detail_pages mb-4">
+      <div class="card-header">
+        <div class="row align-items-center">
+          <div class="col-md-8">
+            <div class="d-flex align-items-center mb-2">
+              <div class="menu-header-icon me-3">
+                <i class="bi bi-egg-fried"></i>
+              </div>
+              <div>
+                <h4 class="mb-1 title-body">{{ menu.name }}</h4>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="badge" [class.badge-published]="menu.isPublished" [class.badge-draft]="!menu.isPublished">
+                    {{ menu.isPublished ? 'Published' : 'Draft' }}
+                  </span>
+                  <span *ngIf="menu.isTemplate" class="badge badge-template">Template</span>
+                  <span class="badge badge-type">{{ menu.menuType }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between body-information">
+          <div>
+            <p class="mb-0 information-title">Date</p>
+            <p class="text-dark information-description">
+              <i class="bi bi-calendar3 me-1"></i>{{ formatDate(menu.menuDate) }}
+            </p>
+          </div>
+          <div *ngIf="menu.description">
+            <p class="mb-0 information-title">Description</p>
+            <p class="text-dark information-description">{{ menu.description }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4 g-3">
+      <div class="col-md-3">
+        <div class="card stat-card">
+          <div class="card-body d-flex align-items-center p-4">
+            <div class="stat-icon-wrapper me-3 stat-icon-primary">
+              <i class="bi bi-people-fill"></i>
+            </div>
+            <div class="stat-content">
+              <h3 class="stat-number mb-1">{{ getTotalChildren() }}</h3>
+              <p class="stat-label mb-0">Children with selections</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card stat-card">
+          <div class="card-body d-flex align-items-center p-4">
+            <div class="stat-icon-wrapper me-3 stat-icon-secondary">
+              <i class="bi bi-egg-fried"></i>
+            </div>
+            <div class="stat-content">
+              <h3 class="stat-number mb-1">{{ menu.menuItems?.length || 0 }}</h3>
+              <p class="stat-label mb-0">Items total menu</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card stat-card">
+          <div class="card-body d-flex align-items-center p-4">
+            <div class="stat-icon-wrapper me-3 stat-icon-warning">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <div class="stat-content">
+              <h3 class="stat-number mb-1">{{ getChildrenWithAllergies().length }}</h3>
+              <p class="stat-label mb-0">Children with allergies</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card stat-card">
+          <div class="card-body d-flex align-items-center p-4">
+            <div class="stat-icon-wrapper me-3 stat-icon-danger">
+              <i class="bi bi-x-circle-fill"></i>
+            </div>
+            <div class="stat-content">
+              <h3 class="stat-number mb-1">{{ getChildrenWithDeclines().length }}</h3>
+              <p class="stat-label mb-0">Children declined items</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Menu Items Overview -->
+    <div class="card card-general mb-4">
+      <div class="card-header">
+        <h5><i class="bi bi-list-ul"></i>Today's Menu Items</h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div *ngFor="let mealType of mealTypes" class="col-md-4 col-lg mb-3 mb-lg-0">
+            <div class="meal-type-card p-3 h-100">
+              <h6 class="d-flex align-items-center mb-3 meal-type-title">
+                <i class="bi me-2" [ngClass]="getMealTypeIcon(mealType)"></i>
+                {{ mealType }}
+              </h6>
+              <ul class="list-unstyled mb-0">
+                <li *ngFor="let item of getMenuItemsByMealType(mealType)" class="mb-2 menu-item-row">
+                  <i class="bi bi-dot"></i>
+                  {{ item.foodItem.name }}
+                  <span *ngIf="item.servingSize" class="text-muted">({{ item.servingSize }})</span>
+                </li>
+                <li *ngIf="getMenuItemsByMealType(mealType).length === 0" class="text-muted">
+                  <small>No items</small>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Children Selections -->
+    <div class="card card-general card-recently">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5><i class="bi bi-person-lines-fill"></i>Children's Food Selections</h5>
+        <span class="badge badge-type">{{ childSelections.length }} children</span>
+      </div>
+      <div class="card-body p-0">
+        <!-- No Selections -->
+        <div *ngIf="childSelections.length === 0" class="text-center py-5">
+          <div class="empty-icon-wrapper mb-3">
+            <i class="bi bi-inbox"></i>
+          </div>
+          <h5 class="empty-title">No selections yet</h5>
+          <p class="empty-description">No parent selections have been made yet for this menu.</p>
+        </div>
+
+        <!-- Children List -->
+        <div class="list-group list-group-flush">
+          <div *ngFor="let child of childSelections" class="list-group-item p-0">
+            <!-- Child Header (Clickable) -->
+            <div class="child-header p-3 d-flex align-items-center justify-content-between cursor-pointer"
+                 [class.expanded]="isChildExpanded(child.childId)"
+                 (click)="toggleChildExpand(child.childId)">
+              <div class="d-flex align-items-center">
+                <div class="avatar-circle me-3">
+                  {{ child.childName.charAt(0) }}
+                </div>
+                <div>
+                  <h6 class="mb-0 title-card__name">{{ child.childName }}</h6>
+                  <small class="card-age">Parent: {{ child.parentName }}</small>
+                </div>
+              </div>
+              <div class="d-flex align-items-center gap-3">
+                <!-- Allergy Badge -->
+                <span *ngIf="child.allergies" class="badge badge-warning-custom">
+                  <i class="bi bi-exclamation-triangle me-1"></i>{{ child.allergies }}
+                </span>
+                <!-- Selection Summary -->
+                <div class="text-end">
+                  <span class="badge badge-published me-1">{{ child.totalSelected }} selected</span>
+                  <span *ngIf="child.totalDeclined > 0" class="badge badge-danger-custom">{{ child.totalDeclined }} declined</span>
+                </div>
+                <!-- Expand Icon -->
+                <i class="bi expand-icon" [class.bi-chevron-down]="!isChildExpanded(child.childId)"
+                   [class.bi-chevron-up]="isChildExpanded(child.childId)"></i>
+              </div>
+            </div>
+
+            <!-- Child Details (Expandable) -->
+            <div *ngIf="isChildExpanded(child.childId)" class="child-details p-3 border-top">
+              <div class="row">
+                <div *ngFor="let mealType of mealTypes" class="col-md-4 col-lg mb-3 mb-lg-0">
+                  <div class="meal-selections p-3 rounded">
+                    <h6 class="border-bottom pb-2 mb-2 d-flex align-items-center meal-type-title">
+                      <i class="bi me-2" [ngClass]="getMealTypeIcon(mealType)"></i>
+                      {{ mealType }}
+                    </h6>
+                    <ul class="list-unstyled mb-0">
+                      <li *ngFor="let sel of getChildSelectionsByMealType(child, mealType)"
+                          class="mb-2 d-flex align-items-start selection-item">
+                        <i class="bi me-2 mt-1"
+                           [class.bi-check-circle-fill]="sel.isSelected"
+                           [class.selection-selected]="sel.isSelected"
+                           [class.bi-x-circle-fill]="!sel.isSelected"
+                           [class.selection-declined]="!sel.isSelected"></i>
+                        <div>
+                          <span [class.text-decoration-line-through]="!sel.isSelected"
+                                [class.text-muted]="!sel.isSelected">
+                            {{ sel.foodItemName }}
+                          </span>
+                          <small *ngIf="sel.notes" class="d-block note-text">
+                            <i class="bi bi-chat-left-text me-1"></i>{{ sel.notes }}
+                          </small>
+                        </div>
+                      </li>
+                      <li *ngIf="getChildSelectionsByMealType(child, mealType).length === 0"
+                          class="text-muted">
+                        <small>No selections</small>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- No Menu Found -->
+  <div *ngIf="!loading && !menu" class="card card-general">
+    <div class="card-body text-center py-5">
+      <div class="empty-icon-wrapper mb-3">
+        <i class="bi bi-calendar-x"></i>
+      </div>
+      <h5 class="empty-title">Menu not found</h5>
+      <p class="empty-description">The menu you're looking for doesn't exist.</p>
+      <button class="action-btn custom-btn-2 btn-cancel-2" (click)="goBack()">
+        <i class="bi bi-arrow-left me-2"></i>
+        Back to Menus
+      </button>
+    </div>
+  </div>
+</div>

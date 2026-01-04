@@ -1,0 +1,385 @@
+<div class="parent-detailchild new-design" >
+  <app-parent-child-header-simple *ngIf="isParent"
+    [title]="'MESSAGES_PAGE.TITLE' | translate"
+  >
+    <span class="nd-unread-badge">{{ getUnreadCount() }} {{ 'MESSAGES_PAGE.UNREAD' | translate }}</span>
+  </app-parent-child-header-simple>
+
+  <!-- Tab Bar -->
+  <div class="nd-tab-bar">
+    <div class="nd-tab" [class.active]="activeTab === 'received'" (click)="switchTab('received')">
+      {{ 'MESSAGES_PAGE.INBOX' | translate }}
+    </div>
+    <div class="nd-tab" [class.active]="activeTab === 'sent'" (click)="switchTab('sent')">
+      {{ 'MESSAGES_PAGE.SENT' | translate }}
+    </div>
+    <div class="nd-tab" [class.active]="activeTab === 'important'" (click)="switchTab('important')">
+      {{ 'MESSAGES_PAGE.IMPORTANT' | translate }}
+    </div>
+    <div class="nd-tab" [class.active]="activeTab === 'trash'" (click)="switchTab('trash')">
+      {{ 'MESSAGES_PAGE.TRASH' | translate }}
+    </div>
+  </div>
+
+  <!-- Filter and Actions Row -->
+  <div class="nd-filter-row" *ngIf="activeMessages.length > 0 && !showModal && !showNewMessageModal">
+    <div class="nd-filter-left">
+      <label class="nd-checkbox-container">
+        <input type="checkbox" (change)="toggleSelectAll($event)" [checked]="isAllSelected()">
+        <span class="nd-checkbox-label">{{ 'MESSAGES_PAGE.SELECT_ALL' | translate }}</span>
+      </label>
+    </div>
+    <div class="nd-filter-right">
+      <div class="nd-filter-dropdown">
+        <select [(ngModel)]="statusFilter" (change)="setFilter(statusFilter)">
+          <option value="all">{{ 'MESSAGES_PAGE.ALL' | translate }}</option>
+          <option value="unread">{{ 'MESSAGES_PAGE.UNREAD' | translate }}</option>
+          <option value="read">{{ 'MESSAGES_PAGE.READ' | translate }}</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bulk Actions -->
+  <div class="nd-bulk-actions" *ngIf="selectedMessages.length > 0 && !showModal && !showNewMessageModal">
+    <button class="nd-action-btn nd-action-read" (click)="markAsRead()">
+      <i class="bi bi-envelope-open"></i>
+      <span>{{ 'MESSAGES_PAGE.MARK_AS_READ' | translate }}</span>
+    </button>
+    <button class="nd-action-btn nd-action-unread" (click)="markAsUnread()">
+      <i class="bi bi-envelope"></i>
+      <span>{{ 'MESSAGES_PAGE.MARK_AS_UNREAD' | translate }}</span>
+    </button>
+    <button class="nd-action-btn nd-action-delete" (click)="deleteSelected()">
+      <i class="bi bi-trash"></i>
+      <span>{{ 'MESSAGES_PAGE.DELETE' | translate }}</span>
+    </button>
+  </div>
+
+  <!-- Message List -->
+  <div class="nd-message-list" *ngIf="!showModal && !showNewMessageModal">
+    <!-- Empty State -->
+    <div class="nd-empty-state" *ngIf="filteredMessages.length === 0">
+      <i class="bi bi-inbox nd-empty-icon"></i>
+      <p class="nd-empty-text">{{ 'MESSAGES_PAGE.NO_MESSAGES' | translate }}</p>
+    </div>
+
+    <!-- Message Cards -->
+    <div class="nd-message-card"
+         *ngFor="let message of filteredMessages"
+         [class.unread]="!message.isRead"
+         [class.selected]="isSelected(message)"
+         (click)="selectMessage(message)">
+      <div class="nd-card-checkbox" (click)="$event.stopPropagation()">
+        <input type="checkbox" [checked]="isSelected(message)" (change)="toggleSelection(message)">
+      </div>
+      <div class="nd-card-content">
+        <div class="nd-card-header">
+          <span class="nd-card-sender">{{ activeTab === 'sent' ? message.recipientName : message.senderName }}</span>
+          <span class="nd-card-time">{{ formatDate(message.sentAt) }}</span>
+          <span class="nd-unread-dot" *ngIf="!message.isRead && activeTab !== 'sent'"></span>
+        </div>
+        <div class="nd-card-subject">{{ message.subject }}</div>
+        <div class="nd-card-preview">{{ message.content.substring(0, 80) }}{{ message.content.length > 80 ? '...' : '' }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Message Detail View -->
+  <div class="nd-message-detail" *ngIf="showModal && selectedMessage">
+    <!-- Detail Header Card -->
+    <div class="nd-detail-header-card">
+      <div class="nd-detail-avatar">
+        {{ (activeTab === 'sent' ? selectedMessage.recipientName : selectedMessage.senderName)?.charAt(0).toUpperCase() }}
+      </div>
+      <div class="nd-detail-info">
+        <div class="nd-detail-name">{{ activeTab === 'sent' ? selectedMessage.recipientName : selectedMessage.senderName }}</div>
+        <div class="nd-detail-role">{{ activeTab === 'sent' ? ('MESSAGES_PAGE.TO' | translate) : ('MESSAGES_PAGE.FROM' | translate) }}</div>
+      </div>
+      <div class="nd-detail-meta">
+        <div class="nd-detail-date">{{ formatDate(selectedMessage.sentAt) }}</div>
+        <span class="nd-detail-status" [class.read]="selectedMessage.isRead" [class.unread]="!selectedMessage.isRead">
+          {{ selectedMessage.isRead ? ('MESSAGES_PAGE.READ' | translate) : ('MESSAGES_PAGE.UNREAD' | translate) }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Message Content Card -->
+    <div class="nd-detail-content-card">
+      <div class="nd-detail-subject">{{ selectedMessage.subject }}</div>
+      <div class="nd-detail-body">{{ selectedMessage.content }}</div>
+    </div>
+
+    <!-- Replies Section -->
+    <div class="nd-replies-section" *ngIf="selectedMessage.replies?.length > 0">
+      <h3 class="nd-section-title">{{ 'MESSAGES_PAGE.REPLIES' | translate }}</h3>
+      <div class="nd-reply-card" *ngFor="let reply of selectedMessage.replies" [class.own-reply]="reply.senderId === currentUserId">
+        <div class="nd-reply-header">
+          <span class="nd-reply-sender">{{ reply.senderName }}</span>
+          <span class="nd-reply-date">{{ formatDate(reply.sentAt) }}</span>
+        </div>
+        <div class="nd-reply-content">{{ reply.content }}</div>
+      </div>
+    </div>
+
+    <!-- Reply Input -->
+    <div class="nd-reply-input-section">
+      <div class="nd-reply-input-container">
+        <textarea class="nd-reply-textarea"
+                  [placeholder]="'MESSAGES_PAGE.WRITE_REPLY' | translate"
+                  [(ngModel)]="replyText"></textarea>
+        <button class="nd-send-btn" (click)="sendReply()" [disabled]="!replyText.trim()">
+          <i class="bi bi-send"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Back Button -->
+    <button class="nd-back-btn" (click)="closeModal()">
+      <i class="bi bi-arrow-left"></i>
+      {{ 'MESSAGES_PAGE.BACK' | translate }}
+    </button>
+  </div>
+
+  <!-- Compose Message View -->
+  <div class="nd-compose-view" *ngIf="showNewMessageModal">
+    <div class="nd-compose-card">
+      <div class="nd-compose-field">
+        <div class="nd-field-icon">
+          <i class="bi bi-building"></i>
+        </div>
+        <span class="nd-field-text">{{ 'MESSAGES_PAGE.TO_DAYCARE' | translate }}</span>
+      </div>
+      <div class="nd-compose-field">
+        <div class="nd-field-icon">
+          <i class="bi bi-chat-text"></i>
+        </div>
+        <input type="text" class="nd-field-input" [placeholder]="'MESSAGES_PAGE.ENTER_SUBJECT' | translate" [(ngModel)]="composeForm.subject">
+      </div>
+      <div class="nd-compose-textarea-container">
+        <textarea class="nd-compose-textarea"
+                  [placeholder]="'MESSAGES_PAGE.ENTER_MESSAGE' | translate"
+                  [(ngModel)]="composeForm.content"></textarea>
+      </div>
+    </div>
+    <div class="nd-compose-actions">
+      <button class="nd-cancel-btn" (click)="closeNewMessageModal()">
+        {{ 'MESSAGES_PAGE.CANCEL' | translate }}
+      </button>
+      <button class="nd-submit-btn" (click)="sendMessage()" [disabled]="!composeForm.subject.trim() || !composeForm.content.trim()">
+        {{ 'MESSAGES_PAGE.SEND_MESSAGE' | translate }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Floating Action Button -->
+  <button class="nd-fab" (click)="openNewMessageModal()" *ngIf="!showNewMessageModal && !showModal">
+    <i class="bi bi-pencil"></i>
+  </button>
+</div>
+
+<div *ngIf="!isParent" class="container-fluid mt-4">
+
+  <div class="row">
+    <div class="col-xs-12 col-sm-3">
+      <div class="panel menu-card-fixed">
+        <div class="panel-header">
+          <button class="custom-btn-2 btn-add-global-2" (click)="openNewMessageModal()">
+            <i class="bi bi-plus-circle"></i>
+            {{ 'MESSAGES_PAGE.NEW_MESSAGE' | translate }}
+          </button>
+        </div>
+        <div class="panel-body">
+          <div class="sidebar-menu">
+            <div class="menu-item" [class.active]="activeTab === 'received'" (click)="switchTab('received')">
+              <i class="bi bi-inbox"></i>
+              <span>{{ 'MESSAGES_PAGE.INBOX' | translate }}</span>
+              <span class="badge">{{ inbox.length }}</span>
+            </div>
+            <div class="menu-item" [class.active]="activeTab === 'sent'" (click)="switchTab('sent')">
+              <i class="bi bi-send"></i>
+              <span>{{ 'MESSAGES_PAGE.SENT' | translate }}</span>
+              <span class="badge">{{ sent.length }}</span>
+            </div>
+            <div class="menu-item" [class.active]="activeTab === 'important'" (click)="switchTab('important')">
+              <i class="bi bi-star"></i>
+              <span>{{ 'MESSAGES_PAGE.IMPORTANT' | translate }}</span>
+              <span class="badge">0</span>
+            </div>
+            <div class="menu-item" [class.active]="activeTab === 'trash'" (click)="switchTab('trash')">
+              <i class="bi bi-trash"></i>
+              <span>{{ 'MESSAGES_PAGE.TRASH' | translate }}</span>
+              <span class="badge">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xs-12 col-sm-9">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="header-left p-1">
+            <div *ngIf="activeMessages.length > 0 && !showModal" class="filter-dropdown">
+              <button class="filter-btn" (click)="toggleFilterMenu()">
+                <i class="bi bi-three-dots-vertical"></i>
+              </button>
+              <div class="filter-menu" *ngIf="showFilterMenu">
+                <div class="filter-item" [class.active]="statusFilter === 'all'" (click)="setFilter('all')">
+                  {{ 'MESSAGES_PAGE.ALL' | translate }}
+                </div>
+                <div class="filter-item" [class.active]="statusFilter === 'unread'" (click)="setFilter('unread')">
+                  {{ 'MESSAGES_PAGE.UNREAD' | translate }}
+                </div>
+                <div class="filter-item" [class.active]="statusFilter === 'read'" (click)="setFilter('read')">
+                  {{ 'MESSAGES_PAGE.READ' | translate }}
+                </div>
+              </div>
+            </div>
+            <div *ngIf="showModal">
+              <h4 class="form-header-title">{{ selectedMessage?.subject }}</h4>
+            </div>
+            <h4 *ngIf="!showModal && !showNewMessageModal">{{ activeTab === 'received' ? ('MESSAGES_PAGE.INBOX' | translate) : activeTab === 'sent' ? ('MESSAGES_PAGE.SENT' | translate) : (activeTab | titlecase) }}</h4>
+            <h4 *ngIf="showNewMessageModal" class="form-header-title">{{ 'MESSAGES_PAGE.NEW_MESSAGE' | translate }}</h4>
+          </div>
+          <div *ngIf="selectedMessages.length > 0 && !showModal && !showNewMessageModal" class="action-buttons">
+            <button class="action-btn read-btn" (click)="markAsRead()" [title]="'MESSAGES_PAGE.MARK_AS_READ' | translate">
+              <i class="bi bi-envelope-open"></i>
+            </button>
+            <button class="action-btn unread-btn" (click)="markAsUnread()" [title]="'MESSAGES_PAGE.MARK_AS_UNREAD' | translate">
+              <i class="bi bi-envelope"></i>
+            </button>
+            <button class="action-btn delete-btn" (click)="deleteSelected()" [title]="('MESSAGES_PAGE.DELETE' | translate) + ' (' + selectedMessages.length + ')'">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div *ngIf="!showNewMessageModal && !showModal">
+            <table class="messages-table" *ngIf="activeMessages.length > 0">
+              <thead>
+                <tr>
+                  <th class="checkbox-col">
+                    <input type="checkbox" (change)="toggleSelectAll($event)" [checked]="isAllSelected()">
+                  </th>
+                  <th>{{ activeTab === 'sent' ? ('MESSAGES_PAGE.TO' | translate) : ('MESSAGES_PAGE.FROM' | translate) }}</th>
+                  <th>{{ 'MESSAGES_PAGE.SUBJECT' | translate }}</th>
+                  <th>{{ 'MESSAGES_PAGE.CONTENT' | translate }}</th>
+                  <th>{{ 'MESSAGES_PAGE.DATE' | translate }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let message of filteredMessages" [class.unread]="!message.isRead">
+                  <td class="checkbox-col" (click)="$event.stopPropagation()">
+                    <input type="checkbox" [checked]="isSelected(message)" (change)="toggleSelection(message)">
+                  </td>
+                  <td class="person-cell" (click)="selectMessage(message)">{{ activeTab === 'sent' ? message.recipientName : message.senderName }}</td>
+                  <td class="subject-cell" (click)="selectMessage(message)">{{ message.subject }}</td>
+                  <td class="content-cell" (click)="selectMessage(message)">{{ message.content.substring(0, 50) }}{{ message.content.length > 50 ? '...' : '' }}</td>
+                  <td class="date-cell" (click)="selectMessage(message)">{{ formatDate(message.sentAt) }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="empty-state" *ngIf="activeMessages.length === 0">
+              <p class="empty-cell">{{ 'MESSAGES_PAGE.NO_MESSAGES' | translate }}</p>
+            </div>
+          </div>
+          <div *ngIf="showModal && selectedMessage" class="message-details">
+            <div class="detail-info-row">
+              <div class="detail-info-left">
+                <div class="info-item">
+                  <span class="info-label">{{ 'MESSAGES_PAGE.FROM' | translate }}:</span>
+                  <span class="info-value">{{ selectedMessage.senderName }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">{{ 'MESSAGES_PAGE.TO' | translate }}:</span>
+                  <span class="info-value">{{ selectedMessage.recipientName }}</span>
+                </div>
+              </div>
+              <div class="detail-info-right">
+                <div class="info-item">
+                  <span class="info-label">{{ 'MESSAGES_PAGE.DATE' | translate }}:</span>
+                  <span class="info-value">{{ formatDate(selectedMessage.sentAt) }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">{{ 'MESSAGES_PAGE.STATUS' | translate }}:</span>
+                  <span class="status-badge" [class.unread]="!selectedMessage.isRead" [class.read]="selectedMessage.isRead">
+                    {{ selectedMessage.isRead ? ('MESSAGES_PAGE.READ' | translate) : ('MESSAGES_PAGE.UNREAD' | translate) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="detail-content-section">
+              <h5 class="section-title">{{ 'MESSAGES_PAGE.MESSAGE' | translate }}</h5>
+              <div class="content-box">
+                {{ selectedMessage.content }}
+              </div>
+            </div>
+            <div class="detail-response-section" *ngIf="selectedMessage.replies?.length > 0">
+              <h5 class="section-title">{{ 'MESSAGES_PAGE.REPLIES' | translate }}</h5>
+              <div *ngFor="let reply of selectedMessage.replies" class="response-box" [class.my-message]="reply.senderId === currentUserId" style="margin-bottom: 12px;">
+                <div class="reply-header">{{ reply.senderName }} - {{ formatDate(reply.sentAt) }}</div>
+                {{ reply.content }}
+              </div>
+            </div>
+            <div class="detail-response-section">
+              <h5 class="section-title">{{ 'MESSAGES_PAGE.REPLY' | translate }}</h5>
+              <textarea class="response-textarea" [placeholder]="'MESSAGES_PAGE.WRITE_REPLY' | translate" [(ngModel)]="replyText"></textarea>
+              <div class="response-actions">
+                <div class="response-actions-left">
+                  <button class="custom-btn-2 btn-add-global-2" (click)="sendReply()" [disabled]="!replyText.trim()">
+                    <i class="bi bi-reply"></i> {{ 'MESSAGES_PAGE.SEND_REPLY' | translate }}
+                  </button>
+                </div>
+                <button class="custom-btn-2 btn-cancel-2" (click)="closeModal()">
+                  <i class="bi bi-x-circle"></i> {{ 'MESSAGES_PAGE.CANCEL' | translate }}
+                </button>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="showNewMessageModal" class="new-message-form">
+            <div class="form-group" *ngIf="isAdmin">
+              <label class="form-label">{{ 'MESSAGES_PAGE.RECIPIENT_TYPE' | translate }}</label>
+              <select class="form-input" [(ngModel)]="composeForm.recipientType" required>
+                <option value="individual">{{ 'MESSAGES_PAGE.INDIVIDUAL' | translate }}</option>
+                <option value="all">{{ 'MESSAGES_PAGE.ALL_USERS' | translate }}</option>
+              </select>
+            </div>
+            <div class="form-group" *ngIf="composeForm.recipientType === 'individual'">
+              <label class="form-label">{{ 'MESSAGES_PAGE.RECIPIENT' | translate }}</label>
+              <select class="form-input" [(ngModel)]="composeForm.recipientId" required>
+                <option value="">{{ 'MESSAGES_PAGE.SELECT_RECIPIENT' | translate }}</option>
+                <optgroup [label]="'MESSAGES_PAGE.PARENTS' | translate" *ngIf="isAdmin">
+                  <option *ngFor="let p of recipients.parents" [value]="p.id">
+                    {{ p.name }} ({{ p.email }})
+                  </option>
+                </optgroup>
+                <optgroup [label]="'MESSAGES_PAGE.TEACHERS' | translate" *ngIf="isAdmin">
+                  <option *ngFor="let t of recipients.teachers" [value]="t.id">
+                    {{ t.name }} ({{ t.email }})
+                  </option>
+                </optgroup>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ 'MESSAGES_PAGE.SUBJECT' | translate }}</label>
+              <input type="text" class="form-input" [placeholder]="'MESSAGES_PAGE.ENTER_SUBJECT' | translate" [(ngModel)]="composeForm.subject" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ 'MESSAGES_PAGE.CONTENT' | translate }}</label>
+              <textarea class="form-textarea" [placeholder]="'MESSAGES_PAGE.ENTER_MESSAGE' | translate" [(ngModel)]="composeForm.content" required></textarea>
+            </div>
+            <div class="form-actions">
+              <button class="btn-send" (click)="sendMessage()" [disabled]="(composeForm.recipientType === 'individual' && !composeForm.recipientId) || !composeForm.subject.trim() || !composeForm.content.trim()">
+                <i class="bi bi-send"></i> {{ 'MESSAGES_PAGE.SEND_MESSAGE' | translate }}
+              </button>
+              <button class="btn-cancel" (click)="closeNewMessageModal()">
+                <i class="bi bi-x-circle"></i> {{ 'MESSAGES_PAGE.CANCEL' | translate }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,86 @@
+<div class="titlepage-container" [class.parent-layout]="isParent">
+
+  <!-- Parent Design -->
+  <div *ngIf="isParent" class="title-section parent-title-section">
+    <div class="title-content container-fluid">
+      <div class="parent-title-wrapper">
+        <div class="parent-header">
+          <div>
+            <h1 class="page-title parent-title mb-1">{{ title }}</h1>
+          </div>
+        </div>
+      </div>
+      <!-- Parent Breadcrumbs -->
+      <nav class="breadcrumbs parent-breadcrumbs" *ngIf="breadcrumbs.length > 0">
+        <ol>
+          <li *ngFor="let crumb of breadcrumbs; let last = last" [class.active]="last">
+            <a *ngIf="crumb.url && !last" [routerLink]="crumb.url">
+              {{ crumb.label }}
+            </a>
+            <span *ngIf="!crumb.url || last">
+              {{ crumb.label }}
+            </span>
+            <i class="bi bi-chevron-right" *ngIf="!last"></i>
+          </li>
+        </ol>
+      </nav>
+    </div>
+
+  </div>
+
+  <!-- Default Design (Admin/Teacher) -->
+  <div *ngIf="!isParent" class="title-section">
+    <div class="title-content container-fluid">
+      <div class="title-wrapper">
+        <div>
+          <h1 class="page-title mb-1">{{ title }}</h1>
+        </div>
+      </div>
+      <!-- Breadcrumbs -->
+      <nav class="breadcrumbs titlepage-breadcrumbs" *ngIf="breadcrumbs.length > 0">
+        <ol>
+          <li *ngFor="let crumb of breadcrumbs; let last = last" [class.active]="last">
+            <a *ngIf="crumb.url && !last" [routerLink]="crumb.url">
+              {{ crumb.label }} 
+            </a>
+            <span *ngIf="!crumb.url || last">
+              {{ crumb.label }}
+            </span>
+            <i class="" *ngIf="!last"></i>
+          </li>
+        </ol>
+      </nav>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="title-actions" *ngIf="actions.length > 0">
+      <div *ngFor="let action of actions; let i = index" class="d-inline-block position-relative">
+        <button 
+          *ngIf="!action.dropdown"
+          [class]="'action-btn custom-btn-2 mb-2 ' + (action.class || 'btn-add-global-2')"
+          (click)="action.action()">
+          <i class="bi bi-plus-circle-dotted me-2" *ngIf="!action.icon"></i>
+          <i *ngIf="action.icon" [class]="action.icon + ' me-2'"></i>
+          {{ action.label }}
+        </button>
+        
+        <div *ngIf="action.dropdown" class="dropdown">
+          <button 
+            [class]="'action-btn btn-add mb-2 dropdown-toggle export-btn ' + (action.class || 'btn-primary')"
+            (click)="toggleDropdown(i)">
+            <i class="bi bi-download me-2"></i>
+            {{ action.label }}
+          </button>
+          <ul class="dropdown-menu" [class.show]="showDropdown[i]" [style.display]="showDropdown[i] ? 'block' : 'none'">
+            <li *ngFor="let item of action.dropdown.items">
+              <button class="dropdown-item" (click)="item.action(); showDropdown[i] = false">
+                <i *ngIf="item.icon" [class]="item.icon + ' me-2'"></i>
+                {{ item.label }}
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

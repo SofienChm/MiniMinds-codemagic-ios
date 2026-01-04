@@ -1,0 +1,360 @@
+// Brand Colors
+$primary-color: #202c4b;
+$secondary-color: #feccfd;
+$accent-color: #cdeaf0;
+
+// newGlobal Card Styles
+.participants-card {
+  .card-header {
+    h5{
+      font-size: 20px;
+      font-weight: 600;
+      color: #333;
+      margin: 0;    
+      display: flex;
+      align-items: center;
+      i{
+        font-size: 24px;
+        color: #7dd3c0;
+        margin-right: 12px;
+      }
+    }
+  }
+}
+.card-general {
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  .event-header {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 24px;
+    .event-image-container {
+      position: relative;
+      width: 100%;
+      height: 280px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: linear-gradient(135deg, #d4f4dd 0%, #c8e6c9 100%);
+      .event-badge {
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        background: #7dbcf9;
+        color: white;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .change-image-btn {
+        position: absolute;
+        bottom: 16px;
+        right: 16px;
+        border: none;
+        font-size: 14px;
+        color: #4f46e5;
+        cursor: pointer;
+      }
+    }
+  }
+}
+.stat-card {
+  background: #f7f7f7;
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+      &.price {
+        background: #dbeafe;
+        color: #2563eb;
+      }
+      &.capacity {
+        background: #fce7f3;
+        color: #db2777;
+      }
+      &.age {
+        background: #d8f2ed;
+        color: #7cd1c0;
+    }
+  }
+}
+.hover-shadow {
+  .bg-success {
+    background-color: #7cd1c0 !important;
+  }
+}
+// Progress Bar
+.event-progress {
+  border-radius: 10px;
+  background-color: rgba(205, 234, 240, 0.3);
+}
+
+.event-progress-bar {
+  border-radius: 10px;
+  font-weight: 600;
+  background: linear-gradient(135deg,#7db9ff 0%,#7dd3c0 100%)  !important;
+}
+
+.add-participant {
+  background: #7db9ff;
+  border: none;
+  font-weight: 400;
+  color: white;
+  font-size: 14px;
+  padding: 9px 15px;
+}
+
+
+.detail-icon {
+  color: #ffffff;
+  background: #7cd1c0;
+  padding: 10px;
+  border-radius: 50px;
+  line-height: 1;
+}
+// end newGlobal Card Styles
+
+.card {
+  transition: all 0.3s ease;
+  border: 1px solid rgba(32, 44, 75, 0.1);
+}
+
+.hover-shadow:hover {
+  box-shadow: 0 4px 12px rgba(32, 44, 75, 0.15);
+  transform: translateY(-2px);
+  transition: all 0.3s ease;
+}
+
+// Event Card Styling
+.event-card {
+  .card-img-top {
+    border-radius: 0;
+  }
+}
+
+
+// Event Stats Cards
+.event-stat-card {
+  background-color: rgba(205, 234, 240, 0.3);
+  border: 1px solid rgba(205, 234, 240, 0.5);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background-color: rgba(205, 234, 240, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(32, 44, 75, 0.1);
+  }
+}
+
+.stat-icon-wrapper {
+  background-color: rgba(254, 204, 253, 0.3);
+}
+
+.stat-icon {
+  color: #202c4b;
+  line-height: 1;
+}
+
+// Parent View Styles
+.parent-event-detail {
+  padding: 16px;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.event-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.event-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #202c4b;
+  margin: 0 0 4px 0;
+}
+
+.event-content {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.event-section {
+  margin-bottom: 24px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #202c4b;
+  margin: 0 0 12px 0;
+}
+
+.section-text {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+  
+  i {
+    color: #202c4b;
+    font-size: 16px;
+  }
+}
+
+.detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag {
+  display: inline-block;
+  padding: 6px 12px;
+  background-color: #feccfd;
+  color: #202c4b;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+
+
+.revenue-text {
+  color: #202c4b !important;
+}
+
+
+
+
+.rounded-circle {
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(32, 44, 75, 0.1);
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .event-stat-card {
+    margin-bottom: 1rem;
+  }
+}
+// Modal Styles
+.modal {
+  display: block !important;
+}
+
+.modal-backdrop {
+  z-index: 1040;
+}
+
+.modal-dialog {
+  z-index: 1050;
+}
+
+.student-item {
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background-color: rgba(205, 234, 240, 0.1);
+    border-color: rgba(32, 44, 75, 0.2) !important;
+  }
+  
+  &.selected {
+    background-color: rgba(254, 204, 253, 0.2);
+    border-color: #202c4b !important;
+    border-width: 2px;
+  }
+}
+
+.student-list {
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #202c4b;
+    border-radius: 3px;
+  }
+}
+
+
+::ng-deep{
+  .parent-detailchild {
+    .header-info{
+      padding-bottom: 30px;
+      margin-bottom: 0;
+      background: linear-gradient(180deg, #cbdfff 0%, #e5e1fa 55%, #f5f5f5 100%);
+    }
+    .overflow-hidden{
+      min-width: 100%;
+      position: relative;
+      .event-image{
+        max-height: 150px;
+        border-radius: 20px;
+        object-fit: cover;
+        object-position: center;
+      }
+      .filter-black{
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.4); 
+        pointer-events: none; 
+        border-radius: 20px;
+      }
+      .event-title{
+        position: absolute;
+        bottom: 20px;
+        left: 15px;
+        font-size: 24px;
+        color: #fff;
+      }
+    }
+  }
+  .event-content{
+    height: 100%;
+    .detail-item{
+      &:last-child{
+        margin-bottom: 0;
+      }
+    }
+    .status{
+      &.pending{
+        color: #664d03;
+      }
+      &.success{
+        color: #0a3622;
+      }
+    }
+  }
+}

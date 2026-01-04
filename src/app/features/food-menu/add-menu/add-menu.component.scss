@@ -1,0 +1,108 @@
+.meal-section {
+  .meal-items {
+    min-height: 60px;
+  }
+}
+
+.food-item-card {
+  background-color: #fff;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: #f8f9fa;
+  }
+
+  .food-icon {
+    width: 40px;
+    height: 40px;
+    background-color: #e9ecef;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+  }
+}
+
+// Modal styles
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1040;
+}
+
+.food-picker-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1050;
+  width: 90%;
+  max-width: 700px;
+  max-height: 80vh;
+
+  .modal-content {
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh;
+  }
+
+  .modal-header {
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-body {
+    padding: 1rem;
+    overflow-y: auto;
+    flex: 1;
+  }
+}
+
+.food-items-grid {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.food-item-option {
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: #e3f2fd;
+    border-color: #2196f3 !important;
+  }
+
+  .food-icon {
+    width: 45px;
+    height: 45px;
+    background-color: #e9ecef;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+  }
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.btn-add-global-2{
+  min-width: 100%;
+}
+.btn-cancel-2{
+  min-width: 100%;
+}

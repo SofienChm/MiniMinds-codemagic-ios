@@ -1,0 +1,17 @@
+<div class="position-relative">
+    <a class="btn btn-header btn-outline-light bg-white btn-icon position-relative me-1" (click)="toggleMenu()">
+        <img loading="lazy" [src]="getFlag(currentLanguage)" [alt]="currentLanguage"
+            class="w-100 h-100 object-fit-cover rounded" />
+        <span class="visually-hidden">{{ currentLanguage }}</span>
+    </a>
+
+    <div *ngIf="showMenu()" class="position-absolute end-0 mt-2 bg-white border rounded shadow-lg"
+        style="overflow-y: auto; z-index: 1000;">
+
+        <div *ngFor="let lang of availableLanguages"
+            class="p-2 border-bottom d-flex align-items-center gap-2 cursor-pointer" (click)="changeLanguage(lang)">
+            <img loading="lazy" [src]="getFlag(lang)" alt="{{lang}}" class=" flag-item w-6 h-6 object-fit-cover rounded" />
+        </div>
+    </div>
+
+</div>

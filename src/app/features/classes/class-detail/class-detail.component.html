@@ -1,0 +1,200 @@
+<div class="container-fluid mt-4">
+  <app-title-page 
+    title="Class Details" 
+    subtitle="View class information"
+    icon="bi bi-backpack2"
+    [breadcrumbs]="breadcrumbs"
+    [actions]="titleActions">
+  </app-title-page>
+
+  <div *ngIf="loading" class="text-center">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <div *ngIf="classData && !loading" class="row">
+    <div class="  col-md-4">
+      <div class="card card-detail_pages border-white">
+        <div class="card-header">
+          <div class="d-flex align-items-center flex-wrap row-gap-3">
+            
+            <div class="overflow-hidden">
+              <span class="badge d-inline-flex align-items-center mb-2" [class.badge-active]="classData.isActive" [class.badge-inactive]="!classData.isActive">
+                <i class="ti ti-circle-filled fs-5 me-1"></i>{{ classData.isActive ? 'Active' : 'Inactive' }}
+              </span>
+              <h5 class="mb-1 text-truncate">{{ classData.name }}</h5>
+              <p class="age">Age: {{ classData.ageGroupMin }} - {{ classData.ageGroupMax }} years</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <h5 class="mb-3 title-body">Basic Information</h5>
+          <dl class="row mb-0 table">
+            <dt class="col-6 fw-medium text-dark mb-3">Class Name</dt>
+            <dd class="col-6 mb-3">{{ classData.name }}</dd>
+            <dt class="col-6 fw-medium text-dark mb-3">Age Group</dt>
+            <dd class="col-6 mb-3">{{ classData.ageGroupMin }} - {{ classData.ageGroupMax }} years</dd>
+            <dt class="col-6 fw-medium text-dark mb-3">Capacity</dt>
+            <dd class="col-6 mb-3">{{ classData.capacity }} students</dd>
+            <dt class="col-6 fw-medium text-dark mb-3">Enrolled</dt>
+            <dd class="col-6 mb-3">{{ classData.enrollmentCount || 0 }} students</dd>
+            <dt class="col-6 fw-medium text-dark mb-3">Status</dt>
+            <dd class="col-6 mb-3">{{ classData.isActive ? 'Active' : 'Inactive' }}</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-8">
+      <div class="card card-general">
+        <div class="card-header">
+          <h5>Class Information</h5>
+        </div>
+        <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-sm-4"><strong>Teachers:</strong></div>
+            <div class="col-sm-8">
+              <div *ngIf="assignedTeachers.length > 0">
+                <div *ngFor="let teacher of assignedTeachers" class="d-inline-block me-2 mb-2">
+                  <span class="badge bg-primary">
+                    {{ teacher.firstName }} {{ teacher.lastName }}
+                    <button class="btn-close btn-close-white ms-1" style="font-size: 10px;" (click)="removeTeacher(teacher.id)"></button>
+                  </span>
+                </div>
+              </div>
+              <button class="btn btn-sm btn-primary mt-2" (click)="openAssignTeacherModal()">
+                <i class="bi bi-plus-square me-1"></i>{{ assignedTeachers.length > 0 ? 'Add More' : 'Assign Teachers' }}
+              </button>
+            </div>
+          </div>
+          <div class="row mb-3" *ngIf="classData.schedule">
+            <div class="col-sm-4"><strong>Schedule:</strong></div>
+            <div class="col-sm-8">{{ classData.schedule }}</div>
+          </div>
+          <div class="row mb-3" *ngIf="classData.description">
+            <div class="col-sm-4"><strong>Description:</strong></div>
+            <div class="col-sm-8">{{ classData.description }}</div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-sm-4"><strong>Available Spots:</strong></div>
+            <div class="col-sm-8">{{ classData.capacity - (classData.enrollmentCount || 0) }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-general mt-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5>Enrolled Children</h5>
+          <button class="btn btn-sm btn-primary" (click)="openAddChildModal()">
+            <i class="bi bi-plus-square me-1"></i>Add Child
+          </button>
+        </div>
+        <div class="card-body">
+          <div *ngIf="enrolledChildren.length > 0">
+            <div *ngFor="let child of enrolledChildren" class="border rounded p-3 mb-3">
+              <div class="row align-items-center">
+                <div class="col-md-8">
+                  <h6 class="mb-1">{{ child.firstName }} {{ child.lastName }}</h6>
+                  <p class="text-muted mb-0">Age: {{ child.dateOfBirth | date:'yyyy' }}</p>
+                </div>
+                <div class="col-md-4 text-end">
+                  <button class="btn btn-sm btn-danger" (click)="removeChild(child.id)">
+                    <i class="bi bi-trash3"></i> Remove
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="enrolledChildren.length === 0" class="text-muted text-center py-3">
+            <p>No children enrolled yet</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-general mt-3">
+        <div class="card-header">
+          <h5>Statistics</h5>
+        </div>
+        <div class="card-body">
+          <div class="row text-center">
+            <div class="col-md-4">
+              <div class="p-3">
+                <h3 class="text-primary">{{ classData.enrollmentCount || 0 }}</h3>
+                <p class="text-muted mb-0">Enrolled Students</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="p-3">
+                <h3 class="text-success">{{ classData.capacity }}</h3>
+                <p class="text-muted mb-0">Total Capacity</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="p-3">
+                <h3 class="text-info">{{ classData.capacity - (classData.enrollmentCount || 0) }}</h3>
+                <p class="text-muted mb-0">Available Spots</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Child Modal -->
+<div class="modal" [class.show]="showAddChildModal" [style.display]="showAddChildModal ? 'block' : 'none'" *ngIf="showAddChildModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add Child to Class</h5>
+        <button type="button" class="btn-close" (click)="closeAddChildModal()"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Select Child</label>
+          <select class="form-select" [(ngModel)]="selectedChildId">
+            <option [value]="null">Choose a child...</option>
+            <option *ngFor="let child of availableChildren" [value]="child.id">
+              {{ child.firstName }} {{ child.lastName }}
+            </option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeAddChildModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="addChildToClass()" [disabled]="!selectedChildId">Add Child</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade" [class.show]="showAddChildModal" *ngIf="showAddChildModal"></div>
+
+<!-- Assign Teacher Modal -->
+<div class="modal" [class.show]="showAssignTeacherModal" [style.display]="showAssignTeacherModal ? 'block' : 'none'" *ngIf="showAssignTeacherModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Assign Teacher</h5>
+        <button type="button" class="btn-close" (click)="closeAssignTeacherModal()"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Select Teachers (Multiple)</label>
+          <select id="teacherSelect" class="form-select" multiple>
+            <option *ngFor="let teacher of availableTeachers" [value]="teacher.id">
+              {{ teacher.firstName }} {{ teacher.lastName }}
+            </option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeAssignTeacherModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="assignTeacher()">Assign Teachers</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade" [class.show]="showAssignTeacherModal" *ngIf="showAssignTeacherModal"></div>

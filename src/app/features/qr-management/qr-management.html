@@ -1,0 +1,168 @@
+<div class="container-fluid mt-4">
+  <app-title-page 
+    title="QR Code Management">
+  </app-title-page>
+  <!-- Messages -->
+  <div class="alert alert-success" *ngIf="successMessage">
+    <i class="bi bi-check-circle-fill"></i>
+    {{ successMessage }}
+  </div>
+  <div class="alert alert-error" *ngIf="errorMessage">
+    <i class="bi bi-exclamation-circle-fill"></i>
+    {{ errorMessage }}
+  </div>
+
+  <!-- QR Codes Section -->
+  <div class="section qr-codes-section card card-general">
+    <div class="section-header card-header">
+      <h5><i class="bi bi-qr-code"></i> QR Codes</h5>
+      <button class="custom-btn-2 btn-add-global-2" (click)="regenerateQrCodes()" [disabled]="regenerating">
+        <i class="bi" [class.bi-arrow-clockwise]="!regenerating" [class.bi-hourglass-split]="regenerating"></i>
+        {{ regenerating ? 'Regenerating...' : 'Regenerate All' }}
+      </button>
+    </div>
+
+    <div class="qr-cards" *ngIf="!loadingQrCodes">
+      <!-- Check-In QR Code -->
+      <div class="qr-card check-in">
+        <div class="qr-header">
+          <i class="bi bi-box-arrow-in-right"></i>
+          <h3>Check-In QR Code</h3>
+        </div>
+        <div class="qr-body">
+          <canvas #checkInCanvas></canvas>
+        </div>
+        <div class="qr-footer">
+          <span class="qr-date" *ngIf="checkInQrCode">
+            Created: {{ formatDate(checkInQrCode.createdAt) }}
+          </span>
+          <button class="btn-print" (click)="printQrCode('checkIn')">
+            <i class="bi bi-printer"></i> Print
+          </button>
+        </div>
+      </div>
+
+      <!-- Check-Out QR Code -->
+      <div class="qr-card check-out">
+        <div class="qr-header">
+          <i class="bi bi-box-arrow-right"></i>
+          <h3>Check-Out QR Code</h3>
+        </div>
+        <div class="qr-body">
+          <canvas #checkOutCanvas></canvas>
+        </div>
+        <div class="qr-footer">
+          <span class="qr-date" *ngIf="checkOutQrCode">
+            Created: {{ formatDate(checkOutQrCode.createdAt) }}
+          </span>
+          <button class="btn-print" (click)="printQrCode('checkOut')">
+            <i class="bi bi-printer"></i> Print
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="loading" *ngIf="loadingQrCodes">
+      <div class="spinner"></div>
+      <p>Loading QR codes...</p>
+    </div>
+  </div>
+
+  <!-- School Settings Section -->
+  <div class="card card-general">
+    <div class="card-header">
+      <h5><i class="bi bi-geo-alt"></i> School Location & Geofence</h5>
+    </div>
+
+    <div class="settings-form card-body">
+      <div class="form-group">
+        <label for="schoolName">School Name</label>
+        <input type="text" id="schoolName" [(ngModel)]="settings.schoolName"
+               placeholder="Enter school name">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="latitude">Latitude</label>
+          <input type="number" id="latitude" [(ngModel)]="settings.latitude"
+                 step="0.000001" placeholder="e.g., 40.7128">
+        </div>
+        <div class="form-group">
+          <label for="longitude">Longitude</label>
+          <input type="number" id="longitude" [(ngModel)]="settings.longitude"
+                 step="0.000001" placeholder="e.g., -74.0060">
+        </div>
+        <button class="btn-location" (click)="getCurrentLocation()" title="Use current location">
+          <i class="bi bi-crosshairs"></i>
+        </button>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="radius">Geofence Radius (meters)</label>
+          <input type="number" id="radius" [(ngModel)]="settings.geofenceRadiusMeters"
+                 min="10" max="1000" placeholder="100">
+        </div>
+        <div class="form-group checkbox-group">
+          <label class="checkbox-label">
+            <input type="checkbox" [(ngModel)]="settings.geofenceEnabled">
+            <span class="checkmark"></span>
+            Enable Geofencing
+          </label>
+          <small>When enabled, parents must be within the radius to check in/out</small>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="custom-btn-2 btn-add-global-2" (click)="saveSettings()" [disabled]="savingSettings">
+          <i class="bi" [class.bi-check-lg]="!savingSettings" [class.bi-hourglass-split]="savingSettings"></i>
+          {{ savingSettings ? 'Saving...' : 'Save Settings' }}
+        </button>
+        <span class="save-success" *ngIf="settingsSaved">
+          <i class="bi bi-check-circle-fill"></i> Saved!
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Instructions Section -->
+  <div class="section instructions-section card card-general">
+    <div class="card-header section-header">
+      <h5><i class="bi bi-info-circle"></i> How It Works</h5>
+    </div>
+
+    <div class="instructions-content">
+      <div class="instruction-item">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <h4>Print QR Codes</h4>
+          <p>Print the Check-In and Check-Out QR codes and place them at the school entrance and exit.</p>
+        </div>
+      </div>
+
+      <div class="instruction-item">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <h4>Set School Location</h4>
+          <p>Configure the school's GPS coordinates and geofence radius for location verification.</p>
+        </div>
+      </div>
+
+      <div class="instruction-item">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <h4>Parents Scan</h4>
+          <p>Parents use the QR Check-in feature in the app to scan codes when dropping off or picking up their children.</p>
+        </div>
+      </div>
+
+      <div class="instruction-item">
+        <div class="step-number">4</div>
+        <div class="step-content">
+          <h4>Automatic Recording</h4>
+          <p>Attendance is automatically recorded with timestamp and location verification.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

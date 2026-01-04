@@ -1,0 +1,18 @@
+<div class="modal-backdrop" *ngIf="show" (click)="onCancel()"></div>
+<div class="modal-dialog-custom" *ngIf="show">
+  <div class="modal-content-custom">
+    <div class="modal-header-custom">
+      <h5>{{ title }}</h5>
+      <button type="button" class="btn-close-custom" (click)="onCancel()">
+        <i class="bi bi-x"></i>
+      </button>
+    </div>
+    <div class="modal-body-custom">
+      <p>{{ message }}</p>
+    </div>
+    <div class="modal-footer-custom">
+      <button type="button" class="btn btn-cancel-global" (click)="onCancel()">{{ cancelText }}</button>
+      <button type="button" class="btn btn-add-global" (click)="onConfirm()">{{ confirmText }}</button>
+    </div>
+  </div>
+</div>

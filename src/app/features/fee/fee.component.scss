@@ -1,0 +1,145 @@
+.modal {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.card {
+  border: none;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.badge {
+  font-size: 0.75em;
+}
+
+.dropdown-menu {
+  border: none;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.btn-outline-secondary:hover {
+  color: #fff;
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
+
+.text-danger {
+  color: #dc3545 !important;
+}
+
+.text-success {
+  color: #198754 !important;
+}
+
+.text-warning {
+  color: #ffc107 !important;
+}
+
+.bg-opacity-10 {
+  background-color: rgba(var(--bs-primary-rgb), 0.1) !important;
+}
+
+.summary-card {
+  transition: transform 0.2s;
+}
+
+.summary-card:hover {
+  transform: translateY(-2px);
+}
+
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.alert {
+  border: none;
+  border-radius: 0.5rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #86b7fe;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+
+@media (max-width: 768px) {
+  .table-responsive {
+    font-size: 0.875rem;
+  }
+  
+  .card-body {
+    padding: 1rem;
+  }
+}
+::ng-deep{
+  .header-info {
+    margin-bottom: 30px !important;
+    .name{
+      padding-bottom: 20px !important;
+    }
+  }
+}
+.parent-detailchild{
+  .fee-tab{
+    .total{
+      font-size: 16px;
+    }
+    .spent{
+      font-size: 14px;
+    }
+    .number{
+      font-size: 12px;
+    }
+  }
+  .icons{
+    background-color: #E0F2FE !important;
+    background: #E0F2FE !important;
+    i{
+      color: #1DBAB4 !important;
+    }
+  }
+}
+.bg-primary {
+  background: var(--gradient-primary) !important;
+  background-color: var(--gradient-primary) !important;
+  color: white;
+}
+
+.stat-card {
+  transition: none;
+  box-shadow: none;
+  border-radius: 12px;
+
+  &:hover {
+    transform: none;
+    box-shadow: none;
+  }
+  
+  .stat-icon-wrapper {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--secondary-color);
+    border-radius: 12px;
+    i {
+      font-size: 22px;
+      color: #ffffff;
+    }
+  }
+  
+  .stat-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    line-height: 1;
+    margin-bottom: 0;
+  }
+  
+  .stat-label {
+    color: #6c757d;
+    font-size: 14px;
+    font-weight: 500;
+  }
+}

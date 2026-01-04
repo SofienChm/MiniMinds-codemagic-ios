@@ -1,0 +1,135 @@
+<div class="container-fluid mt-4">
+  <app-title-page
+    [title]="'LEAVES_PAGE.ADD_LEAVE' | translate"
+    [subtitle]="'LEAVES_PAGE.ADD_LEAVE_SUBTITLE' | translate"
+    icon="bi bi-calendar-x"
+    [breadcrumbs]="breadcrumbs"
+    [actions]="actions">
+  </app-title-page>
+
+  <!-- Teacher Add Leave Form -->
+  <div *ngIf="isTeacher" class="card card-general">
+    <div class="card-header">
+      <h5>{{ 'LEAVES_PAGE.REQUEST_LEAVE' | translate }}</h5>
+    </div>
+    <div class="card-body">
+      <form (ngSubmit)="submitTeacherLeave()">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">{{ 'LEAVES_PAGE.START_DATE' | translate }} *</label>
+            <input type="date" class="form-control" [(ngModel)]="newLeave.startDate" name="startDate" required />
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">{{ 'LEAVES_PAGE.END_DATE' | translate }} *</label>
+            <input type="date" class="form-control" [(ngModel)]="newLeave.endDate" name="endDate" required />
+          </div>
+          <div class="col-md-6 mb-3">
+              <label class="form-label">{{ 'LEAVES_PAGE.LEAVE_TYPE' | translate }} <span class="text-danger">*</span></label>
+              <ng-select
+                class="custom-ng-select"
+                [(ngModel)]="newLeave.leaveType"
+                [items]="leaveTypeOptions"
+                bindLabel="label"
+                bindValue="value"
+                [clearable]="false"
+                [searchable]="false"
+                name="leaveType"
+                required>
+              </ng-select>
+          </div>
+          <div class="col-12 mb-3">
+            <label class="form-label">{{ 'LEAVES_PAGE.REASON' | translate }}</label>
+            <textarea class="form-control" [(ngModel)]="newLeave.reason" name="reason" rows="3" [placeholder]="'LEAVES_PAGE.REASON_PLACEHOLDER' | translate"></textarea>
+          </div>
+        </div>
+        <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+          <i class="bi bi-exclamation-triangle me-2"></i>{{ errorMessage }}
+        </div>
+        <div class="d-flex gap-2 float-right">
+          <button type="button" class="custom-btn-2 btn-cancel-2" (click)="cancel()" [disabled]="submitting">{{ 'LEAVES_PAGE.CANCEL' | translate }}</button>
+          <button type="submit" class="custom-btn-2 btn-add-global-2" [disabled]="submitting">
+            <span *ngIf="submitting" class="spinner-border spinner-border-sm me-2"></span>
+            {{ submitting ? ('LEAVES_PAGE.SUBMITTING' | translate) : ('LEAVES_PAGE.SUBMIT_REQUEST' | translate) }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Admin Add Leave for Teacher -->
+  <div *ngIf="isAdmin" class="card card-general">
+    <div class="card-header">
+      <h5>{{ 'LEAVES_PAGE.ADD_LEAVE_FOR_TEACHER' | translate }}</h5>
+    </div>
+    <div class="card-body">
+      <form (ngSubmit)="submitAdminLeave()">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+              <label class="form-label">{{ 'LEAVES_PAGE.LEAVE_TYPE' | translate }} <span class="text-danger">*</span></label>
+              <ng-select
+                class="custom-ng-select"
+                [(ngModel)]="adminNewLeave.leaveType"
+                [items]="leaveTypeOptions"
+                bindLabel="label"
+                bindValue="value"
+                [clearable]="false"
+                [searchable]="false"
+                name="leaveType"
+                required>
+              </ng-select>
+            </div>
+          <div class="col-6 mb-3">
+            <label class="form-label">{{ 'LEAVES_PAGE.TEACHER' | translate }} *</label>
+            <ng-select
+              class="custom-ng-select"
+              [(ngModel)]="adminSelectedTeacherId"
+              [items]="teachers"
+              bindLabel="firstName"
+              bindValue="id"
+              [placeholder]="'LEAVES_PAGE.SELECT_TEACHER' | translate"
+              [clearable]="false"
+              name="teacherId"
+              required>
+              <ng-template ng-label-tmp let-item="item">
+                {{ item.firstName }} {{ item.lastName }}
+              </ng-template>
+              <ng-template ng-option-tmp let-item="item">
+                {{ item.firstName }} {{ item.lastName }} ({{ item.email }})
+              </ng-template>
+            </ng-select>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">{{ 'LEAVES_PAGE.START_DATE' | translate }} *</label>
+            <input type="date" class="form-control" [(ngModel)]="adminNewLeave.startDate" name="adminStartDate" required />
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">{{ 'LEAVES_PAGE.END_DATE' | translate }} *</label>
+            <input type="date" class="form-control" [(ngModel)]="adminNewLeave.endDate" name="adminEndDate" required />
+          </div>
+          <div class="col-12 mb-3">
+            <label class="form-label">{{ 'LEAVES_PAGE.REASON' | translate }}</label>
+            <textarea class="form-control" [(ngModel)]="adminNewLeave.reason" name="adminReason" rows="3" [placeholder]="'LEAVES_PAGE.REASON_PLACEHOLDER' | translate"></textarea>
+          </div>
+          <div class="col-12 mb-3">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" [(ngModel)]="adminApprove" name="adminApprove" id="adminApprove" />
+              <label class="form-check-label" for="adminApprove">
+                {{ 'LEAVES_PAGE.APPROVE_IMMEDIATELY' | translate }}
+              </label>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="adminError" class="alert alert-danger" role="alert">
+          <i class="bi bi-exclamation-triangle me-2"></i>{{ adminError }}
+        </div>
+        <div class="d-flex gap-2 float-right">
+          <button type="button" class="custom-btn-2 btn-cancel-2" (click)="cancel()" [disabled]="adminSubmitting">{{ 'LEAVES_PAGE.CANCEL' | translate }}</button>
+          <button type="submit" class="custom-btn-2 btn-add-global-2" [disabled]="adminSubmitting">
+            <span *ngIf="adminSubmitting" class="spinner-border spinner-border-sm me-2"></span>
+            {{ adminSubmitting ? ('LEAVES_PAGE.ADDING' | translate) : ('LEAVES_PAGE.ADD_LEAVE' | translate) }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

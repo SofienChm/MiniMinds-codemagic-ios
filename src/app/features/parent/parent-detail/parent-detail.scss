@@ -1,0 +1,286 @@
+.card {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.badge {
+  font-size: 0.875rem;
+}
+
+img {
+  object-fit: cover;
+}
+
+.card-children-info{
+  .card-header {
+    border-radius: var(--bs-card-inner-border-radius) var(--bs-card-inner-border-radius) 0 0;
+  }
+  .content{
+    font-size: 14px;
+    font-weight: 400;
+    color: rgb(106, 114, 135);
+  }
+  .child-image{
+    .avatar{
+      width: 2.813rem;
+      height: 2.813rem;
+      font-size: 1rem;
+      border: 1px solid #00000047;
+      border-radius: 4px;
+    }
+  }
+  .title-age{
+    p{
+      &:first-child{
+        font-size: 14px;
+        color: #202C4B !important;
+        font-weight: 500;
+      }
+    }
+    span{
+      font-size: 14px;
+      color: rgb(106, 114, 135) !important;
+      font-weight: 400;
+    }
+  }
+  .child-text{
+    h6{
+      margin-bottom: 0;
+      font-size: 15px;
+      font-weight: 500;
+    }
+    p{
+      margin-bottom: 0;
+      font-size: 14px;
+      font-weight: 400;
+    }
+    .badge{
+      background: none;
+      color: #1ABE17;
+      padding: 0.25rem 0.45rem;
+      text-transform: capitalize;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      border-radius: 4px;
+      font-size: 10.5px;
+    }
+  }
+  .action-child{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    button.btn {
+      padding: 10px;
+      line-height: 1.2;
+      font-size: 12px;
+    }
+  }
+  .allergies-medical{
+    .title{
+      font-size: 14px;
+      font-weight: 500;
+      color: #202C4B;
+    }
+    .detail{
+      font-size: 14px;
+      font-weight: 400;
+      color: rgb(106, 114, 135);
+    }
+  }
+}
+
+::ng-deep {
+  .header-info_card{
+    margin-top: -70px !important;
+  }
+  .header-info {
+    margin-bottom: 65px !important;
+  }
+  .title-page {
+    display: none !important;
+  }
+  .image-name {
+    margin-top: -20px;
+  }
+}
+.logout{
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 5px !important;
+    font-weight: 500 !important;
+    i{
+      font-size: 18px;
+    }
+}
+
+/* Make left and right columns equal height and use remaining viewport height */
+.parent-detail-row {
+  display: flex;
+  gap: 1rem;
+  align-items: stretch;
+  flex-wrap: nowrap; /* keep columns side-by-side */
+  overflow-x: hidden; /* prevent horizontal scroll */
+}
+.parent-detail-row > .col-md-6 {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 1 1 0; /* allow columns to shrink/grow to available space */
+  min-width: 0; /* allow overflow to be handled by inner containers, preventing page horizontal scroll */
+}
+
+/* Ensure card bodies scroll internally if their content overflows */
+.parent-detail-row .card .card-body {
+  overflow: auto;
+}
+.parent-detail-row .card {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+}
+.parent-detail-row .card .card-body {
+  overflow: auto;
+}
+#children-detail-section {
+  .card-detail_pages{
+    .card-header, .card-body{
+      padding: 5px 15px;
+    }
+  }
+
+  /* Bordure rouge pour le footer des cards dans la colonne Children */
+  .card-footer {
+    margin-top: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: #fff;
+    border-radius: 0 0 8px 8px;
+  }
+}
+
+@media (max-width: 767px) {
+  .parent-detail-row { min-height: auto; display:block; }
+  .parent-detail-row > .col-md-6 { display:block; }
+}
+
+/* Styles for grouped card body in left column */
+/* Styles for grouped card body in left column (modernized) */
+#parent-detail-section .grouped-card-body {
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 0 6px 18px rgba(18, 38, 63, 0.06);
+  /* match font and size of right column */
+  font-family: inherit;
+  font-size: 14px;
+  color: inherit;
+}
+
+#parent-detail-section .grouped-card-body .info-group {
+  padding: 5px 6px;
+  display: block;
+}
+
+#parent-detail-section .grouped-card-body .info-group + .info-group {
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(15,23,36,0.04);
+}
+
+#parent-detail-section .grouped-card-body .group-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f1724;
+  margin-bottom: 10px;
+  letter-spacing: 0.2px;
+  text-transform: none;
+}
+
+/* label / value styling */
+#parent-detail-section .grouped-card-body .row > div {
+  padding: 6px 8px;
+}
+#parent-detail-section .grouped-card-body strong {
+  display: inline-block;
+  font-size: 12px;
+  color: #667085;
+  font-weight: 600;
+}
+#parent-detail-section .grouped-card-body .row > div:nth-child(2n) {
+  color: #0f1724;
+  font-size: 14px;
+}
+
+/* Responsive: stack label/value vertically on very small screens */
+@media (max-width: 480px) {
+  #parent-detail-section .grouped-card-body .row > div {
+    padding: 6px 4px;
+  }
+  #parent-detail-section .grouped-card-body .row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+}
+
+.info-card {
+    width: 100%;
+    padding: 20px;
+    background-color: #FFFFFF;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin: 0 auto;
+
+  .card-title {
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+      .icon-box {
+        width: 36px;
+        height: 36px;
+        background-color: #E0F2FE;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+      }
+      i {
+            font-size: 20px;
+        color: #1DBAB4;
+      }
+      h5 {
+        margin-bottom: 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #2D3748;
+      }
+  }
+  .info-row {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+  .info-row:last-child {
+    margin-bottom: 0;
+  }
+  .info-label {
+    width: 130px;
+    font-size: 14px;
+    font-weight: 400;
+    color: #6B7280;
+  }
+  .info-value {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 500;
+    color: #2D3748;
+    text-transform: capitalize;
+  }
+}
+
+
+
+
+
+

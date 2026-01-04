@@ -1,0 +1,194 @@
+// Form Styling
+.leave-form {
+  .form-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #202C4B;
+    margin-bottom: 0.5rem;
+  }
+
+  .form-control, .form-select {
+    border: 1px solid #E9EDF4;
+    border-radius: 5px;
+    padding: 0.5rem 0.85rem;
+    font-size: 14px;
+    color: #515B73;
+    transition: all 0.3s ease;
+
+    &:focus {
+      border-color: #3D5EE1;
+      box-shadow: 0 0 0 0.2rem rgba(61, 94, 225, 0.15);
+    }
+  }
+
+  textarea.form-control {
+    resize: vertical;
+  }
+}
+
+// Table Styling
+.table {
+  font-size: 14px;
+
+  thead {
+    th {
+      font-weight: 600;
+      color: #202C4B;
+      border-bottom: 2px solid #E9EDF4;
+      padding: 0.75rem;
+    }
+  }
+
+  tbody {
+    tr {
+      transition: all 0.2s ease;
+
+      &:hover {
+        background-color: #F8F9FA;
+      }
+
+      td {
+        padding: 0.75rem;
+        color: #515B73;
+        vertical-align: middle;
+      }
+    }
+  }
+}
+
+// Badge Styling
+.badge {
+  padding: 0.35rem 0.65rem;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border-radius: 4px;
+  text-transform: uppercase;
+
+  &.badge-pending {
+    background: rgba(255, 193, 7, 0.1);
+    color: #FFC107;
+  }
+
+  &.badge-approved {
+    background: var(--primary-color);
+    color: #fff;
+  }
+
+  &.badge-rejected {
+    background: var(--red-color);
+    color: white;
+  }
+
+  &.badge-annual {
+    background: rgba(61, 94, 225, 0.1);
+    color: #3D5EE1;
+  }
+
+  &.badge-medical {
+    background: #feccfd;
+    color: #DC3545;
+  }
+  &.badge-Emergency {
+    background: #cdeaf0;
+    color: #2c7e8f;
+  }
+}
+
+// Avatar
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+
+  &.avatar-sm {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+
+  .avatar-title {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #fff;
+  }
+}
+
+// New Compact Card Styles with Background Images
+.card-leaves {
+  background-position: right top;
+  background-repeat: no-repeat;
+  background-size: contain;
+  border: none;
+  
+  &.bg-black-le {
+    background-image: url('/assets/images/bg-black-le.svg');
+  }
+  
+  &.bg-blue-le {
+    background-image: url('/assets/images/bg-blue-le.svg');
+  }
+  
+  &.bg-pink-le {
+    background-image: url('/assets/images/bg-purple-le.svg');
+  }
+}
+
+.bg-secondary-transparent {
+  background: rgba(108, 117, 125, 0.1);
+  color: #6c757d;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 0.35rem 0.65rem;
+  border-radius: 4px;
+}
+
+.bg-info-transparent {
+  background: rgba(13, 202, 240, 0.1);
+  color: #0dcaf0;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 0.35rem 0.65rem;
+  border-radius: 4px;
+}
+
+.bg-pink-transparent {
+  background: rgba(233, 30, 99, 0.1);
+  color: #e91e63;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 0.35rem 0.65rem;
+  border-radius: 4px;
+}
+
+.avatar {
+  &.avatar-md {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+// Empty State
+.text-center {
+  .bi-inbox {
+    opacity: 0.3;
+  }
+}
+
+.card-leaves{
+  .img-leaves{
+    max-width: 32px;
+  }
+}
+
+.bg-leave{
+  background: var(--secondary-color);
+  color: white;
+}

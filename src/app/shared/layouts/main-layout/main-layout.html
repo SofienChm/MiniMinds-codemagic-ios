@@ -1,0 +1,13 @@
+<div class="d-flex">
+  <div class="sidebar-overlay" [class.show]="isMobileMenuOpen" (click)="closeMobileMenu()"></div>
+  <app-sidebar [class.mobile-open]="isMobileMenuOpen" (linkClicked)="closeMobileMenu()"></app-sidebar>
+  
+  <div class="main-content" [class.parentrole]="isParentRole">
+    <app-header (mobileMenuToggle)="toggleMobileMenu()"></app-header>
+    <main class="content-area ">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+  
+  <app-ai-chat-button></app-ai-chat-button>
+</div>

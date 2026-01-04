@@ -1,0 +1,110 @@
+.title-filter {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #202c4b;
+}
+
+.card {
+  transition: all 0.2s ease-in-out;
+  border: 1px solid #e9ecef;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  &.inactive-card {
+    opacity: 0.7;
+    background-color: #f8f9fa;
+  }
+}
+
+.card-header {
+  background-color: #fff;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.card-footer {
+  background-color: #fff;
+  border-top: 1px solid #f0f0f0;
+}
+
+.nutrition-info {
+  background-color: #f8f9fa;
+  border-radius: 0.375rem;
+  padding: 0.5rem;
+}
+
+.tags-section {
+  min-height: 40px;
+}
+
+// Modal styles
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1040;
+}
+
+.food-form-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1050;
+  width: 90%;
+  max-width: 700px;
+  max-height: 90vh;
+
+  .modal-content {
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+  }
+
+  .modal-header {
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-body {
+    padding: 1rem;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .modal-footer {
+    padding: 1rem;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+}
+
+.dropdown-menu {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  .dropdown-item {
+    font-size: 14px;
+    padding: 0.5rem 1rem;
+
+    &:hover {
+      background-color: #f8f9fa;
+    }
+
+    &.text-danger:hover {
+      background-color: #fff5f5;
+    }
+  }
+}

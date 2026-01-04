@@ -1,0 +1,104 @@
+<div class="cropper-modal-overlay" *ngIf="isVisible" (click)="cancel()">
+  <div class="cropper-modal" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="cropper-header">
+      <div class="cropper-title">
+        <i class="bi bi-crop"></i>
+        <h5>Adjust Photo</h5>
+      </div>
+      <button type="button" class="btn-close-modal" (click)="cancel()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="cropper-body">
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="cropper-loading">
+        <div class="spinner-border spinner-custom" role="status"></div>
+        <p>Loading image...</p>
+      </div>
+
+      <!-- Error State -->
+      <div *ngIf="imageLoadFailed" class="cropper-error">
+        <i class="bi bi-exclamation-triangle"></i>
+        <p>Failed to load image. Please try another file.</p>
+        <button type="button" class="action-btn custom-btn-2 btn-cancel-2" (click)="cancel()">
+          <i class="bi bi-arrow-left me-2"></i>
+          Go Back
+        </button>
+      </div>
+
+      <!-- Cropper -->
+      <div class="cropper-container" [class.hidden]="isLoading || imageLoadFailed">
+        <image-cropper
+          #cropper
+          [imageFile]="imageFile ?? undefined"
+          [maintainAspectRatio]="maintainAspectRatio"
+          [aspectRatio]="aspectRatio"
+          [roundCropper]="roundCropper"
+          [resizeToWidth]="resizeToWidth"
+          [resizeToHeight]="resizeToHeight"
+          [format]="format"
+          [imageQuality]="quality"
+          [transform]="{ scale: zoomLevel }"
+          output="base64"
+          (imageCropped)="onImageCropped($event)"
+          (imageLoaded)="onImageLoaded($event)"
+          (cropperReady)="onCropperReady()"
+          (loadImageFailed)="onLoadImageFailed()">
+        </image-cropper>
+
+        <!-- Instruction -->
+        <div class="cropper-instruction">
+          <i class="bi bi-arrows-move me-1"></i>
+          Drag to reposition the image
+        </div>
+      </div>
+
+      <!-- Zoom Controls -->
+      <div class="zoom-controls" *ngIf="!isLoading && !imageLoadFailed">
+        <button type="button" class="zoom-btn" (click)="zoomOut()" [disabled]="zoomLevel <= minZoom" title="Zoom Out">
+          <i class="bi bi-zoom-out"></i>
+        </button>
+        <div class="zoom-slider-container">
+          <input
+            type="range"
+            class="zoom-slider"
+            [min]="minZoom"
+            [max]="maxZoom"
+            [step]="zoomStep"
+            [value]="zoomLevel"
+            (input)="onZoomChange($event)">
+          <span class="zoom-label">{{ (zoomLevel * 100).toFixed(0) }}%</span>
+        </div>
+        <button type="button" class="zoom-btn" (click)="zoomIn()" [disabled]="zoomLevel >= maxZoom" title="Zoom In">
+          <i class="bi bi-zoom-in"></i>
+        </button>
+        <button type="button" class="zoom-btn reset-btn" (click)="resetZoom()" title="Reset Zoom">
+          <i class="bi bi-arrow-counterclockwise"></i>
+        </button>
+      </div>
+
+      <!-- Preview -->
+      <div class="preview-section" *ngIf="croppedImage && !isLoading && !imageLoadFailed">
+        <p class="preview-label">Preview</p>
+        <div class="preview-container">
+          <img [src]="croppedImage" alt="Preview" class="preview-image" [class.round]="roundCropper">
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="cropper-footer">
+      <button type="button" class="action-btn custom-btn-2 btn-cancel-2" (click)="cancel()">
+        <i class="bi bi-x-circle me-2"></i>
+        Cancel
+      </button>
+      <button type="button" class="action-btn custom-btn-2 btn-add-global-2" (click)="confirmCrop()" [disabled]="!croppedImage || isLoading">
+        <i class="bi bi-check-circle me-2"></i>
+        Apply
+      </button>
+    </div>
+  </div>
+</div>

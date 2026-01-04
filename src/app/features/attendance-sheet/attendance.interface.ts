@@ -1,0 +1,28 @@
+export interface Attendance {
+  id: number;
+  childId: number;
+  checkInTime: string;
+  checkOutTime?: string;
+  date: string;
+  checkInNotes?: string;
+  checkOutNotes?: string;
+  createdAt: string;
+  updatedAt?: string;
+  child?: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    profilePicture?: string | null;
+    parent?: {
+      firstName: string;
+      lastName: string;
+    };
+  };
+}
+
+export interface AttendanceStats {
+  totalPresent: number;
+  totalAbsent: number;
+  checkInsToday: number;
+  checkOutsToday: number;
+}

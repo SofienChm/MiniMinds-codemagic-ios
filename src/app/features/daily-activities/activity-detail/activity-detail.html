@@ -1,0 +1,598 @@
+<!-- Parent View -->
+<div *ngIf="isParent" class="parent-activity-detail font-inter">
+  <div class="header-info" *ngIf="!loading && activity">
+    <div class="title-icons mb-3" (click)="back()">
+      <div class="page-back">
+        <i class="bi bi-arrow-left"></i>
+      </div>
+      <div class="title-page">{{ 'DAILY_REPORT.ACTIVITY_DETAIL' | translate }}</div>
+      <div class="page-setting"></div>
+    </div>
+  </div>
+
+  <div class="activity-detail-content" *ngIf="!loading && activity">
+    <!-- Activity Header Card -->
+    <div class="activity-header-card">
+      <div class="activity-emoji">{{ getActivityEmoji() }}</div>
+      <h2 class="activity-type">{{ getActivityLabel() }}</h2>
+      <p class="activity-time">{{ formatTime(activity.activityTime) }}</p>
+      <p class="activity-date">{{ formatDate(activity.activityTime) }}</p>
+    </div>
+
+    <!-- Child Info -->
+    <div class="info-card" *ngIf="activity.child">
+      <h3 class="section-title">{{ 'DAILY_REPORT.CHILD' | translate }}</h3>
+      <div class="child-info-row">
+        <img [src]="activity.child.profilePicture || 'assets/child.png'"
+             [alt]="activity.child.firstName"
+             class="child-avatar">
+        <div class="child-details">
+          <span class="child-name">{{ getChildFullName() }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Duration -->
+    <div class="info-card" *ngIf="activity.duration">
+      <h3 class="section-title">{{ 'DAILY_REPORT.DURATION' | translate }}</h3>
+      <div class="info-value">
+        <i class="bi bi-clock me-2"></i>
+        {{ formatDuration(activity.duration) }}
+      </div>
+    </div>
+
+    <!-- Food Item -->
+    <div class="info-card" *ngIf="activity.foodItem">
+      <h3 class="section-title">{{ 'DAILY_REPORT.FOOD_DRINK' | translate }}</h3>
+      <div class="info-value">
+        <i class="bi bi-cup-hot me-2"></i>
+        {{ activity.foodItem }}
+      </div>
+    </div>
+
+    <!-- Mood -->
+    <div class="info-card" *ngIf="activity.mood">
+      <h3 class="section-title">{{ 'DAILY_REPORT.MOOD' | translate }}</h3>
+      <div class="mood-display">
+        <span class="mood-emoji">{{ getMoodEmoji() }}</span>
+        <span class="mood-text">{{ 'DAILY_REPORT.MOODS.' + activity.mood.toUpperCase() | translate }}</span>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="info-card" *ngIf="activity.notes">
+      <h3 class="section-title">{{ 'DAILY_REPORT.NOTES' | translate }}</h3>
+      <p class="notes-text">{{ activity.notes }}</p>
+    </div>
+
+    <!-- Recorded Time -->
+    <div class="info-card" *ngIf="activity.createdAt">
+      <h3 class="section-title">{{ 'DAILY_REPORT.RECORDED' | translate }}</h3>
+      <div class="info-value text-muted">
+        <i class="bi bi-calendar-check me-2"></i>
+        {{ formatDate(activity.createdAt) }} at {{ formatTime(activity.createdAt) }}
+      </div>
+    </div>
+
+    <!-- Gallery Section (Parent View - View Only) -->
+    <div class="info-card" *ngIf="photos.length > 0">
+      <h3 class="section-title"><i class="bi bi-images me-2"></i>{{ 'DAILY_REPORT.PHOTOS' | translate }}</h3>
+      <div *ngIf="loadingPhotos" class="text-center py-3">
+        <div class="spinner-border spinner-border-sm" role="status"></div>
+      </div>
+      <div *ngIf="!loadingPhotos" class="photo-grid-parent">
+        <div class="photo-item-parent" *ngFor="let photo of photos" (click)="openPhotoModal(photo)">
+          <img [src]="photo.thumbnailData" [alt]="photo.title || 'Activity photo'">
+        </div>
+      </div>
+    </div>
+
+    <!-- Comments Section (Parent View) -->
+    <div class="info-card">
+      <h3 class="section-title"><i class="bi bi-chat-dots me-2"></i>{{ 'DAILY_REPORT.COMMENTS' | translate }} ({{ comments.length }})</h3>
+
+      <!-- New Comment Form -->
+      <div class="new-comment-form-parent mb-3">
+        <textarea
+          class="form-control mb-2"
+          [(ngModel)]="newCommentText"
+          [placeholder]="'DAILY_REPORT.WRITE_COMMENT' | translate"
+          rows="2"
+          [disabled]="submittingComment">
+        </textarea>
+        <button
+          class="btn btn-primary btn-sm"
+          (click)="submitComment()"
+          [disabled]="!newCommentText.trim() || submittingComment">
+          <span *ngIf="submittingComment" class="spinner-border spinner-border-sm me-1"></span>
+          <i class="bi bi-send me-1" *ngIf="!submittingComment"></i>
+          {{ 'DAILY_REPORT.POST' | translate }}
+        </button>
+      </div>
+
+      <!-- Loading Comments -->
+      <div *ngIf="loadingComments" class="text-center py-3">
+        <div class="spinner-border spinner-border-sm" role="status"></div>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!loadingComments && comments.length === 0" class="text-center py-3 text-muted">
+        <p class="mb-0 small">{{ 'DAILY_REPORT.NO_COMMENTS_YET' | translate }}</p>
+      </div>
+
+      <!-- Comments List -->
+      <div class="comments-list-parent" *ngIf="!loadingComments && comments.length > 0">
+        <div class="comment-item-parent" *ngFor="let comment of comments">
+          <div class="comment-main-parent">
+            <img [src]="comment.user.profilePicture || 'assets/default-avatar.svg'"
+                 [alt]="comment.user.firstName"
+                 class="comment-avatar-parent">
+            <div class="comment-content-parent">
+              <div class="comment-header-parent">
+                <span class="comment-author-parent">{{ comment.user.firstName }} {{ comment.user.lastName }}</span>
+                <span class="comment-time-parent">{{ formatTimeAgo(comment.createdAt) }}</span>
+              </div>
+
+              <div *ngIf="editingComment?.id !== comment.id">
+                <p class="comment-text-parent">{{ comment.content }}</p>
+                <div class="comment-actions-parent">
+                  <button class="btn-action-parent" (click)="startReply(comment)">{{ 'DAILY_REPORT.REPLY' | translate }}</button>
+                  <button class="btn-action-parent" *ngIf="canEditComment(comment)" (click)="startEditComment(comment)">{{ 'DAILY_REPORT.EDIT' | translate }}</button>
+                  <button class="btn-action-parent text-danger" *ngIf="canEditComment(comment)" (click)="deleteComment(comment)">{{ 'DAILY_REPORT.DELETE' | translate }}</button>
+                </div>
+              </div>
+
+              <!-- Edit Mode -->
+              <div *ngIf="editingComment?.id === comment.id" class="edit-form-parent">
+                <textarea class="form-control mb-2" [(ngModel)]="editCommentText" rows="2"></textarea>
+                <button class="btn btn-sm btn-primary me-2" (click)="saveEditComment()">{{ 'DAILY_REPORT.SAVE' | translate }}</button>
+                <button class="btn btn-sm btn-outline-secondary" (click)="cancelEditComment()">{{ 'DAILY_REPORT.CANCEL' | translate }}</button>
+              </div>
+
+              <!-- Reply Form -->
+              <div *ngIf="replyingTo?.id === comment.id" class="reply-form-parent mt-2">
+                <textarea class="form-control mb-2" [(ngModel)]="replyText" [placeholder]="'DAILY_REPORT.WRITE_REPLY' | translate" rows="2"></textarea>
+                <button class="btn btn-sm btn-primary me-1" (click)="submitReply()" [disabled]="!replyText.trim() || submittingComment">{{ 'DAILY_REPORT.REPLY' | translate }}</button>
+                <button class="btn btn-sm btn-outline-secondary" (click)="cancelReply()">{{ 'DAILY_REPORT.CANCEL' | translate }}</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Replies -->
+          <div class="replies-parent" *ngIf="comment.replies && comment.replies.length > 0">
+            <div class="reply-item-parent" *ngFor="let reply of comment.replies">
+              <img [src]="reply.user.profilePicture || 'assets/default-avatar.svg'" [alt]="reply.user.firstName" class="reply-avatar-parent">
+              <div class="reply-content-parent">
+                <div class="comment-header-parent">
+                  <span class="comment-author-parent">{{ reply.user.firstName }} {{ reply.user.lastName }}</span>
+                  <span class="comment-time-parent">{{ formatTimeAgo(reply.createdAt) }}</span>
+                </div>
+
+                <div *ngIf="editingComment?.id !== reply.id">
+                  <p class="comment-text-parent">{{ reply.content }}</p>
+                  <div class="comment-actions-parent">
+                    <button class="btn-action-parent" *ngIf="canEditComment(reply)" (click)="startEditComment(reply)">{{ 'DAILY_REPORT.EDIT' | translate }}</button>
+                    <button class="btn-action-parent text-danger" *ngIf="canEditComment(reply)" (click)="deleteComment(reply)">{{ 'DAILY_REPORT.DELETE' | translate }}</button>
+                  </div>
+                </div>
+
+                <!-- Edit Mode for Reply -->
+                <div *ngIf="editingComment?.id === reply.id" class="edit-form-parent">
+                  <textarea class="form-control mb-2" [(ngModel)]="editCommentText" rows="2"></textarea>
+                  <button class="btn btn-sm btn-primary me-2" (click)="saveEditComment()">{{ 'DAILY_REPORT.SAVE' | translate }}</button>
+                  <button class="btn btn-sm btn-outline-secondary" (click)="cancelEditComment()">{{ 'DAILY_REPORT.CANCEL' | translate }}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Admin/Teacher View -->
+<div class="container-fluid mt-4" *ngIf="!isParent && !loading && activity">
+  <app-title-page
+    [title]="getActivityLabel()"
+    [breadcrumbs]="breadcrumbs"
+    [actions]="titleActions">
+  </app-title-page>
+
+  <div class="row">
+    <!-- Main Content -->
+    <div class="col-xl-8">
+      <!-- Activity Main Card -->
+      <div class="card activity-card card-general shadow-sm mb-4">
+        <div class="activity-card-header" [ngClass]="'bg-' + getActivityColor()">
+          <div class="activity-icon-large">
+            <i class="bi" [ngClass]="getActivityIcon()"></i>
+          </div>
+          <h2 class="activity-title text-white mb-0">{{ getActivityLabel() }}</h2>
+          <p class="activity-subtitle text-white-50 mb-0">{{ formatDate(activity.activityTime) }}</p>
+        </div>
+
+        <div class="card-body p-4">
+          <!-- Child Info -->
+          <div class="detail-section" *ngIf="activity.child">
+            <h5 class="detail-label">
+              <i class="bi bi-person-circle me-2"></i>{{ 'DAILY_REPORT.CHILD' | translate }}
+            </h5>
+            <div class="d-flex align-items-center">
+              <img [src]="activity.child.profilePicture || 'assets/child.png'"
+                   [alt]="activity.child.firstName"
+                   class="rounded-circle me-3"
+                   style="width: 60px; height: 60px; object-fit: cover;">
+              <div>
+                <h5 class="mb-0">{{ getChildFullName() }}</h5>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notes Section -->
+          <div class="detail-section" *ngIf="activity.notes">
+            <h5 class="detail-label">
+              <i class="bi bi-journal-text me-2"></i>{{ 'DAILY_REPORT.NOTES' | translate }}
+            </h5>
+            <p class="notes-content">{{ activity.notes }}</p>
+          </div>
+
+          <!-- Stats Grid -->
+          <div class="row g-3 mt-3">
+            <div class="col-md-4" *ngIf="activity.duration">
+              <div class="stat-card p-3 rounded">
+                <div class="stat-icon-wrapper">
+                  <i class="bi bi-clock"></i>
+                </div>
+                <div class="stat-content">
+                  <small class="text-muted">{{ 'DAILY_REPORT.DURATION' | translate }}</small>
+                  <h5 class="mb-0">{{ formatDuration(activity.duration) }}</h5>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-4" *ngIf="activity.foodItem">
+              <div class="stat-card p-3 rounded">
+                <div class="stat-icon-wrapper">
+                  <i class="bi bi-cup-hot"></i>
+                </div>
+                <div class="stat-content">
+                  <small class="text-muted">{{ 'DAILY_REPORT.FOOD_DRINK' | translate }}</small>
+                  <h5 class="mb-0">{{ activity.foodItem }}</h5>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-4" *ngIf="activity.mood">
+              <div class="stat-card p-3 rounded">
+                <div class="stat-icon-wrapper mood-icon">
+                  <span>{{ getMoodEmoji() }}</span>
+                </div>
+                <div class="stat-content">
+                  <small class="text-muted">{{ 'DAILY_REPORT.MOOD' | translate }}</small>
+                  <h5 class="mb-0">{{ 'DAILY_REPORT.MOODS.' + activity.mood.toUpperCase() | translate }}</h5>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gallery Section (Teacher/Admin only) -->
+      <div class="card card-general shadow-sm mb-4" *ngIf="canEdit()">
+        <div class="card-header d-flex justify-content-between align-items-center py-3">
+          <h5 class="mb-0">
+            <i class="bi bi-images me-2"></i>{{ 'DAILY_REPORT.ACTIVITY_GALLERY' | translate }}
+          </h5>
+          <div class="d-flex gap-2 photo-action-buttons">
+            <button class="btn take-photo" (click)="triggerCameraCapture()" [disabled]="uploadingPhoto">
+              <i class="bi bi-camera me-1"></i>{{ 'DAILY_REPORT.TAKE_PHOTO' | translate }}
+            </button>
+            <button class="btn upload-photo" (click)="triggerFileUpload()" [disabled]="uploadingPhoto">
+              <i class="bi bi-upload me-1"></i>{{ 'DAILY_REPORT.UPLOAD' | translate }}
+            </button>
+          </div>
+          <input type="file" #fileInput (change)="onFilesSelected($event)" multiple accept="image/*" style="display: none;">
+          <input type="file" #cameraInput (change)="onCameraCapture($event)" accept="image/*" capture="environment" style="display: none;">
+        </div>
+        <div class="card-body">
+          <!-- Loading Photos -->
+          <div *ngIf="loadingPhotos" class="text-center py-4">
+            <div class="spinner-border spinner-border-sm" role="status"></div>
+            <span class="ms-2">{{ 'DAILY_REPORT.LOADING_PHOTOS' | translate }}</span>
+          </div>
+
+          <!-- Uploading Indicator -->
+          <div *ngIf="uploadingPhoto" class="alert alert-info d-flex align-items-center mb-3">
+            <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+            {{ 'DAILY_REPORT.UPLOADING_PHOTOS' | translate }}
+          </div>
+
+          <!-- Empty State -->
+          <div *ngIf="!loadingPhotos && photos.length === 0" class="text-center py-4 text-muted">
+            <i class="bi bi-camera fs-1 d-block mb-2"></i>
+            <p class="mb-0">{{ 'DAILY_REPORT.NO_PHOTOS_YET' | translate }}</p>
+          </div>
+
+          <!-- Photo Grid -->
+          <div *ngIf="!loadingPhotos && photos.length > 0" class="photo-grid">
+            <div class="photo-item" *ngFor="let photo of photos" (click)="openPhotoModal(photo)">
+              <img [src]="photo.thumbnailData" [alt]="photo.title || 'Activity photo'">
+              <div class="photo-overlay">
+                <i class="bi bi-zoom-in"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comments Section -->
+      <div class="card card-general shadow-sm mb-4">
+        <div class="card-header py-3">
+          <h5 class="mb-0">
+            <i class="bi bi-chat-dots me-2"></i>{{ 'DAILY_REPORT.COMMENTS' | translate }} ({{ comments.length }})
+          </h5>
+        </div>
+        <div class="card-body">
+          <!-- New Comment Form -->
+          <div class="new-comment-form mb-4">
+            <textarea
+              class="form-control mb-2"
+              [(ngModel)]="newCommentText"
+              [placeholder]="'DAILY_REPORT.WRITE_COMMENT' | translate"
+              rows="2"
+              [disabled]="submittingComment">
+            </textarea>
+            <button
+              class="btn btn-primary btn-sm"
+              (click)="submitComment()"
+              [disabled]="!newCommentText.trim() || submittingComment">
+              <span *ngIf="submittingComment" class="spinner-border spinner-border-sm me-1"></span>
+              <i class="bi bi-send me-1" *ngIf="!submittingComment"></i>
+              {{ 'DAILY_REPORT.POST_COMMENT' | translate }}
+            </button>
+          </div>
+
+          <!-- Loading Comments -->
+          <div *ngIf="loadingComments" class="text-center py-3">
+            <div class="spinner-border spinner-border-sm" role="status"></div>
+            <span class="ms-2">{{ 'DAILY_REPORT.LOADING_COMMENTS' | translate }}</span>
+          </div>
+
+          <!-- Empty State -->
+          <div *ngIf="!loadingComments && comments.length === 0" class="text-center py-3 text-muted">
+            <i class="bi bi-chat-square fs-3 d-block mb-2"></i>
+            <p class="mb-0">{{ 'DAILY_REPORT.NO_COMMENTS_BE_FIRST' | translate }}</p>
+          </div>
+
+          <!-- Comments List -->
+          <div class="comments-list" *ngIf="!loadingComments && comments.length > 0">
+            <div class="comment-item" *ngFor="let comment of comments">
+              <div class="comment-main">
+                <div class="comment-avatar">
+                  <img [src]="comment.user.profilePicture || 'assets/default-avatar.svg'" [alt]="comment.user.firstName">
+                </div>
+                <div class="comment-content">
+                  <div class="comment-header">
+                    <span class="comment-author">{{ comment.user.firstName }} {{ comment.user.lastName }}</span>
+                    <span class="comment-time">{{ formatTimeAgo(comment.createdAt) }}</span>
+                    <span class="comment-edited" *ngIf="comment.updatedAt">({{ 'DAILY_REPORT.EDITED' | translate }})</span>
+                  </div>
+
+                  <!-- Display or Edit Mode -->
+                  <div *ngIf="editingComment?.id !== comment.id">
+                    <p class="comment-text">{{ comment.content }}</p>
+                    <div class="comment-actions">
+                      <button class="btn btn-link btn-sm" (click)="startReply(comment)">
+                        <i class="bi bi-reply me-1"></i>{{ 'DAILY_REPORT.REPLY' | translate }}
+                      </button>
+                      <button class="btn btn-link btn-sm" *ngIf="canEditComment(comment)" (click)="startEditComment(comment)">
+                        <i class="bi bi-pencil me-1"></i>{{ 'DAILY_REPORT.EDIT' | translate }}
+                      </button>
+                      <button class="btn btn-link btn-sm text-danger" *ngIf="canEditComment(comment)" (click)="deleteComment(comment)">
+                        <i class="bi bi-trash me-1"></i>{{ 'DAILY_REPORT.DELETE' | translate }}
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Edit Mode -->
+                  <div *ngIf="editingComment?.id === comment.id" class="edit-comment-form">
+                    <textarea class="form-control mb-2" [(ngModel)]="editCommentText" rows="2"></textarea>
+                    <button class="btn btn-sm btn-primary me-2" (click)="saveEditComment()">{{ 'DAILY_REPORT.SAVE' | translate }}</button>
+                    <button class="btn btn-sm btn-outline-secondary" (click)="cancelEditComment()">{{ 'DAILY_REPORT.CANCEL' | translate }}</button>
+                  </div>
+
+                  <!-- Reply Form -->
+                  <div *ngIf="replyingTo?.id === comment.id" class="reply-form mt-2">
+                    <textarea
+                      class="form-control mb-2"
+                      [(ngModel)]="replyText"
+                      [placeholder]="'DAILY_REPORT.WRITE_REPLY' | translate"
+                      rows="2">
+                    </textarea>
+                    <button class="btn btn-sm btn-primary me-2" (click)="submitReply()" [disabled]="!replyText.trim() || submittingComment">
+                      <span *ngIf="submittingComment" class="spinner-border spinner-border-sm me-1"></span>
+                      {{ 'DAILY_REPORT.REPLY' | translate }}
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" (click)="cancelReply()">{{ 'DAILY_REPORT.CANCEL' | translate }}</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Replies -->
+              <div class="comment-replies" *ngIf="comment.replies && comment.replies.length > 0">
+                <div class="reply-item" *ngFor="let reply of comment.replies">
+                  <div class="comment-avatar small">
+                    <img [src]="reply.user.profilePicture || 'assets/default-avatar.svg'" [alt]="reply.user.firstName">
+                  </div>
+                  <div class="comment-content">
+                    <div class="comment-header">
+                      <span class="comment-author">{{ reply.user.firstName }} {{ reply.user.lastName }}</span>
+                      <span class="comment-time">{{ formatTimeAgo(reply.createdAt) }}</span>
+                      <span class="comment-edited" *ngIf="reply.updatedAt">({{ 'DAILY_REPORT.EDITED' | translate }})</span>
+                    </div>
+
+                    <div *ngIf="editingComment?.id !== reply.id">
+                      <p class="comment-text">{{ reply.content }}</p>
+                      <div class="comment-actions">
+                        <button class="btn btn-link btn-sm" *ngIf="canEditComment(reply)" (click)="startEditComment(reply)">
+                          <i class="bi bi-pencil me-1"></i>{{ 'DAILY_REPORT.EDIT' | translate }}
+                        </button>
+                        <button class="btn btn-link btn-sm text-danger" *ngIf="canEditComment(reply)" (click)="deleteComment(reply)">
+                          <i class="bi bi-trash me-1"></i>{{ 'DAILY_REPORT.DELETE' | translate }}
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Edit Mode for Reply -->
+                    <div *ngIf="editingComment?.id === reply.id" class="edit-comment-form">
+                      <textarea class="form-control mb-2" [(ngModel)]="editCommentText" rows="2"></textarea>
+                      <button class="btn btn-sm btn-primary me-2" (click)="saveEditComment()">{{ 'DAILY_REPORT.SAVE' | translate }}</button>
+                      <button class="btn btn-sm btn-outline-secondary" (click)="cancelEditComment()">{{ 'DAILY_REPORT.CANCEL' | translate }}</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-xl-4">
+      <!-- Activity Details Card -->
+      <div class="card details-sidebar card-general border-0 shadow-sm mb-4">
+        <div class="card-header details-header py-3">
+          <h5 class="mb-0">
+            <i class="bi bi-info-circle me-2"></i>{{ 'DAILY_REPORT.ACTIVITY_DETAILS' | translate }}
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-3 pb-3 border-bottom">
+            <small class="text-muted d-block mb-1">{{ 'DAILY_REPORT.ACTIVITY_TYPE' | translate }}</small>
+            <div class="d-flex align-items-center">
+              <span class="badge me-2" [ngClass]="'bg-' + getActivityColor()">
+                <i class="bi me-1" [ngClass]="getActivityIcon()"></i>
+                {{ activity.activityType }}
+              </span>
+            </div>
+          </div>
+
+          <div class="mb-3 pb-3 border-bottom">
+            <small class="text-muted d-block mb-1">{{ 'DAILY_REPORT.DATE_TIME' | translate }}</small>
+            <div class="d-flex align-items-center">
+              <i class="bi bi-calendar3 detail-icon me-2"></i>
+              <div>
+                <div class="fw-bold">{{ formatDate(activity.activityTime) }}</div>
+                <small class="text-muted">{{ formatTime(activity.activityTime) }}</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3 pb-3 border-bottom" *ngIf="activity.duration">
+            <small class="text-muted d-block mb-1">{{ 'DAILY_REPORT.DURATION' | translate }}</small>
+            <div class="d-flex align-items-center">
+              <i class="bi bi-hourglass-split detail-icon me-2"></i>
+              <div class="fw-bold">{{ formatDuration(activity.duration) }}</div>
+            </div>
+          </div>
+
+          <div class="mb-3 pb-3 border-bottom" *ngIf="activity.mood">
+            <small class="text-muted d-block mb-1">{{ 'DAILY_REPORT.CHILDS_MOOD' | translate }}</small>
+            <div class="d-flex align-items-center">
+              <span class="mood-badge me-2">{{ getMoodEmoji() }}</span>
+              <div class="fw-bold">{{ 'DAILY_REPORT.MOODS.' + activity.mood.toUpperCase() | translate }}</div>
+            </div>
+          </div>
+
+          <div *ngIf="activity.createdAt">
+            <small class="text-muted d-block mb-1">{{ 'DAILY_REPORT.RECORDED' | translate }}</small>
+            <div class="d-flex align-items-center">
+              <i class="bi bi-clock-history detail-icon me-2"></i>
+              <small>{{ formatDate(activity.createdAt) }}</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions Card -->
+      <div class="card card-general action border-0 shadow-sm" *ngIf="canEdit()">
+        <div class="card-header py-3">
+          <h5 class="mb-0">
+            <i class="bi bi-lightning me-2"></i>{{ 'DAILY_REPORT.QUICK_ACTIONS' | translate }}
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="d-grid gap-2">
+            <button class="btn custom-btn-2 btn-edit-global-2 edit" (click)="editActivity()">
+              <i class="bi bi-pencil me-2"></i>{{ 'DAILY_REPORT.EDIT_ACTIVITY' | translate }}
+            </button>
+            <button class="btn custom-btn-2 btn-remove-2 remove" (click)="deleteActivityAction()">
+              <i class="bi bi-trash me-2"></i>{{ 'DAILY_REPORT.DELETE_ACTIVITY' | translate }}
+            </button>
+            <button class="btn custom-btn-2 btn-cancel-2 back" (click)="goBack()">
+              <i class="bi bi-arrow-left me-2"></i>{{ 'DAILY_REPORT.BACK_TO_REPORT' | translate }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading State -->
+<div class="container mt-4" *ngIf="loading">
+  <div class="text-center p-4">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">{{ 'DAILY_REPORT.LOADING' | translate }}</span>
+    </div>
+    <p class="mt-2">{{ 'DAILY_REPORT.LOADING_ACTIVITY' | translate }}</p>
+  </div>
+</div>
+
+<!-- Not Found State -->
+<div class="container mt-4" *ngIf="!loading && !activity">
+  <div class="text-center p-4">
+    <i class="bi bi-exclamation-triangle fs-1 text-warning"></i>
+    <h4 class="mt-3">{{ 'DAILY_REPORT.ACTIVITY_NOT_FOUND' | translate }}</h4>
+    <p class="text-muted">{{ 'DAILY_REPORT.ACTIVITY_NOT_FOUND_TEXT' | translate }}</p>
+    <button class="btn btn-primary" (click)="goBack()">
+      <i class="bi bi-arrow-left me-1"></i> {{ 'DAILY_REPORT.BACK_TO_DAILY_REPORT' | translate }}
+    </button>
+  </div>
+</div>
+
+<!-- Photo Modal -->
+<div class="photo-modal-overlay" *ngIf="showPhotoModal" (click)="closePhotoModal()">
+  <div class="photo-modal-content" (click)="$event.stopPropagation()">
+    <button class="photo-modal-close" (click)="closePhotoModal()">
+      <i class="bi bi-x-lg"></i>
+    </button>
+
+    <div class="photo-modal-body">
+      <!-- Loading State -->
+      <div *ngIf="loadingFullImage" class="text-center py-5">
+        <div class="spinner-border text-light" role="status"></div>
+        <p class="text-light mt-2">Loading image...</p>
+      </div>
+
+      <!-- Full Image -->
+      <img *ngIf="!loadingFullImage && fullImageData"
+           [src]="fullImageData"
+           [alt]="selectedPhoto?.title || 'Activity photo'"
+           class="photo-modal-image">
+    </div>
+
+    <div class="photo-modal-footer" *ngIf="selectedPhoto">
+      <div class="photo-info">
+        <span class="photo-title" *ngIf="selectedPhoto.title">{{ selectedPhoto.title }}</span>
+        <span class="photo-date">{{ formatTimeAgo(selectedPhoto.createdAt) }}</span>
+        <span class="photo-uploader" *ngIf="selectedPhoto.uploadedByName">by {{ selectedPhoto.uploadedByName }}</span>
+      </div>
+      <button class="btn btn-sm btn-outline-danger" *ngIf="canEdit()" (click)="deletePhoto(selectedPhoto)">
+        <i class="bi bi-trash me-1"></i>{{ 'DAILY_REPORT.DELETE' | translate }}
+      </button>
+    </div>
+  </div>
+</div>

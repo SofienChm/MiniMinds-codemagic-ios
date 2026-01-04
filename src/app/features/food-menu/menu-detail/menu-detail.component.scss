@@ -1,0 +1,298 @@
+// Menu Detail Component Styles
+// Note: Uses global styles from styles.scss:
+// - card-general, card-detail_pages, card-recently
+// - information-title, information-description, body-information
+// - title-card__name, card-age
+// - custom-btn-2, btn-cancel-2
+// - stat-card, stat-icon-wrapper, stat-number, stat-label
+
+// Spinner custom color (matches food-menu component)
+.spinner-custom {
+  color: var(--primary-color);
+}
+
+// Menu header icon
+.menu-header-icon {
+  width: 50px;
+  height: 50px;
+  background: var(--gradient-primary);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  i {
+    font-size: 24px;
+    color: white;
+  }
+}
+
+// Badge styles (consistent with food-menu)
+.badge-published {
+  background: rgba(125, 211, 192, 0.15) !important;
+  color: var(--primary-color) !important;
+  font-weight: 600 !important;
+}
+
+.badge-draft {
+  background: rgba(106, 114, 135, 0.15) !important;
+  color: var(--color-gray) !important;
+  font-weight: 600 !important;
+}
+
+.badge-template {
+  background: rgba(125, 185, 255, 0.15) !important;
+  color: var(--secondary-color) !important;
+  font-weight: 600 !important;
+}
+
+.badge-type {
+  background: var(--gradient-primary) !important;
+  color: white !important;
+  font-weight: 500 !important;
+}
+
+.badge-warning-custom {
+  background: rgba(255, 193, 7, 0.15) !important;
+  color: #856404 !important;
+  font-weight: 600 !important;
+}
+
+.badge-danger-custom {
+  background: rgba(255, 107, 107, 0.15) !important;
+  color: var(--red-color) !important;
+  font-weight: 600 !important;
+}
+
+// Stat card icon variants
+.stat-icon-wrapper {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  i {
+    font-size: 22px;
+  }
+
+  &.stat-icon-primary {
+    background: rgba(125, 211, 192, 0.15);
+    i { color: var(--primary-color); }
+  }
+
+  &.stat-icon-secondary {
+    background: rgba(125, 185, 255, 0.15);
+    i { color: var(--secondary-color); }
+  }
+
+  &.stat-icon-warning {
+    background: rgba(255, 193, 7, 0.15);
+    i { color: #ffc107; }
+  }
+
+  &.stat-icon-danger {
+    background: rgba(255, 107, 107, 0.15);
+    i { color: var(--red-color); }
+  }
+}
+
+.stat-card {
+  border-radius: 12px;
+  border: 1px solid #E9EDF4;
+  box-shadow: var(--shadow-card);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  }
+}
+
+.stat-number {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--title-color);
+}
+
+.stat-label {
+  font-size: 13px;
+  color: var(--color-gray);
+}
+
+// Meal type card
+.meal-type-card {
+  background: linear-gradient(135deg, rgba(125, 211, 192, 0.08) 0%, rgba(125, 185, 255, 0.08) 100%);
+  border: 1px solid rgba(125, 211, 192, 0.2);
+  border-radius: 10px;
+}
+
+.meal-type-title {
+  color: var(--title-color);
+  font-weight: 600;
+  font-size: 14px;
+
+  i {
+    color: var(--primary-color);
+  }
+}
+
+.menu-item-row {
+  font-size: 14px;
+  color: var(--text-color);
+
+  .bi-dot {
+    color: var(--primary-color);
+  }
+}
+
+// Avatar circle with app gradient
+.avatar-circle {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+// Child header row
+.child-header {
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: rgba(125, 211, 192, 0.05);
+  }
+
+  &.expanded {
+    background-color: rgba(125, 211, 192, 0.1);
+  }
+}
+
+.expand-icon {
+  color: var(--primary-color);
+  font-size: 16px;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+// Child details expandable section
+.child-details {
+  background: linear-gradient(135deg, rgba(125, 211, 192, 0.05) 0%, rgba(125, 185, 255, 0.05) 100%);
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Meal selections in child details
+.meal-selections {
+  background: white;
+  border: 1px solid #E9EDF4;
+  min-height: 100px;
+}
+
+.selection-item {
+  font-size: 14px;
+}
+
+.selection-selected {
+  color: var(--primary-color) !important;
+}
+
+.selection-declined {
+  color: var(--red-color) !important;
+}
+
+.note-text {
+  color: var(--secondary-color);
+  font-size: 12px;
+}
+
+// List group item borders
+.list-group-item {
+  border-left: none;
+  border-right: none;
+  border-color: #E9EDF4;
+
+  &:first-child {
+    border-top: none;
+  }
+}
+
+// Empty state styles
+.empty-icon-wrapper {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, rgba(125, 211, 192, 0.15) 0%, rgba(125, 185, 255, 0.15) 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+
+  i {
+    font-size: 36px;
+    color: var(--primary-color);
+  }
+}
+
+.empty-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--title-color);
+  margin-bottom: 8px;
+}
+
+.empty-description {
+  font-size: 14px;
+  color: var(--color-gray);
+  margin-bottom: 20px;
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .stat-card .card-body {
+    padding: 1rem !important;
+  }
+
+  .stat-icon-wrapper {
+    width: 40px;
+    height: 40px;
+
+    i {
+      font-size: 18px;
+    }
+  }
+
+  .stat-number {
+    font-size: 1.25rem;
+  }
+
+  .child-header {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 12px;
+
+    .d-flex.align-items-center.gap-3 {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+}

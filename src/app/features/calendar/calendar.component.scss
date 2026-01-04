@@ -1,0 +1,333 @@
+/* Calendar page specific styles */
+
+::ng-deep {
+  .header-info{
+    margin-bottom: 35px !important;
+  }
+  .profile-info-grid{
+    display: block !important;
+    .profile-info-card{
+      margin-bottom: 20px;
+      .info-title{
+        font-size: 15px !important;
+        font-weight: 500 !important;
+        color: #202C4B !important;
+      }
+      .info-desc{
+        font-size: 12px !important;;
+        font-weight: 400 !important;;
+      }
+    }
+  }
+  .fc-theme-standard{
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+}
+.main-information{
+  margin-top: 35px;
+  .fc-theme-standard{
+    padding: 15px !important;
+    border-radius: 16px !important;
+  }
+}
+.selected-day {
+  .card-header{
+    display: flex;
+    align-items: center;
+    border-bottom: 2px solid #f0f0f0;
+    i {
+      font-size: 24px;
+      color: #7dd3c0;
+      margin-right: 12px;
+    }
+  }
+}
+/* FullCalendar Styles */
+::ng-deep {
+  .fc-header-toolbar{
+    .fc-button{
+      background: linear-gradient(135deg, #a8c5ff 0%, #7dd3c0 100%);
+      border: none;
+      color: white;
+       &:hover{
+        background: #7dd3c0;
+        color: white;
+      }
+      &:not(:disabled):active,&:active{
+        background: #7dd3c0;
+        color: white;
+      }
+      &:focus{
+        box-shadow: rgb(129 210 198 / 50%) 0px 0px 0px 0.2rem;
+      }
+    }
+  }
+  .fc {
+    font-size: 14px;
+  }
+  .fc-toolbar-title{
+    font-size: 18px !important;
+    font-weight: 500 !important;
+    color: #202C4B !important;
+  }
+  .fc-scrollgrid {
+    border: 1px solid #ddd;
+    width: 100%;
+  }
+
+  .fc-col-header-cell {
+    background: #f8f9fa;
+    padding: 10px;
+    text-align: center;
+    font-weight: 600;
+    border: 1px solid #ddd;
+    &.fc-day{
+      background: #f4f6fa;
+      border: none;
+      text-align: center;
+      padding: 8px 0;
+      a{
+        color: #202C4B !important;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+      }
+    }
+  }
+
+  .fc-daygrid-day {
+    border: 1px solid #ddd;
+    min-height: 100px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    background: #fff;
+  }
+
+  .fc-daygrid-day:hover {
+    background-color: #f8f9fa;
+  }
+
+  .fc-daygrid-day-frame {
+    padding: 5px;
+    min-height: 100px;
+  }
+
+  .fc-daygrid-day-top {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .fc-daygrid-day-number {
+    padding: 4px 8px;
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+  }
+
+  .fc-day-today {
+    background-color: transparent !important;
+  }
+
+  .fc-day-today .fc-daygrid-day-number {
+    background: #a8c5ff;
+    color: white;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .fc-day.holiday .fc-daygrid-day-number {
+    color: #dc3560;
+    font-weight: 700;
+  }
+
+  .fc-day.holiday {
+    .fc-daygrid-event.fc-event-end {
+      padding: 9px 6px;
+    }
+    .fc-daygrid-event-dot {
+      border-color: #dc3560 !important;
+    }
+    .fc-daygrid-event-harness {
+      background-color: #fbeaec;
+      border-radius: 5px;
+    }
+    .fc-event-title {
+      color: #dc3560 !important;
+    }
+  }
+
+  .event-day {
+    .fc-daygrid-event.fc-event-end {
+      padding: 9px 6px;
+    }
+    .fc-daygrid-event-dot {
+      border-color: #7dd3c0 !important;
+    }
+    .fc-daygrid-event-harness {
+      border-color: #7dd3c0 !important;
+      background-color: #effcf9;
+      border-radius: 5px;
+    }
+    .fc-event-title {
+      color: #7dd3c0 !important;
+    }
+  }
+
+  .fc-day.event-day .fc-daygrid-day-number {
+    color: #7dd3c0 !important;
+    font-weight: 700;
+  }
+
+  .fc-daygrid-event-harness {
+    margin: 2px 0;
+  }
+  
+  .fc-daygrid-event-dot {
+    @media screen and (max-width: 768px) {
+      display: none;
+    }
+  }
+  .fc-event-title{
+    @media screen and (max-width: 768px) {
+      display: none;
+    }
+  }
+  .fc-daygrid-event{
+    @media screen and (max-width: 768px) {
+      display: none;
+    }
+  }
+  .fc-daygrid-day-events{
+    @media screen and (max-width: 768px) {
+      display: none;
+    }
+  }
+
+  @media screen and (max-width: 767px) {
+    .fc-daygrid-day:has(.fc-daygrid-event-harness) .fc-daygrid-day-number {
+      background: #a8c5ff;
+      color: white !important;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .fc-day-today .fc-daygrid-day-number {
+      background: #7dd3c0;
+    }
+  }
+
+  .fc-event {
+    display: block;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-size: 12px;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    color: rgb(7, 7, 7);
+  }
+
+  .fc-daygrid-dot-event {
+    padding-left: 4px;
+  }
+
+  .fc-event:hover {
+    opacity: 0.8;
+  }
+
+  .fc-event-main {
+    color: white;
+  }
+
+  .fc-event-title {
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .fc-event-time {
+    font-size: 11px;
+    opacity: 0.9;
+  }
+
+
+
+  .fc-daygrid-day-events {
+    margin-top: 5px;
+  }
+
+  .fc-scroller {
+    overflow: visible !important;
+  }
+
+  table.fc-scrollgrid-sync-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+}
+
+.card-upcoming_calendar {
+  .card-header{
+    display: flex;
+    align-items: center;
+    border-bottom: 2px solid #f0f0f0;
+    i {
+      font-size: 24px;
+      color: #7dd3c0;
+      margin-right: 12px;
+    }
+  }
+  .name{
+    font-size: 15px;
+    font-weight: 500;
+    color: #7dd3c0;
+  }
+  .time{
+    font-size: 12px;
+    font-weight: 400;
+    color: rgb(106, 114, 135);
+  }
+  .type{
+    font-size: 12px;
+    font-weight: 400;
+    color: rgb(106, 114, 135);
+  }
+} 
+.selected-event_day{
+  font-size: 15px;
+  font-weight: 500;
+  color: #202C4B;
+}
+.selected-event_time{
+  font-size: 13px;
+  font-weight: 400;
+  color: rgb(106, 114, 135);
+}
+
+
+.border-primary{
+  border-color: #7dd3c0!important;
+  background-color: #effcf9;
+}
+
+::ng-deep {
+  .fc .fc-toolbar.fc-header-toolbar {
+    margin-bottom: 9px !important;
+  }
+  .fc-theme-standard{
+    background: white;
+    border-radius: 20px;
+    padding: 0px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08)
+  }
+}
+

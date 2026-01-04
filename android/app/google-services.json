@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "909191830622",
+    "project_id": "miniminds-c7d89",
+    "storage_bucket": "miniminds-c7d89.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:909191830622:android:d2db95b7e60c74083068cf",
+        "android_client_info": {
+          "package_name": "com.miniminds.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCn-2H1kAwPerVKGyCnDRC0Gu3ZZ7ZzDHo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

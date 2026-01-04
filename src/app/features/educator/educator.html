@@ -1,0 +1,221 @@
+<div class="container-fluid mt-4">
+  <app-title-page
+    [title]="'EDUCATORS.TITLE' | translate"
+    [subtitle]="'EDUCATORS.SUBTITLE' | translate"
+    icon="bi bi-backpack2"
+    [breadcrumbs]="breadcrumbs"
+    [actions]="titleActions">
+  </app-title-page>
+
+  <!-- View Controls -->
+  <div class="bg-white p-3 border d-flex align-items-center justify-content-between flex-wrap mb-4 rounded-1">
+    <h4 class="title-filter">{{ 'EDUCATORS.EDUCATORS_GRID' | translate }}</h4>
+    <div class="d-flex align-items-center flex-wrap gap-2">
+      <!-- Search Input -->
+      <div class="search-box">
+        <i class="bi bi-search search-icon"></i>
+        <input
+          type="text"
+          class="form-control search-input"
+          [placeholder]="'EDUCATORS.SEARCH_PLACEHOLDER' | translate"
+          [(ngModel)]="searchTerm"
+          (input)="onSearch()">
+      </div>
+
+      <!-- Sort Select -->
+      <ng-select
+        class="filter-select"
+        [(ngModel)]="sortBy"
+        [items]="sortOptions"
+        bindLabel="label"
+        bindValue="value"
+        [placeholder]="'EDUCATORS.SORT_BY' | translate"
+        [clearable]="false"
+        [searchable]="false"
+        (change)="onSortChange()">
+        <ng-template ng-option-tmp let-item="item">
+          <div class="option-with-image">
+            <i class="bi {{item.icon}}" style="font-size: 16px; color: #7dd3c0;"></i>
+            <span class="option-title">{{ item.label }}</span>
+          </div>
+        </ng-template>
+      </ng-select>
+
+      <!-- View Toggle -->
+      <div class="d-flex align-items-center bg-white border rounded-2 p-1 me-2">
+        <button
+          class="btn btn-icon btn-sm me-1"
+          [class.bg-light]="viewMode === 'list'"
+          [class.primary-hover]="viewMode !== 'list'"
+          (click)="setViewMode('list')">
+          <i class="bi bi-list-ul"></i>
+        </button>
+        <button
+          class="btn btn-icon btn-sm"
+          [class.bg-light]="viewMode === 'grid'"
+          [class.primary-hover]="viewMode !== 'grid'"
+          (click)="setViewMode('grid')">
+          <i class="bi bi-grid"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">{{ 'EDUCATORS.LOADING' | translate }}</span>
+    </div>
+  </div>
+
+  <!-- Grid View -->
+  <div class="row" *ngIf="viewMode === 'grid' && !loading">
+    <div *ngFor="let educator of displayedEducators; trackBy: trackById" class="col-xl-4 col-md-6 d-flex">
+      <div class="card flex-fill card-general rounded-1">
+        <div class="card-header d-flex align-items-center justify-content-between">
+          <span class="badge" [class.bg-success]="educator.isActive" [class.bg-danger]="!educator.isActive">
+            {{ educator.isActive ? ('EDUCATORS.ACTIVE' | translate) : ('EDUCATORS.INACTIVE' | translate) }}
+          </span>
+          <div class="d-flex align-items-center">
+            <div class="dropdown">
+              <span class="btn btn-white btn-icon btn-sm d-flex align-items-center justify-content-center rounded-circle p-0" data-bs-toggle="dropdown">
+                <i class="bi bi-three-dots-vertical"></i>
+              </span>
+              <ul class="dropdown-menu dropdown-menu-end p-3">
+                <li class="dropdown-item_list">
+                  <a class="dropdown-item rounded-1" href="javascript:void(0);" (click)="viewDetails(educator)">
+                    <i class="bi bi-eye me-2"></i>{{ 'EDUCATORS.VIEW_DETAILS' | translate }}
+                  </a>
+                </li>
+                <li class="dropdown-item_list">
+                  <a class="dropdown-item rounded-1" href="javascript:void(0);" (click)="editEducator(educator)">
+                    <i class="bi bi-pencil-square me-2"></i>{{ 'EDUCATORS.EDIT' | translate }}
+                  </a>
+                </li>
+                <li class="dropdown-item_list">
+                  <a class="dropdown-item rounded-1" href="javascript:void(0);" (click)="deleteEducator(educator.id!)">
+                    <i class="bi bi-trash3 me-2"></i>{{ 'EDUCATORS.DELETE' | translate }}
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="bg-light rounded-2 p-3 mb-3">
+            <div class="d-flex align-items-center">
+              <a href="#" class="avatar avatar-lg flex-shrink-0" (click)="viewDetails(educator); $event.preventDefault()">
+                <img loading="lazy" [src]="educator.profilePicture || 'assets/default-avatar.svg'" class="img-fluid rounded-circle" alt="Educator" width="80" height="80">
+              </a>
+              <div class="ms-2">
+                <h6 class="text-dark text-truncate mb-0 title-card__name">
+                  <a href="#" (click)="viewDetails(educator); $event.preventDefault()">{{ educator.firstName }} {{ educator.lastName }}</a>
+                </h6>
+                <p class="mb-0 card-age">{{ educator.specialization }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex justify-content-between body-information">
+            <div>
+              <p class="mb-0 information-title">{{ 'EDUCATORS.EMAIL' | translate }}</p>
+              <p class="text-dark information-description">{{ educator.email }}</p>
+            </div>
+            <div>
+              <p class="mb-0 information-title">{{ 'EDUCATORS.PHONE' | translate }}</p>
+              <p class="mb-0 information-description">{{ educator.phone || ('COMMON.NA' | translate) }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center">
+            <a href="#" class="btn btn-outline-light bg-white btn-icon d-flex align-items-center justify-content-center rounded-circle p-0 me-2 footer-icon-action"><i class="bi bi-telephone"></i></a>
+          </div>
+          <button class="btn btn-light btn-sm btn-footer" (click)="viewDetails(educator)">{{ 'EDUCATORS.VIEW_DETAILS' | translate }}</button>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="filteredEducators.length === 0 && !loading" class="col-12 text-center">
+      <p>{{ 'EDUCATORS.NO_EDUCATORS_FOUND' | translate }}</p>
+    </div>
+  </div>
+
+  <!-- Load More Button for Grid View -->
+  <div *ngIf="viewMode === 'grid' && !loading && hasMoreEducators()" class="text-center d-flex justify-content-center mt-4">
+    <button class="custom-btn-2 btn-add-border mb-4" (click)="loadMoreEducators()">
+      <i class="bi bi-plus-circle me-2"></i>{{ 'EDUCATORS.LOAD_MORE' | translate }}
+    </button>
+  </div>
+
+  <!-- List View -->
+  <div *ngIf="viewMode === 'list' && !loading">
+    <div class="card flex-fill card-general card-recently mb-3">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <h5>
+          <i class="bi bi-list-task"></i>
+          {{ 'EDUCATORS.EDUCATORS_LIST' | translate }}
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive custom-table">
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>{{ 'EDUCATORS.PHOTO' | translate }}</th>
+                <th>{{ 'EDUCATORS.NAME' | translate }}</th>
+                <th>{{ 'EDUCATORS.EMAIL' | translate }}</th>
+                <th>{{ 'EDUCATORS.PHONE' | translate }}</th>
+                <th>{{ 'EDUCATORS.SPECIALIZATION' | translate }}</th>
+                <th>{{ 'EDUCATORS.HIRE_DATE' | translate }}</th>
+                <th>{{ 'EDUCATORS.ACTIONS' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let educator of displayedEducators; trackBy: trackById" (click)="viewDetails(educator)" style="cursor: pointer;">
+                <td>
+                  <img loading="lazy" [src]="educator.profilePicture || 'assets/default-avatar.svg'"
+                       class="rounded-circle" width="40" height="40" alt="Educator">
+                </td>
+                <td class="name-last">
+                  <span>{{ educator.firstName }} {{ educator.lastName }}</span>
+                </td>
+                <td>{{ educator.email }}</td>
+                <td>{{ educator.phone || ('COMMON.NA' | translate) }}</td>
+                <td>{{ educator.specialization || ('COMMON.NA' | translate) }}</td>
+                <td>{{ educator.hireDate | date:'shortDate' }}</td>
+                <td>
+                  <div class="d-flex gap-1" (click)="$event.stopPropagation()">
+                    <button class="btn btn-sm btn-view" (click)="viewDetails(educator)">
+                      <i class="bi bi-eye"></i>
+                    </button>
+                    <button class="btn btn-sm btn-edit" (click)="editEducator(educator)">
+                      <i class="bi bi-pencil-square"></i>
+                    </button>
+                    <button class="btn btn-sm btn-remove" (click)="deleteEducator(educator.id!)">
+                      <i class="bi bi-trash3"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="filteredEducators.length === 0">
+                <td colspan="7" class="text-center py-4">
+                  {{ 'EDUCATORS.NO_EDUCATORS_FOUND' | translate }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card-footer d-flex align-items-center justify-content-between">
+        <span class="text-muted">{{ 'EDUCATORS.TOTAL' | translate }}: {{ displayedEducators.length }} {{ 'EDUCATORS.EDUCATOR_S' | translate }}</span>
+      </div>
+    </div>
+
+    <!-- Load More Button for List View -->
+    <div *ngIf="hasMoreEducators()" class="text-center mt-3">
+      <button class="custom-btn-2 btn-add-border mb-4" (click)="loadMoreEducators()">
+        <i class="bi bi-plus-circle me-2"></i> {{ 'EDUCATORS.LOAD_MORE' | translate }}
+      </button>
+    </div>
+  </div>
+</div>

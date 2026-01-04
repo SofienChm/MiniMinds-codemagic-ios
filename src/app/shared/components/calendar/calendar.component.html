@@ -1,0 +1,171 @@
+<div class="calendar-container">
+  <div class="calendar-header">
+    <button class="btn btn-sm btn-outline-primary left" (click)="previousMonth()">
+      <i class="bi bi-chevron-left"></i>
+    </button>
+    <h5 class="mb-0">{{ getMonthYear() }}</h5>
+    <button class="btn btn-sm btn-outline-primary right" (click)="nextMonth()">
+      <i class="bi bi-chevron-right"></i>
+    </button>
+  </div>
+
+  <div class="calendar-grid">
+    <div class="calendar-weekdays">
+      <div class="weekday">{{ 'CALENDAR_PAGE.SUN' | translate }}</div>
+      <div class="weekday">{{ 'CALENDAR_PAGE.MON' | translate }}</div>
+      <div class="weekday">{{ 'CALENDAR_PAGE.TUE' | translate }}</div>
+      <div class="weekday">{{ 'CALENDAR_PAGE.WED' | translate }}</div>
+      <div class="weekday">{{ 'CALENDAR_PAGE.THU' | translate }}</div>
+      <div class="weekday">{{ 'CALENDAR_PAGE.FRI' | translate }}</div>
+      <div class="weekday">{{ 'CALENDAR_PAGE.SAT' | translate }}</div>
+    </div>
+
+    <div class="calendar-days">
+      <div class="calendar-week" *ngFor="let week of weeks">
+        <div 
+          class="calendar-day"
+          *ngFor="let day of week"
+          [class.today]="isToday(day)"
+          [class.selected]="isSelected(day)"
+          [class.other-month]="!isCurrentMonth(day)"
+          [class.has-event]="hasEvent(day)"
+          [class.has-holiday]="hasHoliday(day)"
+          (click)="selectDate(day)">
+          <div class="day-number">{{ day.getDate() }}</div>
+          <div class="events-container">
+            <!-- Holidays -->
+            <div 
+              class="fc-event-container" 
+              *ngFor="let holiday of getHolidaysForDay(day)">
+              <div 
+                class="fc-day-grid-event fc-h-event fc-event fc-start fc-end holiday-event"
+                [style.background-color]="holiday.color"
+                [title]="holiday.name"
+                (click)="showHolidayDetails(holiday, $event)">
+                <div class="fc-content">
+                  <span class="fc-title">{{ holiday.name }}</span>
+                </div>
+              </div>
+            </div>
+            <!-- Events -->
+            <div 
+              class="fc-event-container" 
+              *ngFor="let event of getEventsForDay(day); trackBy: trackByEventId">
+              <div 
+                class="fc-day-grid-event fc-h-event fc-event fc-start fc-end bg-info"
+                [title]="event.name"
+                (click)="showEventDetails(event, $event)">
+                <div class="fc-content">
+                  <span class="fc-title">{{ event.name }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Holiday Details Modal -->
+  <div class="modal-overlay" *ngIf="showHolidayModal" (click)="closeHolidayModal()">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ selectedHoliday?.name }}</h5>
+          <button type="button" class="btn-close" (click)="closeHolidayModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-6"><strong>{{ 'CALENDAR_PAGE.DATE' | translate }}</strong></div>
+            <div class="col-6">{{ selectedHoliday?.date | date:'fullDate' }}</div>
+          </div>
+          <div class="row mt-2" *ngIf="selectedHoliday?.description">
+            <div class="col-12"><strong>{{ 'CALENDAR_PAGE.DESCRIPTION' | translate }}</strong></div>
+            <div class="col-12 mt-1">{{ selectedHoliday?.description }}</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeHolidayModal()">{{ 'CALENDAR_PAGE.CLOSE' | translate }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Event Details Modal -->
+  <div class="modal-overlay" *ngIf="showModal" (click)="closeEventModal()">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ selectedEvent.name }}</h5>
+          <button type="button" class="btn-close" (click)="closeEventModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div *ngIf="selectedEvent.image" class="text-center mb-3">
+            <img loading="lazy" [src]="selectedEvent.image" alt="Event Image" class="img-fluid rounded" style="max-width: 100%; max-height: 200px;">
+          </div>
+          <div *ngIf="!selectedEvent.image" class="text-center mb-3">
+            <div class="bg-light rounded p-4">
+              <i class="bi bi-image fs-1 text-muted"></i>
+              <p class="text-muted mt-2">{{ 'CALENDAR_PAGE.NO_IMAGE_AVAILABLE' | translate }}</p>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-6"><strong>{{ 'CALENDAR_PAGE.TYPE' | translate }}</strong></div>
+            <div class="col-6">{{ selectedEvent.type }}</div>
+          </div>
+          <div class="row mt-2">
+            <div class="col-6"><strong>{{ 'CALENDAR_PAGE.DATE_TIME' | translate }}</strong></div>
+            <div class="col-6">{{ selectedEvent.time | date:'medium' }}</div>
+          </div>
+          <div class="row mt-2">
+            <div class="col-6"><strong>{{ 'CALENDAR_PAGE.PRICE' | translate }}</strong></div>
+            <div class="col-6">{{ selectedEvent.price | appCurrency }}</div>
+          </div>
+          <div class="row mt-2">
+            <div class="col-6"><strong>{{ 'CALENDAR_PAGE.CAPACITY' | translate }}</strong></div>
+            <div class="col-6">{{ selectedEvent.capacity }}</div>
+          </div>
+          <div class="row mt-2">
+            <div class="col-6"><strong>{{ 'CALENDAR_PAGE.AGE_RANGE' | translate }}</strong></div>
+            <div class="col-6">{{ selectedEvent.ageFrom }} - {{ selectedEvent.ageTo }} {{ 'CALENDAR_PAGE.YEARS' | translate }}</div>
+          </div>
+          <div class="mt-3">
+            <strong>{{ 'CALENDAR_PAGE.DESCRIPTION' | translate }}</strong>
+            <p class="mt-1">{{ selectedEvent.description }}</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeEventModal()">{{ 'CALENDAR_PAGE.CLOSE' | translate }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Date Events Modal -->
+  <div class="modal-overlay" *ngIf="showDateEventsModal" (click)="closeDateEventsModal()">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ 'CALENDAR_PAGE.EVENTS_ON' | translate }} {{ selectedDate | date:'fullDate' }}</h5>
+          <button type="button" class="btn-close" (click)="closeDateEventsModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="list-group">
+            <div *ngFor="let event of selectedDateEvents" class="list-group-item list-group-item-action" style="cursor: pointer;">
+              <div class="d-flex w-100 justify-content-between align-items-center">
+                <h6 class="mb-1">{{ event.name }}</h6>
+                <span class="badge bg-primary">{{ event.type }}</span>
+              </div>
+              <p class="mb-1 text-muted"><i class="bi bi-clock me-1"></i>{{ event.time | date:'h:mm a' }}</p>
+              <p class="mb-1" *ngIf="event.place"><i class="bi bi-geo-alt me-1"></i>{{ event.place }}</p>
+              <small class="text-muted">{{ event.description }}</small>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeDateEventsModal()">{{ 'CALENDAR_PAGE.CLOSE' | translate }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

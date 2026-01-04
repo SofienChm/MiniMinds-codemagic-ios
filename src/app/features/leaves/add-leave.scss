@@ -1,0 +1,34 @@
+.form-select {
+  border-color: #E9EDF4;
+  color: #202C4B;
+  background-color: #ffffff;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.6;
+  border-radius: 5px;
+  padding: 0.5rem 0.625rem;
+  height: 38px;
+  transition: all 0.5s;
+}
+
+.form-check-input {
+  border-color: #E9EDF4;
+  cursor: pointer;
+}
+
+.form-check-input:checked {
+  background-color: #506EE4;
+  border-color: #506EE4;
+}
+
+.form-check-label {
+  font-size: 14px;
+  font-weight: 400;
+  color: #202C4B;
+  cursor: pointer;
+}
+
+.alert {
+  font-size: 14px;
+  border-radius: 5px;
+}

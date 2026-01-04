@@ -1,0 +1,109 @@
+<div class="profile-menu">
+  <div class="header">
+    <div class="title-icons mb-3">
+      <div class="page-back" (click)="goBack()">
+        <i class="bi bi-arrow-left"></i>
+      </div>
+      <div class="page-setting">
+      </div>
+    </div>
+    <div class="d-flex image-name row_direction">
+      <div class="overflow-hidden">
+        <h5 class="name simple"> Menu </h5>
+      </div>
+    </div>
+    <!-- <button class="back-btn" (click)="goBack()">
+      <i class="bi bi-chevron-left"></i>
+    </button>
+    <h1>Menu</h1> -->
+  </div>
+  <div class="content-header">
+    <div class="profile-card">
+      <a routerLink="/profile/edit">
+        <img [src]="currentUser?.profilePicture || 'assets/default-avatar.svg'" 
+          [alt]="currentUser?.firstName" 
+          class="profile-image">
+      </a>
+      <div class="profile-info">
+        <a routerLink="/profile/edit">
+          <h3>Edit Profile</h3>
+          <p class="email">{{ currentUser?.email }}</p>
+        </a>
+      </div>
+      <a routerLink="/profile/edit" class="edit-iconbtn">
+        <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+    <div class="menu-section">
+      <h2>Menu Options</h2>
+      
+      <div class="menu-grid">
+        <div class="menu-item" (click)="navigateTo('/fees')">
+          <div class="icon-circle payments">
+            <i class="bi bi-credit-card"></i>
+          </div>
+          <span>Payments</span>
+        </div>
+        
+        <div class="menu-item" (click)="navigateTo('/messages')">
+          <div class="icon-circle message">
+            <i class="bi bi-chat-dots"></i>
+            <span class="badge-count" *ngIf="messageUnreadCount > 0">{{ messageUnreadCount }}</span>
+          </div>
+          <span>Message</span>
+        </div>
+        
+        <div class="menu-item" (click)="navigateTo('/calendar')">
+          <div class="icon-circle calendar">
+            <i class="bi bi-calendar3"></i>
+          </div>
+          <span>Calendar</span>
+        </div>
+        
+        <div class="menu-item" (click)="navigateTo('/reclamations')">
+          <div class="icon-circle reclamation">
+            <i class="bi bi-exclamation-circle"></i>
+          </div>
+          <span>Reclamation</span>
+        </div>
+        
+        <div class="menu-item" (click)="navigateTo('/events')">
+          <div class="icon-circle events">
+            <i class="bi bi-calendar-event"></i>
+          </div>
+          <span>Events</span>
+        </div>
+        
+        <div class="menu-item" (click)="navigateTo('/daily-activities')">
+          <div class="icon-circle activities">
+            <i class="bi bi-bar-chart"></i>
+          </div>
+          <span>Activities</span>
+        </div>
+        <div class="menu-item" (click)="navigateTo('/gallery')">
+          <div class="icon-circle gallery">
+            <i class="bi bi-images"></i>
+          </div>
+          <span>Gallery</span>
+        </div>
+        <div class="menu-item" (click)="navigateTo('/food-menu/parent')">
+          <div class="icon-circle food">
+            <i class="bi bi-fork-knife"></i>
+          </div>
+          <span>Food </span>
+        </div>
+      </div>
+      
+      <div class="logout-item" (click)="logout()">
+        <div class="icon-circle logout">
+          <i class="bi bi-box-arrow-right"></i>
+        </div>
+        <span>Logout</span>
+      </div>
+    </div>
+  </div>
+
+
+ 
+
+</div>

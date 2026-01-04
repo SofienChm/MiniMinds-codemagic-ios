@@ -1,0 +1,134 @@
+.list-group-item{
+    cursor: pointer;
+    &.active {
+        background-color: #202C4B;
+        border-color: #202C4B;
+        color: white;
+    }
+}
+::ng-deep {
+    .page-setting{
+        i{
+            display: none !important;
+        }
+    }
+    .header-info{
+        margin-bottom: 35px !important;
+    }
+}
+
+// Profile Picture Container Styles
+.profile-picture-container {
+    position: relative;
+    display: inline-block;
+
+    .profile-picture-wrapper {
+        position: relative;
+    }
+
+    .profile-picture {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border: 3px solid #e9ecef;
+        transition: border-color 0.3s ease;
+
+        &:hover {
+            border-color: var(--primary-color, #7dd3c0);
+        }
+    }
+
+    .profile-initials {
+        width: 120px;
+        height: 120px;
+        font-size: 48px;
+        font-weight: 600;
+        background: var(--gradient-primary, linear-gradient(135deg, #7db9ff 0%, #7dd3c0 100%));
+        color: white;
+        border: 3px solid #e9ecef;
+        transition: transform 0.3s ease;
+    }
+
+    .btn-add-photo {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--gradient-primary, linear-gradient(135deg, #7db9ff 0%, #7dd3c0 100%));
+        border: 3px solid white;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+        i {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        &:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(125, 211, 192, 0.4);
+        }
+
+        &:active {
+            transform: scale(0.95);
+        }
+    }
+}
+
+// SweetAlert Custom Styles
+::ng-deep {
+    .profile-photo-modal {
+        border-radius: 16px;
+
+        .swal2-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #202C4B;
+        }
+
+        .swal2-actions {
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            padding: 0 20px;
+
+            button {
+                width: 100%;
+                margin: 0;
+                padding: 12px 20px;
+                border-radius: 8px;
+                font-weight: 500;
+                font-size: 15px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+
+        .swal-btn-upload {
+            order: 1;
+        }
+
+        .swal-btn-remove {
+            order: 2;
+        }
+
+        .swal-btn-cancel {
+            order: 3;
+            background: transparent !important;
+            color: #666 !important;
+            border: 1px solid #e9ecef !important;
+
+            &:hover {
+                background: #f8f9fa !important;
+            }
+        }
+    }
+}

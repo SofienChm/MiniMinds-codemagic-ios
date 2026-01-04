@@ -1,0 +1,46 @@
+<div class="not-found-container">
+  <div class="not-found-content">
+    <div class="illustration">
+      <div class="number-404">
+        <span class="digit">4</span>
+        <div class="zero-container">
+          <div class="zero">
+            <i class="bi bi-emoji-frown"></i>
+          </div>
+        </div>
+        <span class="digit">4</span>
+      </div>
+    </div>
+
+    <div class="message-section">
+      <h1 class="title">{{ 'NOT_FOUND.TITLE' | translate }}</h1>
+      <p class="description">{{ 'NOT_FOUND.DESCRIPTION' | translate }}</p>
+    </div>
+
+    <div class="decorations">
+      <div class="decoration-item item-1">
+        <i class="bi bi-stars"></i>
+      </div>
+      <div class="decoration-item item-2">
+        <i class="bi bi-cloud"></i>
+      </div>
+      <div class="decoration-item item-3">
+        <i class="bi bi-balloon-heart"></i>
+      </div>
+      <div class="decoration-item item-4">
+        <i class="bi bi-rocket-takeoff"></i>
+      </div>
+    </div>
+
+    <div class="actions">
+      <a routerLink="/dashboard" class="custom-btn-2 btn-add-global-2">
+        <i class="bi bi-house-door"></i>
+        {{ 'NOT_FOUND.GO_HOME' | translate }}
+      </a>
+      <button type="button" class="custom-btn-2 btn-cancel-2" onclick="history.back()">
+        <i class="bi bi-arrow-left"></i>
+        {{ 'NOT_FOUND.GO_BACK' | translate }}
+      </button>
+    </div>
+  </div>
+</div>

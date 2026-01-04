@@ -1,0 +1,396 @@
+<div *ngIf="isParent" class="parent-detailchild font-inter">
+  <app-parent-child-header-simple [title]="'RECLAMATIONS_PAGE.TITLE' | translate"></app-parent-child-header-simple>
+
+  <div class="body container-fluid">
+    <div class="main-information">
+      <div class="row gy-2">
+        <div class="col-xs-12 col-sm-3">
+          <div class="panel menu-card-fixed">
+            <div class="panel-header">
+              <button class="custom-btn-2 btn-add-global-2" (click)="openNewReclamationModal()">
+                <i class="bi bi-plus-circle"></i>
+                {{ 'RECLAMATIONS_PAGE.NEW_RECLAMATION' | translate }}
+              </button>
+            </div>
+            <div class="panel-body">
+              <div class="sidebar-menu">
+                <div class="menu-item" [class.active]="activeTab === 'inbox'" (click)="switchTab('inbox')">
+                  <i class="bi bi-inbox"></i>
+                  <span>{{ 'RECLAMATIONS_PAGE.INBOX' | translate }}</span>
+                  <span class="badge">{{ receivedReclamations.length }}</span>
+                </div>
+                <div class="menu-item" [class.active]="activeTab === 'sent'" (click)="switchTab('sent')">
+                  <i class="bi bi-send"></i>
+                  <span>{{ 'RECLAMATIONS_PAGE.SENT' | translate }}</span>
+                  <span class="badge">{{ sentReclamations.length }}</span>
+                </div>
+                <div class="menu-item" [class.active]="activeTab === 'important'" (click)="switchTab('important')">
+                  <i class="bi bi-star"></i>
+                  <span>{{ 'RECLAMATIONS_PAGE.IMPORTANT' | translate }}</span>
+                  <span class="badge">0</span>
+                </div>
+                <div class="menu-item" [class.active]="activeTab === 'trash'" (click)="switchTab('trash')">
+                  <i class="bi bi-trash"></i>
+                  <span>{{ 'RECLAMATIONS_PAGE.TRASH' | translate }}</span>
+                  <span class="badge">0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-xs-12 col-sm-9">
+          <div class="panel">
+            <div class="panel-header">
+              <div class="header-left">
+                <input *ngIf="activeReclamations.length > 0 && !showModal" type="checkbox" class="header-checkbox" (change)="toggleSelectAll($event)" [checked]="isAllSelected()" [title]="'RECLAMATIONS_PAGE.SELECT_ALL' | translate">
+                <div *ngIf="activeReclamations.length > 0 && !showModal" class="filter-dropdown">
+                  <button class="filter-btn" (click)="toggleFilterMenu()">
+                    <i class="bi bi-three-dots-vertical"></i>
+                  </button>
+                  <div class="filter-menu" *ngIf="showFilterMenu">
+                    <div class="filter-item" [class.active]="statusFilter === 'all'" (click)="setFilter('all')">
+                      {{ 'RECLAMATIONS_PAGE.ALL' | translate }}
+                    </div>
+                    <div class="filter-item" [class.active]="statusFilter === 'open'" (click)="setFilter('open')">
+                      {{ 'RECLAMATIONS_PAGE.OPEN' | translate }}
+                    </div>
+                    <div class="filter-item" [class.active]="statusFilter === 'resolved'" (click)="setFilter('resolved')">
+                      {{ 'RECLAMATIONS_PAGE.RESOLVED' | translate }}
+                    </div>
+                  </div>
+                </div>
+                <div *ngIf="showModal">
+                  <h4  class="form-header-title">{{ selectedReclamation?.subject }}</h4>
+                </div>
+                <h4 *ngIf="!showModal && !showNewReclamationModal">{{ activeTab ? ('RECLAMATIONS_PAGE.' + activeTab.toUpperCase() | translate) : ('RECLAMATIONS_PAGE.NEW_RECLAMATION' | translate) }}</h4>
+                <h4 *ngIf="showNewReclamationModal" class="form-header-title">{{ 'RECLAMATIONS_PAGE.NEW_RECLAMATION' | translate }}</h4>
+              </div>
+
+              <div *ngIf="selectedReclamations.length > 0 && !showModal && !showNewReclamationModal" class="action-buttons">
+                <button class="action-btn resolve-btn" (click)="markAsResolved()" [title]="'RECLAMATIONS_PAGE.MARK_AS_RESOLVED_TITLE' | translate">
+                  <i class="bi bi-check-circle"></i>
+                </button>
+                <button class="action-btn open-btn" (click)="markAsOpen()" [title]="'RECLAMATIONS_PAGE.MARK_AS_OPEN_TITLE' | translate">
+                  <i class="bi bi-arrow-counterclockwise"></i>
+                </button>
+                <button class="action-btn delete-btn" (click)="deleteSelected()" [title]="('RECLAMATIONS_PAGE.DELETE_TITLE' | translate) + ' (' + selectedReclamations.length + ')'">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div *ngIf="!showNewReclamationModal && !showModal">
+                <table class="reclamations-table" *ngIf="activeReclamations.length > 0">
+                  <thead>
+                    <tr>
+                      <th class="checkbox-col">
+                        <input type="checkbox" (change)="toggleSelectAll($event)" [checked]="isAllSelected()">
+                      </th>
+                      <th>{{ 'RECLAMATIONS_PAGE.PERSON' | translate }}</th>
+                      <th>{{ 'RECLAMATIONS_PAGE.SUBJECT' | translate }}</th>
+                      <th>{{ 'RECLAMATIONS_PAGE.CONTENT' | translate }}</th>
+                      <th>{{ 'RECLAMATIONS_PAGE.DATE' | translate }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let reclamation of activeReclamations" [class.resolved]="reclamation.isResolved">
+                      <td class="checkbox-col" (click)="$event.stopPropagation()">
+                        <input type="checkbox" [checked]="isSelected(reclamation)" (change)="toggleSelection(reclamation)">
+                      </td>
+                      <td class="person-cell" (click)="selectReclamation(reclamation)">{{ getUserName(activeTab === 'sent' ? reclamation.recipientId : reclamation.senderId) }}</td>
+                      <td class="subject-cell" (click)="selectReclamation(reclamation)">{{ reclamation.subject }}</td>
+                      <td class="content-cell" (click)="selectReclamation(reclamation)">{{ reclamation.content.substring(0, 50) }}{{ reclamation.content.length > 50 ? '...' : '' }}</td>
+                      <td class="date-cell" (click)="selectReclamation(reclamation)">{{ formatDate(reclamation.sentAt) }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div class="empty-state" *ngIf="activeReclamations.length === 0">
+                  <p class="empty-cell">{{ 'RECLAMATIONS_PAGE.NO_RECLAMATIONS' | translate }}</p>
+                </div>
+              </div>
+              <div *ngIf="showModal && selectedReclamation" class="reclamation-details">
+                <div class="detail-info-row">
+                  <div class="detail-info-left">
+                    <div class="info-item">
+                      <span class="info-label">{{ 'RECLAMATIONS_PAGE.FROM' | translate }}:</span>
+                      <span class="info-value">{{ getUserName(selectedReclamation.senderId) }}</span>
+                    </div>
+                    <div class="info-item">
+                      <span class="info-label">{{ 'RECLAMATIONS_PAGE.TO' | translate }}:</span>
+                      <span class="info-value">{{ getUserName(selectedReclamation.recipientId) }}</span>
+                    </div>
+                  </div>
+                  <div class="detail-info-right">
+                    <div class="info-item">
+                      <span class="info-label">{{ 'RECLAMATIONS_PAGE.DATE' | translate }}:</span>
+                      <span class="info-value">{{ formatDate(selectedReclamation.sentAt) }}</span>
+                    </div>
+                    <div class="info-item">
+                      <span class="info-label">{{ 'RECLAMATIONS_PAGE.STATUS' | translate }}:</span>
+                      <span class="status-badge" [class.open]="!selectedReclamation.isResolved" [class.resolved]="selectedReclamation.isResolved">
+                        {{ selectedReclamation.isResolved ? ('RECLAMATIONS_PAGE.RESOLVED' | translate) : ('RECLAMATIONS_PAGE.OPEN' | translate) }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div class="detail-content-section">
+                  <h5 class="section-title">{{ 'RECLAMATIONS_PAGE.MESSAGE' | translate }}</h5>
+                  <div class="content-box">
+                    {{ selectedReclamation.content }}
+                  </div>
+                </div>
+                <div class="detail-response-section" *ngIf="selectedReclamation.isResolved && selectedReclamation.response">
+                  <h5 class="section-title">{{ 'RECLAMATIONS_PAGE.RESPONSE' | translate }}</h5>
+                  <div class="response-box">
+                    {{ selectedReclamation.response }}
+                  </div>
+                </div>
+                <div class="detail-response-section" *ngIf="!selectedReclamation.isResolved && selectedReclamation.recipientId === currentUserId">
+                  <h5 class="section-title">{{ 'RECLAMATIONS_PAGE.RESPONSE_NOTE' | translate }}</h5>
+                  <textarea class="response-textarea" [placeholder]="'RECLAMATIONS_PAGE.ENTER_RESPONSE' | translate" [(ngModel)]="responseText"></textarea>
+                  <div class="response-actions">
+                    <div class="response-actions-left">
+                      <button class="custom-btn-2 btn-edit-global-2" (click)="resolve()" [disabled]="!responseText.trim()">
+                        <i class="bi bi-reply"></i> {{ 'RECLAMATIONS_PAGE.REPLY' | translate }}
+                      </button>
+                      <button class="custom-btn-2 btn-edit-global-2" (click)="resolve()" [disabled]="!responseText.trim()">
+                        <i class="bi bi-check-circle"></i> {{ 'RECLAMATIONS_PAGE.MARK_AS_RESOLVED' | translate }}
+                      </button>
+                    </div>
+                    <button class="custom-btn-2 btn-cancel-2" (click)="closeModal()">
+                      <i class="bi bi-x-circle"></i> {{ 'RECLAMATIONS_PAGE.CANCEL' | translate }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="showNewReclamationModal" class="new-reclamation-form">
+                <div class="form-group" *ngIf="!authService.isParent()">
+                  <label class="form-label">{{ 'RECLAMATIONS_PAGE.RECIPIENT' | translate }}</label>
+                  <select class="form-input" [(ngModel)]="newReclamation.recipientId" required>
+                    <option value="">{{ 'RECLAMATIONS_PAGE.SELECT_RECIPIENT' | translate }}</option>
+                    <option *ngFor="let user of users" [value]="user.id">
+                      {{ user.name }} ({{ user.email }})
+                    </option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">{{ 'RECLAMATIONS_PAGE.SUBJECT' | translate }}</label>
+                  <input type="text" class="form-input" [placeholder]="'RECLAMATIONS_PAGE.ENTER_SUBJECT' | translate" [(ngModel)]="newReclamation.subject" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">{{ 'RECLAMATIONS_PAGE.CONTENT' | translate }}</label>
+                  <textarea class="form-textarea" [placeholder]="'RECLAMATIONS_PAGE.ENTER_MESSAGE' | translate" [(ngModel)]="newReclamation.content" required></textarea>
+                </div>
+                <div class="form-actions">
+                  <button class="btn-send" (click)="send()" [disabled]="(!authService.isParent() && !newReclamation.recipientId) || !newReclamation.subject.trim() || !newReclamation.content.trim()">
+                    <i class="bi bi-send"></i> {{ 'RECLAMATIONS_PAGE.SEND_RECLAMATION' | translate }}
+                  </button>
+                  <button class="btn-cancel" (click)="closeNewReclamationModal()">
+                    <i class="bi bi-x-circle"></i> {{ 'RECLAMATIONS_PAGE.CANCEL' | translate }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+</div>
+
+<div *ngIf="!isParent" class="container-fluid mt-4">
+  
+  <div class="row">
+    <div class="col-xs-12 col-sm-3">
+      <div class="panel menu-card-fixed">
+        <div class="panel-header">
+          <button class="custom-btn-2 btn-add-global-2" (click)="openNewReclamationModal()">
+            <i class="bi bi-plus-circle"></i>
+            {{ 'RECLAMATIONS_PAGE.NEW_RECLAMATION' | translate }}
+          </button>
+        </div>
+        <div class="panel-body">
+          <div class="sidebar-menu">
+            <div class="menu-item" [class.active]="activeTab === 'inbox'" (click)="switchTab('inbox')">
+              <i class="bi bi-inbox"></i>
+              <span>{{ 'RECLAMATIONS_PAGE.INBOX' | translate }}</span>
+              <span class="badge">{{ receivedReclamations.length }}</span>
+            </div>
+            <div class="menu-item" [class.active]="activeTab === 'sent'" (click)="switchTab('sent')">
+              <i class="bi bi-send"></i>
+              <span>{{ 'RECLAMATIONS_PAGE.SENT' | translate }}</span>
+              <span class="badge">{{ sentReclamations.length }}</span>
+            </div>
+            <div class="menu-item" [class.active]="activeTab === 'important'" (click)="switchTab('important')">
+              <i class="bi bi-star"></i>
+              <span>{{ 'RECLAMATIONS_PAGE.IMPORTANT' | translate }}</span>
+              <span class="badge">0</span>
+            </div>
+            <div class="menu-item" [class.active]="activeTab === 'trash'" (click)="switchTab('trash')">
+              <i class="bi bi-trash"></i>
+              <span>{{ 'RECLAMATIONS_PAGE.TRASH' | translate }}</span>
+              <span class="badge">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xs-12 col-sm-9">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="header-left p-1">
+            <div *ngIf="activeReclamations.length > 0 && !showModal" class="filter-dropdown">
+              <button class="filter-btn" (click)="toggleFilterMenu()">
+                <i class="bi bi-three-dots-vertical"></i>
+              </button>
+              <div class="filter-menu" *ngIf="showFilterMenu">
+                <div class="filter-item" [class.active]="statusFilter === 'all'" (click)="setFilter('all')">
+                  {{ 'RECLAMATIONS_PAGE.ALL' | translate }}
+                </div>
+                <div class="filter-item" [class.active]="statusFilter === 'open'" (click)="setFilter('open')">
+                  {{ 'RECLAMATIONS_PAGE.OPEN' | translate }}
+                </div>
+                <div class="filter-item" [class.active]="statusFilter === 'resolved'" (click)="setFilter('resolved')">
+                  {{ 'RECLAMATIONS_PAGE.RESOLVED' | translate }}
+                </div>
+              </div>
+            </div>
+            <div *ngIf="showModal" >
+              <h4 class="form-header-title">{{ selectedReclamation?.subject }}</h4>
+            </div>
+            <h4 *ngIf="!showModal && !showNewReclamationModal">{{ activeTab ? ('RECLAMATIONS_PAGE.' + activeTab.toUpperCase() | translate) : ('RECLAMATIONS_PAGE.NEW_RECLAMATION' | translate) }}</h4>
+            <h4 *ngIf="showNewReclamationModal" class="form-header-title">{{ 'RECLAMATIONS_PAGE.NEW_RECLAMATION' | translate }}</h4>
+          </div>
+          <div *ngIf="selectedReclamations.length > 0 && !showModal && !showNewReclamationModal" class="action-buttons">
+            <button class="action-btn resolve-btn" (click)="markAsResolved()" [title]="'RECLAMATIONS_PAGE.MARK_AS_RESOLVED_TITLE' | translate">
+              <i class="bi bi-check-circle"></i>
+            </button>
+            <button class="action-btn open-btn" (click)="markAsOpen()" [title]="'RECLAMATIONS_PAGE.MARK_AS_OPEN_TITLE' | translate">
+              <i class="bi bi-arrow-counterclockwise"></i>
+            </button>
+            <button class="action-btn delete-btn" (click)="deleteSelected()" [title]="('RECLAMATIONS_PAGE.DELETE_TITLE' | translate) + ' (' + selectedReclamations.length + ')'">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div *ngIf="!showNewReclamationModal && !showModal">
+            <table class="reclamations-table" *ngIf="activeReclamations.length > 0">
+              <thead>
+                <tr>
+                  <th class="checkbox-col">
+                    <input type="checkbox" (change)="toggleSelectAll($event)" [checked]="isAllSelected()">
+                  </th>
+                  <th>{{ 'RECLAMATIONS_PAGE.PERSON' | translate }}</th>
+                  <th>{{ 'RECLAMATIONS_PAGE.SUBJECT' | translate }}</th>
+                  <th>{{ 'RECLAMATIONS_PAGE.CONTENT' | translate }}</th>
+                  <th>{{ 'RECLAMATIONS_PAGE.DATE' | translate }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let reclamation of activeReclamations" [class.resolved]="reclamation.isResolved">
+                  <td class="checkbox-col" (click)="$event.stopPropagation()">
+                    <input type="checkbox" [checked]="isSelected(reclamation)" (change)="toggleSelection(reclamation)">
+                  </td>
+                  <td class="person-cell" (click)="selectReclamation(reclamation)">{{ getUserName(activeTab === 'sent' ? reclamation.recipientId : reclamation.senderId) }}</td>
+                  <td class="subject-cell" (click)="selectReclamation(reclamation)">{{ reclamation.subject }}</td>
+                  <td class="content-cell" (click)="selectReclamation(reclamation)">{{ reclamation.content.substring(0, 50) }}{{ reclamation.content.length > 50 ? '...' : '' }}</td>
+                  <td class="date-cell" (click)="selectReclamation(reclamation)">{{ formatDate(reclamation.sentAt) }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="empty-state" *ngIf="activeReclamations.length === 0">
+              <p class="empty-cell">{{ 'RECLAMATIONS_PAGE.NO_RECLAMATIONS' | translate }}</p>
+            </div>
+          </div>
+          <div *ngIf="showModal && selectedReclamation" class="reclamation-details">
+            <div class="detail-info-row">
+              <div class="detail-info-left">
+                <div class="info-item">
+                  <span class="info-label">{{ 'RECLAMATIONS_PAGE.FROM' | translate }}:</span>
+                  <span class="info-value">{{ getUserName(selectedReclamation.senderId) }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">{{ 'RECLAMATIONS_PAGE.TO' | translate }}:</span>
+                  <span class="info-value">{{ getUserName(selectedReclamation.recipientId) }}</span>
+                </div>
+              </div>
+              <div class="detail-info-right">
+                <div class="info-item">
+                  <span class="info-label">{{ 'RECLAMATIONS_PAGE.DATE' | translate }}:</span>
+                  <span class="info-value">{{ formatDate(selectedReclamation.sentAt) }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">{{ 'RECLAMATIONS_PAGE.STATUS' | translate }}:</span>
+                  <span class="status-badge" [class.open]="!selectedReclamation.isResolved" [class.resolved]="selectedReclamation.isResolved">
+                    {{ selectedReclamation.isResolved ? ('RECLAMATIONS_PAGE.RESOLVED' | translate) : ('RECLAMATIONS_PAGE.OPEN' | translate) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="detail-content-section">
+              <h5 class="section-title">{{ 'RECLAMATIONS_PAGE.MESSAGE' | translate }}</h5>
+              <div class="content-box">
+                {{ selectedReclamation.content }}
+              </div>
+            </div>
+            <div class="detail-response-section" *ngIf="selectedReclamation.isResolved && selectedReclamation.response">
+              <h5 class="section-title">{{ 'RECLAMATIONS_PAGE.RESPONSE' | translate }}</h5>
+              <div class="response-box">
+                {{ selectedReclamation.response }}
+              </div>
+            </div>
+            <div class="detail-response-section" *ngIf="!selectedReclamation.isResolved && selectedReclamation.recipientId === currentUserId">
+              <h5 class="section-title">{{ 'RECLAMATIONS_PAGE.RESPONSE_NOTE' | translate }}</h5>
+              <textarea class="response-textarea" [placeholder]="'RECLAMATIONS_PAGE.ENTER_RESPONSE' | translate" [(ngModel)]="responseText"></textarea>
+                  <div class="response-actions">
+                    <div class="response-actions-left">
+                      <button class="custom-btn-2 btn-add-global-2 replay" (click)="resolve()" [disabled]="!responseText.trim()">
+                        <i class="bi bi-reply"></i> {{ 'RECLAMATIONS_PAGE.REPLY' | translate }}
+                      </button>
+                      <button class="custom-btn-2 btn-edit-global-2" (click)="resolve()" [disabled]="!responseText.trim()">
+                        <i class="bi bi-check-circle"></i> {{ 'RECLAMATIONS_PAGE.MARK_AS_RESOLVED' | translate }}
+                      </button>
+                    </div>
+                    <button class="custom-btn-2 btn-cancel-2" (click)="closeModal()">
+                      <i class="bi bi-x-circle"></i> {{ 'RECLAMATIONS_PAGE.CANCEL' | translate }}
+                    </button>
+                  </div>
+            </div>
+          </div>
+          <div *ngIf="showNewReclamationModal" class="new-reclamation-form">
+            <div class="form-group" *ngIf="!authService.isParent()">
+              <label class="form-label">{{ 'RECLAMATIONS_PAGE.RECIPIENT' | translate }}</label>
+              <select class="form-input" [(ngModel)]="newReclamation.recipientId" required>
+                <option value="">{{ 'RECLAMATIONS_PAGE.SELECT_RECIPIENT' | translate }}</option>
+                <option *ngFor="let user of users" [value]="user.id">
+                  {{ user.name }} ({{ user.email }})
+                </option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ 'RECLAMATIONS_PAGE.SUBJECT' | translate }}</label>
+              <input type="text" class="form-input" [placeholder]="'RECLAMATIONS_PAGE.ENTER_SUBJECT' | translate" [(ngModel)]="newReclamation.subject" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ 'RECLAMATIONS_PAGE.CONTENT' | translate }}</label>
+              <textarea class="form-textarea" [placeholder]="'RECLAMATIONS_PAGE.ENTER_MESSAGE' | translate" [(ngModel)]="newReclamation.content" required></textarea>
+            </div>
+            <div class="form-actions">
+              <button class="btn-send" (click)="send()" [disabled]="(!authService.isParent() && !newReclamation.recipientId) || !newReclamation.subject.trim() || !newReclamation.content.trim()">
+                <i class="bi bi-send"></i> {{ 'RECLAMATIONS_PAGE.SEND_RECLAMATION' | translate }}
+              </button>
+              <button class="btn-cancel" (click)="closeNewReclamationModal()">
+                <i class="bi bi-x-circle"></i> {{ 'RECLAMATIONS_PAGE.CANCEL' | translate }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

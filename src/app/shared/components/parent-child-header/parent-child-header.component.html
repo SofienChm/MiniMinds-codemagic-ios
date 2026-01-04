@@ -1,0 +1,49 @@
+<div class="parent-detailchild font-inter">
+  <div class="header-info">
+    <div class="title-icons mb-2">
+      <div class="page-back" (click)="onBack.emit()">
+        <i class="bi bi-arrow-left"></i>
+      </div>
+      <div class="title-page">{{ title }}</div>
+      <!-- <div class="page-setting" *ngIf="showSettings" (click)="onSettings.emit()">
+        <i class="bi bi-gear"  ></i>
+      </div> -->
+      <div class="page-setting"  (click)="onEdit.emit()">
+        <i class="bi bi-pen" *ngIf="showEdit"></i>
+      </div>
+    </div>
+    <div *ngIf="showImages" class="d-flex image-name row_direction">
+      <div class="d-flex image-active">
+        <img [src]="children[currentChildIndex]?.profilePicture || 'assets/child.png'" 
+             [alt]="children[currentChildIndex]?.firstName" 
+             class="img-fluid">
+      </div>
+      <div class="overflow-hidden">
+        <h5 class="name">{{ children[currentChildIndex]?.firstName }} {{ children[currentChildIndex]?.lastName }}</h5>
+        <p class="age" *ngIf="children[currentChildIndex]?.dateOfBirth">{{ getAge(children[currentChildIndex]?.dateOfBirth) }} years old</p>
+        <div class="slider-controls" *ngIf="children.length > 1">
+          <button class="btn btn-sm btn-outline-secondary" (click)="onPrevChild.emit()" [disabled]="currentChildIndex === 0">
+            <i class="bi bi-chevron-left"></i>
+          </button>
+          <span class="mx-2">{{ currentChildIndex + 1 }}/{{ children.length }}</span>
+          <button class="btn btn-sm btn-outline-secondary" (click)="onNextChild.emit()" [disabled]="currentChildIndex === children.length - 1">
+            <i class="bi bi-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="header-info_card" *ngIf="showDatePicker || hasCustomContent">
+      <div class="card-body">
+        <ng-content select="[headerCard]"></ng-content>
+        <div *ngIf="showDatePicker && !hasCustomContent" class="row justify-content-around">
+          <div class="d-flex">
+            <label class="form-label col-form-label col-5">Select Date</label>
+            <div class="col-7">
+              <input type="date" class="form-control" [ngModel]="selectedDate" (ngModelChange)="onDateChange.emit($event)">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

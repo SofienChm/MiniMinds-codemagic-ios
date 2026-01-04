@@ -1,0 +1,180 @@
+<ng-container *ngIf="isMobile()" class="font-inter">
+  <div class="font-inter mobile-view-login">
+  <div class="header-info">
+    <div class="title-icons mb-3">
+      <div class="page-back">
+      </div>
+      <div class="title-page"></div>
+      <div class="page-setting">
+      </div>
+    </div>
+    <div class="d-flex image-name row_direction">
+      <div class="overflow-hidden">
+        <div class="filter-black"></div>
+        <h1 class="login-title"> Welcome back </h1>
+        <p>Access to your account to stay connected</p>
+      </div>
+    </div>
+  </div>
+  <div class="main-information">
+    <div class="body container-fluid">
+      
+      <div class="logo logo-login-mobile text-center mb-4">
+        <img src="/assets/images/icon.png" class="img-fluid" alt="">
+      </div>
+      <h3 class="text-center mb-3">Miniminds</h3>
+
+      <div class="form col-11 form-login_mobile mb-4">
+        <div class="card">
+          <div class="card-body p-4">
+
+            <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+              {{ errorMessage }}
+            </div>
+
+            <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+              <div class="mb-3">
+                <input 
+                  type="email" 
+                  class="form-control" 
+                  id="email" 
+                  name="email"
+                  [(ngModel)]="credentials.email" 
+                  required 
+                  email
+                  placeholder="Enter your email">
+              </div>
+<div class="form-group">
+                <label for="email">Email Address</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="email" class="form-control" placeholder="Enter your email" required="">
+                </div>
+            </div>
+              <div class="mb-3">
+                <input 
+                  [type]="showPassword ? 'text' : 'password'" 
+                  class="form-control" 
+                  id="password" 
+                  name="password"
+                  [(ngModel)]="credentials.password" 
+                  required
+                  placeholder="Enter your password">
+              </div>
+
+              <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="remember">
+                <label class="form-check-label" for="remember">
+                  Remember me
+                </label>
+              </div>
+
+              <button 
+                type="submit" 
+                class="btn btn-primary w-100 py-2 login-btn"
+                [disabled]="!loginForm.valid || isLoading">
+                <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+                {{ isLoading ? 'Signing in...' : 'Sign In' }}
+              </button>
+            </form>
+
+            <div class="text-center mt-4">
+              <p class="mb-0">Don't have an account? 
+                <a routerLink="/register" class="text-primary">Sign up</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+    
+  </div>
+</ng-container>
+
+<div *ngIf="!isMobile()" class="desktop-login-container">
+  <div class="login-split-layout">
+    <div class="left-section">
+      <div class="welcome-content">
+        <h1 class="welcome-title">Welcome Back!</h1>
+        <p class="welcome-subtitle">Access your account to stay connected</p>
+        
+        <div class="logo-section">
+          <div class="logo-circle">
+            <img src="/assets/images/icon.png" alt="MiniMinds Logo">
+          </div>
+          <h2 class="brand-name">MiniMinds Daycare</h2>
+        </div>
+        
+        <div class="decorative-icons">
+          <i class="icon icon-star"></i>
+          <i class="icon icon-cloud"></i>
+          <i class="icon icon-leaf"></i>
+          <i class="icon icon-sparkle"></i>
+        </div>
+      </div>
+    </div>
+    
+    <div class="right-section">
+      <div class="login-form-card">
+        <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+          {{ errorMessage }}
+        </div>
+        
+        <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <div class="input-with-icon">
+              <i class="bi bi-envelope input-icon"></i>
+              <input 
+                type="email" 
+                class="form-input" 
+                name="email"
+                [(ngModel)]="credentials.email" 
+                required 
+                email
+                placeholder="Enter your email">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <div class="input-with-icon">
+              <i class="bi bi-lock input-icon"></i>
+              <input 
+                [type]="showPassword ? 'text' : 'password'" 
+                class="form-input" 
+                name="password"
+                [(ngModel)]="credentials.password" 
+                required
+                placeholder="Enter your password">
+              <i [class]="showPassword ? 'bi bi-eye toggle-password' : 'bi bi-eye-slash toggle-password'" (click)="togglePasswordVisibility()" style="cursor: pointer;"></i>
+            </div>
+          </div>
+
+          <div class="form-check-custom">
+            <input type="checkbox" id="remember">
+            <label for="remember">Keep me logged in</label>
+          </div>
+
+          <button 
+            type="submit" 
+            class="btn-signin"
+            [disabled]="!loginForm.valid || isLoading">
+            <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+            {{ isLoading ? 'Signing in...' : 'Sign In' }}
+          </button>
+        </form>
+
+        <div class="forgot-password">
+          <a href="#">Forgot Password?</a>
+        </div>
+
+        <div class="signup-link">
+          <p>Don't have an account?</p>
+          <a routerLink="/register">Sign Up Here</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

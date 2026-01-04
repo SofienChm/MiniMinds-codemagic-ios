@@ -1,0 +1,180 @@
+<app-title-page title="QR Check-in/Check-out" />
+
+<div class="qr-checkin-container">
+  <!-- Location Status -->
+  <div class="location-status" *ngIf="currentPosition || locationError">
+    <div class="location-card" [class.error]="locationError" [class.warning]="!isWithinGeofence && !locationError">
+      <div class="location-icon">
+        <i class="bi" [class.bi-geo-alt-fill]="currentPosition" [class.bi-geo-alt]="!currentPosition"></i>
+      </div>
+      <div class="location-info">
+        <ng-container *ngIf="locationError">
+          <span class="status-text error">{{ locationError }}</span>
+          <button class="btn-retry" (click)="getLocation()">
+            <i class="bi bi-arrow-clockwise"></i> Retry
+          </button>
+        </ng-container>
+        <ng-container *ngIf="currentPosition && !locationError">
+          <span class="status-text" *ngIf="isWithinGeofence">
+            <i class="bi bi-check-circle-fill text-success"></i> You are at the school
+          </span>
+          <span class="status-text warning" *ngIf="!isWithinGeofence && schoolSettings?.geofenceEnabled">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            {{ distanceToSchool | number:'1.0-0' }}m away from school (must be within {{ schoolSettings?.geofenceRadiusMeters }}m)
+          </span>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+
+  <!-- Children Status Overview -->
+  <div class="children-overview" *ngIf="state === 'idle' && children.length > 0">
+    <h3>Your Children</h3>
+    <div class="children-list">
+      <div class="child-status-card" *ngFor="let child of children">
+        <div class="child-avatar">
+          <img *ngIf="child.profilePicture" [src]="child.profilePicture" [alt]="child.firstName">
+          <div *ngIf="!child.profilePicture" class="avatar-placeholder">
+            {{ child.firstName.charAt(0) }}{{ child.lastName.charAt(0) }}
+          </div>
+        </div>
+        <div class="child-info">
+          <span class="child-name">{{ child.firstName }} {{ child.lastName }}</span>
+          <span class="child-status" [class]="getChildStatusClass(child)">
+            {{ getChildStatusText(child) }}
+          </span>
+        </div>
+        <div class="status-indicator" [class]="getChildStatusClass(child)">
+          <i class="bi" [class.bi-check-circle-fill]="child.isCheckedIn && !child.isCheckedOut"
+             [class.bi-box-arrow-right]="child.isCheckedOut"
+             [class.bi-circle]="!child.isCheckedIn"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Idle State - Start Scanning -->
+  <div class="scan-prompt" *ngIf="state === 'idle'">
+    <div class="scan-icon">
+      <i class="bi bi-qr-code-scan"></i>
+    </div>
+    <h2>Scan QR Code</h2>
+    <p>Point your camera at the QR code at the school entrance or exit</p>
+    <button class="btn-scan" (click)="startScanner()" [disabled]="!currentPosition || (!isWithinGeofence && schoolSettings?.geofenceEnabled)">
+      <i class="bi bi-camera"></i> Start Scanning
+    </button>
+  </div>
+
+  <!-- Scanning State -->
+  <div class="scanner-container" *ngIf="state === 'scanning'">
+    <div class="scanner-header">
+      <h3>Scanning...</h3>
+      <button class="btn-cancel" (click)="stopScanner(); state = 'idle'">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+    <div id="qr-reader"></div>
+    <p class="scanner-hint">Position the QR code within the frame</p>
+  </div>
+
+  <!-- Validating State -->
+  <div class="loading-state" *ngIf="state === 'validating'">
+    <div class="spinner"></div>
+    <p>Validating QR code...</p>
+  </div>
+
+  <!-- Child Selection State -->
+  <div class="selection-container" *ngIf="state === 'selecting'">
+    <div class="selection-header">
+      <h3>{{ qrType === 'CheckIn' ? 'Check In' : 'Check Out' }}</h3>
+      <p>Select children to {{ qrType === 'CheckIn' ? 'check in' : 'check out' }}</p>
+    </div>
+
+    <div class="children-selection">
+      <div class="select-all" *ngIf="children.filter(isChildEligible.bind(this)).length > 1">
+        <button class="btn-select-all" (click)="selectAllEligible()">
+          <i class="bi bi-check-all"></i> Select All
+        </button>
+      </div>
+
+      <div class="child-select-card" *ngFor="let child of children"
+           [class.selected]="isChildSelected(child.id)"
+           [class.disabled]="!isChildEligible(child)"
+           (click)="isChildEligible(child) && toggleChildSelection(child.id)">
+        <div class="checkbox">
+          <i class="bi" [class.bi-check-square-fill]="isChildSelected(child.id)"
+             [class.bi-square]="!isChildSelected(child.id)"></i>
+        </div>
+        <div class="child-avatar">
+          <img *ngIf="child.profilePicture" [src]="child.profilePicture" [alt]="child.firstName">
+          <div *ngIf="!child.profilePicture" class="avatar-placeholder">
+            {{ child.firstName.charAt(0) }}{{ child.lastName.charAt(0) }}
+          </div>
+        </div>
+        <div class="child-details">
+          <span class="name">{{ child.firstName }} {{ child.lastName }}</span>
+          <span class="status" [class]="getChildStatusClass(child)">
+            {{ getChildStatusText(child) }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="selection-actions">
+      <button class="btn-back" (click)="reset()">
+        <i class="bi bi-arrow-left"></i> Cancel
+      </button>
+      <button class="btn-confirm" (click)="confirmAction()" [disabled]="selectedChildIds.length === 0">
+        <i class="bi" [class.bi-box-arrow-in-right]="qrType === 'CheckIn'"
+           [class.bi-box-arrow-right]="qrType === 'CheckOut'"></i>
+        {{ qrType === 'CheckIn' ? 'Check In' : 'Check Out' }} ({{ selectedChildIds.length }})
+      </button>
+    </div>
+  </div>
+
+  <!-- Processing State -->
+  <div class="loading-state" *ngIf="state === 'processing'">
+    <div class="spinner"></div>
+    <p>Processing {{ qrType === 'CheckIn' ? 'check-in' : 'check-out' }}...</p>
+  </div>
+
+  <!-- Success State -->
+  <div class="result-container success" *ngIf="state === 'success'">
+    <div class="result-icon">
+      <i class="bi bi-check-circle-fill"></i>
+    </div>
+    <h2>Success!</h2>
+    <p>{{ successMessage }}</p>
+
+    <div class="result-details" *ngIf="result?.results?.length">
+      <div class="result-item" *ngFor="let item of result!.results" [class.success]="item.success" [class.error]="!item.success">
+        <i class="bi" [class.bi-check-circle]="item.success" [class.bi-x-circle]="!item.success"></i>
+        <span>{{ item.childName }}: {{ item.message }}</span>
+      </div>
+    </div>
+
+    <button class="btn-done" (click)="reset()">
+      <i class="bi bi-house"></i> Done
+    </button>
+  </div>
+
+  <!-- Error State -->
+  <div class="result-container error" *ngIf="state === 'error'">
+    <div class="result-icon">
+      <i class="bi bi-x-circle-fill"></i>
+    </div>
+    <h2>Error</h2>
+    <p>{{ errorMessage }}</p>
+
+    <div class="result-details" *ngIf="result?.results?.length">
+      <div class="result-item" *ngFor="let item of result!.results" [class.success]="item.success" [class.error]="!item.success">
+        <i class="bi" [class.bi-check-circle]="item.success" [class.bi-x-circle]="!item.success"></i>
+        <span>{{ item.childName }}: {{ item.message }}</span>
+      </div>
+    </div>
+
+    <button class="btn-retry" (click)="reset()">
+      <i class="bi bi-arrow-clockwise"></i> Try Again
+    </button>
+  </div>
+</div>

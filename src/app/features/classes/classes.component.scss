@@ -1,0 +1,26 @@
+.title-table {
+  font-weight: 500;
+  color: #202C4B;
+}
+
+.badge-success {
+  background-color: rgba(26, 190, 23, 0.1);
+  color: #1ABE17;
+}
+
+.badge-secondary {
+  background-color: rgba(108, 117, 125, 0.1);
+  color: #6c757d;
+}
+
+.card-general {
+  .card-header  {
+    display: flex;
+    align-items: center;
+    i{
+      font-size: 22px;
+      color: #7dd3c0;
+      margin-right: 10px; 
+     }
+  }
+}

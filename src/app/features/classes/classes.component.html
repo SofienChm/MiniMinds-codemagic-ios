@@ -1,0 +1,164 @@
+<div class="container-fluid mt-4">
+  <app-title-page 
+    [title]="'Classes Management'"
+    [breadcrumbs]="[
+      { label: 'Dashboard', url: '/dashboard' },
+      { label: 'Classes' }
+    ]"
+    [actions]="[
+      {
+        label: 'Add Class',
+        icon: 'bi bi-plus-square',
+        class: 'btn-add-global-2',
+        action: addClass
+      }
+    ]">
+  </app-title-page>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="card card-general">
+        <div class="card-header">
+          <i class="bi bi-backpack2"></i>
+          <h5 class="mb-0">All Classes</h5>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive custom-table">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Class Name</th>
+                  <th>Age Group</th>
+                  <th>Capacity</th>
+                  <th>Teacher</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let class of classes">
+                  <td class="name-last">{{ class.name }}</td>
+                  <td>{{ class.ageGroupMin }} - {{ class.ageGroupMax }} years</td>
+                  <td>{{ class.enrollmentCount || 0 }} / {{ class.capacity }}</td>
+                  <td>{{ class.teacher ? class.teacher.firstName + ' ' + class.teacher.lastName : 'Not assigned' }}</td>
+                  <td>
+                    <span class="badge" [class]="class.isActive ? 'badge-success' : 'badge-secondary'">
+                      {{ class.isActive ? 'Active' : 'Inactive' }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="d-flex gap-1">
+                      <button class="btn btn-sm btn-view" (click)="showDetail(class)">
+                        <i class="bi bi-eye"></i>
+                      </button>
+                      <button class="btn btn-sm btn-edit" (click)="editClass(class)">
+                        <i class="bi bi-pencil-square"></i>
+                      </button>
+                      <button class="btn btn-sm btn-active" (click)="viewDetails(class.id!)">
+                        <i class="bi bi-info-circle"></i>
+                      </button>
+                      <button class="btn btn-sm btn-remove" (click)="deleteClass(class.id!)">
+                        <i class="bi bi-trash3"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="modal fade" [class.show]="showDetailModal" [style.display]="showDetailModal ? 'block' : 'none'" *ngIf="showDetailModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ selectedClass?.name }}</h5>
+        <button type="button" class="btn-close" (click)="closeModal()"></button>
+      </div>
+      <div class="modal-body" *ngIf="selectedClass">
+        <div class="row mb-3">
+          <div class="col-6"><strong>Age Group:</strong></div>
+          <div class="col-6">{{ selectedClass.ageGroupMin }} - {{ selectedClass.ageGroupMax }} years</div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-6"><strong>Capacity:</strong></div>
+          <div class="col-6">{{ selectedClass.capacity }} students</div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-6"><strong>Status:</strong></div>
+          <div class="col-6">{{ selectedClass.isActive ? 'Active' : 'Inactive' }}</div>
+        </div>
+        <div class="row mb-3" *ngIf="selectedClass.schedule">
+          <div class="col-6"><strong>Schedule:</strong></div>
+          <div class="col-6">{{ selectedClass.schedule }}</div>
+        </div>
+        <div class="row mb-3" *ngIf="selectedClass.description">
+          <div class="col-12"><strong>Description:</strong></div>
+          <div class="col-12">{{ selectedClass.description }}</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade" [class.show]="showDetailModal" *ngIf="showDetailModal"></div>
+
+<!-- Edit Modal -->
+<div class="modal fade" [class.show]="showEditModal" [style.display]="showEditModal ? 'block' : 'none'" *ngIf="showEditModal">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Class</h5>
+        <button type="button" class="btn-close" (click)="closeEditModal()"></button>
+      </div>
+      <form [formGroup]="classForm" (ngSubmit)="onSubmit()">
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Class Name *</label>
+              <input type="text" class="form-control" formControlName="name">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Capacity *</label>
+              <input type="number" class="form-control" formControlName="capacity">
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Min Age *</label>
+              <input type="number" class="form-control" formControlName="ageGroupMin">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Max Age *</label>
+              <input type="number" class="form-control" formControlName="ageGroupMax">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Schedule</label>
+            <input type="text" class="form-control" formControlName="schedule" placeholder="e.g., Mon-Fri 9:00 AM - 3:00 PM">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" formControlName="description" rows="3"></textarea>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" formControlName="isActive" id="isActive">
+            <label class="form-check-label" for="isActive">Active</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeEditModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="classForm.invalid">Update Class</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade" [class.show]="showEditModal" *ngIf="showEditModal"></div>

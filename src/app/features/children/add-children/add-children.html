@@ -1,0 +1,222 @@
+<div class="add-child-container">
+  <!-- Image Cropper Modal -->
+  <app-image-cropper-modal
+    #imageCropper
+    [imageFile]="selectedImageFile"
+    [roundCropper]="true"
+    [aspectRatio]="1"
+    [resizeToWidth]="300"
+    [resizeToHeight]="300"
+    (imageCropped)="onImageCropped($event)"
+    (cancelled)="onCropCancelled()">
+  </app-image-cropper-modal>
+
+  <div class="container-fluid mt-4 mb-4">
+    <app-title-page *ngIf="!isParent()"
+      [title]="'ADD_CHILD.TITLE' | translate"
+      [subtitle]="'ADD_CHILD.SUBTITLE' | translate"
+      icon="bi bi-person-plus-fill"
+      [breadcrumbs]="breadcrumbs"
+      [actions]="titleActions">
+    </app-title-page>
+
+    <div class="card-add-pages">
+      <form [formGroup]="childForm" (ngSubmit)="saveChild()" class="add-form">
+        <!-- Section Personal Information -->
+        <div class="form-section">
+          <div class="section-header">
+            <i class="bi bi-person-circle"></i>
+            <h4>{{ 'ADD_CHILD.GENERAL_INFO' | translate }}</h4>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">{{ 'ADD_CHILD.FIRST_NAME' | translate }} {{ 'ADD_CHILD.REQUIRED' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-person input-icon"></i>
+                <input type="text" class="form-input" [class.is-invalid]="isFieldInvalid('firstName')" formControlName="firstName" [placeholder]="'GLOBAL.FIRST_NAME_PLACEHOLDER' | translate">
+              </div>
+              <div *ngIf="isFieldInvalid('firstName')" class="error-message">
+                {{ getFieldError('firstName') }}
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ 'ADD_CHILD.LAST_NAME' | translate }} {{ 'ADD_CHILD.REQUIRED' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-person input-icon"></i>
+                <input type="text" class="form-input" [class.is-invalid]="isFieldInvalid('lastName')" formControlName="lastName" [placeholder]="'GLOBAL.LAST_NAME_PLACEHOLDER' | translate">
+              </div>
+              <div *ngIf="isFieldInvalid('lastName')" class="error-message">
+                {{ getFieldError('lastName') }}
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ 'ADD_CHILD.GENDER' | translate }} {{ 'ADD_CHILD.REQUIRED' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-gender-ambiguous input-icon"></i>
+                <ng-select
+                  class="form-input"
+                  [class.is-invalid]="isFieldInvalid('gender')"
+                  formControlName="gender"
+                  [items]="genders"
+                  bindLabel="label"
+                  bindValue="value"
+                  [placeholder]="'ADD_CHILD.SELECT_GENDER' | translate"
+                  [clearable]="false"
+                  [searchable]="true">
+                  <!-- Custom option template with icon -->
+                  <ng-template ng-option-tmp let-item="item">
+                    <div class="option-with-image">
+                      <i class="bi {{item.icon}}" style="font-size: 18px; color: #7dd3c0;"></i>
+                      <span class="option-title">{{ item.label }}</span>
+                    </div>
+                  </ng-template>
+                </ng-select>
+              </div>
+              <div *ngIf="isFieldInvalid('gender')" class="error-message">
+                {{ getFieldError('gender') }}
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ 'ADD_CHILD.DATE_OF_BIRTH' | translate }} {{ 'ADD_CHILD.REQUIRED' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-calendar input-icon"></i>
+                <input type="date" class="form-input" [class.is-invalid]="isFieldInvalid('dateOfBirth')" formControlName="dateOfBirth">
+              </div>
+              <div *ngIf="isFieldInvalid('dateOfBirth')" class="error-message">
+                {{ getFieldError('dateOfBirth') }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section Parent Selection (only for admin/teacher) -->
+        <div class="form-section" *ngIf="!isParent()">
+          <div class="section-header">
+            <i class="bi bi-people"></i>
+            <h4>{{ 'ADD_CHILD.PARENT' | translate }}</h4>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">{{ 'ADD_CHILD.PARENT' | translate }} {{ 'ADD_CHILD.REQUIRED' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-person-badge input-icon"></i>
+                <ng-select
+                  class="form-input"
+                  [class.is-invalid]="isFieldInvalid('parentId')"
+                  formControlName="parentId"
+                  [items]="parents"
+                  bindLabel="firstName"
+                  bindValue="id"
+                  [placeholder]="'ADD_CHILD.SELECT_PARENT' | translate"
+                  [clearable]="true"
+                  [searchable]="true">
+                  <!-- Custom option template with image -->
+                  <ng-template ng-option-tmp let-item="item">
+                    <div class="option-with-image">
+                      <img [src]="item?.profilePicture || 'assets/father.png'" class="option-image" alt="">
+                      <div class="option-text">
+                        <span class="option-title">{{ item.firstName }} {{ item.lastName }}</span>
+                        <span class="option-subtitle">{{ item.email }}</span>
+                      </div>
+                    </div>
+                  </ng-template>
+                  <!-- Custom selected label template -->
+                  <ng-template ng-label-tmp let-item="item">
+                    <div class="selected-with-image" *ngIf="item?.id">
+                      <img [src]="item?.profilePicture || 'assets/father.png'" class="selected-image" alt="">
+                      <span class="selected-text">{{ item.firstName }} {{ item.lastName }}</span>
+                    </div>
+                  </ng-template>
+                </ng-select>
+              </div>
+              <div *ngIf="isFieldInvalid('parentId')" class="error-message">
+                {{ getFieldError('parentId') }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section Medical Information -->
+        <div class="form-section">
+          <div class="section-header">
+            <i class="bi bi-heart-pulse"></i>
+            <h4>{{ 'ADD_CHILD.MEDICAL_INFO' | translate }}</h4>
+          </div>
+          <div class="form-grid">
+            <div class="form-group full-width textarea">
+              <label class="form-label">{{ 'ADD_CHILD.ALLERGIES' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-exclamation-triangle input-icon"></i>
+                <textarea class="form-input" [class.is-invalid]="isFieldInvalid('allergies')" formControlName="allergies" rows="3" [placeholder]="'ADD_CHILD.ALLERGIES_PLACEHOLDER' | translate"></textarea>
+              </div>
+              <div *ngIf="isFieldInvalid('allergies')" class="error-message">
+                {{ getFieldError('allergies') }}
+              </div>
+            </div>
+            <div class="form-group full-width">
+              <label class="form-label">{{ 'ADD_CHILD.MEDICAL_NOTES' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-clipboard2-pulse input-icon"></i>
+                <textarea class="form-input" [class.is-invalid]="isFieldInvalid('medicalNotes')" formControlName="medicalNotes" rows="3" [placeholder]="'ADD_CHILD.MEDICAL_NOTES_PLACEHOLDER' | translate"></textarea>
+              </div>
+              <div *ngIf="isFieldInvalid('medicalNotes')" class="error-message">
+                {{ getFieldError('medicalNotes') }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section Photo and Status -->
+        <div class="form-section">
+          <div class="section-header">
+            <i class="bi bi-image"></i>
+            <h4>{{ 'ADD_CHILD.PHOTO_STATUS' | translate }}</h4>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">{{ 'ADD_CHILD.PROFILE_PICTURE' | translate }}</label>
+              <div class="file-upload-area">
+                <input type="file" #fileInput id="profilePicture" class="file-input" (change)="onImageSelect($event)" accept="image/jpeg,image/png,image/gif,image/webp">
+                <label for="profilePicture" class="file-upload-label">
+                  <div *ngIf="!imagePreview" class="upload-placeholder">
+                    <i class="bi bi-cloud-upload"></i>
+                    <span>{{ 'GLOBAL.UPLOAD_PHOTO' | translate }}</span>
+                  </div>
+                  <img *ngIf="imagePreview" [src]="imagePreview" class="preview-image" [alt]="'GLOBAL.PREVIEW' | translate">
+                </label>
+                <button *ngIf="imagePreview" type="button" class="btn-remove-image" (click)="removeImage()">
+                  <i class="bi bi-x-circle"></i>
+                  {{ 'GLOBAL.REMOVE_PHOTO' | translate }}
+                </button>
+              </div>
+              <small class="form-hint">{{ 'GLOBAL.IMAGE_HINT' | translate }}</small>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ 'ADD_CHILD.Status' | translate }}</label>
+              <div class="status-toggle">
+                <label class="toggle-label">{{ 'ADD_CHILD.ACTIVE_STATUS' | translate }}</label>
+                <div class="toggle-switch">
+                  <input type="checkbox" formControlName="isActive" id="isActive" class="toggle-input">
+                  <label for="isActive" class="toggle-slider"></label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="form-actions">
+          <button type="button" class="custom-btn-2 btn-cancel-2" (click)="cancel()" [disabled]="saving">
+            <i class="bi bi-x-circle"></i>
+            {{ 'ADD_CHILD.CANCEL' | translate }}
+          </button>
+          <button type="submit" class="custom-btn-2 btn-add-global-2" [disabled]="saving || childForm.invalid">
+            <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
+            <i *ngIf="!saving" class="bi bi-check-circle"></i>
+            {{ saving ? ('ADD_CHILD.SAVING' | translate) : ('ADD_CHILD.SAVE_CHILD' | translate) }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

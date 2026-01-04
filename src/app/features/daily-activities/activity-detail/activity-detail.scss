@@ -1,0 +1,742 @@
+// Parent View Styles
+.parent-activity-detail {
+  .header-info {
+    padding: 16px 20px;
+    background: linear-gradient(135deg, #B8E6F0 0%, #D4F1E8 100%);
+
+    .title-icons {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+
+      .page-back {
+        width: 40px;
+        height: 40px;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        i {
+          font-size: 20px;
+          color: #202c4b;
+        }
+      }
+
+      .title-page {
+        font-size: 18px;
+        font-weight: 600;
+        color: #202c4b;
+      }
+    }
+  }
+
+  .activity-detail-content {
+    padding: 20px;
+
+    .activity-header-card {
+      background: white;
+      border-radius: 20px;
+      padding: 30px 20px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      margin-bottom: 20px;
+
+      .activity-emoji {
+        font-size: 64px;
+        margin-bottom: 16px;
+      }
+
+      .activity-type {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1F2937;
+        margin-bottom: 8px;
+      }
+
+      .activity-time {
+        font-size: 32px;
+        font-weight: 600;
+        color: #1DBAB4;
+        margin-bottom: 4px;
+      }
+
+      .activity-date {
+        font-size: 14px;
+        color: #6B7280;
+        margin: 0;
+      }
+    }
+
+    .info-card {
+      background: white;
+      border-radius: 16px;
+      padding: 16px 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      margin-bottom: 12px;
+
+      .section-title {
+        font-size: 12px;
+        font-weight: 600;
+        color: #9CA3AF;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+      }
+
+      .child-info-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .child-avatar {
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
+          object-fit: cover;
+        }
+
+        .child-name {
+          font-size: 16px;
+          font-weight: 600;
+          color: #1F2937;
+        }
+      }
+
+      .info-value {
+        font-size: 16px;
+        font-weight: 500;
+        color: #1F2937;
+
+        i {
+          color: #1DBAB4;
+        }
+      }
+
+      .mood-display {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .mood-emoji {
+          font-size: 32px;
+        }
+
+        .mood-text {
+          font-size: 18px;
+          font-weight: 600;
+          color: #1F2937;
+        }
+      }
+
+      .notes-text {
+        font-size: 15px;
+        color: #4B5563;
+        line-height: 1.6;
+        margin: 0;
+      }
+    }
+  }
+}
+
+// Admin/Teacher View Styles
+.activity-card {
+  overflow: hidden;
+
+  .activity-card-header {
+    padding: 40px 30px;
+    text-align: center;
+    position: relative;
+    background: linear-gradient(135deg, #7db9ff 0%, #7dd3c0 100%) !important;
+    .activity-icon-large {
+      width: 80px;
+      height: 80px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+
+      i {
+        font-size: 36px;
+        color: white;
+      }
+    }
+
+    .activity-title {
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .activity-subtitle {
+      font-size: 16px;
+    }
+  }
+
+  .detail-section {
+    padding: 20px 0;
+    border-bottom: 1px solid #E5E7EB;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .detail-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #6B7280;
+      margin-bottom: 12px;
+
+      i {
+        color: #1DBAB4;
+      }
+    }
+
+    .notes-content {
+      font-size: 15px;
+      color: #4B5563;
+      line-height: 1.7;
+      background: #F9FAFB;
+      padding: 16px;
+      border-radius: 8px;
+      margin: 0;
+    }
+  }
+}
+
+.stat-card {
+  background: #F9FAFB;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  .stat-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    background: #E0F2FE;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    i {
+      font-size: 20px;
+      color: #1DBAB4;
+    }
+
+    &.mood-icon {
+      background: #FEF3C7;
+
+      span {
+        font-size: 24px;
+      }
+    }
+  }
+
+  .stat-content {
+    small {
+      font-size: 12px;
+    }
+
+    h5 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1F2937;
+    }
+  }
+}
+
+// Sidebar Styles
+.details-sidebar {
+  .details-header {
+    h5 {
+      font-size: 20px;
+      font-weight: 600;
+      color: #333;
+      margin: 0;
+      display: flex;
+      align-items: center;
+    }
+    i {
+      color: #1DBAB4;
+      font-size: 22px;
+      margin-right: 8px;
+    }
+  }
+
+  .detail-icon {
+    color: #ffffff;
+    background: #7cd1c0;
+    padding: 10px;
+    border-radius: 50px;
+    line-height: 1;
+  }
+
+  .mood-badge {
+    font-size: 24px;
+  }
+}
+
+// Gallery Styles (Admin/Teacher View)
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+
+  .photo-item {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    background: #F3F4F6;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.2s ease;
+    }
+
+    .photo-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+
+      i {
+        color: white;
+        font-size: 24px;
+      }
+    }
+
+    &:hover {
+      img {
+        transform: scale(1.05);
+      }
+
+      .photo-overlay {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+// Comments Styles (Admin/Teacher View)
+.comments-list {
+  .comment-item {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #E5E7EB;
+
+    &:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+  }
+
+  .comment-main {
+    display: flex;
+    gap: 12px;
+  }
+
+  .comment-avatar {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+
+    img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    &.small {
+      width: 32px;
+      height: 32px;
+    }
+  }
+
+  .comment-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .comment-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+    flex-wrap: wrap;
+  }
+
+  .comment-author {
+    font-weight: 600;
+    color: #1F2937;
+    font-size: 14px;
+  }
+
+  .comment-time {
+    font-size: 12px;
+    color: #9CA3AF;
+  }
+
+  .comment-edited {
+    font-size: 11px;
+    color: #9CA3AF;
+    font-style: italic;
+  }
+
+  .comment-text {
+    margin: 0;
+    font-size: 14px;
+    color: #4B5563;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .comment-actions {
+    margin-top: 8px;
+
+    .btn-link {
+      font-size: 12px;
+      padding: 0;
+      margin-right: 12px;
+      text-decoration: none;
+      color: #6B7280;
+
+      &:hover {
+        color: #1DBAB4;
+      }
+
+      &.text-danger:hover {
+        color: #DC2626;
+      }
+    }
+  }
+
+  .comment-replies {
+    margin-top: 16px;
+    margin-left: 52px;
+    padding-left: 16px;
+    border-left: 2px solid #E5E7EB;
+  }
+
+  .reply-item {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .reply-form,
+  .edit-comment-form {
+    background: #F9FAFB;
+    padding: 12px;
+    border-radius: 8px;
+  }
+}
+
+// Photo Modal
+.photo-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.photo-modal-content {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.photo-modal-close {
+  position: absolute;
+  top: -40px;
+  right: 0;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 8px;
+  z-index: 10;
+
+  &:hover {
+    color: #1DBAB4;
+  }
+}
+
+.photo-modal-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.photo-modal-image {
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.photo-modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  color: white;
+
+  .photo-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .photo-title {
+    font-weight: 600;
+    font-size: 16px;
+  }
+
+  .photo-date,
+  .photo-uploader {
+    font-size: 13px;
+    color: #9CA3AF;
+  }
+}
+
+// Parent View Gallery Styles
+.photo-grid-parent {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+
+  .photo-item-parent {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+}
+
+// Parent View Comments Styles
+.new-comment-form-parent,
+.reply-form-parent,
+.edit-form-parent {
+  textarea {
+    font-size: 14px;
+    border-radius: 12px;
+    resize: none;
+  }
+}
+
+.comments-list-parent {
+  .comment-item-parent {
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #E5E7EB;
+
+    &:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+  }
+
+  .comment-main-parent {
+    display: flex;
+    gap: 10px;
+  }
+
+  .comment-avatar-parent {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  .comment-content-parent {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .comment-header-parent {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+  }
+
+  .comment-author-parent {
+    font-weight: 600;
+    font-size: 13px;
+    color: #1F2937;
+  }
+
+  .comment-time-parent {
+    font-size: 11px;
+    color: #9CA3AF;
+  }
+
+  .comment-text-parent {
+    margin: 0;
+    font-size: 14px;
+    color: #4B5563;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .comment-actions-parent {
+    margin-top: 6px;
+  }
+
+  .btn-action-parent {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 12px;
+    color: #6B7280;
+    margin-right: 12px;
+    cursor: pointer;
+
+    &:hover {
+      color: #1DBAB4;
+    }
+
+    &.text-danger:hover {
+      color: #DC2626;
+    }
+  }
+
+  .replies-parent {
+    margin-top: 12px;
+    margin-left: 46px;
+    padding-left: 12px;
+    border-left: 2px solid #E5E7EB;
+  }
+
+  .reply-item-parent {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .reply-avatar-parent {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  .reply-content-parent {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .activity-card .activity-card-header {
+    padding: 30px 20px;
+
+    .activity-icon-large {
+      width: 60px;
+      height: 60px;
+
+      i {
+        font-size: 28px;
+      }
+    }
+
+    .activity-title {
+      font-size: 22px;
+    }
+  }
+
+  .stat-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+}
+
+.action{
+.custom-btn-2 {
+  min-width: 100%;
+  &.add {
+  }
+  &.edit {
+  }
+  &.back {
+  }
+}
+
+}
+
+.card-general .card-header i {
+  color: #1DBAB4;
+  font-size: 22px;
+  margin-right: 8px;
+  line-height: 0;
+}
+
+.photo-action-buttons {
+  i {
+    font-size: 16px !important;
+    color: white !important;
+  }
+  .take-photo {
+    background: #7dd3c0 !important;
+    border: none;
+    color: white;
+    &:hover {
+      background: #7dd3c0;
+      color: white;
+    }
+  }
+  .upload-photo {
+    background: #7db9ff !important;
+    border: none;
+    color: white;
+    &:hover {
+      background: #7db9ff;
+      color: white;
+    }
+  }
+}

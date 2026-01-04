@@ -1,0 +1,168 @@
+<div class="add-fee-container">
+  <div class="container-fluid mt-4 mb-4">
+    <app-title-page
+      [title]="'ADD_FEE.TITLE' | translate"
+      [subtitle]="'ADD_FEE.SUBTITLE' | translate"
+      icon="bi bi-plus-circle"
+      [breadcrumbs]="breadcrumbs"
+      [actions]="titleActions">
+    </app-title-page>
+
+    <!-- Loading -->
+    <div *ngIf="loading" class="text-center py-5">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">{{ 'ADD_FEE.LOADING' | translate }}</span>
+      </div>
+    </div>
+
+    <div class="card-add-pages" *ngIf="!loading">
+      <form [formGroup]="feeForm" (ngSubmit)="createFee()" class="add-form">
+        <!-- Section Fee Information -->
+        <div class="form-section">
+          <div class="section-header">
+            <i class="bi bi-cash-coin"></i>
+            <h4>{{ 'ADD_FEE.FEE_INFO' | translate }}</h4>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">{{ 'ADD_FEE.CHILD' | translate }} {{ 'ADD_FEE.REQUIRED' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-person input-icon"></i>
+                <ng-select
+                  class="form-input"
+                  [class.is-invalid]="isFieldInvalid('childId')"
+                  formControlName="childId"
+                  [items]="children"
+                  bindLabel="firstName"
+                  bindValue="id"
+                  [placeholder]="'ADD_FEE.SELECT_CHILD' | translate"
+                  [clearable]="true"
+                  [searchable]="true">
+                  <!-- Custom option template with image -->
+                  <ng-template ng-option-tmp let-item="item">
+                    <div class="option-with-image">
+                      <img [src]="item?.profilePicture || 'assets/child.png'" class="option-image" alt="">
+                      <div class="option-text">
+                        <span class="option-title">{{ item.firstName }} {{ item.lastName }}</span>
+                      </div>
+                    </div>
+                  </ng-template>
+                  <!-- Custom selected label template -->
+                  <ng-template ng-label-tmp let-item="item">
+                    <div class="selected-with-image" *ngIf="item?.id">
+                      <img [src]="item?.profilePicture || 'assets/child.png'" class="selected-image" alt="">
+                      <span class="selected-text">{{ item.firstName }} {{ item.lastName }}</span>
+                    </div>
+                  </ng-template>
+                </ng-select>
+              </div>
+              <div *ngIf="isFieldInvalid('childId')" class="error-message">
+                {{ getFieldError('childId') }}
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ 'ADD_FEE.AMOUNT' | translate }} {{ 'ADD_FEE.REQUIRED' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-currency-dollar input-icon"></i>
+                <input type="number" class="form-input" [class.is-invalid]="isFieldInvalid('amount')" formControlName="amount" step="0.01" min="0" [placeholder]="'ADD_FEE.AMOUNT_PLACEHOLDER' | translate">
+              </div>
+              <div *ngIf="isFieldInvalid('amount')" class="error-message">
+                {{ getFieldError('amount') }}
+              </div>
+            </div>
+            <div class="form-group full-width">
+              <label class="form-label">{{ 'ADD_FEE.DESCRIPTION' | translate }} {{ 'ADD_FEE.REQUIRED' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-card-text input-icon"></i>
+                <input type="text" class="form-input" [class.is-invalid]="isFieldInvalid('description')" formControlName="description" [placeholder]="'ADD_FEE.DESCRIPTION_PLACEHOLDER' | translate">
+              </div>
+              <div *ngIf="isFieldInvalid('description')" class="error-message">
+                {{ getFieldError('description') }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section Payment Details -->
+        <div class="form-section">
+          <div class="section-header">
+            <i class="bi bi-credit-card"></i>
+            <h4>{{ 'ADD_FEE.PAYMENT_DETAILS' | translate }}</h4>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">{{ 'ADD_FEE.DUE_DATE' | translate }} {{ 'ADD_FEE.REQUIRED' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-calendar input-icon"></i>
+                <input type="date" class="form-input" [class.is-invalid]="isFieldInvalid('dueDate')" formControlName="dueDate">
+              </div>
+              <div *ngIf="isFieldInvalid('dueDate')" class="error-message">
+                {{ getFieldError('dueDate') }}
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ 'ADD_FEE.FEE_TYPE' | translate }} {{ 'ADD_FEE.REQUIRED' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-tag input-icon"></i>
+                <ng-select
+                  class="form-input"
+                  [class.is-invalid]="isFieldInvalid('feeType')"
+                  formControlName="feeType"
+                  [items]="feeTypes"
+                  bindLabel="label"
+                  bindValue="value"
+                  [placeholder]="'ADD_FEE.SELECT_FEE_TYPE' | translate"
+                  [clearable]="false"
+                  [searchable]="false">
+                  <!-- Custom option template with icon -->
+                  <ng-template ng-option-tmp let-item="item">
+                    <div class="option-with-image">
+                      <i class="bi {{item.icon}}" style="font-size: 18px; color: #7dd3c0;"></i>
+                      <span class="option-title">{{ item.label }}</span>
+                    </div>
+                  </ng-template>
+                </ng-select>
+              </div>
+              <div *ngIf="isFieldInvalid('feeType')" class="error-message">
+                {{ getFieldError('feeType') }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section Additional Notes -->
+        <div class="form-section">
+          <div class="section-header">
+            <i class="bi bi-journal-text"></i>
+            <h4>{{ 'ADD_FEE.ADDITIONAL_INFO' | translate }}</h4>
+          </div>
+          <div class="form-grid">
+            <div class="form-group full-width textarea">
+              <label class="form-label">{{ 'ADD_FEE.NOTES' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-pencil input-icon"></i>
+                <textarea class="form-input" [class.is-invalid]="isFieldInvalid('notes')" formControlName="notes" rows="3" [placeholder]="'ADD_FEE.NOTES_PLACEHOLDER' | translate"></textarea>
+              </div>
+              <div *ngIf="isFieldInvalid('notes')" class="error-message">
+                {{ getFieldError('notes') }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="form-actions">
+          <button type="button" class="custom-btn-2 btn-cancel-2" (click)="cancel()" [disabled]="saving">
+            <i class="bi bi-x-circle"></i>
+            {{ 'ADD_FEE.CANCEL' | translate }}
+          </button>
+          <button type="submit" class="custom-btn-2 btn-add-global-2" [disabled]="saving || feeForm.invalid">
+            <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
+            <i *ngIf="!saving" class="bi bi-check-circle"></i>
+            {{ saving ? ('ADD_FEE.CREATING' | translate) : ('ADD_FEE.CREATE_FEE' | translate) }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

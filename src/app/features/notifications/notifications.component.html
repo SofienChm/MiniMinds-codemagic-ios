@@ -1,0 +1,118 @@
+<div *ngIf="isParent && !loading" [class]="isParent ? '' : ' mt-4'">
+  <div class="parent-detailchild font-inter">
+    <app-parent-child-header-simple *ngIf="isParent"
+      title="Notifications"
+    >
+    </app-parent-child-header-simple>
+
+    <div class="body container-fluid">
+      <div class="main-information">
+        <div *ngIf="isLoading" class="loading-state">
+          <div class="spinner"></div>
+          <p>Loading notifications...</p>
+        </div>
+
+        <div *ngIf="!isLoading && filteredNotifications.length === 0" class="empty-state">
+          <i class="bi bi-bell-slash"></i>
+          <h3>No notifications</h3>
+          <p>You're all caught up!</p>
+        </div>
+
+        <div *ngIf="!isLoading && filteredNotifications.length > 0" class="notifications-list">
+          <div *ngFor="let notification of displayedNotifications" 
+               class="notification-card" 
+               [class.unread]="!notification.isRead"
+               (click)="onNotificationClick(notification)">
+            <div class="notification-avatar">
+              <span class="avatar-text">{{ getAvatarText(notification.title) }}</span>
+              <div *ngIf="!notification.isRead" class="unread-dot"></div>
+            </div>
+            <div class="notification-content">
+              <div class="notification-header">
+                <h4 class="sender-name">{{ notification.title }}</h4>
+                <span class="notification-time">{{ getTimeAgo(notification.createdAt) }}</span>
+              </div>
+              <p class="notification-message">{{ notification.message }}</p>
+              <div *ngIf="notification.type" class="notification-tag">
+                {{ notification.type }}
+              </div>
+            </div>
+            <div *ngIf="notification.isRead" class="read-check">
+              <i class="bi bi-check-circle-fill"></i>
+            </div>
+          </div>
+          <div *ngIf="hasMoreNotifications" class="load-more-container">
+            <button class="btn btn-outline-primary load-more-btn" (click)="loadMore()">
+              Load More
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="!isParent" [class]="isParent ? '' : 'container-fluid mt-4'">
+  <app-title-page 
+    [title]="'Notifications'" 
+    [breadcrumbs]="[{label: 'Dashboard', url: '/dashboard'}, {label: 'Notifications'}]">
+  </app-title-page>
+  
+  <div class="container-fluid">
+    <div class="notifications-header mb-4">
+      <button *ngIf="filteredNotifications.length > 0" class="btn btn-outline-primary" (click)="markAllAsRead()">
+        <i class="bi bi-check-all"></i> Mark all as read
+      </button>
+    </div>
+
+    <div class="tabs mb-4">
+      <button class="btn tab" [class.active]="activeTab === 'all'" (click)="setActiveTab('all')">
+        All
+      </button>
+      <button class="btn tab" [class.active]="activeTab === 'unread'" (click)="setActiveTab('unread')">
+        Unread
+      </button>
+    </div>
+
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading notifications...</p>
+    </div>
+
+    <div *ngIf="!isLoading && filteredNotifications.length === 0" class="empty-state">
+      <i class="bi bi-bell-slash"></i>
+      <h3>No notifications</h3>
+      <p>You're all caught up!</p>
+    </div>
+
+    <div *ngIf="!isLoading && filteredNotifications.length > 0" class="notifications-list">
+      <div *ngFor="let notification of displayedNotifications" 
+           class="notification-card" 
+           [class.unread]="!notification.isRead"
+           (click)="onNotificationClick(notification)">
+        <div class="notification-avatar">
+          <span class="avatar-text">{{ getAvatarText(notification.title) }}</span>
+          <div *ngIf="!notification.isRead" class="unread-dot"></div>
+        </div>
+        <div class="notification-content">
+          <div class="notification-header">
+            <h4 class="sender-name">{{ notification.title }}</h4>
+            <span class="notification-time">{{ getTimeAgo(notification.createdAt) }}</span>
+          </div>
+          <p class="notification-message">{{ notification.message }}</p>
+          <div *ngIf="notification.type" class="notification-tag">
+            {{ notification.type }}
+          </div>
+        </div>
+        <div *ngIf="notification.isRead" class="read-check">
+          <i class="bi bi-check-circle-fill"></i>
+        </div>
+      </div>
+      <div *ngIf="hasMoreNotifications" class="load-more-container">
+        <button class="btn btn-outline-primary load-more-btn" (click)="loadMore()">
+          Load More
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

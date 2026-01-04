@@ -1,0 +1,340 @@
+<div class="container-fluid mt-4">
+  <app-title-page
+    [title]="'FOOD_MENU.TITLE' | translate"
+    [subtitle]="'FOOD_MENU.SUBTITLE' | translate"
+    icon="bi bi-egg-fried"
+    [breadcrumbs]="breadcrumbs"
+    [actions]="titleActions">
+  </app-title-page>
+
+  <!-- View Controls -->
+  <div class="card card-general p-3 d-flex align-items-center justify-content-between flex-wrap flex-row mb-4">
+    <div class="d-flex align-items-center">
+      <h4 class="title-filter mb-0 me-3">{{ 'FOOD_MENU.MENUS' | translate }}</h4>
+      <!-- Filter Pills -->
+      <div class="btn-group me-3 bg-white border rounded-2 p-1 filter-custom" role="group">
+        <button type="button" class="btn btn-sm"
+                [class.btn-primary]="filterType === 'all'"
+                [class.btn-outline-secondary]="filterType !== 'all'"
+                (click)="setFilterType('all')">{{ 'FOOD_MENU.ALL' | translate }}</button>
+        <button type="button" class="btn btn-sm"
+                [class.btn-primary]="filterType === 'published'"
+                [class.btn-outline-secondary]="filterType !== 'published'"
+                (click)="setFilterType('published')">{{ 'FOOD_MENU.PUBLISHED' | translate }}</button>
+        <button type="button" class="btn btn-sm"
+                [class.btn-primary]="filterType === 'draft'"
+                [class.btn-outline-secondary]="filterType !== 'draft'"
+                (click)="setFilterType('draft')">{{ 'FOOD_MENU.DRAFTS' | translate }}</button>
+        <button type="button" class="btn btn-sm"
+                [class.btn-primary]="filterType === 'templates'"
+                [class.btn-outline-secondary]="filterType !== 'templates'"
+                (click)="setFilterType('templates')">{{ 'FOOD_MENU.TEMPLATES' | translate }}</button>
+      </div>
+    </div>
+
+    <div class="d-flex align-items-center flex-wrap gap-2">
+      <!-- Search -->
+      <div class="search-box">
+        <i class="bi bi-search search-icon"></i>
+        <input
+          type="text"
+          class="form-control search-input"
+          [placeholder]="'FOOD_MENU.SEARCH_PLACEHOLDER' | translate"
+          [(ngModel)]="searchTerm"
+          (input)="applyFilter()">
+      </div>
+
+      <!-- View Toggle -->
+      <div class="d-flex align-items-center bg-white border rounded-2 p-1 view-toggle">
+        <button
+          class="btn btn-icon btn-sm me-1"
+          [class.active]="viewMode === 'grid'"
+          (click)="setViewMode('grid')"
+          [title]="'FOOD_MENU.GRID_VIEW' | translate">
+          <i class="bi bi-grid"></i>
+        </button>
+        <button
+          class="btn btn-icon btn-sm me-1"
+          [class.active]="viewMode === 'list'"
+          (click)="setViewMode('list')"
+          [title]="'FOOD_MENU.LIST_VIEW' | translate">
+          <i class="bi bi-list-ul"></i>
+        </button>
+        <button
+          class="btn btn-icon btn-sm"
+          [class.active]="viewMode === 'calendar'"
+          (click)="setViewMode('calendar')"
+          [title]="'FOOD_MENU.CALENDAR_VIEW' | translate">
+          <i class="bi bi-calendar-week"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border spinner-custom" role="status">
+      <span class="visually-hidden">{{ 'FOOD_MENU.LOADING' | translate }}</span>
+    </div>
+  </div>
+
+  <!-- Calendar View -->
+  <div *ngIf="viewMode === 'calendar' && !loading" class="mb-4">
+    <div class="card card-general calendar-card">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <button class="btn btn-sm btn-calendar-nav" (click)="previousWeek()">
+          <i class="bi bi-chevron-left me-1"></i> {{ 'FOOD_MENU.PREVIOUS' | translate }}
+        </button>
+        <h5 class="mb-0 calendar-title">
+          {{ selectedWeekStart | date:'MMM d' }} - {{ getWeekDays()[6] | date:'MMM d, yyyy' }}
+        </h5>
+        <button class="btn btn-sm btn-calendar-nav" (click)="nextWeek()">
+          {{ 'FOOD_MENU.NEXT' | translate }} <i class="bi bi-chevron-right ms-1"></i>
+        </button>
+      </div>
+      <div class="card-body p-0">
+        <div class="row g-0">
+          <div *ngFor="let day of getWeekDays()" class="col calendar-day-col">
+            <div class="calendar-day-header">
+              <small class="d-block day-name">{{ day | date:'EEE' }}</small>
+              <strong class="day-number">{{ day | date:'d' }}</strong>
+            </div>
+            <div class="calendar-day-content">
+              <ng-container *ngIf="getMenuForDay(day) as menu; else noMenu">
+                <div class="calendar-menu-card" (click)="viewMenu(menu)">
+                  <small class="fw-bold text-truncate menu-name">{{ menu.name }}</small>
+                  <div class="d-flex flex-wrap gap-1 mt-1">
+                    <span *ngIf="menu.isPublished" class="badge badge-published">{{ 'FOOD_MENU.PUBLISHED' | translate }}</span>
+                    <span *ngIf="!menu.isPublished" class="badge badge-draft">{{ 'FOOD_MENU.DRAFT' | translate }}</span>
+                  </div>
+                  <small class="menu-items-count">{{ menu.menuItems?.length || 0 }} {{ 'FOOD_MENU.ITEMS' | translate }}</small>
+                </div>
+              </ng-container>
+              <ng-template #noMenu>
+                <div class="text-center py-3" *ngIf="canEdit()">
+                  <button class="btn btn-sm btn-add-menu"
+                          (click)="router.navigate(['/food-menu/add'], { queryParams: { date: day.toISOString().split('T')[0] } })">
+                    <i class="bi bi-plus"></i> {{ 'FOOD_MENU.ADD' | translate }}
+                  </button>
+                </div>
+              </ng-template>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grid View -->
+  <div class="row" *ngIf="viewMode === 'grid' && !loading">
+    <div *ngFor="let menu of displayedMenus" class="col-xl-4 col-md-6 mb-4">
+      <div class="card card-general h-100 menu-card">
+        <div class="card-header d-flex align-items-center justify-content-between">
+          <div class="d-flex gap-2 flex-wrap">
+            <span class="badge" [class.badge-published]="menu.isPublished" [class.badge-draft]="!menu.isPublished">
+              {{ menu.isPublished ? ('FOOD_MENU.PUBLISHED' | translate) : ('FOOD_MENU.DRAFT' | translate) }}
+            </span>
+            <span *ngIf="menu.isTemplate" class="badge badge-template">{{ 'FOOD_MENU.TEMPLATE' | translate }}</span>
+            <span class="badge badge-type">{{ menu.menuType }}</span>
+          </div>
+          <div class="dropdown" *ngIf="canEdit() || canDelete()">
+            <a href="#" class="btn btn-white btn-icon btn-sm d-flex align-items-center justify-content-center rounded-circle p-0" data-bs-toggle="dropdown">
+              <i class="bi bi-three-dots-vertical"></i>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end p-3">
+              <li>
+                <a class="dropdown-item rounded-1" href="#" (click)="viewMenu(menu); $event.preventDefault()">
+                  <i class="bi bi-eye me-2"></i>{{ 'FOOD_MENU.VIEW_DETAILS' | translate }}
+                </a>
+              </li>
+              <li *ngIf="canEdit()">
+                <a class="dropdown-item rounded-1" href="#" (click)="editMenu(menu); $event.preventDefault()">
+                  <i class="bi bi-pencil-square me-2"></i>{{ 'FOOD_MENU.EDIT' | translate }}
+                </a>
+              </li>
+              <li *ngIf="canEdit()">
+                <a class="dropdown-item rounded-1" href="#" (click)="duplicateMenu(menu); $event.preventDefault()">
+                  <i class="bi bi-copy me-2"></i>{{ 'FOOD_MENU.DUPLICATE' | translate }}
+                </a>
+              </li>
+              <li *ngIf="canEdit()">
+                <a class="dropdown-item rounded-1" href="#" (click)="togglePublish(menu); $event.preventDefault()">
+                  <i class="bi me-2" [class.bi-eye]="!menu.isPublished" [class.bi-eye-slash]="menu.isPublished"></i>
+                  {{ menu.isPublished ? ('FOOD_MENU.UNPUBLISH' | translate) : ('FOOD_MENU.PUBLISH' | translate) }}
+                </a>
+              </li>
+              <li *ngIf="canEdit()">
+                <a class="dropdown-item rounded-1" href="#" (click)="viewReport(menu); $event.preventDefault()">
+                  <i class="bi bi-bar-chart me-2"></i>{{ 'FOOD_MENU.VIEW_REPORT' | translate }}
+                </a>
+              </li>
+              <li *ngIf="canDelete()">
+                <a class="dropdown-item rounded-1 text-danger" href="#" (click)="deleteMenu(menu); $event.preventDefault()">
+                  <i class="bi bi-trash3 me-2"></i>{{ 'FOOD_MENU.DELETE' | translate }}
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="bg-light rounded-2 p-3 mb-3 menu-info-box">
+            <div class="d-flex align-items-center">
+              <div class="menu-icon-wrapper flex-shrink-0">
+                <i class="bi bi-egg-fried"></i>
+              </div>
+              <div class="ms-3">
+                <h6 class="text-dark text-truncate mb-0 title-card__name">
+                  {{ menu.name }}
+                </h6>
+                <p class="mb-0 card-age">
+                  <i class="bi bi-calendar3 me-1"></i>{{ formatDate(menu.menuDate) }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <p class="menu-description" *ngIf="menu.description">{{ menu.description }}</p>
+
+          <!-- CACFP Compliance -->
+          <div class="compliance-section mb-3">
+            <p class="mb-1 information-title">{{ 'FOOD_MENU.CACFP_COMPLIANCE' | translate }}</p>
+            <div class="d-flex flex-wrap gap-1">
+              <span *ngFor="let badge of getComplianceBadges(menu)"
+                    class="badge compliance-badge" [class]="badge.class">
+                {{ badge.label }}
+              </span>
+              <span *ngIf="getComplianceBadges(menu).length === 0" class="text-muted small">
+                {{ 'FOOD_MENU.NOT_MEETING_REQUIREMENTS' | translate }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Meal Summary -->
+          <div class="d-flex align-items-center justify-content-between body-information meal-summary">
+            <div *ngFor="let mealType of mealTypes" class="meal-type-item text-center">
+              <p class="mb-0 information-title">{{ mealType.split(' ')[0] }}</p>
+              <p class="text-dark information-description meal-count">{{ getMealItemsCount(menu, mealType) }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-footer d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center">
+            <span class="text-muted me-1"><i class="bi bi-clock me-1"></i>{{ menu.createdAt | date:'short' }}</span>
+          </div>
+          <button class="btn btn-light btn-sm btn-footer" (click)="viewMenu(menu)">{{ 'FOOD_MENU.VIEW_MENU' | translate }}</button>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="filteredMenus.length === 0" class="col-12">
+      <div class="card card-general empty-state-card">
+        <div class="card-body text-center py-5">
+          <div class="empty-icon-wrapper mb-3">
+            <i class="bi bi-calendar-x"></i>
+          </div>
+          <h5 class="empty-title">{{ 'FOOD_MENU.NO_MENUS_FOUND' | translate }}</h5>
+          <p class="empty-description">{{ 'FOOD_MENU.START_CREATING' | translate }}</p>
+          <button *ngIf="canEdit()" class="action-btn custom-btn-2 btn-add-global-2" (click)="router.navigate(['/food-menu/add'])">
+            <i class="bi bi-plus-circle-dotted me-2"></i>
+            {{ 'FOOD_MENU.CREATE_FIRST_MENU' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load More Button for Grid View -->
+  <div *ngIf="viewMode === 'grid' && !loading && hasMoreMenus()" class="text-center mt-4">
+    <button class="action-btn custom-btn-2 btn-add-border" (click)="loadMore()">
+      <i class="bi bi-arrow-down-circle me-1"></i>
+      {{ 'FOOD_MENU.LOAD_MORE' | translate }}
+    </button>
+  </div>
+
+  <!-- List View -->
+  <div *ngIf="viewMode === 'list' && !loading">
+    <div class="card card-general card-recently">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0 custom-table">
+          <thead>
+            <tr>
+              <th>{{ 'FOOD_MENU.MENU_NAME' | translate }}</th>
+              <th>{{ 'FOOD_MENU.DATE' | translate }}</th>
+              <th>{{ 'FOOD_MENU.TYPE' | translate }}</th>
+              <th>{{ 'FOOD_MENU.STATUS' | translate }}</th>
+              <th>{{ 'FOOD_MENU.ITEMS' | translate }}</th>
+              <th>{{ 'FOOD_MENU.COMPLIANCE' | translate }}</th>
+              <th>{{ 'FOOD_MENU.ACTIONS' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let menu of displayedMenus">
+              <td>
+                <span class="name-last">{{ menu.name }}</span>
+                <br>
+                <small class="text-muted">{{ menu.description }}</small>
+              </td>
+              <td>{{ formatDate(menu.menuDate) }}</td>
+              <td>
+                <span class="badge badge-type">{{ menu.menuType }}</span>
+                <span *ngIf="menu.isTemplate" class="badge badge-template ms-1">{{ 'FOOD_MENU.TEMPLATE' | translate }}</span>
+              </td>
+              <td>
+                <span class="badge" [class.badge-published]="menu.isPublished" [class.badge-draft]="!menu.isPublished">
+                  {{ menu.isPublished ? ('FOOD_MENU.PUBLISHED' | translate) : ('FOOD_MENU.DRAFT' | translate) }}
+                </span>
+              </td>
+              <td>{{ menu.menuItems?.length || 0 }} {{ 'FOOD_MENU.ITEMS' | translate }}</td>
+              <td>
+                <div class="d-flex flex-wrap gap-1">
+                  <span *ngFor="let badge of getComplianceBadges(menu)"
+                        class="badge compliance-badge" [class]="badge.class">
+                    {{ badge.label }}
+                  </span>
+                </div>
+              </td>
+              <td>
+                <div class="d-flex gap-1">
+                  <button class="btn btn-sm btn-view" (click)="viewMenu(menu)" [title]="'FOOD_MENU.VIEW_DETAILS' | translate">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                  <button *ngIf="canEdit()" class="btn btn-sm btn-edit" (click)="editMenu(menu)" [title]="'FOOD_MENU.EDIT' | translate">
+                    <i class="bi bi-pencil-square"></i>
+                  </button>
+                  <button *ngIf="canEdit()" class="btn btn-sm btn-active" (click)="duplicateMenu(menu)" [title]="'FOOD_MENU.DUPLICATE' | translate">
+                    <i class="bi bi-copy"></i>
+                  </button>
+                  <button *ngIf="canEdit()" class="btn btn-sm"
+                          [class.btn-view]="!menu.isPublished"
+                          [class.btn-active]="menu.isPublished"
+                          (click)="togglePublish(menu)"
+                          [title]="menu.isPublished ? ('FOOD_MENU.UNPUBLISH' | translate) : ('FOOD_MENU.PUBLISH' | translate)">
+                    <i class="bi" [class.bi-eye]="!menu.isPublished" [class.bi-eye-slash]="menu.isPublished"></i>
+                  </button>
+                  <button *ngIf="canDelete()" class="btn btn-sm btn-remove" (click)="deleteMenu(menu)" [title]="'FOOD_MENU.DELETE' | translate">
+                    <i class="bi bi-trash3"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="filteredMenus.length === 0">
+              <td colspan="7" class="text-center py-4">
+                {{ 'FOOD_MENU.NO_MENUS_FOUND' | translate }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Load More Button for List View -->
+    <div *ngIf="hasMoreMenus()" class="text-center mt-3">
+      <button class="action-btn custom-btn-2 btn-add-border" (click)="loadMore()">
+        <i class="bi bi-arrow-down-circle me-1"></i>
+        {{ 'FOOD_MENU.LOAD_MORE' | translate }}
+      </button>
+    </div>
+  </div>
+</div>

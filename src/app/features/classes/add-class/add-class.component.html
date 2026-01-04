@@ -1,0 +1,61 @@
+<div class="container-fluid mt-4">
+  <app-title-page 
+    title="Add New Class" 
+    subtitle="Create a new class"
+    icon="bi bi-plus-square"
+    [breadcrumbs]="[
+      { label: 'Dashboard', url: '/dashboard' },
+      { label: 'Classes', url: '/classes' },
+      { label: 'Add Class' }
+    ]">
+  </app-title-page>
+
+  <div class="card card-general">
+    <div class="card-header">
+      <h5>Class Information</h5>
+    </div>
+    <div class="card-body">
+      <form (ngSubmit)="onSubmit()">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Class Name *</label>
+            <input type="text" class="form-control" [(ngModel)]="classData.name" name="name" required>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Capacity *</label>
+            <input type="number" class="form-control" [(ngModel)]="classData.capacity" name="capacity" required min="1">
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Minimum Age *</label>
+            <input type="number" class="form-control" [(ngModel)]="classData.ageGroupMin" name="ageGroupMin" required min="0">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Maximum Age *</label>
+            <input type="number" class="form-control" [(ngModel)]="classData.ageGroupMax" name="ageGroupMax" required min="0">
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Schedule</label>
+          <input type="text" class="form-control" [(ngModel)]="classData.schedule" name="schedule" placeholder="e.g., Mon-Fri 9:00 AM - 3:00 PM">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Description</label>
+          <textarea class="form-control" [(ngModel)]="classData.description" name="description" rows="3" placeholder="Enter class description"></textarea>
+        </div>
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" [(ngModel)]="classData.isActive" name="isActive" id="isActive">
+          <label class="form-check-label" for="isActive">Active</label>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-add-global" [disabled]="saving">
+            <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
+            {{ saving ? 'Creating...' : 'Create Class' }}
+          </button>
+          <button type="button" class="btn btn-cancel-global" (click)="cancel()" [disabled]="saving">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

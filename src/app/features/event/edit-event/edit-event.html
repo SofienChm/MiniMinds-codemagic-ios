@@ -1,0 +1,201 @@
+<div class="edit-event-container">
+  <div class="container-fluid mt-4 mb-4">
+    <!-- Loading -->
+    <div *ngIf="loading" class="text-center py-5">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">{{ 'EDIT_EVENT.LOADING' | translate }}</span>
+      </div>
+    </div>
+
+    <div class="card-add-pages" *ngIf="!loading">
+      <form [formGroup]="eventForm" (ngSubmit)="updateEvent()" class="add-form">
+        <!-- Section Event Information -->
+        <div class="form-section">
+          <div class="section-header">
+            <i class="bi bi-calendar-event"></i>
+            <h4>{{ 'EDIT_EVENT.EVENT_INFO' | translate }}</h4>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">{{ 'EDIT_EVENT.EVENT_NAME' | translate }} {{ 'EDIT_EVENT.REQUIRED' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-tag input-icon"></i>
+                <input type="text" class="form-input" [class.is-invalid]="isFieldInvalid('name')" formControlName="name" [placeholder]="'EDIT_EVENT.EVENT_NAME_PLACEHOLDER' | translate">
+              </div>
+              <div *ngIf="isFieldInvalid('name')" class="error-message">
+                {{ getFieldError('name') }}
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ 'EDIT_EVENT.EVENT_TYPE' | translate }} {{ 'EDIT_EVENT.REQUIRED' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-collection input-icon"></i>
+                <ng-select
+                  class="form-input"
+                  [class.is-invalid]="isFieldInvalid('type')"
+                  formControlName="type"
+                  [items]="eventTypes"
+                  bindLabel="label"
+                  bindValue="value"
+                  [placeholder]="'EDIT_EVENT.SELECT_TYPE' | translate"
+                  [clearable]="false"
+                  [searchable]="false">
+                  <ng-template ng-option-tmp let-item="item">
+                    <div class="option-with-image">
+                      <i class="bi {{item.icon}}" style="font-size: 18px; color: #7dd3c0;"></i>
+                      <span class="option-title">{{ item.label }}</span>
+                    </div>
+                  </ng-template>
+                </ng-select>
+              </div>
+              <div *ngIf="isFieldInvalid('type')" class="error-message">
+                {{ getFieldError('type') }}
+              </div>
+            </div>
+            <div class="form-group full-width textarea">
+              <label class="form-label">{{ 'EDIT_EVENT.DESCRIPTION' | translate }} {{ 'EDIT_EVENT.REQUIRED' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-text-paragraph input-icon"></i>
+                <textarea class="form-input" [class.is-invalid]="isFieldInvalid('description')" formControlName="description" rows="3" [placeholder]="'EDIT_EVENT.DESCRIPTION_PLACEHOLDER' | translate"></textarea>
+              </div>
+              <div *ngIf="isFieldInvalid('description')" class="error-message">
+                {{ getFieldError('description') }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section Event Details -->
+        <div class="form-section">
+          <div class="section-header">
+            <i class="bi bi-info-circle"></i>
+            <h4>{{ 'EDIT_EVENT.EVENT_DETAILS' | translate }}</h4>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">{{ 'EDIT_EVENT.PRICE' | translate }} {{ 'EDIT_EVENT.REQUIRED' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-currency-dollar input-icon"></i>
+                <input type="number" class="form-input" [class.is-invalid]="isFieldInvalid('price')" formControlName="price" min="0" step="0.01" [placeholder]="'EDIT_EVENT.PRICE_PLACEHOLDER' | translate">
+              </div>
+              <div *ngIf="isFieldInvalid('price')" class="error-message">
+                {{ getFieldError('price') }}
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ 'EDIT_EVENT.CAPACITY' | translate }} {{ 'EDIT_EVENT.REQUIRED' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-people input-icon"></i>
+                <input type="number" class="form-input" [class.is-invalid]="isFieldInvalid('capacity')" formControlName="capacity" min="1" [placeholder]="'EDIT_EVENT.CAPACITY_PLACEHOLDER' | translate">
+              </div>
+              <div *ngIf="isFieldInvalid('capacity')" class="error-message">
+                {{ getFieldError('capacity') }}
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ 'EDIT_EVENT.AGE_FROM' | translate }} {{ 'EDIT_EVENT.REQUIRED' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-person input-icon"></i>
+                <input type="number" class="form-input" [class.is-invalid]="isFieldInvalid('ageFrom')" formControlName="ageFrom" min="0" max="18" [placeholder]="'EDIT_EVENT.AGE_FROM_PLACEHOLDER' | translate">
+              </div>
+              <div *ngIf="isFieldInvalid('ageFrom')" class="error-message">
+                {{ getFieldError('ageFrom') }}
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ 'EDIT_EVENT.AGE_TO' | translate }} {{ 'EDIT_EVENT.REQUIRED' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-person-fill input-icon"></i>
+                <input type="number" class="form-input" [class.is-invalid]="isFieldInvalid('ageTo')" formControlName="ageTo" min="0" max="18" [placeholder]="'EDIT_EVENT.AGE_TO_PLACEHOLDER' | translate">
+              </div>
+              <div *ngIf="isFieldInvalid('ageTo')" class="error-message">
+                {{ getFieldError('ageTo') }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section Date, Time & Location -->
+        <div class="form-section">
+          <div class="section-header">
+            <i class="bi bi-geo-alt"></i>
+            <h4>{{ 'EDIT_EVENT.DATE_LOCATION' | translate }}</h4>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">{{ 'EDIT_EVENT.DATE' | translate }} {{ 'EDIT_EVENT.REQUIRED' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-calendar input-icon"></i>
+                <input type="date" class="form-input" [class.is-invalid]="isFieldInvalid('eventDate')" formControlName="eventDate">
+              </div>
+              <div *ngIf="isFieldInvalid('eventDate')" class="error-message">
+                {{ getFieldError('eventDate') }}
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ 'EDIT_EVENT.TIME' | translate }} {{ 'EDIT_EVENT.REQUIRED' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-clock input-icon"></i>
+                <input type="time" class="form-input" [class.is-invalid]="isFieldInvalid('eventTime')" formControlName="eventTime">
+              </div>
+              <div *ngIf="isFieldInvalid('eventTime')" class="error-message">
+                {{ getFieldError('eventTime') }}
+              </div>
+            </div>
+            <div class="form-group full-width">
+              <label class="form-label">{{ 'EDIT_EVENT.PLACE' | translate }}</label>
+              <div class="input-with-icon">
+                <i class="bi bi-pin-map input-icon"></i>
+                <input type="text" class="form-input" [class.is-invalid]="isFieldInvalid('place')" formControlName="place" [placeholder]="'EDIT_EVENT.PLACE_PLACEHOLDER' | translate">
+              </div>
+              <div *ngIf="isFieldInvalid('place')" class="error-message">
+                {{ getFieldError('place') }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section Event Image -->
+        <div class="form-section">
+          <div class="section-header">
+            <i class="bi bi-image"></i>
+            <h4>{{ 'EDIT_EVENT.EVENT_IMAGE_SECTION' | translate }}</h4>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">{{ 'EDIT_EVENT.EVENT_IMAGE' | translate }}</label>
+              <div class="file-upload-area">
+                <input type="file" #fileInput id="eventImage" class="file-input" (change)="onImageSelect($event)" accept="image/jpeg,image/png,image/gif,image/webp">
+                <label for="eventImage" class="file-upload-label">
+                  <div *ngIf="!imagePreview" class="upload-placeholder">
+                    <i class="bi bi-cloud-upload"></i>
+                    <span>{{ 'GLOBAL.UPLOAD_PHOTO' | translate }}</span>
+                  </div>
+                  <img *ngIf="imagePreview" [src]="imagePreview" class="preview-image" [alt]="'GLOBAL.PREVIEW' | translate">
+                </label>
+                <button *ngIf="imagePreview" type="button" class="btn-remove-image" (click)="removeImage()">
+                  <i class="bi bi-x-circle"></i>
+                  {{ 'GLOBAL.REMOVE_PHOTO' | translate }}
+                </button>
+              </div>
+              <small class="form-hint">{{ 'GLOBAL.IMAGE_HINT' | translate }}</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="form-actions">
+          <button type="button" class="custom-btn-2 btn-cancel-2" (click)="cancel()" [disabled]="saving">
+            <i class="bi bi-x-circle"></i>
+            {{ 'EDIT_EVENT.CANCEL' | translate }}
+          </button>
+          <button type="submit" class="custom-btn-2 btn-add-global-2" [disabled]="saving || eventForm.invalid">
+            <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
+            <i *ngIf="!saving" class="bi bi-check-circle"></i>
+            {{ saving ? ('EDIT_EVENT.UPDATING' | translate) : ('EDIT_EVENT.UPDATE_EVENT' | translate) }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

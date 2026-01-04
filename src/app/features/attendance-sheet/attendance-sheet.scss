@@ -1,0 +1,196 @@
+// Stats Cards
+.stats-card {
+  transition: transform 0.2s;
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  .stats-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    background: var(--secondary-color);
+    color: #fff;
+  }
+
+  .stats-content {
+    h3 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0;
+      color: #2c3e50;
+    }
+
+    p {
+      margin: 0;
+      color: #6c757d;
+      font-size: 0.9rem;
+    }
+  }
+}
+
+// Status Badges
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+
+  &.status-present {
+    background: var(--primary-color);
+    color: white;
+    border: 1px solid var(--primary-color);
+  }
+
+  &.status-checked-out {
+    background: var(--secondary-color);
+    color: white;
+    border: 1px solid var(--secondary-color);
+  }
+}
+
+// Child Avatar
+.child-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+// Time Info
+.time-info {
+  strong {
+    color: #2c3e50;
+  }
+  
+  small {
+    font-size: 0.75rem;
+    
+    i {
+      margin-right: 0.25rem;
+    }
+  }
+}
+
+// Table Enhancements
+.table {
+  th {
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.9rem;
+  }
+
+  .attendance-row {
+    &:hover {
+      background-color: rgba(0, 123, 255, 0.05);
+    }
+  }
+}
+
+// Live Clock Card
+.live {
+  flex: 1;
+  .live-clock-card {
+    color: white;
+    height: 100%;
+    h4 {
+      font-weight: 700;
+      font-size: 1.5rem;    
+      color: #2c3e50
+    }
+  }
+
+  .live-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #7dd3c0;
+    width: max-content;
+    padding: 4px 10px;
+    border-radius: 50px;
+    small {
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 10px;
+    }
+  }
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  background: #ffffff;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(54, 184, 84, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(54, 191, 86, 0);
+  }
+}
+
+// Live Duration
+.live-duration {
+  font-weight: 600;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0.5; }
+  to { opacity: 1; }
+}
+
+// Card Enhancements
+.card {
+  border: none;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  border-radius: 12px;
+
+  .card-header {
+    background: #fff;
+    border-bottom: 1px solid #e9ecef;
+    border-radius: 12px 12px 0 0 !important;
+  }
+  .badge {
+    background: #cdeaf0 !important;
+    border: 1px solid #cdeaf0 !important;
+    padding: 0.5rem 0.85rem !important;
+    color: #202C4B !important;
+  }
+}
+
+
+.check-in {
+  background: linear-gradient(135deg, #a8c5ff 0%, #7dd3c0 100%) !important;
+  font-weight: 600;
+  color: #0e567d !important;
+  border: none !important;
+}
+
+.complited {
+  color: var(--primary-color);
+  font-weight: bold;
+}

@@ -1,0 +1,320 @@
+<div class="container-fluid mt-4">
+  <!-- Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <h2><i class="bi bi-controller me-2"></i>Learning Games</h2>
+      <p class="text-muted">Interactive educational games for children</p>
+    </div>
+  </div>
+
+  <!-- Game Playing Interface -->
+  <div *ngIf="gameStarted && currentGame" class="row mb-4">
+    <div class="col-12">
+      <div class="card game-interface">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5><i [class]="currentGame.icon + ' me-2'"></i>{{ currentGame.title }}</h5>
+          <div>
+            <span class="badge bg-primary me-2">Score: {{ score }}</span>
+            <button class="btn btn-sm btn-outline-danger" (click)="endGame()">
+              <i class="bi bi-x-lg me-1"></i>End Game
+            </button>
+          </div>
+        </div>
+        <div class="card-body text-center">
+          <!-- Math Game Interface -->
+          <div *ngIf="currentGame.id === '1'" class="math-game">
+            <div class="question-container mb-4">
+              <h1 class="display-4 text-primary">{{ mathQuestion.question }}</h1>
+            </div>
+            <div class="answer-container">
+              <div class="input-group justify-content-center">
+                <input 
+                  type="number" 
+                  class="form-control answer-input" 
+                  [(ngModel)]="userAnswer"
+                  placeholder="Your answer"
+                  (keyup.enter)="submitAnswer()">
+                <button 
+                  class="btn btn-success btn-lg" 
+                  (click)="submitAnswer()"
+                  [disabled]="userAnswer === null">
+                  <i class="bi bi-check-lg me-1"></i>Submit
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Letter Safari Game -->
+          <div *ngIf="currentGame.id === '2'" class="letter-game">
+            <div class="question-container mb-4">
+              <h2 class="text-primary mb-3">Find the letter:</h2>
+              <h1 class="display-1 text-success">{{ currentLetter }}</h1>
+            </div>
+            <div class="options-container">
+              <button 
+                *ngFor="let option of letterOptions"
+                class="btn btn-outline-primary btn-lg me-3 mb-3 letter-btn"
+                [class.btn-success]="selectedLetter === option && option === currentLetter"
+                [class.btn-danger]="selectedLetter === option && option !== currentLetter"
+                (click)="selectLetter(option)">
+                {{ option }}
+              </button>
+            </div>
+          </div>
+          
+          <!-- Color Mixer Game -->
+          <div *ngIf="currentGame.id === '3'" class="color-game">
+            <div class="question-container mb-4">
+              <h2 class="text-primary mb-3">Mix these colors:</h2>
+              <div class="d-flex justify-content-center align-items-center mb-4">
+                <div [ngStyle]="getColorStyle(color1)"></div>
+                <span class="mx-3 display-4">+</span>
+                <div [ngStyle]="getColorStyle(color2)"></div>
+                <span class="mx-3 display-4">=</span>
+                <div [ngStyle]="getColorStyle(mixedColor)" class="result-color"></div>
+              </div>
+            </div>
+            <button class="btn btn-success btn-lg" (click)="mixColors()">
+              <i class="bi bi-palette me-1"></i>Mix Colors!
+            </button>
+          </div>
+          
+          <!-- Shape Builder Game -->
+          <div *ngIf="currentGame.id === '4'" class="shape-game">
+            <div class="question-container mb-4">
+              <h2 class="text-primary mb-3">Build with shapes:</h2>
+              <div class="available-shapes mb-3">
+                <button 
+                  *ngFor="let shape of availableShapes"
+                  class="btn btn-outline-info me-2 mb-2"
+                  (click)="addShape(shape)">
+                  <i class="bi bi-{{ shape === 'circle' ? 'circle' : shape === 'square' ? 'square' : shape === 'triangle' ? 'triangle' : 'rectangle' }}"></i>
+                  {{ shape | titlecase }}
+                </button>
+              </div>
+              <div class="selected-shapes">
+                <h5>Your creation:</h5>
+                <div class="shape-display">
+                  <span 
+                    *ngFor="let shape of selectedShapes; let i = index"
+                    class="badge bg-info me-2 mb-2 shape-badge"
+                    (click)="removeShape(i)">
+                    {{ shape }} <i class="bi bi-x"></i>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Music Maker Game -->
+          <div *ngIf="currentGame.id === '5'" class="music-game">
+            <div class="question-container mb-4">
+              <h2 class="text-primary mb-3">Create your melody:</h2>
+              <div class="notes-container mb-3">
+                <button 
+                  *ngFor="let note of notes"
+                  class="btn btn-outline-warning me-2 mb-2 note-btn"
+                  (click)="addNote(note)">
+                  <i class="bi bi-music-note"></i> {{ note }}
+                </button>
+              </div>
+              <div class="melody-display mb-3">
+                <h5>Your melody:</h5>
+                <div class="melody-notes">
+                  <span 
+                    *ngFor="let note of melody"
+                    class="badge bg-warning text-dark me-1">
+                    {{ note }}
+                  </span>
+                </div>
+              </div>
+              <div class="music-controls">
+                <button class="btn btn-success me-2" (click)="playMelody()" [disabled]="melody.length === 0">
+                  <i class="bi bi-play-fill me-1"></i>Play
+                </button>
+                <button class="btn btn-outline-secondary" (click)="clearMelody()">
+                  <i class="bi bi-trash me-1"></i>Clear
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Story Creator Game -->
+          <div *ngIf="currentGame.id === '6'" class="story-game">
+            <div class="question-container mb-4">
+              <h2 class="text-primary mb-3">Create your story:</h2>
+              <div class="story-elements">
+                <div class="row">
+                  <div class="col-md-4">
+                    <h6>Characters:</h6>
+                    <div class="btn-group-vertical d-grid gap-2">
+                      <button class="btn btn-outline-primary">🐻 Bear</button>
+                      <button class="btn btn-outline-primary">🐰 Rabbit</button>
+                      <button class="btn btn-outline-primary">🦊 Fox</button>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <h6>Places:</h6>
+                    <div class="btn-group-vertical d-grid gap-2">
+                      <button class="btn btn-outline-success">🌲 Forest</button>
+                      <button class="btn btn-outline-success">🏰 Castle</button>
+                      <button class="btn btn-outline-success">🏖️ Beach</button>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <h6>Actions:</h6>
+                    <div class="btn-group-vertical d-grid gap-2">
+                      <button class="btn btn-outline-warning">🏃 Running</button>
+                      <button class="btn btn-outline-warning">🎵 Singing</button>
+                      <button class="btn btn-outline-warning">🎨 Painting</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters and Search -->
+  <div *ngIf="!gameStarted" class="row mb-4">
+    <div class="col-md-4">
+      <div class="input-group">
+        <span class="input-group-text"><i class="bi bi-search"></i></span>
+        <input 
+          type="text" 
+          class="form-control" 
+          placeholder="Search games..."
+          [(ngModel)]="searchTerm">
+      </div>
+    </div>
+    <div class="col-md-4">
+      <select class="form-select" [(ngModel)]="selectedCategory">
+        <option value="all">All Categories</option>
+        <option value="math">Math</option>
+        <option value="language">Language</option>
+        <option value="science">Science</option>
+        <option value="art">Art</option>
+        <option value="music">Music</option>
+      </select>
+    </div>
+    <div class="col-md-4">
+      <select class="form-select" [(ngModel)]="selectedDifficulty">
+        <option value="all">All Difficulties</option>
+        <option value="easy">Easy</option>
+        <option value="medium">Medium</option>
+        <option value="hard">Hard</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Games Grid -->
+  <div *ngIf="!gameStarted" class="row">
+    <div class="col-lg-4 col-md-6 mb-4" *ngFor="let game of filteredGames">
+      <div class="card game-card h-100">
+        <div class="card-body">
+          <div class="game-icon mb-3" [style.color]="game.color">
+            <i [class]="game.icon + ' display-4'"></i>
+          </div>
+          
+          <h5 class="card-title">{{ game.title }}</h5>
+          <p class="card-text text-muted">{{ game.description }}</p>
+          
+          <div class="game-meta mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="badge" [class]="'bg-' + getDifficultyColor(game.difficulty)">
+                {{ game.difficulty | titlecase }}
+              </span>
+              <small class="text-muted">
+                <i class="bi bi-clock me-1"></i>{{ game.duration }} min
+              </small>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="badge bg-info">{{ game.ageGroup }}</span>
+              <span class="badge bg-secondary">
+                <i [class]="getCategoryIcon(game.category) + ' me-1'"></i>
+                {{ game.category | titlecase }}
+              </span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card-footer bg-transparent">
+          <button 
+            class="btn btn-primary w-100" 
+            (click)="startGame(game)">
+            <i class="bi bi-play-fill me-1"></i>Start Game
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- No Games Found -->
+  <div *ngIf="!gameStarted && filteredGames.length === 0" class="row">
+    <div class="col-12 text-center py-5">
+      <i class="bi bi-search display-1 text-muted mb-3"></i>
+      <h4 class="text-muted">No games found</h4>
+      <p class="text-muted">Try adjusting your search criteria</p>
+    </div>
+  </div>
+
+  <!-- Game Categories Overview -->
+  <div *ngIf="!gameStarted" class="row mt-5">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5><i class="bi bi-grid me-2"></i>Game Categories</h5>
+        </div>
+        <div class="card-body">
+          <div class="row text-center">
+            <div class="col-md-2">
+              <div class="category-item">
+                <i class="bi bi-calculator display-4 text-success mb-2"></i>
+                <h6>Math</h6>
+                <small class="text-muted">Numbers & Logic</small>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="category-item">
+                <i class="bi bi-chat-text display-4 text-primary mb-2"></i>
+                <h6>Language</h6>
+                <small class="text-muted">Reading & Writing</small>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="category-item">
+                <i class="bi bi-flask display-4 text-warning mb-2"></i>
+                <h6>Science</h6>
+                <small class="text-muted">Discovery & Experiments</small>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="category-item">
+                <i class="bi bi-palette display-4 text-info mb-2"></i>
+                <h6>Art</h6>
+                <small class="text-muted">Creativity & Design</small>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="category-item">
+                <i class="bi bi-music-note display-4 text-danger mb-2"></i>
+                <h6>Music</h6>
+                <small class="text-muted">Rhythm & Melody</small>
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="category-item">
+                <i class="bi bi-puzzle display-4 text-secondary mb-2"></i>
+                <h6>Puzzles</h6>
+                <small class="text-muted">Problem Solving</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,421 @@
+<div *ngIf="isParent && !loading" [class]="isParent ? '' : ' mt-4'">
+  <app-parent-child-header-simple
+    [title]="'Photo Gallery'" >
+  </app-parent-child-header-simple>
+</div>
+
+<div class="container mt-4">
+  <app-title-page *ngIf="!isParent"
+    title="Photo Gallery"
+    subtitle="View and manage children's photos and memories"
+    icon="bi bi-images"
+    [breadcrumbs]="breadcrumbs"
+    [actions]="titleActions">
+  </app-title-page>
+
+  <!-- Filters -->
+  <div class="bg-white p-3 border rounded-1 d-flex align-items-center justify-content-between flex-wrap mb-4">
+    <h4 class="title-filter mb-0">Photos</h4>
+    <div class="d-flex align-items-center flex-wrap gap-2">
+      <!-- Child Filter -->
+      <select class="form-select" style="width: auto;" [(ngModel)]="selectedChildId" (change)="onFilterChange()">
+        <option [ngValue]="null">All Children</option>
+        <option *ngFor="let child of children" [ngValue]="child.id">
+          {{ child.firstName }} {{ child.lastName }}
+        </option>
+      </select>
+
+      <!-- Category Filter -->
+      <select class="form-select" style="width: auto;" [(ngModel)]="selectedCategory" (change)="onFilterChange()">
+        <option value="">All Categories</option>
+        <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+      </select>
+
+      <!-- Clear Filters -->
+      <button *ngIf="selectedChildId || selectedCategory" class="btn btn-outline-secondary" (click)="clearFilters()">
+        <i class="bi bi-x-lg"></i> Clear
+      </button>
+
+      <!-- View Toggle -->
+      <div class="d-flex align-items-center bg-white border rounded-2 p-1">
+        <button
+          class="btn btn-icon btn-sm me-1"
+          [class.bg-light]="viewMode === 'list'"
+          (click)="setViewMode('list')">
+          <i class="bi bi-list-ul"></i>
+        </button>
+        <button
+          class="btn btn-icon btn-sm"
+          [class.bg-light]="viewMode === 'grid'"
+          (click)="setViewMode('grid')">
+          <i class="bi bi-grid"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && photos.length === 0" class="text-center py-5">
+    <i class="bi bi-images display-1 text-muted"></i>
+    <h5 class="mt-3">No photos found</h5>
+    <p class="text-muted">
+      {{ selectedChildId || selectedCategory ? 'Try adjusting your filters' : 'Upload some photos to get started' }}
+    </p>
+    <button *ngIf="canEdit()" class="btn btn-primary" (click)="openUploadModal()">
+      <i class="bi bi-upload me-2"></i>Upload Photos
+    </button>
+  </div>
+
+  <!-- Grid View -->
+  <div *ngIf="!loading && viewMode === 'grid' && photos.length > 0" class="row g-4">
+    <div *ngFor="let photo of photos" class="col-xl-3 col-lg-4 col-md-6">
+      <div class="card h-100 photo-card">
+        <div class="photo-container position-relative" (click)="openPreview(photo)">
+          <img [src]="getPhotoUrl(photo)" [alt]="photo.title || photo.fileName" class="card-img-top photo-thumbnail">
+          <div class="photo-overlay">
+            <i class="bi bi-zoom-in"></i>
+          </div>
+          <span class="badge bg-primary position-absolute top-0 end-0 m-2 badge-galery">{{ photo.category }}</span>
+        </div>
+        <div class="card-body p-3">
+          <h6 class="card-title text-truncate mb-1">{{ photo.title || photo.fileName }}</h6>
+          <p class="text-muted small mb-2">
+            <i class="bi bi-person-fill me-1"></i>{{ photo.childName }}
+          </p>
+          <p class="text-muted small mb-0">
+            <i class="bi bi-calendar me-1"></i>{{ formatDate(photo.createdAt) }}
+          </p>
+        </div>
+        <div *ngIf="canEdit()" class="card-footer bg-transparent border-top-0 p-3 pt-0">
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-primary flex-grow-1 btn-edit" (click)="openEditModal(photo); $event.stopPropagation()">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-danger" (click)="deletePhoto(photo); $event.stopPropagation()">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- List View -->
+  <div *ngIf="!loading && viewMode === 'list' && photos.length > 0" class="card">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead class="table-light">
+          <tr>
+            <th style="width: 80px;">Preview</th>
+            <th>Title/Filename</th>
+            <th>Child</th>
+            <th>Category</th>
+            <th>Size</th>
+            <th>Uploaded</th>
+            <th *ngIf="canEdit()" style="width: 120px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let photo of photos" (click)="openPreview(photo)" style="cursor: pointer;">
+            <td>
+              <img [src]="getPhotoUrl(photo)" [alt]="photo.title || photo.fileName"
+                   class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
+            </td>
+            <td>
+              <strong>{{ photo.title || photo.fileName }}</strong>
+              <p *ngIf="photo.description" class="text-muted small mb-0 text-truncate" style="max-width: 200px;">
+                {{ photo.description }}
+              </p>
+            </td>
+            <td>{{ photo.childName }}</td>
+            <td><span class="badge bg-primary">{{ photo.category }}</span></td>
+            <td>{{ formatFileSize(photo.fileSize) }}</td>
+            <td>
+              {{ formatDate(photo.createdAt) }}
+              <p *ngIf="photo.uploadedByName" class="text-muted small mb-0">by {{ photo.uploadedByName }}</p>
+            </td>
+            <td *ngIf="canEdit()" (click)="$event.stopPropagation()">
+              <div class="d-flex gap-1">
+                <button class="btn btn-sm btn-outline-primary" (click)="openEditModal(photo)">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" (click)="deletePhoto(photo)">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="!loading && totalPages > 1" class="d-flex justify-content-center mt-4">
+    <nav>
+      <ul class="pagination">
+        <li class="page-item" [class.disabled]="currentPage === 1">
+          <button class="page-link" (click)="previousPage()">
+            <i class="bi bi-chevron-left"></i>
+          </button>
+        </li>
+        <li *ngFor="let page of [].constructor(totalPages); let i = index"
+            class="page-item" [class.active]="currentPage === i + 1">
+          <button class="page-link" (click)="goToPage(i + 1)">{{ i + 1 }}</button>
+        </li>
+        <li class="page-item" [class.disabled]="currentPage === totalPages">
+          <button class="page-link" (click)="nextPage()">
+            <i class="bi bi-chevron-right"></i>
+          </button>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</div>
+
+<!-- Upload Modal -->
+<div class="modal fade" [class.show]="showUploadModal" [style.display]="showUploadModal ? 'block' : 'none'" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-upload me-2"></i>Upload Photos
+        </h5>
+        <button type="button" class="btn-close" (click)="closeUploadModal()"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Select Child *</label>
+            <select class="form-select" [(ngModel)]="uploadChildId" required>
+              <option [ngValue]="null" disabled>Choose a child...</option>
+              <option *ngFor="let child of children" [ngValue]="child.id">
+                {{ child.firstName }} {{ child.lastName }}
+              </option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Category</label>
+            <select class="form-select" [(ngModel)]="uploadCategory">
+              <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+            </select>
+          </div>
+          <div class="col-12" *ngIf="uploadFiles.length <= 1">
+            <label class="form-label">Title (optional)</label>
+            <input type="text" class="form-control" [(ngModel)]="uploadTitle" placeholder="Enter photo title">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Description (optional)</label>
+            <textarea class="form-control" [(ngModel)]="uploadDescription" rows="2" placeholder="Enter description"></textarea>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Select Photos *</label>
+            <div class="upload-zone p-4 border border-2 border-dashed rounded text-center"
+                 (click)="fileInput.click()"
+                 (dragover)="$event.preventDefault()"
+                 (drop)="$event.preventDefault()">
+              <input #fileInput type="file" class="d-none" accept="image/*" multiple (change)="onFileSelect($event)">
+              <i class="bi bi-cloud-upload display-4 text-muted"></i>
+              <p class="mb-0 mt-2">Click to select photos or drag and drop</p>
+              <small class="text-muted">Maximum 20 photos, 10MB each. Supported formats: JPEG, PNG, GIF, WebP</small>
+            </div>
+          </div>
+          <div class="col-12" *ngIf="uploadFiles.length > 0">
+            <label class="form-label">Selected Files ({{ uploadFiles.length }})</label>
+            <div class="d-flex flex-wrap gap-2">
+              <div *ngFor="let file of uploadFiles; let i = index" class="selected-file d-flex align-items-center bg-light rounded p-2">
+                <i class="bi bi-image me-2"></i>
+                <span class="text-truncate" style="max-width: 150px;">{{ file.name }}</span>
+                <button class="btn btn-sm btn-link text-danger p-0 ms-2" (click)="removeFile(i)">
+                  <i class="bi bi-x"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeUploadModal()" [disabled]="uploading">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="uploadPhotos()" [disabled]="uploading || !uploadChildId || uploadFiles.length === 0">
+          <span *ngIf="uploading" class="spinner-border spinner-border-sm me-2"></span>
+          {{ uploading ? 'Uploading...' : 'Upload' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div *ngIf="showUploadModal" class="modal-backdrop fade show"></div>
+
+<!-- Preview Modal -->
+<div class="modal fade" [class.show]="showPreviewModal" [style.display]="showPreviewModal ? 'block' : 'none'" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ selectedPhoto?.title || selectedPhoto?.fileName }}</h5>
+        <button type="button" class="btn-close" (click)="closePreview()"></button>
+      </div>
+      <div class="modal-body text-center p-0 position-relative">
+        <!-- Loading spinner while fetching full image -->
+        <div *ngIf="loadingFullImage" class="position-absolute top-50 start-50 translate-middle">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+        <img *ngIf="selectedPhoto" [src]="getFullImageUrl(selectedPhoto)" [alt]="selectedPhoto.title || selectedPhoto.fileName"
+             class="img-fluid" style="max-height: 70vh;" [class.opacity-50]="loadingFullImage">
+      </div>
+      <div class="modal-footer justify-content-between" *ngIf="selectedPhoto">
+        <div class="text-start">
+          <p class="mb-1"><strong>Child:</strong> {{ selectedPhoto.childName }}</p>
+          <p class="mb-1"><strong>Category:</strong> {{ selectedPhoto.category }}</p>
+          <p class="mb-1" *ngIf="selectedPhoto.description"><strong>Description:</strong> {{ selectedPhoto.description }}</p>
+          <p class="mb-0 text-muted small">
+            Uploaded on {{ formatDate(selectedPhoto.createdAt) }}
+            <span *ngIf="selectedPhoto.uploadedByName"> by {{ selectedPhoto.uploadedByName }}</span>
+          </p>
+        </div>
+        <div *ngIf="canEdit()">
+          <button class="btn btn-outline-primary me-2" (click)="openEditModal(selectedPhoto); closePreview()">
+            <i class="bi bi-pencil me-1"></i>Edit
+          </button>
+          <button class="btn btn-outline-danger" (click)="deletePhoto(selectedPhoto)">
+            <i class="bi bi-trash me-1"></i>Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div *ngIf="showPreviewModal" class="modal-backdrop fade show"></div>
+
+<!-- Edit Modal -->
+<div class="modal fade" [class.show]="showEditModal" [style.display]="showEditModal ? 'block' : 'none'" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-pencil me-2"></i>Edit Photo
+        </h5>
+        <button type="button" class="btn-close" (click)="closeEditModal()"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Title</label>
+          <input type="text" class="form-control" [(ngModel)]="editTitle" placeholder="Enter photo title">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Description</label>
+          <textarea class="form-control" [(ngModel)]="editDescription" rows="3" placeholder="Enter description"></textarea>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Category</label>
+          <select class="form-select" [(ngModel)]="editCategory">
+            <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeEditModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="savePhotoEdit()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div *ngIf="showEditModal" class="modal-backdrop fade show"></div>
+
+<!-- Camera Modal -->
+<div class="modal fade" [class.show]="showCameraModal" [style.display]="showCameraModal ? 'block' : 'none'" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-camera me-2"></i>Take Photo
+        </h5>
+        <button type="button" class="btn-close" (click)="closeCameraModal()"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <!-- Camera/Preview Section -->
+          <div class="col-12">
+            <div class="camera-container position-relative bg-dark rounded overflow-hidden" style="aspect-ratio: 16/9;">
+              <!-- Live Video Feed -->
+              <video #videoElement
+                     *ngIf="!capturedImage"
+                     autoplay
+                     playsinline
+                     class="w-100 h-100"
+                     style="object-fit: cover;">
+              </video>
+              <!-- Captured Image Preview -->
+              <img *ngIf="capturedImage"
+                   [src]="capturedImage"
+                   alt="Captured photo"
+                   class="w-100 h-100"
+                   style="object-fit: contain;">
+              <!-- Hidden Canvas for Capture -->
+              <canvas #canvasElement class="d-none"></canvas>
+            </div>
+          </div>
+
+          <!-- Camera Controls -->
+          <div class="col-12 text-center">
+            <div *ngIf="!capturedImage" class="d-flex justify-content-center gap-3">
+              <button class="btn btn-primary btn-lg rounded-circle" style="width: 70px; height: 70px;" (click)="capturePhoto()">
+                <i class="bi bi-camera-fill fs-4"></i>
+              </button>
+            </div>
+            <div *ngIf="capturedImage" class="d-flex justify-content-center gap-3">
+              <button class="btn btn-outline-secondary" (click)="retakePhoto()">
+                <i class="bi bi-arrow-repeat me-2"></i>Retake
+              </button>
+            </div>
+          </div>
+
+          <!-- Form Fields (only show after capture) -->
+          <div *ngIf="capturedImage" class="col-md-6">
+            <label class="form-label">Select Child *</label>
+            <select class="form-select" [(ngModel)]="cameraChildId" required>
+              <option [ngValue]="null" disabled>Choose a child...</option>
+              <option *ngFor="let child of children" [ngValue]="child.id">
+                {{ child.firstName }} {{ child.lastName }}
+              </option>
+            </select>
+          </div>
+          <div *ngIf="capturedImage" class="col-md-6">
+            <label class="form-label">Category</label>
+            <select class="form-select" [(ngModel)]="cameraCategory">
+              <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+            </select>
+          </div>
+          <div *ngIf="capturedImage" class="col-12">
+            <label class="form-label">Title (optional)</label>
+            <input type="text" class="form-control" [(ngModel)]="cameraTitle" placeholder="Enter photo title">
+          </div>
+          <div *ngIf="capturedImage" class="col-12">
+            <label class="form-label">Description (optional)</label>
+            <textarea class="form-control" [(ngModel)]="cameraDescription" rows="2" placeholder="Enter description"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeCameraModal()" [disabled]="uploading">Cancel</button>
+        <button *ngIf="capturedImage"
+                type="button"
+                class="btn btn-primary"
+                (click)="saveCapturedPhoto()"
+                [disabled]="uploading || !cameraChildId">
+          <span *ngIf="uploading" class="spinner-border spinner-border-sm me-2"></span>
+          {{ uploading ? 'Saving...' : 'Save Photo' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div *ngIf="showCameraModal" class="modal-backdrop fade show"></div>

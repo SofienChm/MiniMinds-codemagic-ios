@@ -1,0 +1,17 @@
+// Component-specific styles can be added here if needed
+.header-info {
+    display: flex;
+    align-items: center;
+
+    .name{
+        &.simple{
+            padding-bottom: 20px;
+        }
+    }
+
+    .header-actions {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+    }
+}

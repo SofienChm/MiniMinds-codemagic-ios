@@ -1,0 +1,413 @@
+<!-- Image Cropper Modal for Parent -->
+<app-image-cropper-modal
+  #imageCropper
+  [imageFile]="selectedImageFile"
+  [roundCropper]="true"
+  [aspectRatio]="1"
+  [resizeToWidth]="300"
+  [resizeToHeight]="300"
+  (imageCropped)="onImageCropped($event)"
+  (cancelled)="onCropCancelled()">
+</app-image-cropper-modal>
+
+<!-- Image Cropper Modal for Child -->
+<app-image-cropper-modal
+  #childImageCropper
+  [imageFile]="selectedChildImageFile"
+  [roundCropper]="true"
+  [aspectRatio]="1"
+  [resizeToWidth]="300"
+  [resizeToHeight]="300"
+  (imageCropped)="onChildImageCropped($event)"
+  (cancelled)="onChildCropCancelled()">
+</app-image-cropper-modal>
+
+<div class="edit-parent-container">
+  <div class="container-fluid mt-4">
+    <app-title-page [title]="'EDIT_PARENT.TITLE' | translate" [breadcrumbs]="breadcrumbs" [actions]="titleActions">
+    </app-title-page>
+
+    <!-- Loading -->
+    <div *ngIf="loading" class="text-center py-5">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">{{ 'EDIT_PARENT.LOADING' | translate }}</span>
+      </div>
+    </div>
+
+    <div *ngIf="!loading">
+      <!-- Parent Form -->
+      <div class="card-add-pages mb-4">
+        <form [formGroup]="parentForm" (ngSubmit)="updateParent()" class="add-form">
+          <!-- Section Personal Information -->
+          <div class="form-section">
+            <div class="section-header">
+              <i class="bi bi-person-circle"></i>
+              <h4>{{ 'EDIT_PARENT.PERSONAL_INFO' | translate }}</h4>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">{{ 'EDIT_PARENT.FIRST_NAME' | translate }} {{ 'EDIT_PARENT.REQUIRED' | translate }}</label>
+                <div class="input-with-icon">
+                  <i class="bi bi-person input-icon"></i>
+                  <input type="text" class="form-input" [class.is-invalid]="isFieldInvalid('firstName')" formControlName="firstName" [placeholder]="'GLOBAL.FIRST_NAME_PLACEHOLDER' | translate">
+                </div>
+                <div *ngIf="isFieldInvalid('firstName')" class="error-message">
+                  {{ getFieldError('firstName') }}
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">{{ 'EDIT_PARENT.LAST_NAME' | translate }} {{ 'EDIT_PARENT.REQUIRED' | translate }}</label>
+                <div class="input-with-icon">
+                  <i class="bi bi-person input-icon"></i>
+                  <input type="text" class="form-input" [class.is-invalid]="isFieldInvalid('lastName')" formControlName="lastName" [placeholder]="'GLOBAL.LAST_NAME_PLACEHOLDER' | translate">
+                </div>
+                <div *ngIf="isFieldInvalid('lastName')" class="error-message">
+                  {{ getFieldError('lastName') }}
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">{{ 'EDIT_PARENT.GENDER' | translate }}</label>
+                <div class="input-with-icon">
+                  <i class="bi bi-gender-ambiguous input-icon"></i>
+                  <ng-select
+                    class="form-input"
+                    formControlName="gender"
+                    [items]="genders"
+                    bindLabel="label"
+                    bindValue="value"
+                    [placeholder]="'EDIT_PARENT.SELECT_GENDER' | translate"
+                    [clearable]="true"
+                    [searchable]="false">
+                    <ng-template ng-option-tmp let-item="item">
+                      <div class="option-with-image">
+                        <i class="bi {{item.icon}}" style="font-size: 18px; color: #7dd3c0;"></i>
+                        <span class="option-title">{{ item.label }}</span>
+                      </div>
+                    </ng-template>
+                  </ng-select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">{{ 'EDIT_PARENT.DATE_OF_BIRTH' | translate }}</label>
+                <div class="input-with-icon">
+                  <i class="bi bi-calendar input-icon"></i>
+                  <input type="date" class="form-input" formControlName="dateOfBirth">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section Contact -->
+          <div class="form-section">
+            <div class="section-header">
+              <i class="bi bi-telephone"></i>
+              <h4>{{ 'EDIT_PARENT.CONTACT_INFO' | translate }}</h4>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">{{ 'EDIT_PARENT.EMAIL' | translate }} {{ 'EDIT_PARENT.REQUIRED' | translate }}</label>
+                <div class="input-with-icon">
+                  <i class="bi bi-envelope input-icon"></i>
+                  <input type="email" class="form-input" [class.is-invalid]="isFieldInvalid('email')" formControlName="email" [placeholder]="'EDIT_PARENT.EMAIL_PLACEHOLDER' | translate">
+                </div>
+                <div *ngIf="isFieldInvalid('email')" class="error-message">
+                  {{ getFieldError('email') }}
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">{{ 'EDIT_PARENT.PHONE' | translate }} {{ 'EDIT_PARENT.REQUIRED' | translate }}</label>
+                <div class="input-with-icon">
+                  <i class="bi bi-phone input-icon"></i>
+                  <input type="text" class="form-input" [class.is-invalid]="isFieldInvalid('phoneNumber')" formControlName="phoneNumber" [placeholder]="'EDIT_PARENT.PHONE_PLACEHOLDER' | translate">
+                </div>
+                <div *ngIf="isFieldInvalid('phoneNumber')" class="error-message">
+                  {{ getFieldError('phoneNumber') }}
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">{{ 'EDIT_PARENT.EMERGENCY_CONTACT' | translate }}</label>
+                <div class="input-with-icon">
+                  <i class="bi bi-exclamation-triangle input-icon"></i>
+                  <input type="text" class="form-input" [class.is-invalid]="isFieldInvalid('emergencyContact')" formControlName="emergencyContact" [placeholder]="'EDIT_PARENT.EMERGENCY_PLACEHOLDER' | translate">
+                </div>
+                <div *ngIf="isFieldInvalid('emergencyContact')" class="error-message">
+                  {{ getFieldError('emergencyContact') }}
+                </div>
+              </div>
+              <div class="form-group full-width">
+                <label class="form-label">{{ 'EDIT_PARENT.ADDRESS' | translate }}</label>
+                <div class="input-with-icon">
+                  <i class="bi bi-geo-alt input-icon"></i>
+                  <textarea class="form-input" [class.is-invalid]="isFieldInvalid('address')" formControlName="address" rows="3" [placeholder]="'EDIT_PARENT.ADDRESS_PLACEHOLDER' | translate"></textarea>
+                </div>
+                <div *ngIf="isFieldInvalid('address')" class="error-message">
+                  {{ getFieldError('address') }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section Professional -->
+          <div class="form-section">
+            <div class="section-header">
+              <i class="bi bi-briefcase"></i>
+              <h4>{{ 'EDIT_PARENT.PROFESSIONAL_INFO' | translate }}</h4>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">{{ 'EDIT_PARENT.PROFESSION' | translate }}</label>
+                <div class="input-with-icon">
+                  <i class="bi bi-building input-icon"></i>
+                  <input type="text" class="form-input" [class.is-invalid]="isFieldInvalid('work')" formControlName="work" [placeholder]="'EDIT_PARENT.PROFESSION_PLACEHOLDER' | translate">
+                </div>
+                <div *ngIf="isFieldInvalid('work')" class="error-message">
+                  {{ getFieldError('work') }}
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">{{ 'EDIT_PARENT.ZIP_CODE' | translate }}</label>
+                <div class="input-with-icon">
+                  <i class="bi bi-mailbox input-icon"></i>
+                  <input type="text" class="form-input" [class.is-invalid]="isFieldInvalid('zipCode')" formControlName="zipCode" [placeholder]="'EDIT_PARENT.ZIP_CODE_PLACEHOLDER' | translate">
+                </div>
+                <div *ngIf="isFieldInvalid('zipCode')" class="error-message">
+                  {{ getFieldError('zipCode') }}
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">{{ 'EDIT_PARENT.PARENT_TYPE' | translate }}</label>
+                <div class="input-with-icon">
+                  <i class="bi bi-people input-icon"></i>
+                  <ng-select
+                    class="form-input"
+                    formControlName="parentType"
+                    [items]="parentTypes"
+                    bindLabel="label"
+                    bindValue="value"
+                    [placeholder]="'EDIT_PARENT.SELECT_TYPE' | translate"
+                    [clearable]="true"
+                    [searchable]="false">
+                    <ng-template ng-option-tmp let-item="item">
+                      <div class="option-with-image">
+                        <i class="bi {{item.icon}}" style="font-size: 18px; color: #7dd3c0;"></i>
+                        <span class="option-title">{{ item.label }}</span>
+                      </div>
+                    </ng-template>
+                  </ng-select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section Photo and Status -->
+          <div class="form-section">
+            <div class="section-header">
+              <i class="bi bi-image"></i>
+              <h4>{{ 'EDIT_PARENT.PHOTO_STATUS' | translate }}</h4>
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">{{ 'EDIT_PARENT.PROFILE_PICTURE' | translate }}</label>
+                <div class="file-upload-area">
+                  <input type="file" #fileInput id="profilePicture" class="file-input" (change)="onImageSelect($event)" accept="image/jpeg,image/png,image/gif,image/webp">
+                  <label for="profilePicture" class="file-upload-label">
+                    <div *ngIf="!imagePreview" class="upload-placeholder">
+                      <i class="bi bi-cloud-upload"></i>
+                      <span>{{ 'GLOBAL.UPLOAD_PHOTO' | translate }}</span>
+                    </div>
+                    <img *ngIf="imagePreview" [src]="imagePreview" class="preview-image" [alt]="'GLOBAL.PREVIEW' | translate">
+                  </label>
+                  <button *ngIf="imagePreview" type="button" class="btn-remove-image" (click)="removeImage()">
+                    <i class="bi bi-x-circle"></i>
+                    {{ 'GLOBAL.REMOVE_PHOTO' | translate }}
+                  </button>
+                </div>
+                <small class="form-hint">{{ 'GLOBAL.IMAGE_HINT' | translate }}</small>
+              </div>
+              <div class="form-group">
+                <label class="form-label">{{ 'EDIT_PARENT.STATUS' | translate }}</label>
+                <div class="status-toggle">
+                  <label class="toggle-label">{{ 'EDIT_PARENT.ACTIVE_STATUS' | translate }}</label>
+                  <div class="toggle-switch">
+                    <input type="checkbox" formControlName="isActive" id="isActive" class="toggle-input">
+                    <label for="isActive" class="toggle-slider"></label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="form-actions">
+            <button type="button" class="custom-btn-2 btn-cancel-2" (click)="cancel()" [disabled]="saving">
+              <i class="bi bi-x-circle"></i>
+              {{ 'EDIT_PARENT.CANCEL' | translate }}
+            </button>
+            <button type="submit" class="custom-btn-2 btn-add-global-2" [disabled]="saving || parentForm.invalid">
+              <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
+              <i *ngIf="!saving" class="bi bi-check-circle"></i>
+              {{ saving ? ('EDIT_PARENT.UPDATING' | translate) : ('EDIT_PARENT.UPDATE_PARENT' | translate) }}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Children Section -->
+      <div class="card-add-pages">
+        <div class="add-form form-section">
+          <div class="section-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+              <i class="bi bi-people-fill"></i>
+              <h4>{{ 'EDIT_PARENT.CHILDREN' | translate }} ({{ children.length }})</h4>
+            </div>
+            <button type="button" class="custom-btn-2 btn-add-global-2" (click)="toggleAddChild()">
+              <i class="bi bi-plus-circle"></i>
+              {{ 'EDIT_PARENT.ADD_CHILD' | translate }}
+            </button>
+          </div>
+
+          <!-- Add Child Form -->
+          <div *ngIf="showAddChild" class="add-child-form mt-4">
+            <form [formGroup]="childForm" (ngSubmit)="addChild()">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">{{ 'EDIT_PARENT.CHILD_FIRST_NAME' | translate }} {{ 'EDIT_PARENT.REQUIRED' | translate }}</label>
+                  <div class="input-with-icon">
+                    <i class="bi bi-person input-icon"></i>
+                    <input type="text" class="form-input" [class.is-invalid]="isChildFieldInvalid('firstName')" formControlName="firstName" [placeholder]="'GLOBAL.FIRST_NAME_PLACEHOLDER' | translate">
+                  </div>
+                  <div *ngIf="isChildFieldInvalid('firstName')" class="error-message">
+                    {{ getChildFieldError('firstName') }}
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">{{ 'EDIT_PARENT.CHILD_LAST_NAME' | translate }} {{ 'EDIT_PARENT.REQUIRED' | translate }}</label>
+                  <div class="input-with-icon">
+                    <i class="bi bi-person input-icon"></i>
+                    <input type="text" class="form-input" [class.is-invalid]="isChildFieldInvalid('lastName')" formControlName="lastName" [placeholder]="'GLOBAL.LAST_NAME_PLACEHOLDER' | translate">
+                  </div>
+                  <div *ngIf="isChildFieldInvalid('lastName')" class="error-message">
+                    {{ getChildFieldError('lastName') }}
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">{{ 'EDIT_PARENT.CHILD_DATE_OF_BIRTH' | translate }} {{ 'EDIT_PARENT.REQUIRED' | translate }}</label>
+                  <div class="input-with-icon">
+                    <i class="bi bi-calendar input-icon"></i>
+                    <input type="date" class="form-input" [class.is-invalid]="isChildFieldInvalid('dateOfBirth')" formControlName="dateOfBirth">
+                  </div>
+                  <div *ngIf="isChildFieldInvalid('dateOfBirth')" class="error-message">
+                    {{ getChildFieldError('dateOfBirth') }}
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">{{ 'EDIT_PARENT.CHILD_GENDER' | translate }} {{ 'EDIT_PARENT.REQUIRED' | translate }}</label>
+                  <div class="input-with-icon">
+                    <i class="bi bi-gender-ambiguous input-icon"></i>
+                    <ng-select
+                      class="form-input"
+                      [class.is-invalid]="isChildFieldInvalid('gender')"
+                      formControlName="gender"
+                      [items]="genders"
+                      bindLabel="label"
+                      bindValue="value"
+                      [placeholder]="'EDIT_PARENT.SELECT_GENDER' | translate"
+                      [clearable]="false"
+                      [searchable]="false">
+                      <ng-template ng-option-tmp let-item="item">
+                        <div class="option-with-image">
+                          <i class="bi {{item.icon}}" style="font-size: 18px; color: #7dd3c0;"></i>
+                          <span class="option-title">{{ item.label }}</span>
+                        </div>
+                      </ng-template>
+                    </ng-select>
+                  </div>
+                  <div *ngIf="isChildFieldInvalid('gender')" class="error-message">
+                    {{ getChildFieldError('gender') }}
+                  </div>
+                </div>
+                <div class="form-group full-width">
+                  <label class="form-label">{{ 'EDIT_PARENT.CHILD_ALLERGIES' | translate }}</label>
+                  <div class="input-with-icon">
+                    <i class="bi bi-exclamation-triangle input-icon"></i>
+                    <textarea class="form-input" formControlName="allergies" rows="2" [placeholder]="'EDIT_PARENT.ALLERGIES_PLACEHOLDER' | translate"></textarea>
+                  </div>
+                </div>
+                <div class="form-group full-width">
+                  <label class="form-label">{{ 'EDIT_PARENT.CHILD_MEDICAL_NOTES' | translate }}</label>
+                  <div class="input-with-icon">
+                    <i class="bi bi-clipboard2-pulse input-icon"></i>
+                    <textarea class="form-input" formControlName="medicalNotes" rows="2" [placeholder]="'EDIT_PARENT.MEDICAL_NOTES_PLACEHOLDER' | translate"></textarea>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">{{ 'EDIT_PARENT.CHILD_PROFILE_PICTURE' | translate }}</label>
+                  <div class="file-upload-area">
+                    <input type="file" #childFileInput id="childProfilePicture" class="file-input" (change)="onChildImageSelect($event)" accept="image/jpeg,image/png,image/gif,image/webp">
+                    <label for="childProfilePicture" class="file-upload-label">
+                      <div *ngIf="!childImagePreview" class="upload-placeholder">
+                        <i class="bi bi-cloud-upload"></i>
+                        <span>{{ 'GLOBAL.UPLOAD_PHOTO' | translate }}</span>
+                      </div>
+                      <img *ngIf="childImagePreview" [src]="childImagePreview" class="preview-image" [alt]="'GLOBAL.PREVIEW' | translate">
+                    </label>
+                    <button *ngIf="childImagePreview" type="button" class="btn-remove-image" (click)="removeChildImage()">
+                      <i class="bi bi-x-circle"></i>
+                      {{ 'GLOBAL.REMOVE_PHOTO' | translate }}
+                    </button>
+                  </div>
+                  <small class="form-hint">{{ 'GLOBAL.IMAGE_HINT' | translate }}</small>
+                </div>
+              </div>
+              <div class="form-actions mt-3">
+                <button type="button" class="custom-btn-2 btn-cancel-2" (click)="toggleAddChild()" [disabled]="saving">
+                  <i class="bi bi-x-circle"></i>
+                  {{ 'EDIT_PARENT.CANCEL' | translate }}
+                </button>
+                <button type="submit" class="custom-btn-2 btn-add-global-2" [disabled]="saving || childForm.invalid">
+                  <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
+                  <i *ngIf="!saving" class="bi bi-check-circle"></i>
+                  {{ saving ? ('EDIT_PARENT.ADDING_CHILD' | translate) : ('EDIT_PARENT.SAVE_CHILD' | translate) }}
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Children List -->
+          <div *ngIf="children.length === 0 && !showAddChild" class="text-center text-muted py-4">
+            <i class="bi bi-people" style="font-size: 48px; opacity: 0.5;"></i>
+            <p class="mt-2">{{ 'EDIT_PARENT.NO_CHILDREN' | translate }}</p>
+          </div>
+
+          <div *ngFor="let child of children" class="child-card mt-3">
+            <div class="d-flex align-items-center">
+              <img loading="lazy" [src]="child.profilePicture || 'assets/child.png'"
+                   class="rounded-circle me-3" width="60" height="60" alt="Child">
+              <div class="flex-grow-1">
+                <h6 class="mb-1">{{ child.firstName }} {{ child.lastName }}</h6>
+                <p class="mb-0 text-muted">{{ child.gender }} - {{ child.age }} {{ 'EDIT_PARENT.YEARS' | translate }}</p>
+                <small class="text-muted">{{ 'EDIT_PARENT.BORN' | translate }}: {{ child.dateOfBirth | date:'mediumDate' }}</small>
+              </div>
+              <div class="text-end">
+                <button class="btn btn-outline-primary btn-sm me-2" [routerLink]="['/children/edit', child.id]">
+                  <i class="bi bi-pencil-square"></i> {{ 'EDIT_PARENT.EDIT' | translate }}
+                </button>
+                <button class="btn btn-outline-info btn-sm" [routerLink]="['/children/detail', child.id]">
+                  <i class="bi bi-eye"></i> {{ 'EDIT_PARENT.VIEW' | translate }}
+                </button>
+              </div>
+            </div>
+            <div *ngIf="child.allergies || child.medicalNotes" class="mt-2 pt-2 border-top">
+              <small class="text-muted d-block" *ngIf="child.allergies">
+                <strong>{{ 'EDIT_PARENT.ALLERGIES' | translate }}:</strong> {{ child.allergies }}
+              </small>
+              <small class="text-muted d-block" *ngIf="child.medicalNotes">
+                <strong>{{ 'EDIT_PARENT.MEDICAL_NOTES' | translate }}:</strong> {{ child.medicalNotes }}
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

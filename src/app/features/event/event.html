@@ -1,0 +1,303 @@
+<div *ngIf="isParent" class="parent-detailchild font-inter">
+  <app-parent-child-header-simple *ngIf="isParent"
+    [title]="'EVENTS.TITLE' | translate"
+  >
+  </app-parent-child-header-simple>
+  <div class="body container-fluid">
+      <div class="main-information">
+        <div *ngIf="loading" class="loading-state">
+          <div class="spinner"></div>
+          <p>{{ 'EVENTS.LOADING' | translate }}</p>
+        </div>
+
+        <div *ngIf="!loading && events.length === 0" class="empty-state">
+          <i class="bi bi-bell-slash"></i>
+          <h3>{{ 'EVENTS.NO_EVENTS' | translate }}</h3>
+        </div>
+
+        <div *ngIf="!loading && events.length > 0" class="events-list">
+          <div *ngFor="let event of displayedEvents; trackBy: trackById"
+               class="events-card" (click)="viewEventDetail(event); $event.preventDefault()"
+            >
+            <div class="event-upper">
+              <div class="event-avatar" >
+                <img loading="lazy" class="banner-img img-fluid" [src]="event.image || 'assets/dark.png'" alt="">
+              </div>
+              <div class="eventparent-content">
+                <div class="eventparent-header">
+                  <h4 class="event-name">{{ event.name }}</h4>
+                <div class="event-active">
+                  <span class="badge" [class]="getEventStatusClass(event)">{{ getEventStatus(event) }}</span>
+                </div>
+                </div>
+                <div class="mb-2">
+                  <i class="bi bi-calendar3 pe-2"></i>
+                  <span class="event-time">{{ event.time }}</span>
+                </div>
+                <p class="event-message">{{event.description}}</p>
+              </div>
+            </div>
+            <div class="event-bottom_content">
+              <div class="event-tag-bottom">
+                <div *ngIf="event.type" class="event-type {{ event.type }}">
+                  {{ event.type }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="load-more-container">
+            <button class="custom-btn-2 btn-add-border mb-4" (click)="loadMore()">
+              <i class="bi bi-plus-circle me-2"></i>{{ 'EVENTS.LOAD_MORE' | translate }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+<div class="container-fluid mt-4" *ngIf="!isParent">
+  <app-title-page
+    [title]="'EVENTS.TITLE' | translate"
+    [subtitle]="'EVENTS.SUBTITLE' | translate"
+    icon="bi bi-calendar-event"
+    [breadcrumbs]="breadcrumbs"
+    [actions]="titleActions">
+  </app-title-page>
+
+  <!-- View Controls -->
+  <div class="bg-white p-3 border rounded-1 d-flex align-items-center justify-content-between flex-wrap mb-4">
+    <h4 class="title-filter">{{ 'EVENTS.EVENTS_GRID' | translate }}</h4>
+    <div class="d-flex align-items-center flex-wrap gap-2">
+      <!-- Search -->
+      <div class="search-box">
+        <i class="bi bi-search search-icon"></i>
+        <input
+          type="text"
+          class="form-control search-input"
+          [placeholder]="'EVENTS.SEARCH_PLACEHOLDER' | translate"
+          [(ngModel)]="searchTerm"
+          (input)="applyFilter()">
+      </div>
+
+      <!-- Sort Select with ng-select -->
+      <ng-select
+        class="filter-select"
+        [(ngModel)]="sortBy"
+        [items]="sortOptions"
+        bindLabel="label"
+        bindValue="value"
+        [placeholder]="'EVENTS.SORT_BY' | translate"
+        [clearable]="false"
+        [searchable]="false"
+        (change)="onSortChange()">
+        <ng-template ng-option-tmp let-item="item">
+          <div class="option-with-image">
+            <i class="bi {{item.icon}}" style="font-size: 16px; color: #7dd3c0;"></i>
+            <span class="option-title">{{ item.label }}</span>
+          </div>
+        </ng-template>
+      </ng-select>
+
+      <!-- View Toggle -->
+      <div class="d-flex align-items-center bg-white border rounded-2 p-1 me-2">
+        <button
+          class="btn btn-icon btn-sm me-1"
+          [class.bg-light]="viewMode === 'list'"
+          [class.primary-hover]="viewMode !== 'list'"
+          (click)="setViewMode('list')">
+          <i class="bi bi-list-ul"></i>
+        </button>
+        <button
+          class="btn btn-icon btn-sm"
+          [class.bg-light]="viewMode === 'grid'"
+          [class.primary-hover]="viewMode !== 'grid'"
+          (click)="setViewMode('grid')">
+          <i class="bi bi-grid"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">{{ 'EVENTS.LOADING' | translate }}</span>
+    </div>
+  </div>
+
+  <!-- Grid View -->
+  <div class="row" *ngIf="viewMode === 'grid' && !loading">
+    <div *ngFor="let event of displayedEvents; trackBy: trackById" class="col-xl-4 col-md-6 d-flex">
+
+      <div class="card col-xl-4 card-event circ card-general">
+          <div class="card-banner">
+            <div class="d-flex action-edit-add" *ngIf="canEdit() || canDelete()">
+                <div class="dropdown">
+                  <a href="#" class="btn btn-white btn-icon btn-sm d-flex align-items-center justify-content-center p-0" data-bs-toggle="dropdown">
+                    <i class="bi bi-three-dots-vertical icon-action"></i>
+                  </a>
+                  <ul class="dropdown-menu dropdown-menu-end p-3">
+                    <li class="dropdown-item_list">
+                      <a class="dropdown-item rounded-1" href="#" (click)="viewEventDetail(event); $event.preventDefault()">
+                        <i class="bi bi-eye me-2"></i>{{ 'EVENTS.VIEW_DETAILS' | translate }}
+                      </a>
+                    </li>
+                    <li class="dropdown-item_list">
+                      <a class="dropdown-item rounded-1" href="#" (click)="viewParticipants(event); $event.preventDefault()">
+                        <i class="bi bi-people-fill me-2"></i>{{ 'EVENTS.PARTICIPANTS' | translate }}
+                      </a>
+                    </li>
+                    <li *ngIf="canEdit()" class="dropdown-item_list">
+                      <a class="dropdown-item rounded-1" href="#" (click)="editEvent(event); $event.preventDefault()">
+                        <i class="bi bi-pencil-square me-2"></i>{{ 'EVENTS.EDIT' | translate }}
+                      </a>
+                    </li>
+                    <li *ngIf="canDelete()" class="dropdown-item_list">
+                      <a class="dropdown-item rounded-1" href="#" (click)="deleteEvent(event.id!); $event.preventDefault()">
+                        <i class="bi bi-trash3 me-2"></i>{{ 'EVENTS.DELETE' | translate }}
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            <button class="link-to-event" (click)="viewEventDetail(event)">
+
+              <p class="category-tag popular">{{ event.type }}</p>
+              <img loading="lazy" class="banner-img" [src]="event.image || 'assets/dark.png'" alt="">
+            </button>
+          </div>
+          <div class="card-body">
+            <button class="link-to-event" (click)="viewEventDetail(event)"><h5 class="blog-title">{{ event.name }}</h5></button>
+            <p class="blog-description">{{ event.description }}</p>
+            <div class="card-profile">
+              <div class="row mb-3">
+                <div class="col-xl-4">
+                  <small class="information-title">{{ 'EVENTS.PRICE' | translate }}</small>
+                  <div class="information-description">{{ event.price | appCurrency }}</div>
+                </div>
+                <div class="col-xl-4">
+                  <small class="information-title">{{ 'EVENTS.CAPACITY' | translate }}</small>
+                  <div class="information-description">{{ event.capacity }} {{ 'EVENTS.PEOPLE' | translate }}</div>
+                </div>
+                <div class="col-xl-4">
+                  <small class="information-title">{{ 'EVENTS.STATUS' | translate }}</small>
+                  <div class="information-description badge" [class]="getEventStatusClass(event)">{{ getEventStatus(event) }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card-footer d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center">
+              <div class="d-flex align-items-center me-2" *ngIf="event.participants && event.participants.length > 0">
+                <div class="d-flex">
+                  <img *ngFor="let participant of event.participants.slice(0, 3); let i = index"
+                  [src]="participant.child.profilePicture || 'assets/child.png'"
+                  class="rounded-circle border border-2 border-white"
+                  style="width: 32px; height: 32px; object-fit: cover; margin-left: -8px;"
+                  [style.zIndex]="10 - i"
+                  [title]="participant.child.firstName + ' ' + participant.child.lastName">
+                  <span *ngIf="event.participants.length > 3"
+                        class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center border border-2 border-white"
+                        style="width: 32px; height: 32px; font-size: 12px; margin-left: -8px; z-index: 1;"
+                        [title]="'+' + (event.participants.length - 3) + ' ' + ('EVENTS.MORE_PARTICIPANTS' | translate)">
+                    +{{ event.participants.length - 3 }}
+                  </span>
+                </div>
+                <small class="text-muted ms-2">{{ event.participants.length }} {{ 'EVENTS.REGISTERED' | translate }}</small>
+              </div>
+              <small class="text-muted" *ngIf="!event.participants || event.participants.length === 0">{{ 'EVENTS.NO_PARTICIPANTS' | translate }}</small>
+            </div>
+            <button class="btn btn-outline-info btn-sm btn-footer" (click)="viewEventDetail(event)">{{ 'EVENTS.VIEW_DETAILS' | translate }}</button>
+          </div>
+
+    </div>
+
+    </div>
+
+    <div *ngIf="filteredEvents.length === 0 && !loading" class="col-12 text-center">
+      <p>{{ 'EVENTS.NO_EVENTS_FOUND' | translate }}</p>
+    </div>
+  </div>
+
+  <!-- Load More Button for Grid View -->
+  <div *ngIf="viewMode === 'grid' && !loading && hasMoreEvents()" class="text-center d-flex justify-content-center mt-4">
+    <button class="custom-btn-2 btn-add-border mb-4" (click)="loadMore()">
+      <i class="bi bi-plus-circle me-2"></i>{{ 'EVENTS.LOAD_MORE' | translate }}
+    </button>
+  </div>
+
+  <!-- List View -->
+  <div *ngIf="viewMode === 'list' && !loading">
+    <div class="card flex-fill card-general card-recently mb-3">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <h5 class="mb-0">
+          <i class="bi bi-list-task"></i>
+          {{ 'EVENTS.EVENTS_LIST' | translate }}
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive custom-table">
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>{{ 'EVENTS.NAME' | translate }}</th>
+                <th>{{ 'EVENTS.TYPE' | translate }}</th>
+                <th>{{ 'EVENTS.STATUS' | translate }}</th>
+                <th>{{ 'EVENTS.PRICE' | translate }}</th>
+                <th>{{ 'EVENTS.AGE_RANGE' | translate }}</th>
+                <th>{{ 'EVENTS.CAPACITY' | translate }}</th>
+                <th>{{ 'EVENTS.TIME' | translate }}</th>
+                <th>{{ 'EVENTS.ACTIONS' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let event of displayedEvents; trackBy: trackById">
+                <td class="name-last">
+                  <span>{{ event.name }}</span>
+                  <br>
+                  <small class="text-muted">{{ event.description }}</small>
+                </td>
+                <td><span class="badge bg-primary">{{ event.type }}</span></td>
+                <td><span class="badge" [class]="getEventStatusClass(event)">{{ getEventStatus(event) }}</span></td>
+                <td>{{ event.price | appCurrency }}</td>
+                <td>{{ event.ageFrom }}-{{ event.ageTo }} {{ 'EVENTS.YEARS' | translate }}</td>
+                <td>{{ event.capacity }} {{ 'EVENTS.PEOPLE' | translate }}</td>
+                <td>{{ event.time }}</td>
+                <td>
+                  <div class="d-flex gap-1">
+                    <button class="btn btn-sm btn-view" (click)="viewEventDetail(event)">
+                      <i class="bi bi-eye"></i>
+                    </button>
+                    <button class="btn btn-sm btn-view" (click)="viewParticipants(event)">
+                      <i class="bi bi-people"></i>
+                    </button>
+                    <button *ngIf="canEdit()" class="btn btn-sm btn-edit" (click)="editEvent(event)">
+                      <i class="bi bi-pencil-square"></i>
+                    </button>
+                    <button *ngIf="canDelete()" class="btn btn-sm btn-remove" (click)="deleteEvent(event.id!)">
+                      <i class="bi bi-trash3"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="filteredEvents.length === 0">
+                <td colspan="8" class="text-center py-4">
+                  {{ 'EVENTS.NO_EVENTS_FOUND' | translate }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card-footer d-flex align-items-center justify-content-between">
+        <span class="text-muted">{{ 'EVENTS.TOTAL' | translate }}: {{ displayedEvents.length }} {{ 'EVENTS.EVENT_S' | translate }}</span>
+      </div>
+    </div>
+
+    <!-- Load More Button for List View -->
+    <div *ngIf="hasMoreEvents()" class="text-center mt-3">
+      <button class="custom-btn-2 btn-add-border mb-4" (click)="loadMore()">
+        <i class="bi bi-plus-circle me-2"></i> {{ 'EVENTS.LOAD_MORE' | translate }}
+      </button>
+    </div>
+  </div>
+</div>

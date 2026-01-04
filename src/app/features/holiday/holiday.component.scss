@@ -1,0 +1,75 @@
+.color-indicator {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  margin-right: 8px;
+  border: 1px solid #ddd;
+}
+
+.modal {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.badge-success {
+  background-color: #28a745;
+}
+
+.badge-secondary {
+  background-color: var(--primary-color);
+}
+.holiday-style{
+  .card-header{
+    display: flex;
+    align-items: center;
+    h5{
+      font-size: 18px;
+      font-weight: 500;
+      color: #202C4B;
+      margin-bottom: 0;
+      align-items: center;
+      display: flex;
+      i {
+        font-size: 22px;
+        color: #7dd3c0;
+        margin-right: 10px;
+      }
+    }
+  }
+  .table-responsive {
+    overflow-x: auto;
+  }
+  .table-holiday{
+    thead{
+      tr{
+        th{
+          color: #202C4B;
+          font-size: 14px;
+          font-weight: 500;
+          padding: 12px 20px;
+          background-color: #E9EDF4 !important;
+        }
+      }
+    }
+    tbody{
+      tr{
+        td{
+          font-size: 14px;
+          color: #515B73;
+          border-bottom: 1px solid #E9EDF4;
+          padding: 12px 20px;
+        }
+        .title-table{
+          color: #202C4B;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+}
+
+.holiday-style{
+  .card-body{
+    padding: 0;
+  }
+}

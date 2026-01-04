@@ -1,0 +1,150 @@
+<div class="container-fluid mt-4">
+  <app-title-page
+    [title]="'EDUCATOR_DETAIL.TITLE' | translate"
+    [breadcrumbs]="breadcrumbs"
+    [actions]="titleActions">
+  </app-title-page>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">{{ 'EDUCATOR_DETAIL.LOADING' | translate }}</span>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+  <div *ngIf="educator && !loading">
+    <!-- Educator Profile Card -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <div class="d-flex align-items-center mb-4">
+          <div class="position-relative me-3">
+            <img loading="lazy"
+                [src]="educator.profilePicture || 'assets/default-avatar.svg'"
+                class="rounded-circle"
+                width="100"
+                height="100"
+                alt="Educator Photo">
+            <span *ngIf="educator.isActive" class="badge bg-success position-absolute bottom-0 end-0">{{ 'EDUCATOR_DETAIL.ACTIVE' | translate }}</span>
+            <span *ngIf="!educator.isActive" class="badge bg-danger position-absolute bottom-0 end-0">{{ 'EDUCATOR_DETAIL.INACTIVE' | translate }}</span>
+          </div>
+          <div>
+            <h4 class="mb-1">{{ educator.firstName }} {{ educator.lastName }}</h4>
+            <p class="mb-0 text-muted">{{ educator.specialization || ('EDUCATOR_DETAIL.EDUCATOR' | translate) }}</p>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <strong>{{ 'EDUCATOR_DETAIL.EMAIL' | translate }}</strong>
+            <p class="mb-0">{{ educator.email }}</p>
+          </div>
+          <div class="col-md-6 mb-3">
+            <strong>{{ 'EDUCATOR_DETAIL.PHONE' | translate }}</strong>
+            <p class="mb-0">{{ educator.phone || ('COMMON.NA' | translate) }}</p>
+          </div>
+          <div class="col-md-6 mb-3">
+            <strong>{{ 'EDUCATOR_DETAIL.DATE_OF_BIRTH' | translate }}</strong>
+            <p class="mb-0">{{ educator.dateOfBirth | date:'mediumDate' }}</p>
+          </div>
+          <div class="col-md-6 mb-3">
+            <strong>{{ 'EDUCATOR_DETAIL.HIRE_DATE' | translate }}</strong>
+            <p class="mb-0">{{ educator.hireDate | date:'mediumDate' }}</p>
+          </div>
+          <div class="col-md-6 mb-3">
+            <strong>{{ 'EDUCATOR_DETAIL.SALARY' | translate }}</strong>
+            <p class="mb-0">{{ educator.salary ? (educator.salary | appCurrency) : ('COMMON.NA' | translate) }}</p>
+          </div>
+          <div class="col-md-6 mb-3" *ngIf="educator.address">
+            <strong>{{ 'EDUCATOR_DETAIL.ADDRESS' | translate }}</strong>
+            <p class="mb-0">{{ educator.address }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Assigned Children Section -->
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">{{ 'EDUCATOR_DETAIL.ASSIGNED_CHILDREN' | translate }} ({{ assignedChildren.length }})</h5>
+        <button type="button" class="btn btn-primary btn-sm" (click)="openAddChildModal()">
+          <i class="bi bi-plus-circle me-1"></i>
+          {{ 'EDUCATOR_DETAIL.ASSIGN_CHILD' | translate }}
+        </button>
+      </div>
+      <div class="card-body">
+        <!-- Children List -->
+        <div *ngIf="assignedChildren.length === 0" class="text-center text-muted py-4">
+          <i class="bi bi-people" style="font-size: 48px; opacity: 0.5;"></i>
+          <p class="mt-2">{{ 'EDUCATOR_DETAIL.NO_CHILDREN_ASSIGNED' | translate }}</p>
+        </div>
+
+        <div *ngFor="let child of assignedChildren" class="d-flex align-items-center p-3 border rounded mb-2">
+          <img loading="lazy" [src]="child.profilePicture || 'assets/child.png'"
+               class="rounded-circle me-3" width="60" height="60" alt="Child">
+          <div class="flex-grow-1">
+            <h6 class="mb-1">{{ child.firstName }} {{ child.lastName }}</h6>
+            <p class="mb-0 text-muted">{{ child.gender }} - {{ getAge(child.dateOfBirth) }} {{ 'EDUCATOR_DETAIL.YEARS_OLD' | translate }}</p>
+            <small class="text-muted">{{ 'EDUCATOR_DETAIL.BORN' | translate }} {{ child.dateOfBirth | date:'mediumDate' }}</small>
+          </div>
+          <div class="text-end">
+            <button class="btn btn-outline-danger btn-sm me-2" (click)="removeChild(child.id!)">
+              <i class="bi bi-x-circle"></i> {{ 'EDUCATOR_DETAIL.REMOVE' | translate }}
+            </button>
+            <button class="btn btn-outline-info btn-sm" (click)="viewChildDetails(child.id!)">
+              <i class="bi bi-eye"></i> {{ 'EDUCATOR_DETAIL.VIEW' | translate }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Assign Child Modal -->
+  <div class="modal fade show d-block" *ngIf="showAddChildModal" style="background-color: rgba(0,0,0,0.5)" (click)="closeAddChildModal()">
+    <div class="modal-dialog modal-lg modal-dialog-centered" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ 'EDUCATOR_DETAIL.ASSIGN_CHILD_MODAL_TITLE' | translate }}</h5>
+          <button type="button" class="btn-close" (click)="closeAddChildModal()"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <input
+              type="text"
+              class="form-control"
+              [placeholder]="'EDUCATOR_DETAIL.SEARCH_BY_NAME' | translate"
+              [(ngModel)]="searchTerm"
+              (ngModelChange)="filterChildren()">
+          </div>
+          <div *ngIf="filteredChildren.length === 0" class="text-center text-muted py-4">
+            <p>{{ 'EDUCATOR_DETAIL.NO_AVAILABLE_CHILDREN' | translate }}</p>
+          </div>
+          <div class="list-group" style="max-height: 400px; overflow-y: auto;">
+            <button
+              *ngFor="let child of filteredChildren"
+              type="button"
+              class="list-group-item list-group-item-action"
+              (click)="assignChildToEducator(child.id!)"
+              [disabled]="assigningChild">
+              <div class="d-flex align-items-center">
+                <img loading="lazy"
+                  [src]="child.profilePicture || 'assets/child.png'"
+                  class="rounded-circle me-3"
+                  style="width: 50px; height: 50px;"
+                  alt="Child Photo">
+                <div class="flex-grow-1">
+                  <h6 class="mb-0">{{ child.firstName }} {{ child.lastName }}</h6>
+                  <small class="text-muted">{{ 'EDUCATOR_DETAIL.AGE' | translate }}: {{ getAge(child.dateOfBirth) }} | {{ 'EDUCATOR_DETAIL.GENDER' | translate }}: {{ child.gender }}</small>
+                </div>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

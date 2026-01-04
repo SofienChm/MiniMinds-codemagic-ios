@@ -1,0 +1,116 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="row">
+      <!-- Left sidebar -->
+      <div class="col-md-4">
+        <div class="card">
+          <header class="card-header">
+            <div class="card-title">
+              <div class="flex items-center space-x-3 rtl:space-x-reverse">
+                <div class="shrink-0">
+                  <div class="inline-flex shrink-0 relative h-14 w-14">
+                    <img *ngIf="user?.profilePicture" loading="lazy" [src]="user?.profilePicture" alt="Profile Picture" class="img-fluid">
+                    <div *ngIf="!user?.profilePicture" class="w-full h-full flex items-center justify-center bg-primary text-white rounded-full">
+                      {{ getInitials() }}
+                    </div>
+                  </div>
+                </div>
+                <div class="text-gray-700 dark:text-white text-sm font-semibold">
+                  <span class="truncate w-full block">{{ user?.firstName }} {{ user?.lastName }}</span>
+                  <span class="block font-light text-xs capitalize">{{ user?.role }}</span>
+                </div>
+              </div>
+            </div>
+          </header>
+          <main class="card-body px-5 py-4">
+            <ul class="space-y-2">
+              <li class="bg-primary text-white flex space-x-3 rtl:space-x-reverse px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary capitalize cursor-pointer">
+                <div class="flex-none text-xl">
+                  <i class="bi bi-person"></i>
+                </div>
+                <div class="flex-1 text-sm">Account</div>
+              </li>
+              <li class="flex space-x-3 rtl:space-x-reverse px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary capitalize cursor-pointer">
+                <div class="flex-none text-xl">
+                  <i class="bi bi-bell"></i>
+                </div>
+                <div class="flex-1 text-sm">Notifications</div>
+              </li>
+              <li class="flex space-x-3 rtl:space-x-reverse px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary capitalize cursor-pointer">
+                <div class="flex-none text-xl">
+                  <i class="bi bi-shield-lock"></i>
+                </div>
+                <div class="flex-1 text-sm">Security</div>
+              </li>
+              <li class="flex space-x-3 rtl:space-x-reverse px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary capitalize cursor-pointer">
+                <div class="flex-none text-xl">
+                  <i class="bi bi-app"></i>
+                </div>
+                <div class="flex-1 text-sm">App</div>
+              </li>
+              <li class="flex space-x-3 rtl:space-x-reverse px-3 py-2 rounded-md hover:bg-primary/10 hover:text-primary capitalize cursor-pointer">
+                <div class="flex-none text-xl">
+                  <i class="bi bi-database"></i>
+                </div>
+                <div class="flex-1 text-sm">Privacy & Data</div>
+              </li>
+            </ul>
+          </main>
+        </div>
+      </div>
+      
+      <!-- Right content -->
+      <div class="col-md-8">
+        <div class="card">
+          <header class="card-header">
+            <div class="card-title">Account</div>
+          </header>
+          <main class="card-body px-5 py-4">
+            <div class="space-y-5">
+              <div>
+                <div class="file-group">
+                  <label>
+                    <input type="file" class="w-full hidden" (change)="onImageSelect($event)" accept="image/*">
+                    <div class="btn btn-primary light btn-sm">
+                      <span class="flex items-center">
+                        <span class="ltr:mr-2 rtl:ml-2 text-xl">
+                          <i class="bi bi-upload"></i>
+                        </span>
+                        <span>Choose File</span>
+                      </span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="d_name" class="block capitalize form-label">Display name</label>
+                <div class="relative">
+                  <input class="form-control" placeholder="Display name" id="d_name" [(ngModel)]="profile.firstName" name="firstName">
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="email" class="block capitalize form-label">Email</label>
+                <div class="relative">
+                  <input type="email" class="form-control" placeholder="Email" id="email" [(ngModel)]="profile.email" name="email">
+                </div>
+              </div>
+              
+
+              
+              <div class="text-right">
+                <button class="btn btn-primary" (click)="updateProfile()">
+                  <span class="flex items-center">
+                    <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
+                    <span>{{ saving ? 'Updating...' : 'Update' }}</span>
+                  </span>
+                </button>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,359 @@
+<div *ngIf="isParent" class="parent-detailchild font-inter">
+  <div class="header-info" *ngIf="!loading && event">
+    <div class="title-icons mb-3" (click)="back()">
+      <div class="page-back">
+        <i class="bi bi-arrow-left"></i>
+      </div>
+      <div class="title-page"></div>
+      <div class="page-setting">
+        <i class="bi bi-share"></i>
+      </div>
+    </div>
+    <div class="d-flex image-name row_direction">
+      <div class="overflow-hidden">
+        <div class="filter-black"></div>
+        <img [src]="event.image || 'assets/dark.png'" [alt]="event.name" class="event-image">
+        <h2 class="event-title">{{ event.name }}</h2>
+      </div>
+    </div>
+  </div>
+  
+  <div class="parent-event-detail" *ngIf="!loading && event">
+    <div class="row mb-3 align-items-stretch">
+      <div class="col-6">
+        <div class="event-content">      
+          <div class="event-section">
+            <h3 class="section-title">{{ 'EVENT_DETAIL.EVENT_LOCATION' | translate }}</h3>
+            <div class="detail-item">
+              <i class="bi bi-geo-alt"></i>
+              <span>{{ event.place || ('EVENT_DETAIL.LOCATION_TBD' | translate) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="event-content">      
+          <div class="event-section">
+            <div class="detail-item">
+              <button *ngIf="!hasChildInEvent()" class="btn btn-primary btn-sm " (click)="openAddParticipantModal()">
+                <i class="bi bi-person-plus me-1"></i>{{ 'EVENT_DETAIL.ADD_CHILD' | translate }}
+              </button>
+              <div *ngIf="hasChildInEvent() && getChildStatus() === 'Pending'" class="status pending mb-0 py-2">
+                <i class="bi bi-clock-history me-2"></i>{{ 'EVENT_DETAIL.REQUEST_PENDING' | translate }}
+              </div>
+              <div *ngIf="hasChildInEvent() && getChildStatus() === 'Registered'" class="status success mb-0 py-2">
+                <i class="bi bi-check-circle me-2"></i>{{ 'EVENT_DETAIL.CHILD_REGISTERED' | translate }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="event-content mb-3">      
+      <div class="event-section">
+        <h3 class="section-title">{{ 'EVENT_DETAIL.EVENT_DETAILS' | translate }}</h3>
+
+        <div class="detail-item">
+          <i class="bi bi-cash"></i>
+          <span>{{ 'EVENT_DETAIL.PRICE' | translate }}: </span>
+          <span>{{ event.price}}</span>
+        </div>
+        <div class="detail-item">
+          <i class="bi bi-people"></i>
+          <span>{{ 'EVENT_DETAIL.AGE_RANGE' | translate }}: </span>
+          <span>{{ event.ageFrom }}-{{ event.ageTo }} {{ 'EVENT_DETAIL.YEARS' | translate }}</span>
+        </div>
+        <div class="detail-tags">
+          <span class="tag" *ngIf="event.type">#{{ event.type }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="event-content">
+      <div class="event-section">
+        <h3 class="section-title">{{ 'EVENT_DETAIL.DESCRIPTION' | translate }}</h3>
+        <p class="section-text">{{ event.description }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid mt-4" *ngIf="!isParent && !loading && event">
+  <app-title-page *ngIf="!isParent"
+    [title]="event.name" 
+    [breadcrumbs]="[{label: 'Dashboard', url: '/dashboard'}, {label: 'Events', url: '/events'}, {label: event.name}]"
+    [actions]="titleActions">
+  </app-title-page>
+  <div class="row">
+    <div class="col-8">
+      <div class="card card-general">
+        <div class="event-header">
+            <div class="event-image-container position-relative">
+              <img *ngIf="event.image" loading="lazy" [src]="event.image" class="card-img-top" style="height: 350px; object-fit: cover;" alt="Event">
+              <div *ngIf="!event.image" class="event-placeholder text-white text-center" style="height: 350px; display: flex; align-items: center; justify-content: center;">
+                <div>
+                  <i class="bi bi-calendar-event" style="font-size: 80px; opacity: 0.3;"></i>
+                  <p class="mt-3 opacity-75">{{ 'EVENT_DETAIL.NO_IMAGE' | translate }}</p>
+                </div>
+              </div>
+              
+              <div class="change-image-btn">
+                <button class="btn btn-light btn-sm shadow" (click)="triggerImageUpload()" [disabled]="uploading">
+                  <span *ngIf="uploading" class="spinner-border spinner-border-sm me-2"></span>
+                  <i *ngIf="!uploading" class="bi bi-camera me-1"></i>
+                  {{ uploading ? ('EVENT_DETAIL.UPLOADING' | translate) : (event.image ? ('EVENT_DETAIL.CHANGE_IMAGE' | translate) : ('EVENT_DETAIL.ADD_IMAGE' | translate)) }}
+                </button>
+                <input type="file" class="d-none" (change)="onImageSelected($event)" accept="image/*">
+              </div>
+              
+              <div class="badge">
+                <span class="event-badge px-3 py-2 shadow">
+                  <i class="bi bi-tag-fill me-1"></i>{{ event.type }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="event-info">
+            <h2 class="event-title">{{ event.name }}</h2>
+            <p class="event-description">{{ event.description }}</p>
+          </div>
+      </div>
+      <div class="row">
+        <div class="col-4">
+          <div class="card card-general">
+            <div class="stat-card">
+              <div class="stat-icon price">
+                <i class="bi bi-currency-dollar"></i>
+              </div>
+              <div class="stat-content">
+                <span class="stat-label">{{ 'EVENT_DETAIL.PRICE' | translate }}</span>
+                <div class="stat-value">{{ event.price | appCurrency }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="card card-general">
+            <div class="stat-card">
+              <div class="stat-icon capacity">
+                <i class="bi bi-people"></i>
+              </div>
+              <div class="stat-content">
+                <span class="stat-label">{{ 'EVENT_DETAIL.CAPACITY' | translate }}</span>
+                <div class="stat-value">{{ event.capacity }} {{ 'EVENT_DETAIL.SPOTS' | translate }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="card card-general">
+            <div class="stat-card">
+              <div class="stat-icon age">
+                <i class="bi bi-person-badge"></i>
+              </div>
+              <div class="stat-content">
+                <span class="stat-label">{{ 'EVENT_DETAIL.PRICE' | translate }}</span>
+                <div class="stat-value">$25</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-4">
+      <div class="card participants-card event-details-card card-general border-0 shadow-sm mb-4">
+        <div class="card-header event-details-header text-white py-3">
+          <h5 class="mb-0">
+            {{ 'EVENT_DETAIL.EVENT_DETAILS' | translate }}
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-3 pb-3 border-bottom">
+            <small class="text-muted d-block mb-1">{{ 'EVENT_DETAIL.DATE_TIME' | translate }}</small>
+            <div class="d-flex align-items-center">
+              <i class="bi bi-calendar3 detail-icon me-2"></i>
+              <div>
+                <div class="fw-bold">{{ formatDate(event.time) }}</div>
+                <small class="text-muted">{{ formatTime(event.time) }}</small>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mb-3 pb-3 border-bottom" *ngIf="event.place">
+            <small class="text-muted d-block mb-1">{{ 'EVENT_DETAIL.LOCATION' | translate }}</small>
+            <div class="d-flex align-items-center">
+              <i class="bi bi-geo-alt detail-icon me-2"></i>
+              <div class="fw-bold">{{ event.place }}</div>
+            </div>
+          </div>
+          
+          <div class="mb-3 pb-3 border-bottom">
+            <small class="text-muted d-block mb-1">{{ 'EVENT_DETAIL.TOTAL_REVENUE' | translate }}</small>
+            <div class="d-flex align-items-center">
+              <i class="bi bi-cash-stack detail-icon me-2"></i>
+              <div>
+                <div class="fw-bold revenue-text">{{ getTotalRevenue() | appCurrency }}</div>
+                <small class="text-muted">{{ event.price | appCurrency }} × {{ registeredCount }} {{ 'EVENT_DETAIL.REGISTERED' | translate }}</small>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mb-3 pb-3 border-bottom">
+            <small class="text-muted d-block mb-1">{{ 'EVENT_DETAIL.AVAILABILITY' | translate }}</small>
+            <div class="progress event-progress" style="height: 25px;">
+              <div class="progress-bar event-progress-bar" [style.width.%]="(registeredCount / event.capacity) * 100">
+                {{ registeredCount }} / {{ event.capacity }}
+              </div>
+            </div>
+            <small class="text-muted mt-1 d-block">{{ event.capacity - registeredCount }} {{ 'EVENT_DETAIL.SPOTS_REMAINING' | translate }}</small>
+          </div>
+          
+          <div>
+            <small class="text-muted d-block mb-1">{{ 'EVENT_DETAIL.CREATED' | translate }}</small>
+            <div class="d-flex align-items-center">
+              <i class="bi bi-clock-history detail-icon me-2"></i>
+              <small>{{ event.createdAt | date:'MMM d, y - h:mm a' }}</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-12">
+      <div class="card participants-card card-general border-0 shadow-sm">
+        <div class="card-header participants-header py-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+              <i class="bi bi-people-fill me-2 header-icon"></i>
+              {{ 'EVENT_DETAIL.REGISTERED_PARTICIPANTS' | translate }}
+              <span class="badge participants-badge ms-2">{{ event.participants?.length || 0 }}</span>
+            </h5>
+            <button class="btn custom-btn-2 btn-add-border" (click)="openAddParticipantModal()">
+              <i class="bi bi-person-plus me-1"></i>{{ 'EVENT_DETAIL.ADD_PARTICIPANT' | translate }}
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div *ngIf="!event.participants || event.participants.length === 0" class="text-center py-5">
+            <i class="bi bi-person-x" style="font-size: 60px; opacity: 0.2;"></i>
+            <p class="text-muted mt-3">{{ 'EVENT_DETAIL.NO_PARTICIPANTS' | translate }}</p>
+          </div>
+          
+          <div *ngIf="event.participants && event.participants.length > 0" class="row g-3">
+            <div *ngFor="let participant of event.participants" class="col-md-6">
+              <div class="d-flex align-items-center p-3 border rounded hover-shadow">
+                <img [src]="participant.child.profilePicture || 'assets/child.png'" 
+                     class="rounded-circle me-3" 
+                     style="width: 50px; height: 50px; object-fit: cover;"
+                     [alt]="participant.child.firstName">
+                <div class="flex-grow-1">
+                  <h6 class="mb-1">{{ participant.child.firstName }} {{ participant.child.lastName }}</h6>
+                  <small class="text-muted">
+                    <i class="bi bi-clock me-1"></i>{{ participant.registeredAt | date:'MMM d, y' }}
+                  </small>
+                </div>
+                <span class="badge bg-success">{{ participant.status }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="container-fluid mt-4" *ngIf="loading">
+  <div class="text-center p-4">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">{{ 'EVENT_DETAIL.LOADING' | translate }}</span>
+    </div>
+    <p class="mt-2">{{ 'EVENT_DETAIL.LOADING_EVENT' | translate }}</p>
+  </div>
+</div>
+
+<div class="container-fluid mt-4" *ngIf="!loading && !event">
+  <div class="text-center p-4">
+    <i class="bi bi-exclamation-triangle fs-1 text-warning"></i>
+    <h4 class="mt-3">{{ 'EVENT_DETAIL.EVENT_NOT_FOUND' | translate }}</h4>
+    <p class="text-muted">{{ 'EVENT_DETAIL.EVENT_NOT_FOUND_TEXT' | translate }}</p>
+    <button class="btn btn-primary" (click)="goBack()">
+      <i class="bi bi-arrow-left"></i> {{ 'EVENT_DETAIL.BACK_TO_EVENTS' | translate }}
+    </button>
+  </div>
+</div>
+
+<!-- Add Participant Modal -->
+<div class="modal fade-transition" id="addParticipantModal" tabindex="-1" *ngIf="showAddParticipantModal">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-person-plus me-2"></i>{{ 'EVENT_DETAIL.ADD_PARTICIPANT_TO' | translate }} {{ event?.name }}
+        </h5>
+        <button type="button" class="btn-close" (click)="closeAddParticipantModal()"></button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="loadingStudents" class="text-center py-4">
+          <div class="spinner-border" role="status">
+            <span class="visually-hidden">{{ 'EVENT_DETAIL.LOADING_STUDENTS' | translate }}</span>
+          </div>
+          <p class="mt-2">{{ 'EVENT_DETAIL.LOADING_STUDENTS' | translate }}</p>
+        </div>
+        
+        <div *ngIf="!loadingStudents">
+          <div class="mb-3">
+            <input type="text" class="form-control" [placeholder]="'EVENT_DETAIL.SEARCH_STUDENTS' | translate" 
+                   [(ngModel)]="searchTerm" (input)="filterStudents()">
+          </div>
+          
+          <div *ngIf="filteredStudents.length === 0" class="text-center py-4">
+            <i class="bi bi-person-x" style="font-size: 60px; opacity: 0.2;"></i>
+            <p class="text-muted mt-3">{{ 'EVENT_DETAIL.NO_STUDENTS_FOUND' | translate }}</p>
+          </div>
+          
+          <div class="student-list" style="max-height: 400px; overflow-y: auto;">
+            <div *ngFor="let student of filteredStudents" class="student-item p-3 border rounded mb-2 hover-shadow" 
+                 [class.selected]="student.id && selectedStudents.includes(student.id)" 
+                 (click)="toggleStudentSelection(student)" 
+                 style="cursor: pointer;">
+              <div class="d-flex align-items-center">
+                <img [src]="student.profilePicture || 'assets/child.png'" 
+                     class="rounded-circle me-3" 
+                     style="width: 50px; height: 50px; object-fit: cover;"
+                     [alt]="student.firstName">
+                <div class="flex-grow-1">
+                  <h6 class="mb-1">{{ student.firstName }} {{ student.lastName }}</h6>
+                  <small class="text-muted">
+                    <i class="bi bi-calendar me-1"></i>{{ 'EVENT_DETAIL.AGE' | translate }}: {{ calculateAge(student.dateOfBirth) }} {{ 'EVENT_DETAIL.YEARS' | translate }}
+                  </small>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" 
+                         [checked]="student.id && selectedStudents.includes(student.id)" 
+                         (click)="$event.stopPropagation()">
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div *ngIf="students.length === 0 && !loadingStudents && (event?.participants?.length || 0) > 0" class="alert alert-info mt-3">
+            <i class="bi bi-info-circle me-2"></i>{{ 'EVENT_DETAIL.ALL_CHILDREN_REGISTERED' | translate }}
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn custom-btn-2 btn-cancel-2" (click)="closeAddParticipantModal()">{{ 'EVENT_DETAIL.CANCEL' | translate }}</button>
+        <button type="button" class="btn custom-btn-2 btn-add-global-2" 
+                [disabled]="selectedStudents.length === 0 || addingParticipants" 
+                (click)="addSelectedParticipants()">
+          <span *ngIf="addingParticipants" class="spinner-border spinner-border-sm me-2"></span>
+          {{ 'EVENT_DETAIL.ADD_PARTICIPANT' | translate }} {{ selectedStudents.length }} {{ selectedStudents.length !== 1 ? 's' : '' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Backdrop -->
+<div class="modal-backdrop fade show" *ngIf="showAddParticipantModal" (click)="closeAddParticipantModal()"></div>

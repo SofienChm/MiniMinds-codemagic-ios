@@ -1,0 +1,66 @@
+<div class="ai-assistant-container">
+  <div class="chat-header">
+    <div class="header-content">
+      <i class="bi bi-robot"></i>
+      <h3>AI Assistant</h3>
+    </div>
+    <button class="btn btn-sm btn-outline-secondary" (click)="clearChat()">
+      <i class="bi bi-trash3"></i> Clear
+    </button>
+  </div>
+
+  <div class="messages-container" #messagesContainer>
+    <div *ngFor="let message of messages" class="message" [ngClass]="{'user-message': message.isUser, 'ai-message': !message.isUser}">
+      <div class="message-content">
+        <div class="message-text">{{ message.content }}</div>
+        <div *ngIf="hasData(message)" class="message-data">
+          <div class="data-header">
+            <i class="bi bi-table"></i> Data Results:
+          </div>
+          <pre class="data-content">{{ formatData(message.data) }}</pre>
+        </div>
+        <div class="message-time">{{ message.timestamp | date:'short' }}</div>
+      </div>
+    </div>
+
+    <div *ngIf="isLoading" class="message ai-message">
+      <div class="message-content">
+        <div class="typing-indicator">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="showSuggestions" class="suggestions-container">
+    <div class="suggestions-header">Try asking:</div>
+    <div class="suggestions-grid">
+      <button 
+        *ngFor="let suggestion of suggestedQueries" 
+        class="suggestion-btn"
+        (click)="useSuggestedQuery(suggestion)">
+        {{ suggestion }}
+      </button>
+    </div>
+  </div>
+
+  <div class="input-container">
+    <div class="input-group">
+      <input 
+        type="text" 
+        class="form-control" 
+        [(ngModel)]="currentQuery"
+        (keypress)="onKeyPress($event)"
+        placeholder="Ask me anything about the daycare..."
+        [disabled]="isLoading">
+      <button 
+        class="btn btn-primary" 
+        (click)="sendMessage()"
+        [disabled]="!currentQuery.trim() || isLoading">
+        <i class="bi bi-send-fill"></i>
+      </button>
+    </div>
+  </div>
+</div>

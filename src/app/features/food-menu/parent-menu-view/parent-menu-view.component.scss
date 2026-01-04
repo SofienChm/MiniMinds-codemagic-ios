@@ -1,0 +1,138 @@
+.parent-menu-view {
+  .body {
+    padding: 1rem;
+  }
+}
+
+.week-navigation {
+  h5 {
+    color: #202c4b;
+  }
+}
+
+.week-days-scroll {
+  .day-card {
+    min-width: 70px;
+    background: #fff;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    transition: all 0.2s;
+    cursor: pointer;
+
+    &:hover {
+      border-color: #4886ed;
+    }
+
+    &.today {
+      border-color: #ffc107;
+      background-color: #fff9e6;
+    }
+
+    &.has-menu {
+      border-color: #28a745;
+    }
+
+    &.active {
+      background-color: #4886ed;
+      border-color: #4886ed;
+      color: white;
+
+      small, strong {
+        color: white !important;
+      }
+    }
+  }
+}
+
+.meal-section {
+  .meal-type-header {
+    color: #202c4b;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e9ecef;
+  }
+}
+
+.meal-item {
+  background: #fff;
+  transition: all 0.2s;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #f8f9fa;
+  }
+
+  &.selected {
+    background-color: #e8f5e9;
+    border-color: #28a745 !important;
+  }
+
+  &.warning {
+    border-color: #ffc107 !important;
+    background-color: #fff9e6;
+  }
+
+  .selection-checkbox {
+    font-size: 1.5rem;
+  }
+}
+
+.nutrition-summary {
+  .nutrition-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #202c4b;
+  }
+}
+
+.compliance-badge {
+  padding: 1rem;
+
+  i {
+    font-size: 2rem;
+    color: #dc3545;
+  }
+
+  &.met i {
+    color: #28a745;
+  }
+
+  small {
+    color: #6c757d;
+    font-weight: 500;
+  }
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.card {
+  border: 1px solid #e9ecef;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+}
+
+.card-header {
+  background-color: #fff;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.alert-danger {
+  background-color: #fff5f5;
+  border-color: #ffcdd2;
+  color: #c62828;
+}
+
+.alert-warning {
+  background-color: #fff9e6;
+  border-color: #ffe082;
+  color: #856404;
+}
+
+::ng-deep {
+  .header-info {
+    margin-bottom: 20px !important;
+  }
+}
