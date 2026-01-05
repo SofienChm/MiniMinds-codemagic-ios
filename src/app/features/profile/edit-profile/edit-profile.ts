@@ -9,7 +9,7 @@ import { AuthService } from '../../../core/services/auth';
 import { LanguageService } from '../../../core/services/langauge-service';
 import { TitlePage, Breadcrumb } from '../../../shared/layouts/title-page/title-page';
 import { CustomValidators } from '../../../shared/validators/custom.validators';
-import { environment } from '../../../../environments/environment.development';
+import { environment } from '../../../../environments/environment';
 import { ParentChildHeaderComponent } from '../../../shared/components/parent-child-header/parent-child-header.component';
 import { ImageCropperModalComponent } from '../../../shared/components/image-cropper-modal/image-cropper-modal.component';
 import { Location } from '@angular/common';
@@ -108,6 +108,10 @@ export class EditProfile implements OnInit {
             emergencyContact: parent.emergencyContact
           });
           this.imagePreview = parent.profilePicture || null;
+        },
+        error: (err) => {
+          console.error('Failed to load parent data:', err);
+          this.errorMessage = 'Failed to load profile data';
         }
       });
     }

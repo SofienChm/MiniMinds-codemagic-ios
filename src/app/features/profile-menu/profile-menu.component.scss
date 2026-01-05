@@ -5,6 +5,7 @@
     position: relative;
     background: linear-gradient(135deg, #90b9fc 0%, #95f2d7 100%);
     padding-bottom: 100px;
+    
     .title-icons{
       display: flex;
       justify-content: space-between;
@@ -37,7 +38,13 @@
     }
   }
 }
-
+h5.name.simple {
+  text-transform: capitalize;
+  margin-bottom: 0;
+  font-size: 24px;
+  font-weight: bold;
+  color: #202C4B;
+}
 
 .profile-card {
   background: white;

@@ -894,7 +894,7 @@ input.form-control {
   .header-info{
     background: linear-gradient(135deg, #B8E6F0 0%, #D4F1E8 100%);
     padding: 35px 20px 16px;
-    padding-top: calc(35px + var(--safe-area-top, 0px)); // Add safe area for status bar
+    padding-top: calc(10px + var(--safe-area-top, 0px)); // Add safe area for status bar
     border-radius: 0 0 32px 32px;
     margin-bottom: 80px;
     .title-icons{
@@ -1482,3 +1482,12 @@ input.form-control {
 //         padding: 45px 20px 16px;
 //   }
 // }
+
+ @media only screen 
+   and (min-device-width: 320px) 
+   and (max-device-width: 410px)    
+   and (-webkit-min-device-pixel-ratio: 3)   {
+  .parent-detailchild .header-info {
+    padding: 45px 20px 16px !important;
+  }
+ }
