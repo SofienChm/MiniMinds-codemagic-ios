@@ -1,1 +1,49 @@
 // Component-specific styles can be added here if needed
+
+.parent-detailchild {
+  .header-info {
+    position: relative;
+
+    .image-name {
+      position: relative;
+        margin-bottom: 45px;
+
+      .slider-controls {
+        position: absolute;
+        bottom: -40px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 4px 8px;
+        border-radius: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+        white-space: nowrap;
+
+        button {
+          width: 28px;
+          height: 28px;
+          padding: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+
+          i {
+            font-size: 14px;
+          }
+        }
+
+        span {
+          font-size: 13px;
+          font-weight: 500;
+          min-width: 40px;
+          text-align: center;
+        }
+      }
+    }
+  }
+}

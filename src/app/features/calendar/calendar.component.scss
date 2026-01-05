@@ -83,7 +83,7 @@
     font-weight: 600;
     border: 1px solid #ddd;
     &.fc-day{
-      background: #f4f6fa;
+      background: #fff;
       border: none;
       text-align: center;
       padding: 8px 0;
@@ -210,8 +210,7 @@
 
   @media screen and (max-width: 767px) {
     .fc-daygrid-day:has(.fc-daygrid-event-harness) .fc-daygrid-day-number {
-      background: #a8c5ff;
-      color: white !important;
+      
       border-radius: 50%;
       width: 30px;
       height: 30px;
@@ -331,3 +330,52 @@
   }
 }
 
+
+::ng-deep {
+  @media screen and (max-width: 768px) {
+    .fc-theme-standard td, .fc-theme-standard th {
+      border: none !important;
+    }
+    .fc-scrollgrid {
+      border: none !important;
+    }
+    .fc-daygrid-day:has(.fc-daygrid-event-harness) .fc-daygrid-day-number:before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      background: var(--secondary-color);
+      bottom: -2px;
+      border-radius: 50px;
+      position: absolute;
+    }
+    .fc-day.holiday .fc-daygrid-day-number:before {
+      background: #dc3560 !important;
+    }
+    .fc-day.event-day .fc-daygrid-day-number{
+      color: var(--secondary-color) !important;
+    }
+    
+    .event-icon {
+      background: var(--secondary-color);
+      padding: 10px;
+      border-radius: 8px;
+      .day {
+        font-weight: bold;
+        color: white;
+      }
+      .month{
+        font-size: 14px;
+        font-weight: 400; 
+        color: white;
+      }
+    }
+    .clplace{
+      font-size: 13px; 
+    }
+    .date-type{
+      span {
+        font-size: 12px; 
+      }
+    }
+  }
+}

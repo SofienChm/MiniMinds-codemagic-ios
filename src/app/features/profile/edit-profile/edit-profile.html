@@ -1,6 +1,5 @@
 <div *ngIf="isParent()">
   <app-parent-child-header
-    title="Edit profile"
     [children]="[{firstName: profileForm.get('firstName')?.value, lastName: profileForm.get('lastName')?.value, profilePicture: imagePreview}]"
     [currentChildIndex]="0"
     [showDatePicker]="false"

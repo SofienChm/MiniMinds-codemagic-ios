@@ -118,7 +118,21 @@ export class FcmPushNotificationService {
 
         // Navigate to the appropriate page based on notification data
         if (data?.redirectUrl) {
-          this.router.navigate([data.redirectUrl]);
+          // Handle URLs with query parameters (e.g., /messages?id=123)
+          const url = data.redirectUrl as string;
+          if (url.includes('?')) {
+            const [path, queryString] = url.split('?');
+            const queryParams: { [key: string]: string } = {};
+            queryString.split('&').forEach(param => {
+              const [key, value] = param.split('=');
+              if (key && value) {
+                queryParams[key] = value;
+              }
+            });
+            this.router.navigate([path], { queryParams });
+          } else {
+            this.router.navigate([url]);
+          }
         } else if (data?.type) {
           this.handleNotificationNavigation(data.type, data);
         }
@@ -145,7 +159,7 @@ export class FcmPushNotificationService {
         this.router.navigate(['/messages']);
         break;
       case 'Attendance':
-        this.router.navigate(['/attendance']);
+        this.router.navigate(['/daily-activities']);
         break;
       default:
         this.router.navigate(['/notifications']);

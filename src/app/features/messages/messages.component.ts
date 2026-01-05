@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { NgSelectModule } from '@ng-select/ng-select';
 import { ActivatedRoute } from '@angular/router';
 import { MessagesService, MailMessage, Recipient } from '../../core/services/messages.service';
 import { AuthService } from '../../core/services/auth';
@@ -15,7 +16,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 @Component({
   selector: 'app-messages',
   standalone: true,
-  imports: [CommonModule, FormsModule, ParentChildHeaderSimpleComponent, TranslateModule],
+  imports: [CommonModule, FormsModule, NgSelectModule, ParentChildHeaderSimpleComponent, TranslateModule],
   templateUrl: './messages.component.html',
   styleUrl: './messages.component.scss'
 })
@@ -302,6 +303,29 @@ export class MessagesComponent implements OnInit, OnDestroy {
 
   getRecipientsList(): Recipient[] {
     return [...this.recipients.parents, ...this.recipients.teachers];
+  }
+
+  getGroupedRecipients(): { id: string; name: string; email: string; group: string }[] {
+    const parentsLabel = this.translateService.instant('MESSAGES_PAGE.PARENTS');
+    const teachersLabel = this.translateService.instant('MESSAGES_PAGE.TEACHERS');
+
+    const parents = this.recipients.parents.map(p => ({
+      id: p.id,
+      name: p.name,
+      email: p.email,
+      displayName: `${p.name} (${p.email})`,
+      group: parentsLabel
+    }));
+
+    const teachers = this.recipients.teachers.map(t => ({
+      id: t.id,
+      name: t.name,
+      email: t.email,
+      displayName: `${t.name} (${t.email})`,
+      group: teachersLabel
+    }));
+
+    return [...parents, ...teachers];
   }
 
   get isParent(): boolean {

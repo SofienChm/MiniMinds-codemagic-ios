@@ -1,5 +1,5 @@
-<div class="parent-detailchild new-design" >
-  <app-parent-child-header-simple *ngIf="isParent"
+<div *ngIf="isParent" class="parent-detailchild new-design">
+  <app-parent-child-header-simple 
     [title]="'MESSAGES_PAGE.TITLE' | translate"
   >
     <span class="nd-unread-badge">{{ getUnreadCount() }} {{ 'MESSAGES_PAGE.UNREAD' | translate }}</span>
@@ -347,19 +347,17 @@
             </div>
             <div class="form-group" *ngIf="composeForm.recipientType === 'individual'">
               <label class="form-label">{{ 'MESSAGES_PAGE.RECIPIENT' | translate }}</label>
-              <select class="form-input" [(ngModel)]="composeForm.recipientId" required>
-                <option value="">{{ 'MESSAGES_PAGE.SELECT_RECIPIENT' | translate }}</option>
-                <optgroup [label]="'MESSAGES_PAGE.PARENTS' | translate" *ngIf="isAdmin">
-                  <option *ngFor="let p of recipients.parents" [value]="p.id">
-                    {{ p.name }} ({{ p.email }})
-                  </option>
-                </optgroup>
-                <optgroup [label]="'MESSAGES_PAGE.TEACHERS' | translate" *ngIf="isAdmin">
-                  <option *ngFor="let t of recipients.teachers" [value]="t.id">
-                    {{ t.name }} ({{ t.email }})
-                  </option>
-                </optgroup>
-              </select>
+              <ng-select
+                [(ngModel)]="composeForm.recipientId"
+                [items]="getGroupedRecipients()"
+                [placeholder]="'MESSAGES_PAGE.SELECT_RECIPIENT' | translate"
+                [clearable]="true"
+                [searchable]="true"
+                bindValue="id"
+                bindLabel="displayName"
+                groupBy="group"
+                class="form-ng-select">
+              </ng-select>
             </div>
             <div class="form-group">
               <label class="form-label">{{ 'MESSAGES_PAGE.SUBJECT' | translate }}</label>
