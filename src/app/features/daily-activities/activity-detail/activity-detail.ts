@@ -12,6 +12,7 @@ import { ApiConfig } from '../../../core/config/api.config';
 import { PageTitleService } from '../../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
+import { ParentChildHeaderSimpleComponent } from "../../../shared/components/parent-child-header-simple/parent-child-header-simple.component";
 
 interface ActivityComment {
   id: number;
@@ -43,7 +44,7 @@ interface ActivityPhoto {
 @Component({
   selector: 'app-activity-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, TranslateModule, TitlePage],
+  imports: [CommonModule, RouterModule, FormsModule, TranslateModule, TitlePage, ParentChildHeaderSimpleComponent],
   templateUrl: './activity-detail.html',
   styleUrls: ['./activity-detail.scss']
 })
@@ -506,7 +507,7 @@ export class ActivityDetail implements OnInit, OnDestroy {
   setupTitleActions(): void {
     const actions: TitleAction[] = [
       {
-        label: this.translate.instant('DAILY_REPORT.BACK'),
+        label: this.translate.instant('DAILY_REPORT.BACK_TO_DAILY_REPORT'),
         icon: 'bi bi-arrow-left',
         class: 'custom-btn-2 btn-cancel-2',
         action: () => this.goBack()

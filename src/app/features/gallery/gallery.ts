@@ -14,6 +14,7 @@ import { PageTitleService } from '../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
 import { ParentChildHeaderSimpleComponent } from '../../shared/components/parent-child-header-simple/parent-child-header-simple.component';
+import { Capacitor } from '@capacitor/core';
 
 // Image compression settings - reduces storage by ~70%
 const IMAGE_MAX_WIDTH = 1920;
@@ -30,6 +31,7 @@ const IMAGE_QUALITY = 0.8; // 80% quality - good balance between size and qualit
 export class Gallery implements OnInit, OnDestroy {
   @ViewChild('videoElement') videoElement!: ElementRef<HTMLVideoElement>;
   @ViewChild('canvasElement') canvasElement!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('nativeCameraInput') nativeCameraInput!: ElementRef<HTMLInputElement>;
 
   photos: Photo[] = [];
   children: ChildModel[] = [];
@@ -325,6 +327,21 @@ export class Gallery implements OnInit, OnDestroy {
     }
   }
 
+  // Check if running on native mobile platform or mobile browser
+  // Use native file input for camera on mobile devices
+  private isNativeMobile(): boolean {
+    // Check Capacitor native platform first
+    if (Capacitor.isNativePlatform()) {
+      return true;
+    }
+    // Fallback: check user agent for mobile devices
+    const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+    const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent.toLowerCase());
+    // Also check if mediaDevices is not available (iOS WebView)
+    const noMediaDevices = !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia;
+    return isMobile || noMediaDevices;
+  }
+
   // Camera functions - web browser camera API
   async openCameraModal() {
     // Reset modal state
@@ -333,6 +350,13 @@ export class Gallery implements OnInit, OnDestroy {
     this.cameraCategory = 'Memory';
     this.cameraTitle = '';
     this.cameraDescription = '';
+
+    // On native mobile (Android/iOS), use native file input with capture
+    // This properly triggers the native camera app
+    if (this.isNativeMobile()) {
+      this.nativeCameraInput?.nativeElement.click();
+      return;
+    }
 
     // Check HTTPS requirement (camera only works on HTTPS or localhost)
     const isSecure = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
@@ -487,6 +511,26 @@ export class Gallery implements OnInit, OnDestroy {
     this.stopCamera();
     this.showCameraModal = false;
     this.capturedImage = null;
+  }
+
+  // Handle native camera capture (from file input with capture="environment")
+  onNativeCameraCapture(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+
+    const file = input.files[0];
+
+    // Read file as base64 and show in modal for child selection
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.capturedImage = reader.result as string;
+      // Show modal with captured image for child selection
+      this.showCameraModal = true;
+    };
+    reader.readAsDataURL(file);
+
+    // Reset input so same file can be selected again
+    input.value = '';
   }
 
   async saveCapturedPhoto() {

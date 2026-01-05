@@ -20,7 +20,14 @@
       </div>
       <div class="overflow-hidden">
         <h5 class="name">{{ children[currentChildIndex]?.firstName }} {{ children[currentChildIndex]?.lastName }}</h5>
-        <p class="age" *ngIf="children[currentChildIndex]?.dateOfBirth">{{ getAge(children[currentChildIndex]?.dateOfBirth) }} years old</p>
+        <p class="age" *ngIf="children[currentChildIndex]?.dateOfBirth">
+          @if(calculateAge(children[currentChildIndex]?.dateOfBirth).years > 0){
+          {{ calculateAge(children[currentChildIndex]?.dateOfBirth).years }} years old
+          }
+          @if(calculateAge(children[currentChildIndex]?.dateOfBirth).years <= 0){
+          {{ calculateAge(children[currentChildIndex]?.dateOfBirth).months }} months old
+          }
+        </p>
         <div class="slider-controls" *ngIf="children.length > 1">
           <button class="btn btn-sm btn-outline-secondary" (click)="onPrevChild.emit()" [disabled]="currentChildIndex === 0">
             <i class="bi bi-chevron-left"></i>

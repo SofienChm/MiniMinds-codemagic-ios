@@ -28,6 +28,7 @@ export interface ChildModel {
   id?: number;
   firstName: string;
   lastName: string;
+  age?: number;
   dateOfBirth: string;
   gender: string;
   allergies?: string;

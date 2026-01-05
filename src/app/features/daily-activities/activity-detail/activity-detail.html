@@ -1,14 +1,11 @@
 <!-- Parent View -->
+
 <div *ngIf="isParent" class="parent-activity-detail font-inter">
-  <div class="header-info" *ngIf="!loading && activity">
-    <div class="title-icons mb-3" (click)="back()">
-      <div class="page-back">
-        <i class="bi bi-arrow-left"></i>
-      </div>
-      <div class="title-page">{{ 'DAILY_REPORT.ACTIVITY_DETAIL' | translate }}</div>
-      <div class="page-setting"></div>
-    </div>
-  </div>
+  <app-parent-child-header-simple
+    [title]="'DAILY_REPORT.ACTIVITY_DETAIL' | translate"
+  >
+    <!-- Ajoutez ici des badges ou autres éléments si besoin -->
+  </app-parent-child-header-simple>
 
   <div class="activity-detail-content" *ngIf="!loading && activity">
     <!-- Activity Header Card -->

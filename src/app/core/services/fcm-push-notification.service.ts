@@ -118,21 +118,21 @@ export class FcmPushNotificationService {
 
         // Navigate to the appropriate page based on notification data
         if (data?.redirectUrl) {
-          // Handle URLs with query parameters (e.g., /messages?id=123)
-          const url = data.redirectUrl as string;
-          if (url.includes('?')) {
-            const [path, queryString] = url.split('?');
-            const queryParams: { [key: string]: string } = {};
-            queryString.split('&').forEach(param => {
-              const [key, value] = param.split('=');
-              if (key && value) {
-                queryParams[key] = value;
-              }
-            });
-            this.router.navigate([path], { queryParams });
-          } else {
-            this.router.navigate([url]);
+          let url = data.redirectUrl as string;
+          console.log('Navigating to redirectUrl:', url);
+
+          // Handle /reclamations/:id - convert to /reclamations?id=:id since there's no detail page
+          const reclamationMatch = url.match(/^\/reclamations\/(\d+)$/);
+          if (reclamationMatch) {
+            url = `/reclamations?id=${reclamationMatch[1]}`;
+            console.log('Converted reclamation URL to:', url);
           }
+
+          // Use navigateByUrl for full path navigation (handles /path/to/page, /page?id=123, etc.)
+          this.router.navigateByUrl(url).then(
+            (success) => console.log('Navigation success:', success),
+            (error) => console.error('Navigation error:', error)
+          );
         } else if (data?.type) {
           this.handleNotificationNavigation(data.type, data);
         }

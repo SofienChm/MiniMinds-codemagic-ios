@@ -349,13 +349,14 @@
               <label class="form-label">{{ 'MESSAGES_PAGE.RECIPIENT' | translate }}</label>
               <ng-select
                 [(ngModel)]="composeForm.recipientId"
-                [items]="getGroupedRecipients()"
+                [items]="groupedRecipients"
                 [placeholder]="'MESSAGES_PAGE.SELECT_RECIPIENT' | translate"
                 [clearable]="true"
                 [searchable]="true"
                 bindValue="id"
                 bindLabel="displayName"
                 groupBy="group"
+                appendTo="body"
                 class="form-ng-select">
               </ng-select>
             </div>

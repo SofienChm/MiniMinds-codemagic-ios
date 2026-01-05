@@ -93,7 +93,18 @@
             </div>
             <div class="info">
               <div class="info-title">{{ child.firstName }} {{ child.lastName }}</div>
-              <div class="info-desc">{{ child.age }} years old</div>
+                        @if( calculateAge(child.dateOfBirth).years > 0){
+                          <div class="info-desc">
+                            {{ calculateAge(child.dateOfBirth).years }} years old
+                          </div>
+                        }
+                        @if( calculateAge(child.dateOfBirth).years  <= 0){
+                          <div class="info-desc">
+                            {{ calculateAge(child.dateOfBirth).months }} months old
+                          </div>
+                        }
+
+              
             </div>
             <div class="link">
               <i class="bi bi-chevron-right"></i>
@@ -213,8 +224,14 @@
                       class="d-flex align-items-center justify-content-center avatar avatar-xxl border border-dashed me-2 flex-shrink-0 text-dark frames">
                       <img loading="lazy" [src]="currentChild?.profilePicture || 'assets/child.png'" class="img-fluid"
                         alt="Child Photo">
-                      <span class="badge badge-age d-inline-flex align-items-center mb-2">{{ currentChild?.gender }}
-                        years old</span>
+                      <span class="badge badge-age d-inline-flex align-items-center mb-2">
+                        @if( calculateAge(currentChild!.dateOfBirth).years  > 0){
+                        {{ calculateAge(currentChild!.dateOfBirth).years}} years old
+                        }
+                        @if( calculateAge(currentChild!.dateOfBirth).years  <= 0){
+                        {{ calculateAge(currentChild!.dateOfBirth).months}} months old
+                        }
+                      </span>
                     </div>
                     <div class="overflow-hidden">
                       <h5 class="mb-1 text-truncate name-user">{{ currentChild?.firstName }} {{ currentChild?.lastName
@@ -254,8 +271,14 @@
                       class="d-flex align-items-center justify-content-center avatar avatar-xxl border border-dashed me-2 flex-shrink-0 text-dark frames">
                       <img loading="lazy" [src]="child.profilePicture || 'assets/child.png'" class="img-fluid"
                         alt="Child Photo">
-                      <span class="badge badge-age d-inline-flex align-items-center mb-2">{{ child.age }} years
-                        old</span>
+                      <span class="badge badge-age d-inline-flex align-items-center mb-2">
+                        @if( calculateAge(child.dateOfBirth).years  > 0){
+                        {{ calculateAge(child.dateOfBirth).years}} years old
+                        }
+                        @if( calculateAge(child.dateOfBirth).years  <= 0){
+                        {{ calculateAge(child.dateOfBirth).months}} months old
+                        }
+                      </span>
                     </div>
                     <div class="overflow-hidden">
                       <h5 class="mb-1 text-truncate name-user">{{ child.firstName }} {{ child.lastName }}</h5>
@@ -280,21 +303,6 @@
                     <dt class="col-6 title-dt-body-card mb-3">Registration Date</dt>
                     <dd class="col-6 description-dt-body-card mb-3">{{ formatDate(parent.createdAt) }}</dd>
                   </dl>
-                </div>
-                <div class="card-footer">
-                  <div class="d-flex col-12 align-items-center justify-content-end action-child">
-                    <button class="custom-btn-2 btn-remove-2" (click)="removeChildFromParent(child.id, child.firstName + ' ' + child.lastName)">
-                      <i class="bi bi-trash me-2"></i>
-                      Remove
-                    </button> <button class="custom-btn-2 btn-add-global-2" (click)="addFeeForChild(child.id, child.firstName + ' ' + child.lastName)">
-                      <i class="bi bi-plus-circle-dotted me-2"></i>
-                      Add Fees
-                    </button>
-                    <button class="custom-btn-2 btn-view-global-2" (click)="viewChildDetails(child.id)">
-                      <i class="bi bi-eye me-2 me-2"></i>
-                      View Details
-                    </button>
-                  </div>
                 </div>
               </div>
             </div>

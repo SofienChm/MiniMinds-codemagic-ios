@@ -31,6 +31,5 @@ export interface ChildInfo {
   profilePicture?: string;
   hasProfilePicture?: boolean;
   enrollmentDate: string;
-  age?: number;
   isActive?: boolean;
 }

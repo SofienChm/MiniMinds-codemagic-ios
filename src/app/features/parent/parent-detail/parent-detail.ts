@@ -142,17 +142,23 @@ export class ParentDetail implements OnInit, OnDestroy {
     });
   }
 
-  calculateAge(dateOfBirth: string): number {
+  /**
+   * Retourne l'âge sous forme d'objet { years, months }
+   * Ex : { years: 2, months: 5 }
+   */
+  calculateAge(dateOfBirth: string): { years: number, months: number } {
     const today = new Date();
     const birthDate = new Date(dateOfBirth);
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
+    let years = today.getFullYear() - birthDate.getFullYear();
+    let months = today.getMonth() - birthDate.getMonth();
+    if (today.getDate() < birthDate.getDate()) {
+      months--;
     }
-    
-    return age;
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+    return { years: years < 0 ? 0 : years, months: months < 0 ? 0 : months };
   }
 
   formatDate(dateString?: string): string {
