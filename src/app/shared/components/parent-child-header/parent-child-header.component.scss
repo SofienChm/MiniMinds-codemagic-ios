@@ -4,6 +4,25 @@
   .header-info {
     position: relative;
 
+    .title-icons {
+      .page-setting {
+        // Ensure touch target is large enough on mobile
+        min-width: 44px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+
+        i {
+          font-size: 18px;
+          pointer-events: none; // Ensure clicks go to parent
+        }
+      }
+    }
+
     .image-name {
       position: relative;
         margin-bottom: 45px;

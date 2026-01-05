@@ -26,6 +26,11 @@ export class ParentChildHeaderComponent {
   @Output() onDateChange = new EventEmitter<string>();
   @Output() onSettings = new EventEmitter<void>();
   @Output() onEdit = new EventEmitter<void>();
+
+  handleEditClick(): void {
+    console.log('Edit button clicked in header component');
+    this.onEdit.emit();
+  }
   
   get child() {
     return this.children[this.currentChildIndex];

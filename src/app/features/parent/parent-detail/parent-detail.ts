@@ -170,12 +170,20 @@ export class ParentDetail implements OnInit, OnDestroy {
   }
 
   editParent(): void {
+    console.log('editParent() called, parent:', this.parent?.id, 'isParent:', this.isParent);
     if (this.parent?.id) {
       if (this.isParent) {
-        this.router.navigate(['/profile/edit']);
+        console.log('Navigating to /profile/edit');
+        this.router.navigate(['/profile/edit']).then(
+          (success) => console.log('Navigation success:', success),
+          (error) => console.error('Navigation error:', error)
+        );
       } else {
+        console.log('Navigating to /parents/edit/', this.parent.id);
         this.router.navigate(['/parents/edit', this.parent.id]);
       }
+    } else {
+      console.log('editParent() - no parent id');
     }
   }
 

@@ -20,6 +20,7 @@ export class Login {
   errorMessage = '';
   isLoading = false;
   showPassword = false;
+  showWelcomeScreen = true;
 
   constructor(
     private authService: AuthService,
@@ -32,6 +33,10 @@ export class Login {
 
   togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;
+  }
+
+  onContinue(): void {
+    this.showWelcomeScreen = false;
   }
 
 

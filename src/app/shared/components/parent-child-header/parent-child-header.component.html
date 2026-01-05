@@ -8,8 +8,8 @@
       <!-- <div class="page-setting" *ngIf="showSettings" (click)="onSettings.emit()">
         <i class="bi bi-gear"  ></i>
       </div> -->
-      <div class="page-setting"  (click)="onEdit.emit()">
-        <i class="bi bi-pen" *ngIf="showEdit"></i>
+      <div class="page-setting" *ngIf="showEdit" (click)="handleEditClick()">
+        <i class="bi bi-pen"></i>
       </div>
     </div>
     <div *ngIf="showImages" class="d-flex image-name row_direction">

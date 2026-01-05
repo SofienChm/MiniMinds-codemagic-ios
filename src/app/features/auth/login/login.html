@@ -1,4 +1,110 @@
 <ng-container *ngIf="isMobile()" class="font-inter">
+  <div class="welcome-screen" [class.show-login]="!showWelcomeScreen">
+    <!-- Blue wave background -->
+    <div class="welcome-top-section">
+      <svg
+        viewBox="0 0 390 520"
+        preserveAspectRatio="xMidYMax slice"
+        class="wave-svg"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <linearGradient id="waveGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#90b9fc" />
+            <stop offset="100%" stop-color="#95f2d7" />
+          </linearGradient>
+        </defs>
+
+        <path
+          d="M0 0 L390 0 L390 420 Q320 480 195 450 Q70 420 0 480 L0 0 Z"
+          fill="url(#waveGradient)"
+        ></path>
+      </svg>
+
+    </div>
+
+    <!-- Bottom section with animated content -->
+    <div class="welcome-bottom-section">
+      <!-- Welcome content -->
+      <div class="welcome-content" [class.hidden]="!showWelcomeScreen">
+        <h1 class="welcome-title">Welcome</h1>
+        <p class="welcome-description">Lorem ipsum dolor sit amet consectetur.<br>Lorem id sit</p>
+        <div class="wrapper float-end">
+          <a class="link" (click)="onContinue()">
+            <span class="color"></span>
+            <span>Continue</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Login form content -->
+      <div class="login-content" [class.visible]="!showWelcomeScreen">
+        <h1 class="signin-title">Sign in</h1>
+
+        <form (ngSubmit)="onSubmit()" #loginForm="ngForm" class="login-form">
+          <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+            {{ errorMessage }}
+          </div>
+
+          <div class="form-group-mobile">
+            <label class="form-label-mobile">Email</label>
+            <div class="input-wrapper">
+              <i class="bi bi-envelope"></i>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                [(ngModel)]="credentials.email"
+                required
+                email
+                placeholder="demo@email.com">
+            </div>
+          </div>
+
+          <div class="form-group-mobile">
+            <label class="form-label-mobile">Password</label>
+            <div class="input-wrapper">
+              <i class="bi bi-lock"></i>
+              <input
+                [type]="showPassword ? 'text' : 'password'"
+                id="password"
+                name="password"
+                [(ngModel)]="credentials.password"
+                required
+                placeholder="enter your password">
+              <i [class]="showPassword ? 'bi bi-eye toggle-pass' : 'bi bi-eye-slash toggle-pass'"
+                 (click)="togglePasswordVisibility()"></i>
+            </div>
+          </div>
+
+          <div class="form-options">
+            <div class="remember-me">
+              <input type="checkbox" id="remember">
+              <label for="remember">Remember Me</label>
+            </div>
+            <a href="#" class="forgot-link">Forgot Password?</a>
+          </div>
+
+          <button
+            type="submit"
+            class="btn-login"
+            [disabled]="!loginForm.valid || isLoading">
+            <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+            {{ isLoading ? 'Signing in...' : 'Login' }}
+          </button>
+        </form>
+
+        <div class="signup-prompt">
+          <span>Don't have an Account ?</span>
+          <a routerLink="/register">Sign up</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-container>
+
+<ng-container *ngIf="false" class="font-inter">
   <div class="font-inter mobile-view-login">
   <div class="header-info">
     <div class="title-icons mb-3">
@@ -22,7 +128,7 @@
       <div class="logo logo-login-mobile text-center mb-4">
         <img src="/assets/images/icon.png" class="img-fluid" alt="">
       </div>
-      <h3 class="text-center mb-3">Miniminds</h3>
+      <h3 class="text-center mb-3 fw-bold">Miniminds</h3>
 
       <div class="form col-11 form-login_mobile mb-4">
         <div class="card">
@@ -33,7 +139,7 @@
             </div>
 
             <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
-              <div class="mb-3">
+              <!-- <div class="mb-3">
                 <input 
                   type="email" 
                   class="form-control" 
@@ -43,15 +149,35 @@
                   required 
                   email
                   placeholder="Enter your email">
-              </div>
-<div class="form-group">
-                <label for="email">Email Address</label>
+              </div> -->
+              <div class="form-group">
                 <div class="input-with-icon">
-                    <i class="fas fa-envelope"></i>
-                    <input type="email" id="email" class="form-control" placeholder="Enter your email" required="">
+                    <i class="bi bi-envelope"></i>
+                    <input 
+                    type="email" 
+                    id="email" 
+                    class="form-control" 
+                    name="email"
+                    [(ngModel)]="credentials.email" 
+                    required 
+                    email
+                    placeholder="Enter your email">
                 </div>
-            </div>
-              <div class="mb-3">
+              </div>
+              <div class="form-group">
+                <div class="input-with-icon">
+                    <i class="bi bi-lock"></i>
+                    <input 
+                    [type]="showPassword ? 'text' : 'password'" 
+                    class="form-control" 
+                    id="password" 
+                    name="password"
+                    [(ngModel)]="credentials.password" 
+                    required
+                    placeholder="Enter your password">
+                </div>
+              </div>
+              <!-- <div class="mb-3">
                 <input 
                   [type]="showPassword ? 'text' : 'password'" 
                   class="form-control" 
@@ -60,7 +186,7 @@
                   [(ngModel)]="credentials.password" 
                   required
                   placeholder="Enter your password">
-              </div>
+              </div> -->
 
               <div class="mb-3 form-check">
                 <input type="checkbox" class="form-check-input" id="remember">
@@ -125,7 +251,6 @@
           <div class="form-group">
             <label class="form-label">Email Address</label>
             <div class="input-with-icon">
-              <i class="bi bi-envelope input-icon"></i>
               <input 
                 type="email" 
                 class="form-input" 
@@ -140,7 +265,6 @@
           <div class="form-group">
             <label class="form-label">Password</label>
             <div class="input-with-icon">
-              <i class="bi bi-lock input-icon"></i>
               <input 
                 [type]="showPassword ? 'text' : 'password'" 
                 class="form-input" 

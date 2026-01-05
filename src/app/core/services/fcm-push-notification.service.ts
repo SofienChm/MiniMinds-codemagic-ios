@@ -159,7 +159,12 @@ export class FcmPushNotificationService {
         this.router.navigate(['/messages']);
         break;
       case 'Attendance':
+      case 'CheckIn':
+      case 'CheckOut':
         this.router.navigate(['/daily-activities']);
+        break;
+      case 'Reclamation':
+        this.router.navigate(['/reclamations']);
         break;
       default:
         this.router.navigate(['/notifications']);
