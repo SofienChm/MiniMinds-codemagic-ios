@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { NgSelectModule } from '@ng-select/ng-select';
 import { ReclamationsService, Reclamation, ReclamationUser } from './reclamations.service';
 import { AuthService } from '../../core/services/auth';
 import { TitlePage } from "../../shared/layouts/title-page/title-page";
@@ -12,7 +13,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 @Component({
   selector: 'app-reclamations',
   standalone: true,
-  imports: [CommonModule, FormsModule, ParentChildHeaderSimpleComponent, TranslateModule],
+  imports: [CommonModule, FormsModule, NgSelectModule, ParentChildHeaderSimpleComponent, TranslateModule],
   templateUrl: './reclamations.component.html',
   styleUrls: ['./reclamations.component.scss']
 })

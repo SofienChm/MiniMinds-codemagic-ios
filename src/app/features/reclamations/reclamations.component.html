@@ -167,12 +167,19 @@
               <div *ngIf="showNewReclamationModal" class="new-reclamation-form">
                 <div class="form-group" *ngIf="!authService.isParent()">
                   <label class="form-label">{{ 'RECLAMATIONS_PAGE.RECIPIENT' | translate }}</label>
-                  <select class="form-input" [(ngModel)]="newReclamation.recipientId" required>
-                    <option value="">{{ 'RECLAMATIONS_PAGE.SELECT_RECIPIENT' | translate }}</option>
-                    <option *ngFor="let user of users" [value]="user.id">
-                      {{ user.name }} ({{ user.email }})
-                    </option>
-                  </select>
+                  <ng-select
+                    [(ngModel)]="newReclamation.recipientId"
+                    [items]="users"
+                    [placeholder]="'RECLAMATIONS_PAGE.SELECT_RECIPIENT' | translate"
+                    [clearable]="true"
+                    [searchable]="true"
+                    bindValue="id"
+                    bindLabel="name"
+                    class="form-ng-select">
+                    <ng-template ng-option-tmp let-item="item">
+                      {{ item.name }} ({{ item.email }})
+                    </ng-template>
+                  </ng-select>
                 </div>
                 <div class="form-group">
                   <label class="form-label">{{ 'RECLAMATIONS_PAGE.SUBJECT' | translate }}</label>
@@ -365,12 +372,19 @@
           <div *ngIf="showNewReclamationModal" class="new-reclamation-form">
             <div class="form-group" *ngIf="!authService.isParent()">
               <label class="form-label">{{ 'RECLAMATIONS_PAGE.RECIPIENT' | translate }}</label>
-              <select class="form-input" [(ngModel)]="newReclamation.recipientId" required>
-                <option value="">{{ 'RECLAMATIONS_PAGE.SELECT_RECIPIENT' | translate }}</option>
-                <option *ngFor="let user of users" [value]="user.id">
-                  {{ user.name }} ({{ user.email }})
-                </option>
-              </select>
+              <ng-select
+                [(ngModel)]="newReclamation.recipientId"
+                [items]="users"
+                [placeholder]="'RECLAMATIONS_PAGE.SELECT_RECIPIENT' | translate"
+                [clearable]="true"
+                [searchable]="true"
+                bindValue="id"
+                bindLabel="name"
+                class="form-ng-select">
+                <ng-template ng-option-tmp let-item="item">
+                  {{ item.name }} ({{ item.email }})
+                </ng-template>
+              </ng-select>
             </div>
             <div class="form-group">
               <label class="form-label">{{ 'RECLAMATIONS_PAGE.SUBJECT' | translate }}</label>

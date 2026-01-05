@@ -331,6 +331,7 @@
 .dashboard-header {
   background: linear-gradient(135deg, #B8E6F0 0%, #D4F1E8 100%);
   padding: 24px 20px 16px;
+  padding-top: calc(24px + var(--safe-area-top, 0px)); // Add safe area for status bar
   border-radius: 0 0 32px 32px;
   margin-bottom: 105px;
    .welcome-text{
