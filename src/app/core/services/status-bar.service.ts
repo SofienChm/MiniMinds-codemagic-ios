@@ -51,8 +51,10 @@ export class StatusBarService {
     if (!this.isNative) return;
 
     try {
+      // Style.Dark = dark STATUS BAR (light/white icons) - for dark backgrounds
+      // Style.Light = light STATUS BAR (dark/black icons) - for light backgrounds
       await StatusBar.setStyle({
-        style: style === 'dark' ? Style.Dark : Style.Light
+        style: style === 'dark' ? Style.Light : Style.Dark
       });
     } catch (error) {
       console.warn('Failed to set status bar style:', error);
