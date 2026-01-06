@@ -3,12 +3,15 @@ import { RouterOutlet } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { AuthService } from './core/services/auth';
 import { FcmPushNotificationService } from './core/services/fcm-push-notification.service';
+import { NetworkService } from './core/services/network.service';
+import { StatusBarService } from './core/services/status-bar.service';
+import { OfflineIndicatorComponent } from './shared/components/offline-indicator/offline-indicator.component';
 import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, OfflineIndicatorComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
@@ -17,6 +20,8 @@ export class App implements OnInit, OnDestroy {
   private translate = inject(TranslateService);
   private authService = inject(AuthService);
   private fcmService = inject(FcmPushNotificationService);
+  private networkService = inject(NetworkService); // Initialize network monitoring
+  private statusBarService = inject(StatusBarService); // Initialize status bar
   private userSubscription?: Subscription;
 
   constructor(private translates: TranslateService) {

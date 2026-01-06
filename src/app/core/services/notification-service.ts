@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { Notification } from '../interfaces/notification.interface';
 import { ApiConfig } from '../../core/config/api.config';
 import { PushNotificationService } from './push-notification.service';
+import { BadgeService } from './badge.service';
 import * as signalR from '@microsoft/signalr';
 
 @Injectable({
@@ -21,11 +22,17 @@ export class NotificationService {
   public notificationReceived$ = this.notificationReceivedSubject.asObservable();
 
   constructor(
-    private http: HttpClient, 
+    private http: HttpClient,
     private router: Router,
-    private pushNotificationService: PushNotificationService
+    private pushNotificationService: PushNotificationService,
+    private badgeService: BadgeService
   ) {
     this.loadUnreadCount();
+
+    // Update app badge when unread count changes
+    this.unreadCount$.subscribe(count => {
+      this.badgeService.setBadge(count);
+    });
   }
 
   getNotifications(): Observable<Notification[]> {

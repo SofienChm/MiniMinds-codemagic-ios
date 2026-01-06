@@ -11,10 +11,11 @@ import { ChildModel } from '../../children/children.interface';
 import Swal from 'sweetalert2';
 import { PageTitleService } from '../../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
+import { TitlePage, Breadcrumb, TitleAction } from '../../../shared/layouts/title-page/title-page';
 
 @Component({
   selector: 'app-fee-edit',
-  imports: [CommonModule, ReactiveFormsModule, TranslateModule, NgSelectModule],
+  imports: [CommonModule, ReactiveFormsModule, TranslateModule, NgSelectModule, TitlePage],
   standalone: true,
   templateUrl: './fee-edit.component.html',
   styleUrls: ['./fee-edit.component.scss']
@@ -26,6 +27,7 @@ export class FeeEditComponent implements OnInit, OnDestroy {
   saving = false;
   feeId: number = 0;
   private langChangeSub?: Subscription;
+  breadcrumbs: Breadcrumb[] = [];
 
   // Options for ng-select
   feeTypes: Array<{ value: string; label: string; icon: string }> = [];
@@ -60,6 +62,12 @@ export class FeeEditComponent implements OnInit, OnDestroy {
   }
 
   private updateTranslatedContent(): void {
+    this.breadcrumbs = [
+      { label: this.translate.instant('FEES_PAGE.DASHBOARD') },
+      { label: this.translate.instant('FEES_PAGE.FEES_LABEL'), url: '/fees' },
+      { label: this.translate.instant('EDIT_FEE.TITLE') }
+    ];
+
     this.feeTypes = [
       { value: 'monthly', label: this.translate.instant('EDIT_FEE.MONTHLY'), icon: 'bi-calendar-month' },
       { value: 'one-time', label: this.translate.instant('EDIT_FEE.ONE_TIME'), icon: 'bi-1-circle' },
@@ -70,6 +78,17 @@ export class FeeEditComponent implements OnInit, OnDestroy {
       { value: 'pending', label: this.translate.instant('EDIT_FEE.PENDING'), icon: 'bi-clock' },
       { value: 'paid', label: this.translate.instant('EDIT_FEE.PAID'), icon: 'bi-check-circle' },
       { value: 'overdue', label: this.translate.instant('EDIT_FEE.OVERDUE'), icon: 'bi-x-circle' }
+    ];
+  }
+
+  getActions(): TitleAction[] {
+    return [
+      {
+        label: this.translate.instant('FEES_PAGE.BACK'),
+        icon: 'bi bi-arrow-left',
+        class: 'custom-btn-2 btn-cancel-2',
+        action: () => this.cancel()
+      }
     ];
   }
 

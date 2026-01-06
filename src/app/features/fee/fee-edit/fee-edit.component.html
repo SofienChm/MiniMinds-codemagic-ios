@@ -1,5 +1,13 @@
 <div class="edit-fee-container">
   <div class="container-fluid mt-4 mb-4">
+    <app-title-page
+      [title]="'EDIT_FEE.TITLE' | translate"
+      [subtitle]="'EDIT_FEE.SUBTITLE' | translate"
+      icon="bi bi-pencil-square"
+      [breadcrumbs]="breadcrumbs"
+      [actions]="getActions()">
+    </app-title-page>
+
     <!-- Loading -->
     <div *ngIf="loading" class="text-center py-5">
       <div class="spinner-border" role="status">
@@ -171,10 +179,6 @@
 
         <!-- Action Buttons -->
         <div class="form-actions">
-          <button type="button" class="custom-btn-2 btn-cancel-2" (click)="cancel()" [disabled]="saving">
-            <i class="bi bi-x-circle"></i>
-            {{ 'EDIT_FEE.CANCEL' | translate }}
-          </button>
           <button type="submit" class="custom-btn-2 btn-add-global-2" [disabled]="saving || feeForm.invalid">
             <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
             <i *ngIf="!saving" class="bi bi-check-circle"></i>

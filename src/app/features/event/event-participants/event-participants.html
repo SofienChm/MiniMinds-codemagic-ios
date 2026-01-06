@@ -44,8 +44,9 @@
           </ng-select>
         </div>
         <div class="col-md-4">
-          <button class="btn btn-primary btn-add-global" (click)="addParticipant()"
+          <button class="custom-btn-2 btn-add-global-2" (click)="addParticipant()"
                   [disabled]="!selectedChildId || saving">
+            <i class="bi bi-plus-circle-dotted me-2"></i>
             <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
             {{ saving ? ('EVENT_PARTICIPANTS.ADDING' | translate) : ('EVENT_PARTICIPANTS.ADD_PARTICIPANT_BTN' | translate) }}
           </button>
@@ -58,7 +59,7 @@
   <div class="card card-general add-participant">
     <div class="card-header d-flex justify-content-between align-items-center">
       <h6>{{ 'EVENT_PARTICIPANTS.REGISTERED_PARTICIPANTS' | translate }} ({{ participants.length }})</h6>
-      <button class="btn btn-secondary btn-cancel-global btn-sm" (click)="goBack()">
+      <button class="btn custom-btn-2 btn-cancel-2" (click)="goBack()">
         <i class="bi bi-arrow-left me-1"></i>{{ 'EVENT_PARTICIPANTS.BACK_TO_EVENTS' | translate }}
       </button>
     </div>

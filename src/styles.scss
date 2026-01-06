@@ -782,6 +782,12 @@ h1, h2, h3, h4, h5, h6{
       opacity: 1;
     }
   }
+  @media screen and (max-width: 576px) {
+    padding: 7px 14px !important;
+    font-size: 13px !important;
+    min-width: 100px;
+    gap: 4px!important;
+  }
 }
 .btn-view {
   background: var(--gradient-primary);

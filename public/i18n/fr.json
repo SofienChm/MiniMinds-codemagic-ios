@@ -720,6 +720,7 @@
   },
   "RECLAMATIONS_PAGE": {
     "TITLE": "Réclamations",
+    "BACK": "Retour",
     "NEW_RECLAMATION": "Nouvelle Réclamation",
     "INBOX": "Boîte de réception",
     "SENT": "Envoyées",

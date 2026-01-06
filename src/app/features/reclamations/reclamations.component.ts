@@ -372,4 +372,8 @@ export class ReclamationsComponent implements OnInit, OnDestroy {
     this.selectedReclamations.forEach(r => r.isResolved = false);
     this.selectedReclamations = [];
   }
+
+  getOpenCount(): number {
+    return this.receivedReclamations.filter(r => !r.isResolved).length;
+  }
 }

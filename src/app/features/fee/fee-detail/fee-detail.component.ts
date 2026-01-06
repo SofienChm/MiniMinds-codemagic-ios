@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { TitlePage, Breadcrumb } from '../../../shared/layouts/title-page/title-page';
+import { TitlePage, Breadcrumb, TitleAction } from '../../../shared/layouts/title-page/title-page';
 import { FeeService } from '../fee.service';
 import { FeeModel } from '../fee.interface';
 import { PaymentService } from '../../../core/services/payment.service';
@@ -60,6 +60,29 @@ export class FeeDetailComponent implements OnInit, OnDestroy {
       { label: this.translateService.instant('FEES_PAGE.DASHBOARD') },
       { label: this.translateService.instant('FEES_PAGE.FEES_LABEL'), url: '/fees' },
       { label: this.translateService.instant('FEES_PAGE.FEE_DETAIL') }
+    ];
+  }
+
+  getActions(): TitleAction[] {
+    return [
+      {
+        label: this.translateService.instant('FEES_PAGE.BACK'),
+        icon: 'bi bi-arrow-left',
+        class: 'custom-btn-2 btn-cancel-2',
+        action: () => this.goBack()
+      },
+      {
+        label: this.translateService.instant('FEES_PAGE.EDIT'),
+        icon: 'bi bi-pencil',
+        class: 'custom-btn-2 btn-edit-global-2',
+        action: () => this.editFee()
+      },
+      {
+        label: this.translateService.instant('FEES_PAGE.PRINT'),
+        icon: 'bi bi-printer',
+        class: 'custom-btn-2 btn-view-global-2',
+        action: () => this.print()
+      }
     ];
   }
 

@@ -1,5 +1,6 @@
-<div *ngIf="isParent" class="parent-detailchild new-design">
-  <app-parent-child-header-simple 
+<app-pull-to-refresh #pullToRefresh (refresh)="onRefresh()" *ngIf="isParent">
+<div class="parent-detailchild new-design">
+  <app-parent-child-header-simple
     [title]="'MESSAGES_PAGE.TITLE' | translate"
   >
     <span class="nd-unread-badge">{{ getUnreadCount() }} {{ 'MESSAGES_PAGE.UNREAD' | translate }}</span>
@@ -177,6 +178,7 @@
     <i class="bi bi-pencil"></i>
   </button>
 </div>
+</app-pull-to-refresh>
 
 <div *ngIf="!isParent" class="container-fluid mt-4">
 

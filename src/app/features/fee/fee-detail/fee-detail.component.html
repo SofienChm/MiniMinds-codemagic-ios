@@ -9,7 +9,8 @@
     [title]="'FEES_PAGE.FEE_RECEIPT' | translate"
     [subtitle]="'FEES_PAGE.VIEW_FEE_DETAILS' | translate"
     icon="bi bi-receipt"
-    [breadcrumbs]="breadcrumbs">
+    [breadcrumbs]="breadcrumbs"
+    [actions]="getActions()">
   </app-title-page>
 
 </div>
@@ -107,18 +108,15 @@
                   <p class="text-muted">{{ fee.paymentNotes }}</p>
                 </div>
               </div>
-              <div class="col-md-12">
+              <div class="col-md-12" *ngIf="isParent">
                 <div class="text-end">
-                  <button [class]="'btn me-2 ' + (!isParent ? 'custom-btn-2 btn-cancel-2' : 'btn-secondary')" (click)="goBack()">
+                  <button class="btn btn-secondary me-2" (click)="goBack()">
                     <i class="bi bi-arrow-left me-2"></i>{{ 'FEES_PAGE.BACK' | translate }}
                   </button>
-                  <button *ngIf="isParent && fee.status === 'pending'" class="btn btn-success me-2" (click)="payOnline()" [disabled]="loading">
+                  <button *ngIf="fee.status === 'pending'" class="btn btn-success me-2" (click)="payOnline()" [disabled]="loading">
                     <i class="bi bi-credit-card me-2"></i>{{ 'FEES_PAGE.PAY_ONLINE' | translate }}
                   </button>
-                  <button *ngIf="!isParent" class="btn custom-btn-2 btn-edit-global-2 me-2" (click)="editFee()">
-                    <i class="bi bi-pencil me-2"></i>{{ 'FEES_PAGE.EDIT' | translate }}
-                  </button>
-                  <button [class]="'btn me-2 ' + (!isParent ? 'custom-btn-2 btn-view-global-2' : 'btn-info')" (click)="print()">
+                  <button class="btn btn-info me-2" (click)="print()">
                     <i class="bi bi-printer me-2"></i>{{ 'FEES_PAGE.PRINT' | translate }}
                   </button>
                 </div>

@@ -15,6 +15,7 @@ import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
 import { ParentChildHeaderSimpleComponent } from '../../shared/components/parent-child-header-simple/parent-child-header-simple.component';
 import { Capacitor } from '@capacitor/core';
+import { PullToRefreshComponent } from '../../shared/components/pull-to-refresh/pull-to-refresh.component';
 
 // Image compression settings - reduces storage by ~70%
 const IMAGE_MAX_WIDTH = 1920;
@@ -24,7 +25,7 @@ const IMAGE_QUALITY = 0.8; // 80% quality - good balance between size and qualit
 @Component({
   selector: 'app-gallery',
   standalone: true,
-  imports: [CommonModule, FormsModule, TitlePage, TranslateModule, ParentChildHeaderSimpleComponent],
+  imports: [CommonModule, FormsModule, TitlePage, TranslateModule, ParentChildHeaderSimpleComponent, PullToRefreshComponent],
   templateUrl: './gallery.html',
   styleUrl: './gallery.scss'
 })
@@ -32,6 +33,7 @@ export class Gallery implements OnInit, OnDestroy {
   @ViewChild('videoElement') videoElement!: ElementRef<HTMLVideoElement>;
   @ViewChild('canvasElement') canvasElement!: ElementRef<HTMLCanvasElement>;
   @ViewChild('nativeCameraInput') nativeCameraInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('pullToRefresh') pullToRefresh!: PullToRefreshComponent;
 
   photos: Photo[] = [];
   children: ChildModel[] = [];
@@ -511,6 +513,11 @@ export class Gallery implements OnInit, OnDestroy {
     this.stopCamera();
     this.showCameraModal = false;
     this.capturedImage = null;
+    // Reset form fields
+    this.cameraChildId = null;
+    this.cameraCategory = 'Memory';
+    this.cameraTitle = '';
+    this.cameraDescription = '';
   }
 
   // Handle native camera capture (from file input with capture="environment")
@@ -772,5 +779,13 @@ export class Gallery implements OnInit, OnDestroy {
   }
   get isParent(): boolean {
     return this.authService.isParent();
+  }
+
+  // Pull-to-refresh handler
+  onRefresh(): void {
+    this.loadPhotos();
+    setTimeout(() => {
+      this.pullToRefresh?.completeRefresh();
+    }, 500);
   }
 }

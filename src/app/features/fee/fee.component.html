@@ -92,54 +92,54 @@
   </app-title-page>
 
   <!-- Summary Cards -->
-  <div class="row mb-4" *ngIf="summary && !isParent">
-    <div class="col-xl-3 col-md-6 col-6 mb-3">
+  <div class="row mb-1 mb-md-4" *ngIf="summary && !isParent">
+    <div class="col-xl-3 col-md-6 col-6 mb-3 fee-mobile first">
       <div class="card stat-card shadow-sm">
         <div class="card-body d-flex justify-content-between align-items-center p-3">
           <div class="stat-content">
             <p class="mb-0">{{ 'FEES_PAGE.TOTAL_FEES' | translate }}</p>
             <h5 class="stat-number">{{ summary.totalAmount | appCurrency }}</h5>
           </div>
-          <div class="stat-icon-wrapper me-3">
+          <div class="stat-icon-wrapper">
             <i class="bi bi-currency-dollar"></i>
           </div>
         </div>
       </div>
     </div>
-    <div class="col-xl-3 col-md-6 col-6 mb-3">
+    <div class="col-xl-3 col-md-6 col-6 mb-3 fee-mobile second">
       <div class="card stat-card shadow-sm">
         <div class="card-body d-flex justify-content-between align-items-center p-3">
           <div class="stat-content">
             <p class="mb-0">{{ 'FEES_PAGE.PAID' | translate }}</p>
             <h5 class="stat-number">{{ summary.paidAmount | appCurrency }}</h5>
           </div>
-          <div class="stat-icon-wrapper me-3">
+          <div class="stat-icon-wrapper">
             <i class="bi bi-check-circle"></i>
           </div>
         </div>
       </div>
     </div>
-    <div class="col-xl-3 col-md-6 col-6 mb-3">
+    <div class="col-xl-3 col-md-6 col-6 mb-3 fee-mobile third">
       <div class="card stat-card shadow-sm">
         <div class="card-body d-flex justify-content-between align-items-center p-3">
           <div class="stat-content">
             <p class="mb-0">{{ 'FEES_PAGE.PENDING' | translate }}</p>
             <h5 class="stat-number">{{ summary.pendingAmount | appCurrency }}</h5>
           </div>
-          <div class="stat-icon-wrapper me-3">
+          <div class="stat-icon-wrapper">
             <i class="bi bi-clock text"></i>
           </div>
         </div>
       </div>
     </div>
-    <div class="col-xl-3 col-md-6 col-6 mb-3">
+    <div class="col-xl-3 col-md-6 col-6 mb-3 fee-mobile last">
       <div class="card stat-card shadow-sm">
         <div class="card-body d-flex justify-content-between align-items-center p-3">
           <div class="stat-content">
             <p class="mb-0">{{ 'FEES_PAGE.OVERDUE' | translate }}</p>
             <h5 class="stat-number">{{ summary.overdueAmount | appCurrency }}</h5>
           </div>
-          <div class="stat-icon-wrapper me-3">
+          <div class="stat-icon-wrapper">
             <i class="bi bi-exclamation-triangle"></i>
           </div>
         </div>

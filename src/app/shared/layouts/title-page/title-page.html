@@ -57,7 +57,7 @@
       <div *ngFor="let action of actions; let i = index" class="d-inline-block position-relative">
         <button 
           *ngIf="!action.dropdown"
-          [class]="'action-btn custom-btn-2 mb-2 ' + (action.class || 'btn-add-global-2')"
+          [class]="'action-btn custom-btn-2 ' + (action.class || 'btn-add-global-2')"
           (click)="action.action()">
           <i class="bi bi-plus-circle-dotted me-2" *ngIf="!action.icon"></i>
           <i *ngIf="action.icon" [class]="action.icon + ' me-2'"></i>
@@ -66,7 +66,7 @@
         
         <div *ngIf="action.dropdown" class="dropdown">
           <button 
-            [class]="'action-btn btn-add mb-2 dropdown-toggle export-btn ' + (action.class || 'btn-primary')"
+            [class]="'action-btn btn-add dropdown-toggle export-btn ' + (action.class || 'btn-primary')"
             (click)="toggleDropdown(i)">
             <i class="bi bi-download me-2"></i>
             {{ action.label }}

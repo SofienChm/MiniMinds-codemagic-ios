@@ -1,6 +1,7 @@
-<div *ngIf="isParent && !loading" [class]="isParent ? '' : ' mt-4'">
+<app-pull-to-refresh #pullToRefresh (refresh)="onRefresh()" *ngIf="isParent && !loading">
+<div [class]="isParent ? '' : ' mt-4'">
   <div class="parent-detailchild font-inter">
-    <app-parent-child-header-simple *ngIf="isParent"
+    <app-parent-child-header-simple
       title="Notifications"
     >
     </app-parent-child-header-simple>
@@ -19,8 +20,8 @@
         </div>
 
         <div *ngIf="!isLoading && filteredNotifications.length > 0" class="notifications-list">
-          <div *ngFor="let notification of displayedNotifications" 
-               class="notification-card" 
+          <div *ngFor="let notification of displayedNotifications"
+               class="notification-card"
                [class.unread]="!notification.isRead"
                (click)="onNotificationClick(notification)">
             <div class="notification-avatar">
@@ -51,6 +52,7 @@
     </div>
   </div>
 </div>
+</app-pull-to-refresh>
 
 <div *ngIf="!isParent" [class]="isParent ? '' : 'container-fluid mt-4'">
   <app-title-page 

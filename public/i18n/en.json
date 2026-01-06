@@ -807,6 +807,7 @@
   },
   "RECLAMATIONS_PAGE": {
     "TITLE": "Reclamations",
+    "BACK": "Back",
     "NEW_RECLAMATION": "New Reclamation",
     "INBOX": "Inbox",
     "SENT": "Sent",

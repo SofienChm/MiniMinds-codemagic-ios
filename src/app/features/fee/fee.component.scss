@@ -143,3 +143,24 @@
     font-weight: 500;
   }
 }
+
+
+  @media (max-width: 576px) {
+    .fee-mobile{
+      .stat-number {
+        font-size: 0.9rem;
+      }
+      &.first {
+        padding-right: 2px;
+      }
+      &.second {
+        padding-left: 2px;
+      }
+      &.third {
+        padding-right: 2px;
+      }
+      &.last {
+        padding-left: 2px;
+      }
+    }
+}

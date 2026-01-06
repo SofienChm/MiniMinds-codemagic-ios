@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { NotificationService } from '../../core/services/notification-service';
@@ -6,15 +6,17 @@ import { Notification } from '../../core/interfaces/notification.interface';
 import { AuthService } from '../../core/services/auth';
 import { ParentChildHeaderSimpleComponent } from '../../shared/components/parent-child-header-simple/parent-child-header-simple.component';
 import { TitlePage } from '../../shared/layouts/title-page/title-page';
+import { PullToRefreshComponent } from '../../shared/components/pull-to-refresh/pull-to-refresh.component';
 
 @Component({
   selector: 'app-notifications',
   standalone: true,
-  imports: [CommonModule, ParentChildHeaderSimpleComponent, TitlePage],
+  imports: [CommonModule, ParentChildHeaderSimpleComponent, TitlePage, PullToRefreshComponent],
   templateUrl: './notifications.component.html',
   styleUrl: './notifications.component.scss'
 })
 export class NotificationsComponent implements OnInit {
+  @ViewChild('pullToRefresh') pullToRefresh!: PullToRefreshComponent;
   notifications: Notification[] = [];
   filteredNotifications: Notification[] = [];
   displayedNotifications: Notification[] = [];
@@ -155,5 +157,13 @@ export class NotificationsComponent implements OnInit {
       return (words[0][0] + words[1][0]).toUpperCase();
     }
     return name.substring(0, 2).toUpperCase();
+  }
+
+  // Pull-to-refresh handler
+  onRefresh(): void {
+    this.loadNotifications();
+    setTimeout(() => {
+      this.pullToRefresh?.completeRefresh();
+    }, 500);
   }
 }

@@ -15,16 +15,19 @@ import { Location } from '@angular/common';
 import { ParentChildHeaderComponent } from '../../shared/components/parent-child-header/parent-child-header.component';
 import { PageTitleService } from '../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
+import { PullToRefreshComponent } from '../../shared/components/pull-to-refresh/pull-to-refresh.component';
+
 @Component({
   selector: 'app-daily-activities',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, NgSelectModule, TranslateModule, TitlePage, BaseChartDirective, ParentChildHeaderComponent],
+  imports: [CommonModule, FormsModule, RouterModule, NgSelectModule, TranslateModule, TitlePage, BaseChartDirective, ParentChildHeaderComponent, PullToRefreshComponent],
   templateUrl: './daily-activities.html',
   styleUrls: ['./daily-activities.scss']
 })
 export class DailyActivities implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('activityChart') activityChartRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('timelineChart') timelineChartRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('pullToRefresh') pullToRefresh!: PullToRefreshComponent;
   
   activities: DailyActivity[] = [];
   children: any[] = [];
@@ -441,7 +444,16 @@ export class DailyActivities implements OnInit, AfterViewInit, OnDestroy {
   trackByChildId(index: number, child: any): number {
     return child.id;
   }
-  
+
+  // Pull-to-refresh handler
+  onRefresh(): void {
+    this.loadActivities();
+    // Complete refresh after data loads
+    setTimeout(() => {
+      this.pullToRefresh?.completeRefresh();
+    }, 500);
+  }
+
   ngOnDestroy() {
     this.langChangeSub?.unsubscribe();
     // Charts are handled by ng2-charts

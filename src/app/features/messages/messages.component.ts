@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
@@ -12,15 +12,17 @@ import { NotificationService } from '../../core/services/notification-service';
 import { Subject, takeUntil } from 'rxjs';
 import Swal from 'sweetalert2';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { PullToRefreshComponent } from '../../shared/components/pull-to-refresh/pull-to-refresh.component';
 
 @Component({
   selector: 'app-messages',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgSelectModule, ParentChildHeaderSimpleComponent, TranslateModule],
+  imports: [CommonModule, FormsModule, NgSelectModule, ParentChildHeaderSimpleComponent, TranslateModule, PullToRefreshComponent],
   templateUrl: './messages.component.html',
   styleUrl: './messages.component.scss'
 })
 export class MessagesComponent implements OnInit, OnDestroy {
+  @ViewChild('pullToRefresh') pullToRefresh!: PullToRefreshComponent;
   private destroy$ = new Subject<void>();
   activeTab: 'received' | 'sent' | 'important' | 'trash' = 'received';
   inbox: MailMessage[] = [];
@@ -469,5 +471,14 @@ export class MessagesComponent implements OnInit, OnDestroy {
   }
   getUnreadCount(): number {
     return this.inbox.filter(m => !m.isRead).length;
+  }
+
+  // Pull-to-refresh handler
+  onRefresh(): void {
+    this.loadInbox();
+    this.loadSent();
+    setTimeout(() => {
+      this.pullToRefresh?.completeRefresh();
+    }, 500);
   }
 }
