@@ -48,6 +48,8 @@ export class ChildDetail implements OnInit, OnDestroy {
   isWithinGeofence = false;
   distanceToSchool = 0;
   childAttendanceStatus: { isCheckedIn: boolean; isCheckedOut: boolean; checkInTime?: string; checkOutTime?: string } | null = null;
+  isLoadingLocation = false;
+  locationError = '';
 
   breadcrumbs: Breadcrumb[] = [];
   get isParent(): boolean {
@@ -290,6 +292,9 @@ export class ChildDetail implements OnInit, OnDestroy {
     this.qrScannerState = 'idle';
     this.qrScannerError = '';
     this.qrScannerSuccess = '';
+    this.locationError = '';
+    this.isLoadingLocation = true;
+    this.currentPosition = null;
     this.loadChildAttendanceStatus();
     this.loadSchoolSettings();
   }
@@ -326,13 +331,17 @@ export class ChildDetail implements OnInit, OnDestroy {
   }
 
   getLocation(): void {
+    this.isLoadingLocation = true;
+    this.locationError = '';
     this.geolocationService.getCurrentPosition().subscribe({
       next: (position) => {
         this.currentPosition = position;
+        this.isLoadingLocation = false;
         this.checkGeofence();
       },
       error: (err) => {
-        this.qrScannerError = err.message || this.translate.instant('CHILD_DETAIL.QR_LOCATION_ERROR');
+        this.isLoadingLocation = false;
+        this.locationError = err.message || this.translate.instant('CHILD_DETAIL.QR_LOCATION_ERROR');
       }
     });
   }
@@ -418,11 +427,18 @@ export class ChildDetail implements OnInit, OnDestroy {
     }
   }
 
-  async onQrCodeScanned(code: string): Promise<void> {
+  async onQrCodeScanned(scannedData: string): Promise<void> {
     if (this.qrScannerState !== 'scanning') return;
 
     await this.stopQrScanner();
     this.qrScannerState = 'processing';
+
+    // Extract the code from URL if needed (QR codes contain URLs like https://app.miniminds.com/qr-action/MINIMINDS-CHECKIN-xxx)
+    let code = scannedData;
+    if (scannedData.includes('/qr-action/')) {
+      const parts = scannedData.split('/qr-action/');
+      code = parts[parts.length - 1];
+    }
 
     // First validate the QR code
     this.qrService.validateQrCode(code).subscribe({

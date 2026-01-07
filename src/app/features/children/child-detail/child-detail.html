@@ -414,15 +414,21 @@
               <i class="bi bi-qr-code display-1 text-muted"></i>
               <p class="text-muted mt-2">{{ 'CHILD_DETAIL.QR_READY_TO_SCAN' | translate }}</p>
             </div>
-            <div *ngIf="!currentPosition" class="alert alert-warning">
+            <div *ngIf="isLoadingLocation" class="alert alert-warning">
               <i class="bi bi-geo-alt me-2"></i>{{ 'CHILD_DETAIL.QR_GETTING_LOCATION' | translate }}
+            </div>
+            <div *ngIf="!isLoadingLocation && locationError" class="alert alert-danger">
+              <i class="bi bi-exclamation-triangle me-2"></i>{{ locationError }}
+              <button class="btn btn-sm btn-outline-danger ms-2" (click)="getLocation()">
+                <i class="bi bi-arrow-repeat me-1"></i>{{ 'CHILD_DETAIL.QR_TRY_AGAIN' | translate }}
+              </button>
             </div>
             <div *ngIf="currentPosition && schoolSettings?.geofenceEnabled && !isWithinGeofence" class="alert alert-danger">
               <i class="bi bi-exclamation-triangle me-2"></i>
               {{ 'CHILD_DETAIL.QR_OUTSIDE_GEOFENCE' | translate: { distance: (distanceToSchool | number:'1.0-0') } }}
             </div>
             <button class="btn btn-primary btn-lg w-100" (click)="startQrScanner()"
-              [disabled]="!currentPosition || (schoolSettings?.geofenceEnabled && !isWithinGeofence)">
+              [disabled]="!currentPosition || isLoadingLocation || locationError || (schoolSettings?.geofenceEnabled && !isWithinGeofence)">
               <i class="bi bi-camera me-2"></i>{{ 'CHILD_DETAIL.QR_START_SCAN' | translate }}
             </button>
           </div>

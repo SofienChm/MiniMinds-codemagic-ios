@@ -58,5 +58,16 @@
 	<string>This app needs access to your photo library to upload photos.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>This app needs permission to save photos to your library.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.miniminds.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>miniminds</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
