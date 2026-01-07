@@ -1,5 +1,5 @@
-import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, inject, OnInit, OnDestroy, signal, NgZone } from '@angular/core';
+import { Router, RouterOutlet } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { AuthService } from './core/services/auth';
 import { FcmPushNotificationService } from './core/services/fcm-push-notification.service';
@@ -7,6 +7,8 @@ import { NetworkService } from './core/services/network.service';
 import { StatusBarService } from './core/services/status-bar.service';
 import { OfflineIndicatorComponent } from './shared/components/offline-indicator/offline-indicator.component';
 import { Subscription } from 'rxjs';
+import { App as CapacitorApp, URLOpenListenerEvent } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
 
 @Component({
   selector: 'app-root',
@@ -22,12 +24,17 @@ export class App implements OnInit, OnDestroy {
   private fcmService = inject(FcmPushNotificationService);
   private networkService = inject(NetworkService); // Initialize network monitoring
   private statusBarService = inject(StatusBarService); // Initialize status bar
+  private router = inject(Router);
+  private zone = inject(NgZone);
   private userSubscription?: Subscription;
 
   constructor(private translates: TranslateService) {
     const savedLang = localStorage.getItem('lang') || 'en';
     translates.setDefaultLang('en');
     translates.use(savedLang);
+
+    // Initialize deep link listener for mobile
+    this.initializeDeepLinks();
   }
 
   ngOnInit(): void {
@@ -60,5 +67,39 @@ export class App implements OnInit, OnDestroy {
     } catch (error) {
       console.error('Failed to initialize FCM push notifications:', error);
     }
+  }
+
+  private initializeDeepLinks(): void {
+    // Only initialize on native platforms
+    if (!Capacitor.isNativePlatform()) {
+      return;
+    }
+
+    // Listen for app URL open events (deep links)
+    CapacitorApp.addListener('appUrlOpen', (event: URLOpenListenerEvent) => {
+      console.log('Deep link received:', event.url);
+
+      // Parse the URL and navigate
+      this.zone.run(() => {
+        const url = new URL(event.url);
+        let path = url.pathname;
+
+        // Handle custom scheme (miniminds://qr-action/CODE)
+        if (event.url.startsWith('miniminds://')) {
+          const parts = event.url.replace('miniminds://', '').split('/');
+          if (parts[0] === 'qr-action' && parts[1]) {
+            path = `/qr-action/${parts[1]}`;
+          }
+        }
+
+        // Handle https scheme (https://app.miniminds.com/qr-action/CODE)
+        if (path && path !== '/') {
+          console.log('Navigating to:', path);
+          this.router.navigateByUrl(path);
+        }
+      });
+    });
+
+    console.log('Deep link listener initialized');
   }
 }

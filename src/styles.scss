@@ -8,43 +8,48 @@
 // ===================================
 // SAFE AREA - STATUS BAR FIX (iOS & Android)
 // ===================================
-:root {
-  --safe-area-top: env(safe-area-inset-top, 0px);
-  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
-  --safe-area-left: env(safe-area-inset-left, 0px);
-  --safe-area-right: env(safe-area-inset-right, 0px);
-}
+// COMMENTED OUT - Safe area disabled by user request
+// Status bar is still handled natively:
+// - Android: MainActivity.java
+// - iOS: StatusBarService.ts
+
+// :root {
+//   --safe-area-top: env(safe-area-inset-top, 0px);
+//   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+//   --safe-area-left: env(safe-area-inset-left, 0px);
+//   --safe-area-right: env(safe-area-inset-right, 0px);
+// }
 
 // Fixed white status bar background for iOS
 // This creates a white bar that stays fixed behind the status bar icons
-body::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: env(safe-area-inset-top, 0px);
-  background-color: #FFFFFF;
-  z-index: 99999;
-  pointer-events: none;
-}
+// body::before {
+//   content: '';
+//   position: fixed;
+//   top: 0;
+//   left: 0;
+//   right: 0;
+//   height: env(safe-area-inset-top, 0px);
+//   background-color: #FFFFFF;
+//   z-index: 99999;
+//   pointer-events: none;
+// }
 
 // DON'T add padding to body - let headers handle safe area
-body {
-  padding-top: 0;
-  padding-bottom: var(--safe-area-bottom);
-  padding-left: var(--safe-area-left);
-  padding-right: var(--safe-area-right);
-}
+// body {
+//   padding-top: 0;
+//   padding-bottom: var(--safe-area-bottom);
+//   padding-left: var(--safe-area-left);
+//   padding-right: var(--safe-area-right);
+// }
 
 // For headers/toolbars that need safe area padding
-.safe-area-top {
-  padding-top: var(--safe-area-top);
-}
+// .safe-area-top {
+//   padding-top: var(--safe-area-top);
+// }
 
-.safe-area-bottom {
-  padding-bottom: var(--safe-area-bottom);
-}
+// .safe-area-bottom {
+//   padding-bottom: var(--safe-area-bottom);
+// }
 
 // ===================================
 // HIDE SCROLLBAR ON MOBILE
@@ -914,7 +919,7 @@ input.form-control {
   .header-info{
     background: linear-gradient(135deg, #B8E6F0 0%, #D4F1E8 100%);
     padding: 35px 20px 16px;
-    padding-top: calc(10px + var(--safe-area-top, 0px)); // Add safe area for status bar
+    // padding-top: calc(10px + var(--safe-area-top, 0px)); // Safe area disabled
     border-radius: 0 0 32px 32px;
     margin-bottom: 80px;
     .title-icons{

@@ -5,6 +5,12 @@ const config: CapacitorConfig = {
   appName: 'miniminds',
   webDir: 'dist/miniminds-web/browser',
 
+  // Server configuration for deep linking
+  server: {
+    // Handle deep links within the app
+    androidScheme: 'https'
+  },
+
   // iOS specific settings
   ios: {
     allowsLinkPreview: false,
