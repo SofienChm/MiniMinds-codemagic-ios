@@ -18,6 +18,10 @@ import { Html5Qrcode } from 'html5-qrcode';
 import { QrCheckinService } from '../../qr-checkin/qr-checkin.service';
 import { GeolocationService, GeolocationPosition } from '../../../core/services/geolocation.service';
 import { SchoolSettings } from '../../qr-checkin/qr-checkin.interface';
+import { QrScannerService } from '../../../core/services/qr-scanner.service';
+import { Subscription } from 'rxjs';
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
+import { Capacitor } from '@capacitor/core';
 
 @Component({
   selector: 'app-child-detail',
@@ -48,6 +52,7 @@ export class ChildDetail implements OnInit, OnDestroy {
   isWithinGeofence = false;
   distanceToSchool = 0;
   childAttendanceStatus: { isCheckedIn: boolean; isCheckedOut: boolean; checkInTime?: string; checkOutTime?: string } | null = null;
+  private scanSubscription?: Subscription;
 
   breadcrumbs: Breadcrumb[] = [];
   get isParent(): boolean {
@@ -70,7 +75,8 @@ export class ChildDetail implements OnInit, OnDestroy {
     private location: Location,
     private translate: TranslateService,
     private qrService: QrCheckinService,
-    private geolocationService: GeolocationService
+    private geolocationService: GeolocationService,
+    private qrScannerService: QrScannerService
   ) {}
 
   ngOnInit() {
@@ -282,6 +288,7 @@ export class ChildDetail implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.stopQrScanner();
+    this.scanSubscription?.unsubscribe();
   }
 
   // QR Scanner Methods
@@ -371,8 +378,44 @@ export class ChildDetail implements OnInit, OnDestroy {
       return;
     }
 
-    this.qrScannerState = 'scanning';
     this.qrScannerError = '';
+
+    // Use native scanner on mobile for better UX
+    if (this.qrScannerService.isNativePlatform()) {
+      await this.startNativeScanner();
+    } else {
+      await this.startWebScanner();
+    }
+  }
+
+  /**
+   * Start native barcode scanner (mobile)
+   */
+  private async startNativeScanner(): Promise<void> {
+    this.qrScannerState = 'scanning';
+
+    try {
+      const result = await this.qrScannerService.scanOnce();
+
+      if (result.success && result.code) {
+        await this.onQrCodeScanned(result.code);
+      } else if (result.error === 'Scan cancelled') {
+        this.qrScannerState = 'idle';
+      } else {
+        this.qrScannerState = 'error';
+        this.qrScannerError = result.error || this.translate.instant('CHILD_DETAIL.QR_SCAN_FAILED');
+      }
+    } catch (err: any) {
+      this.qrScannerState = 'error';
+      this.qrScannerError = err.message || this.translate.instant('CHILD_DETAIL.QR_CAMERA_ERROR');
+    }
+  }
+
+  /**
+   * Start web-based scanner (browser/PWA)
+   */
+  private async startWebScanner(): Promise<void> {
+    this.qrScannerState = 'scanning';
 
     // Wait for DOM element to be rendered
     setTimeout(async () => {
@@ -407,6 +450,10 @@ export class ChildDetail implements OnInit, OnDestroy {
   }
 
   async stopQrScanner(): Promise<void> {
+    // Stop native scanner if running
+    await this.qrScannerService.stopScan();
+
+    // Stop web scanner if running
     if (this.html5QrCode) {
       try {
         await this.html5QrCode.stop();
@@ -418,11 +465,18 @@ export class ChildDetail implements OnInit, OnDestroy {
     }
   }
 
-  async onQrCodeScanned(code: string): Promise<void> {
+  async onQrCodeScanned(scannedValue: string): Promise<void> {
     if (this.qrScannerState !== 'scanning') return;
 
     await this.stopQrScanner();
     this.qrScannerState = 'processing';
+
+    // Extract QR code from URL if scanned from a URL-based QR code
+    let code = scannedValue;
+    const extractedCode = this.qrScannerService.extractQrCodeFromUrl(scannedValue);
+    if (extractedCode) {
+      code = extractedCode;
+    }
 
     // First validate the QR code
     this.qrService.validateQrCode(code).subscribe({
@@ -430,11 +484,13 @@ export class ChildDetail implements OnInit, OnDestroy {
         if (response.isValid) {
           this.processAttendance(code, response.type as 'CheckIn' | 'CheckOut');
         } else {
+          this.triggerHaptic(false);
           this.qrScannerState = 'error';
           this.qrScannerError = response.message || this.translate.instant('CHILD_DETAIL.QR_INVALID');
         }
       },
       error: (err) => {
+        this.triggerHaptic(false);
         this.qrScannerState = 'error';
         this.qrScannerError = err.error?.message || this.translate.instant('CHILD_DETAIL.QR_VALIDATION_ERROR');
       }
@@ -443,6 +499,7 @@ export class ChildDetail implements OnInit, OnDestroy {
 
   processAttendance(qrCode: string, qrType: 'CheckIn' | 'CheckOut'): void {
     if (!this.currentPosition) {
+      this.triggerHaptic(false);
       this.qrScannerState = 'error';
       this.qrScannerError = this.translate.instant('CHILD_DETAIL.QR_LOCATION_ERROR');
       return;
@@ -450,12 +507,14 @@ export class ChildDetail implements OnInit, OnDestroy {
 
     // Check if the action is valid for current status
     if (qrType === 'CheckIn' && this.childAttendanceStatus?.isCheckedIn) {
+      this.triggerHaptic(false);
       this.qrScannerState = 'error';
       this.qrScannerError = this.translate.instant('CHILD_DETAIL.QR_ALREADY_CHECKED_IN');
       return;
     }
 
     if (qrType === 'CheckOut' && (!this.childAttendanceStatus?.isCheckedIn || this.childAttendanceStatus?.isCheckedOut)) {
+      this.triggerHaptic(false);
       this.qrScannerState = 'error';
       this.qrScannerError = this.translate.instant('CHILD_DETAIL.QR_NOT_CHECKED_IN');
       return;
@@ -475,21 +534,39 @@ export class ChildDetail implements OnInit, OnDestroy {
     action$.subscribe({
       next: (result) => {
         if (result.success) {
+          this.triggerHaptic(true);
           this.qrScannerState = 'success';
           this.qrScannerSuccess = qrType === 'CheckIn'
             ? this.translate.instant('CHILD_DETAIL.QR_CHECKIN_SUCCESS', { name: this.child?.firstName })
             : this.translate.instant('CHILD_DETAIL.QR_CHECKOUT_SUCCESS', { name: this.child?.firstName });
           this.loadChildAttendanceStatus();
         } else {
+          this.triggerHaptic(false);
           this.qrScannerState = 'error';
           this.qrScannerError = result.message || this.translate.instant('CHILD_DETAIL.QR_ACTION_FAILED');
         }
       },
       error: (err) => {
+        this.triggerHaptic(false);
         this.qrScannerState = 'error';
         this.qrScannerError = err.error?.message || this.translate.instant('CHILD_DETAIL.QR_ACTION_FAILED');
       }
     });
+  }
+
+  /**
+   * Trigger haptic feedback on mobile devices
+   */
+  private async triggerHaptic(success: boolean): Promise<void> {
+    if (Capacitor.isNativePlatform()) {
+      try {
+        await Haptics.impact({
+          style: success ? ImpactStyle.Medium : ImpactStyle.Heavy
+        });
+      } catch {
+        // Ignore haptics errors
+      }
+    }
   }
 
   getAttendanceStatusText(): string {

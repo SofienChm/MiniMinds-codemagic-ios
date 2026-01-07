@@ -44,6 +44,11 @@ const config: CapacitorConfig = {
     Keyboard: {
       resize: 'body',
       resizeOnFullScreen: true
+    },
+    // MLKit Barcode Scanner configuration
+    CapacitorMLKitBarcodeScanning: {
+      // Automatically check for Google Barcode Scanner availability
+      checkGoogleBarcodeScannerAvailability: true
     }
   }
 };
