@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -14,6 +14,10 @@ import Swal from 'sweetalert2';
 import { ApiConfig } from '../../../core/config/api.config';
 import { ParentChildHeaderComponent } from '../../../shared/components/parent-child-header/parent-child-header.component';
 import { Location } from '@angular/common';
+import { Html5Qrcode } from 'html5-qrcode';
+import { QrCheckinService } from '../../qr-checkin/qr-checkin.service';
+import { GeolocationService, GeolocationPosition } from '../../../core/services/geolocation.service';
+import { SchoolSettings } from '../../qr-checkin/qr-checkin.interface';
 
 @Component({
   selector: 'app-child-detail',
@@ -22,7 +26,7 @@ import { Location } from '@angular/common';
   templateUrl: './child-detail.html',
   styleUrl: './child-detail.scss'
 })
-export class ChildDetail implements OnInit {
+export class ChildDetail implements OnInit, OnDestroy {
   child: ChildModel | null = null;
   loading = false;
   childId: number = 0;
@@ -32,6 +36,18 @@ export class ChildDetail implements OnInit {
   relationshipType: string = 'Parent';
   isPrimaryContact: boolean = false;
   currentParentIndex: number = 0;
+
+  // QR Scanner properties
+  showQrScannerModal = false;
+  qrScannerState: 'idle' | 'scanning' | 'processing' | 'success' | 'error' = 'idle';
+  html5QrCode: Html5Qrcode | null = null;
+  currentPosition: GeolocationPosition | null = null;
+  schoolSettings: SchoolSettings | null = null;
+  qrScannerError = '';
+  qrScannerSuccess = '';
+  isWithinGeofence = false;
+  distanceToSchool = 0;
+  childAttendanceStatus: { isCheckedIn: boolean; isCheckedOut: boolean; checkInTime?: string; checkOutTime?: string } | null = null;
 
   breadcrumbs: Breadcrumb[] = [];
   get isParent(): boolean {
@@ -52,7 +68,9 @@ export class ChildDetail implements OnInit {
     private route: ActivatedRoute,
     private http: HttpClient,
     private location: Location,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private qrService: QrCheckinService,
+    private geolocationService: GeolocationService
   ) {}
 
   ngOnInit() {
@@ -260,5 +278,236 @@ export class ChildDetail implements OnInit {
   prevParent() {
     if (!this.child?.childParents || this.child.childParents.length <= 1) return;
     this.currentParentIndex = (this.currentParentIndex - 1 + this.child.childParents.length) % this.child.childParents.length;
+  }
+
+  ngOnDestroy(): void {
+    this.stopQrScanner();
+  }
+
+  // QR Scanner Methods
+  openQrScannerModal(): void {
+    this.showQrScannerModal = true;
+    this.qrScannerState = 'idle';
+    this.qrScannerError = '';
+    this.qrScannerSuccess = '';
+    this.loadChildAttendanceStatus();
+    this.loadSchoolSettings();
+  }
+
+  closeQrScannerModal(): void {
+    this.stopQrScanner();
+    this.showQrScannerModal = false;
+    this.qrScannerState = 'idle';
+    this.qrScannerError = '';
+    this.qrScannerSuccess = '';
+  }
+
+  loadChildAttendanceStatus(): void {
+    this.http.get<any>(`${ApiConfig.ENDPOINTS.ATTENDANCE}/ChildStatus/${this.childId}`).subscribe({
+      next: (status) => {
+        this.childAttendanceStatus = status;
+      },
+      error: () => {
+        this.childAttendanceStatus = { isCheckedIn: false, isCheckedOut: false };
+      }
+    });
+  }
+
+  loadSchoolSettings(): void {
+    this.qrService.getSchoolSettings().subscribe({
+      next: (settings) => {
+        this.schoolSettings = settings;
+        this.getLocation();
+      },
+      error: () => {
+        this.getLocation();
+      }
+    });
+  }
+
+  getLocation(): void {
+    this.geolocationService.getCurrentPosition().subscribe({
+      next: (position) => {
+        this.currentPosition = position;
+        this.checkGeofence();
+      },
+      error: (err) => {
+        this.qrScannerError = err.message || this.translate.instant('CHILD_DETAIL.QR_LOCATION_ERROR');
+      }
+    });
+  }
+
+  checkGeofence(): void {
+    if (!this.currentPosition || !this.schoolSettings) {
+      return;
+    }
+
+    if (!this.schoolSettings.geofenceEnabled) {
+      this.isWithinGeofence = true;
+      return;
+    }
+
+    this.distanceToSchool = this.geolocationService.calculateDistance(
+      this.currentPosition.latitude,
+      this.currentPosition.longitude,
+      this.schoolSettings.latitude,
+      this.schoolSettings.longitude
+    );
+
+    this.isWithinGeofence = this.distanceToSchool <= this.schoolSettings.geofenceRadiusMeters;
+  }
+
+  async startQrScanner(): Promise<void> {
+    if (!this.currentPosition) {
+      this.qrScannerError = this.translate.instant('CHILD_DETAIL.QR_ENABLE_LOCATION');
+      return;
+    }
+
+    if (this.schoolSettings?.geofenceEnabled && !this.isWithinGeofence) {
+      this.qrScannerError = this.translate.instant('CHILD_DETAIL.QR_GEOFENCE_ERROR', {
+        radius: this.schoolSettings.geofenceRadiusMeters,
+        distance: Math.round(this.distanceToSchool)
+      });
+      return;
+    }
+
+    this.qrScannerState = 'scanning';
+    this.qrScannerError = '';
+
+    // Wait for DOM element to be rendered
+    setTimeout(async () => {
+      try {
+        const element = document.getElementById('child-qr-reader');
+        if (!element) {
+          this.qrScannerState = 'error';
+          this.qrScannerError = this.translate.instant('CHILD_DETAIL.QR_CAMERA_ERROR');
+          return;
+        }
+
+        this.html5QrCode = new Html5Qrcode('child-qr-reader');
+
+        await this.html5QrCode.start(
+          { facingMode: 'environment' },
+          {
+            fps: 10,
+            qrbox: { width: 250, height: 250 }
+          },
+          (decodedText) => {
+            this.onQrCodeScanned(decodedText);
+          },
+          () => {
+            // Ignore scan errors while searching
+          }
+        );
+      } catch (err: any) {
+        this.qrScannerState = 'error';
+        this.qrScannerError = err.message || this.translate.instant('CHILD_DETAIL.QR_CAMERA_ERROR');
+      }
+    }, 100);
+  }
+
+  async stopQrScanner(): Promise<void> {
+    if (this.html5QrCode) {
+      try {
+        await this.html5QrCode.stop();
+        this.html5QrCode.clear();
+      } catch (err) {
+        // Ignore stop errors
+      }
+      this.html5QrCode = null;
+    }
+  }
+
+  async onQrCodeScanned(code: string): Promise<void> {
+    if (this.qrScannerState !== 'scanning') return;
+
+    await this.stopQrScanner();
+    this.qrScannerState = 'processing';
+
+    // First validate the QR code
+    this.qrService.validateQrCode(code).subscribe({
+      next: (response) => {
+        if (response.isValid) {
+          this.processAttendance(code, response.type as 'CheckIn' | 'CheckOut');
+        } else {
+          this.qrScannerState = 'error';
+          this.qrScannerError = response.message || this.translate.instant('CHILD_DETAIL.QR_INVALID');
+        }
+      },
+      error: (err) => {
+        this.qrScannerState = 'error';
+        this.qrScannerError = err.error?.message || this.translate.instant('CHILD_DETAIL.QR_VALIDATION_ERROR');
+      }
+    });
+  }
+
+  processAttendance(qrCode: string, qrType: 'CheckIn' | 'CheckOut'): void {
+    if (!this.currentPosition) {
+      this.qrScannerState = 'error';
+      this.qrScannerError = this.translate.instant('CHILD_DETAIL.QR_LOCATION_ERROR');
+      return;
+    }
+
+    // Check if the action is valid for current status
+    if (qrType === 'CheckIn' && this.childAttendanceStatus?.isCheckedIn) {
+      this.qrScannerState = 'error';
+      this.qrScannerError = this.translate.instant('CHILD_DETAIL.QR_ALREADY_CHECKED_IN');
+      return;
+    }
+
+    if (qrType === 'CheckOut' && (!this.childAttendanceStatus?.isCheckedIn || this.childAttendanceStatus?.isCheckedOut)) {
+      this.qrScannerState = 'error';
+      this.qrScannerError = this.translate.instant('CHILD_DETAIL.QR_NOT_CHECKED_IN');
+      return;
+    }
+
+    const request = {
+      qrCode: qrCode,
+      childIds: [this.childId],
+      latitude: this.currentPosition.latitude,
+      longitude: this.currentPosition.longitude
+    };
+
+    const action$ = qrType === 'CheckIn'
+      ? this.qrService.qrCheckIn(request)
+      : this.qrService.qrCheckOut(request);
+
+    action$.subscribe({
+      next: (result) => {
+        if (result.success) {
+          this.qrScannerState = 'success';
+          this.qrScannerSuccess = qrType === 'CheckIn'
+            ? this.translate.instant('CHILD_DETAIL.QR_CHECKIN_SUCCESS', { name: this.child?.firstName })
+            : this.translate.instant('CHILD_DETAIL.QR_CHECKOUT_SUCCESS', { name: this.child?.firstName });
+          this.loadChildAttendanceStatus();
+        } else {
+          this.qrScannerState = 'error';
+          this.qrScannerError = result.message || this.translate.instant('CHILD_DETAIL.QR_ACTION_FAILED');
+        }
+      },
+      error: (err) => {
+        this.qrScannerState = 'error';
+        this.qrScannerError = err.error?.message || this.translate.instant('CHILD_DETAIL.QR_ACTION_FAILED');
+      }
+    });
+  }
+
+  getAttendanceStatusText(): string {
+    if (!this.childAttendanceStatus) return this.translate.instant('CHILD_DETAIL.QR_STATUS_LOADING');
+    if (this.childAttendanceStatus.isCheckedOut) {
+      return this.translate.instant('CHILD_DETAIL.QR_STATUS_CHECKED_OUT', { time: this.formatTime(this.childAttendanceStatus.checkOutTime) });
+    }
+    if (this.childAttendanceStatus.isCheckedIn) {
+      return this.translate.instant('CHILD_DETAIL.QR_STATUS_CHECKED_IN', { time: this.formatTime(this.childAttendanceStatus.checkInTime) });
+    }
+    return this.translate.instant('CHILD_DETAIL.QR_STATUS_NOT_CHECKED_IN');
+  }
+
+  formatTime(dateString?: string): string {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   }
 }

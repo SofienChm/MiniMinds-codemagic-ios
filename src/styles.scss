@@ -15,6 +15,20 @@
   --safe-area-right: env(safe-area-inset-right, 0px);
 }
 
+// Fixed white status bar background for iOS
+// This creates a white bar that stays fixed behind the status bar icons
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: env(safe-area-inset-top, 0px);
+  background-color: #FFFFFF;
+  z-index: 99999;
+  pointer-events: none;
+}
+
 // DON'T add padding to body - let headers handle safe area
 body {
   padding-top: 0;

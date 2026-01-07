@@ -19,6 +19,11 @@ export const routes: Routes = [
         path: 'reset-password',
         loadComponent: () => import('./features/auth/reset-password/reset-password.component').then(m => m.ResetPasswordComponent)
     },
+    // QR Action - Public route for deep linking (no auth guard, handles auth internally)
+    {
+        path: 'qr-action/:code',
+        loadComponent: () => import('./features/qr-action/qr-action.component').then(m => m.QrActionComponent)
+    },
   {
     path: '',
     loadComponent: () => import('./shared/layouts/main-layout/main-layout').then(m => m.MainLayout),

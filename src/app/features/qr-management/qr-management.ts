@@ -10,6 +10,7 @@ import { QrCodeInfo, SchoolSettings } from '../qr-checkin/qr-checkin.interface';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { PageTitleService } from '../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-qr-management',
@@ -134,8 +135,11 @@ export class QrManagement implements OnInit, AfterViewInit, OnDestroy {
       const canvas = type === 'checkIn' ? this.checkInCanvas : this.checkOutCanvas;
       if (!canvas?.nativeElement) return;
 
+      // Generate URL-based QR code for deep linking
+      const qrUrl = `${environment.webUrl}/qr-action/${code}`;
+
       try {
-        await QRCode.toCanvas(canvas.nativeElement, code, {
+        await QRCode.toCanvas(canvas.nativeElement, qrUrl, {
           width: 280,
           margin: 2,
           color: {

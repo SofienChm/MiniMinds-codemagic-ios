@@ -133,9 +133,98 @@ img {
   .child-detail-row > .col-md-6 { display:block; }
 }
 
-.btn-add-fee{ 
+.btn-add-fee{
   background: var(--secondary-color);
   color: white;
+}
+
+// QR Scan Button Styles
+.btn-qr-scan {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  }
+
+  i {
+    font-size: 1rem;
+  }
+}
+
+.btn-qr-scan-large {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 16px 24px;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  }
+
+  i {
+    font-size: 1.25rem;
+  }
+}
+
+.qr-scan-card {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+// QR Scanner Modal Styles
+.qr-scanner-placeholder {
+  padding: 40px 20px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 2px dashed #dee2e6;
+}
+
+.qr-reader-container {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  border-radius: 12px;
+  overflow: hidden;
+
+  video {
+    border-radius: 12px;
+  }
+}
+
+.success-icon, .error-icon {
+  animation: bounceIn 0.5s ease;
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 ::ng-deep {
