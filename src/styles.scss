@@ -18,20 +18,18 @@
   --safe-area-right: env(safe-area-inset-right, 0px);
 }
 
-// Fixed white status bar background for iOS
-// Only needed on pages without a colored header that extends into safe area
-// Dashboard and similar pages handle this themselves with negative margin
-// body::before {
-//   content: '';
-//   position: fixed;
-//   top: 0;
-//   left: 0;
-//   right: 0;
-//   height: env(safe-area-inset-top, 0px);
-//   background-color: #FFFFFF;
-//   z-index: 99999;
-//   pointer-events: none;
-// }
+// Fixed white status bar background for iOS - stays fixed when scrolling
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: env(safe-area-inset-top, 0px);
+  background-color: #FFFFFF;
+  z-index: 99999;
+  pointer-events: none;
+}
 
 // For headers/toolbars that need safe area padding
 .safe-area-top {

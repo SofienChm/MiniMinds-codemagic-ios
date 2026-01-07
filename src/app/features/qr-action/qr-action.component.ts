@@ -243,7 +243,6 @@ export class QrActionComponent implements OnInit {
 
   ngOnInit(): void {
     this.qrCode = this.route.snapshot.paramMap.get('code') || '';
-    console.log('QR Action - Received code from URL:', this.qrCode);
 
     if (!this.qrCode) {
       this.state = 'error';
@@ -263,11 +262,9 @@ export class QrActionComponent implements OnInit {
   }
 
   async validateAndProcess(): Promise<void> {
-    console.log('QR Action - Validating code:', this.qrCode);
     // First, validate the QR code
     this.qrService.validateQrCode(this.qrCode).subscribe({
       next: (response) => {
-        console.log('QR Action - Validation response:', response);
         if (response.isValid) {
           this.qrType = response.type as 'CheckIn' | 'CheckOut';
           this.requestLocation();
@@ -276,8 +273,7 @@ export class QrActionComponent implements OnInit {
           this.errorMessage = response.message || this.translate.instant('QR_ACTION.INVALID_QR');
         }
       },
-      error: (err) => {
-        console.error('QR Action - Validation error:', err);
+      error: () => {
         this.state = 'error';
         this.errorMessage = this.translate.instant('QR_ACTION.VALIDATION_ERROR');
       }
