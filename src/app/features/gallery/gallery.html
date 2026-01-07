@@ -2,7 +2,9 @@
 <input type="file" #nativeCameraInput (change)="onNativeCameraCapture($event)" accept="image/*" capture="environment" style="display: none;">
 
 <app-pull-to-refresh #pullToRefresh (refresh)="onRefresh()" *ngIf="isParent">
-<div *ngIf="!loading" [class]="isParent ? '' : ' mt-4'">
+</app-pull-to-refresh>
+
+<div *ngIf="!loading && isParent" class="">
   <app-parent-child-header-simple
     [title]="'Photo Gallery'" >
   </app-parent-child-header-simple>
@@ -183,7 +185,6 @@
     </nav>
   </div>
 </div>
-</app-pull-to-refresh>
 
 <!-- Upload Modal -->
 <div class="modal fade" [class.show]="showUploadModal" [style.display]="showUploadModal ? 'block' : 'none'" tabindex="-1">

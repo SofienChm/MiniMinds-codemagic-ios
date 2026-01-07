@@ -47,7 +47,7 @@
           <span>{{ item.label }}</span>
         </a>
       </li>
-      <li>
+      <li *ngIf="menuItemsPeople.length > 0">
         <h6 class="submenu-hdr"><span>People</span></h6>
       </li>
       <li class="nav-item" *ngFor="let item of menuItemsPeople">
@@ -74,7 +74,7 @@
           <span>{{ item.label }}</span>
         </a>
       </li>
-      <li>
+      <li *ngIf="menuItemsSetting.length > 0">
         <h6 class="submenu-hdr"><span>Setting</span></h6>
       </li>
       <li class="nav-item" *ngFor="let item of menuItemsSetting">

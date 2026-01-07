@@ -136,7 +136,13 @@ export class Event implements OnInit, OnDestroy {
     this.loading = true;
     this.eventService.loadEvents().subscribe({
       next: (events) => {
-        this.events = events;
+        // For Parent role, filter out expired events (additional frontend safety)
+        if (this.isParent) {
+          const now = new Date();
+          this.events = events.filter(event => new Date(event.time) > now);
+        } else {
+          this.events = events;
+        }
         this.applyFilter();
         this.loading = false;
       },

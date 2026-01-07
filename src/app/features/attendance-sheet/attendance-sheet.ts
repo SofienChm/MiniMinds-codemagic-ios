@@ -69,6 +69,10 @@ export class AttendanceSheet implements OnInit, OnDestroy {
       next: (children) => {
         this.children = children;
         this.updateAvailableChildren();
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Error loading children:', error?.message || error);
       }
     });
   }
@@ -106,28 +110,46 @@ export class AttendanceSheet implements OnInit, OnDestroy {
 
   loadTodayData(): void {
     this.loading = true;
+    this.cdr.detectChanges();
     this.attendanceService.getTodayAttendance().subscribe({
       next: (data) => {
         this.attendances = data;
         this.updateAvailableChildren();
         this.loading = false;
+        this.cdr.detectChanges();
       },
-      error: () => this.loading = false
+      error: (error) => {
+        console.error('Error loading attendance:', error?.message || error);
+        this.loading = false;
+        this.cdr.detectChanges();
+      }
     });
 
     this.attendanceService.getTodayStats().subscribe({
-      next: (stats) => this.stats = stats
+      next: (stats) => {
+        this.stats = stats;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Error loading stats:', error?.message || error);
+      }
     });
   }
 
   onDateChange(): void {
     this.loading = true;
+    this.cdr.detectChanges();
     this.attendanceService.getAttendanceByDate(this.selectedDate).subscribe({
       next: (data) => {
         this.attendances = data;
         this.loading = false;
+        this.cdr.detectChanges();
       },
-      error: () => this.loading = false
+      error: (error) => {
+        console.error('Error loading attendance by date:', error?.message || error);
+        this.loading = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 

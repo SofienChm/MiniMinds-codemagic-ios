@@ -1489,11 +1489,101 @@ input.form-control {
 //   }
 // }
 
- @media only screen 
-   and (min-device-width: 320px) 
-   and (max-device-width: 410px)    
+ @media only screen
+   and (min-device-width: 320px)
+   and (max-device-width: 410px)
       {
   .parent-detailchild .header-info {
     padding: 45px 20px 16px !important;
   }
  }
+
+// ===================================
+// PRINT STYLES - Fee Receipt
+// ===================================
+@media print {
+  // Hide everything by default
+  body * {
+    visibility: hidden;
+  }
+
+  // Hide navigation, header, sidebar, footer
+  app-header,
+  app-sidebar,
+  app-footer,
+  .sidebar,
+  .header,
+  .navbar,
+  nav,
+  .breadcrumb,
+  app-title-page,
+  app-parent-child-header-simple,
+  .parent-detailchild,
+  .btn,
+  button,
+  .no-print {
+    display: none !important;
+  }
+
+  // Show only the receipt card and its contents
+  .white-box,
+  .white-box * {
+    visibility: visible;
+  }
+
+  .white-box {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 20px;
+    margin: 0;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  // Card container
+  .card {
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  // Reset container styles for print
+  .container-fluid,
+  .container {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  // Ensure proper page layout
+  @page {
+    margin: 1cm;
+    size: A4;
+  }
+
+  // Hide action buttons in receipt
+  .text-end button,
+  .text-end .btn {
+    display: none !important;
+  }
+
+  // Make sure images print
+  img {
+    max-width: 100% !important;
+    page-break-inside: avoid;
+  }
+
+  // Badge styling for print
+  .badge {
+    border: 1px solid #000 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  // Ensure backgrounds print
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

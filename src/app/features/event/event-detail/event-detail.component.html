@@ -35,7 +35,7 @@
         <div class="event-content">      
           <div class="event-section">
             <div class="detail-item">
-              <button *ngIf="!hasChildInEvent()" class="btn btn-primary btn-sm " (click)="openAddParticipantModal()">
+              <button *ngIf="!hasChildInEvent()" class="btn custom-btn-2 btn-add-global-2" (click)="openAddParticipantModal()">
                 <i class="bi bi-person-plus me-1"></i>{{ 'EVENT_DETAIL.ADD_CHILD' | translate }}
               </button>
               <div *ngIf="hasChildInEvent() && getChildStatus() === 'Pending'" class="status pending mb-0 py-2">
