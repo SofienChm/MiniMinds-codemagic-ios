@@ -11,11 +11,15 @@ import { TitlePage } from '../../shared/layouts/title-page/title-page';
 import { AuthService } from '../../core/services/auth';
 import { BaseChartDirective } from 'ng2-charts';
 import type { ChartConfiguration } from 'chart.js';
+import { Chart, ArcElement, Tooltip, Legend, DoughnutController, LineElement, LineController, LinearScale, CategoryScale, PointElement } from 'chart.js';
 import { Location } from '@angular/common';
 import { ParentChildHeaderComponent } from '../../shared/components/parent-child-header/parent-child-header.component';
 import { PageTitleService } from '../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
 import { PullToRefreshComponent } from '../../shared/components/pull-to-refresh/pull-to-refresh.component';
+
+// Register Chart.js components
+Chart.register(ArcElement, Tooltip, Legend, DoughnutController, LineElement, LineController, LinearScale, CategoryScale, PointElement);
 
 @Component({
   selector: 'app-daily-activities',
@@ -82,7 +86,6 @@ export class DailyActivities implements OnInit, AfterViewInit, OnDestroy {
     this.userRole = this.authService.getUserRole();
     this.initActivityTemplates();
     this.loadChildren();
-    this.loadActivities();
 
     this.langChangeSub = this.translate.onLangChange.subscribe(() => {
       this.pageTitleService.setTitle(this.translate.instant('DAILY_REPORT.TITLE'));
@@ -105,17 +108,8 @@ export class DailyActivities implements OnInit, AfterViewInit, OnDestroy {
   }
   
   ngAfterViewInit() {
-    this.loadChartJS();
     this.setupChartOptions();
-    setTimeout(() => {
-      this.updateChartData();
-    }, 100);
-  }
-  
-  loadChartJS() {
-    import('chart.js').then(({ Chart, ArcElement, Tooltip, Legend, DoughnutController, LineElement, LineController, LinearScale, CategoryScale, PointElement }) => {
-      Chart.register(ArcElement, Tooltip, Legend, DoughnutController, LineElement, LineController, LinearScale, CategoryScale, PointElement);
-    });
+    this.updateChartData();
   }
   
   setupChartOptions() {
@@ -161,6 +155,8 @@ export class DailyActivities implements OnInit, AfterViewInit, OnDestroy {
           this.selectedChildId = children[0].id!;
           this.currentChildIndex = 0;
         }
+        // Load activities after children are loaded and selectedChildId is set
+        this.loadActivities();
       }
     });
   }

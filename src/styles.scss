@@ -19,24 +19,26 @@
 }
 
 // Fixed white status bar background for iOS - stays fixed when scrolling
-// body::before {
-//   content: '';
-//   position: fixed;
-//   top: 0;
-//   left: 0;
-//   right: 0;
-//   height: env(safe-area-inset-top, 0px);
-//   background-color: #FFFFFF;
-//   z-index: 99999;
-//   pointer-events: none;
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: env(safe-area-inset-top, 0px);
+  background-color: #FFFFFF;
+  z-index: 99999;
+  pointer-events: none;
+}
+
+// For headers/toolbars that need safe area padding - COMMENTED FOR TESTING
+// .safe-area-top {
+//   padding-top: var(--safe-area-top);
 // }
 
-// For headers/toolbars that need safe area padding
-
-
-.safe-area-bottom {
-  padding-bottom: var(--safe-area-bottom);
-}
+// .safe-area-bottom {
+//   padding-bottom: var(--safe-area-bottom);
+// }
 
 // ===================================
 // HIDE SCROLLBAR ON MOBILE
