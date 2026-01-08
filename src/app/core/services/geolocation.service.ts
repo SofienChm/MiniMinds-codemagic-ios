@@ -93,6 +93,18 @@ export class GeolocationService {
   }
 
   /**
+   * Helper to add timeout to any promise
+   */
+  private withTimeout<T>(promise: Promise<T>, ms: number, errorMsg: string): Promise<T> {
+    return Promise.race([
+      promise,
+      new Promise<T>((_, reject) =>
+        setTimeout(() => reject(new Error(errorMsg)), ms)
+      )
+    ]);
+  }
+
+  /**
    * Get position using Capacitor's native Geolocation plugin
    */
   private getNativePosition(options: GeolocationOptions): Observable<GeolocationPosition> {
@@ -101,11 +113,37 @@ export class GeolocationService {
 
       const getPosition = async () => {
         try {
-          // First check/request permissions
-          let permStatus = await Geolocation.checkPermissions();
+          // First check/request permissions with timeout
+          let permStatus;
+          try {
+            permStatus = await this.withTimeout(
+              Geolocation.checkPermissions(),
+              5000,
+              'Permission check timed out'
+            );
+          } catch (permCheckError) {
+            console.warn('Permission check failed, trying to request directly:', permCheckError);
+            // If check fails, try to request directly
+            permStatus = { location: 'prompt', coarseLocation: 'prompt' };
+          }
 
           if (permStatus.location !== 'granted') {
-            permStatus = await Geolocation.requestPermissions();
+            try {
+              permStatus = await this.withTimeout(
+                Geolocation.requestPermissions(),
+                10000,
+                'Permission request timed out'
+              );
+            } catch (permReqError) {
+              console.warn('Permission request failed:', permReqError);
+              if (!isCancelled) {
+                observer.error({
+                  code: 1,
+                  message: 'Location permission request failed. Please enable location access in your device settings.'
+                } as GeolocationError);
+              }
+              return;
+            }
           }
 
           if (permStatus.location !== 'granted' && permStatus.coarseLocation !== 'granted') {
@@ -120,11 +158,15 @@ export class GeolocationService {
 
           // Try to get position with high accuracy first
           try {
-            const position = await Geolocation.getCurrentPosition({
-              enableHighAccuracy: options.enableHighAccuracy,
-              timeout: options.timeout,
-              maximumAge: options.maximumAge
-            });
+            const position = await this.withTimeout(
+              Geolocation.getCurrentPosition({
+                enableHighAccuracy: options.enableHighAccuracy,
+                timeout: options.timeout,
+                maximumAge: options.maximumAge
+              }),
+              (options.timeout || 30000) + 5000, // Add 5 seconds buffer
+              'Location request timed out'
+            );
 
             if (!isCancelled) {
               observer.next({
@@ -139,11 +181,15 @@ export class GeolocationService {
             console.warn('High accuracy location failed, trying low accuracy:', highAccuracyError);
 
             try {
-              const position = await Geolocation.getCurrentPosition({
-                enableHighAccuracy: false,
-                timeout: options.timeout,
-                maximumAge: 10000 // Allow older cached position
-              });
+              const position = await this.withTimeout(
+                Geolocation.getCurrentPosition({
+                  enableHighAccuracy: false,
+                  timeout: options.timeout,
+                  maximumAge: 10000 // Allow older cached position
+                }),
+                (options.timeout || 30000) + 5000,
+                'Location request timed out (low accuracy)'
+              );
 
               if (!isCancelled) {
                 observer.next({

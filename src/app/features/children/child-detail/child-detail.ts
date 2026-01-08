@@ -57,6 +57,7 @@ export class ChildDetail implements OnInit, OnDestroy {
   // Location retry properties
   private locationRetryCount = 0;
   private maxLocationRetries = 3;
+  private locationTimeoutId: any = null;
 
   breadcrumbs: Breadcrumb[] = [];
   get isParent(): boolean {
@@ -307,10 +308,17 @@ export class ChildDetail implements OnInit, OnDestroy {
 
   closeQrScannerModal(): void {
     this.stopQrScanner();
+    // Clear any pending location timeout
+    if (this.locationTimeoutId) {
+      clearTimeout(this.locationTimeoutId);
+      this.locationTimeoutId = null;
+    }
     this.showQrScannerModal = false;
     this.qrScannerState = 'idle';
     this.qrScannerError = '';
     this.qrScannerSuccess = '';
+    this.locationRetryCount = 0;
+    this.currentPosition = null;
   }
 
   loadChildAttendanceStatus(): void {
@@ -341,18 +349,43 @@ export class ChildDetail implements OnInit, OnDestroy {
     this.qrScannerError = '';
     this.locationRetryCount++;
 
+    // Clear any existing timeout
+    if (this.locationTimeoutId) {
+      clearTimeout(this.locationTimeoutId);
+    }
+
+    // Safety timeout - if location never returns after 35 seconds, show error
+    this.locationTimeoutId = setTimeout(() => {
+      if (this.qrScannerState === 'getting-location') {
+        console.error('Location request timed out (safety timeout)');
+        this.qrScannerState = 'idle';
+        this.qrScannerError = this.translate.instant('CHILD_DETAIL.QR_LOCATION_ERROR');
+        this.locationRetryCount = 0;
+      }
+    }, 35000);
+
     this.geolocationService.getCurrentPosition({
       enableHighAccuracy: true,
       timeout: 30000,
       maximumAge: 5000
     }).subscribe({
       next: (position) => {
+        // Clear safety timeout
+        if (this.locationTimeoutId) {
+          clearTimeout(this.locationTimeoutId);
+          this.locationTimeoutId = null;
+        }
         this.currentPosition = position;
         this.locationRetryCount = 0; // Reset on success
         this.qrScannerState = 'idle';
         this.checkGeofence();
       },
       error: (err) => {
+        // Clear safety timeout
+        if (this.locationTimeoutId) {
+          clearTimeout(this.locationTimeoutId);
+          this.locationTimeoutId = null;
+        }
         console.error('Location error in child detail:', err);
 
         if (this.locationRetryCount < this.maxLocationRetries) {
