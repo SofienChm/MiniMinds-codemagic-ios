@@ -9,6 +9,7 @@ import { OfflineIndicatorComponent } from './shared/components/offline-indicator
 import { Subscription } from 'rxjs';
 import { App as CapacitorApp, URLOpenListenerEvent } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
+import { CapacitorSwipeBackPlugin } from '@notnotsamuel/capacitor-swipe-back';
 
 @Component({
   selector: 'app-root',
@@ -32,6 +33,9 @@ export class App implements OnInit, OnDestroy {
     const savedLang = localStorage.getItem('lang') || 'en';
     translates.setDefaultLang('en');
     translates.use(savedLang);
+
+    // Initialize swipe back gesture for iOS
+    this.initializeSwipeBack();
 
     // Initialize deep link listener for mobile
     this.initializeDeepLinks();
@@ -66,6 +70,18 @@ export class App implements OnInit, OnDestroy {
       console.log('FCM Push notifications initialized');
     } catch (error) {
       console.error('Failed to initialize FCM push notifications:', error);
+    }
+  }
+
+  private async initializeSwipeBack(): Promise<void> {
+    // Only enable on iOS native platform
+    if (Capacitor.getPlatform() === 'ios') {
+      try {
+        await CapacitorSwipeBackPlugin.enable();
+        console.log('iOS swipe back gesture enabled');
+      } catch (error) {
+        console.error('Failed to enable swipe back gesture:', error);
+      }
     }
   }
 

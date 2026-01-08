@@ -474,7 +474,7 @@ export class QrActionComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Main automatic flow - validates QR, gets location, processes attendance
+   * Main automatic flow - validates QR, checks if geofencing is needed, processes attendance
    */
   private async startAutomaticFlow(): Promise<void> {
     this.state = 'loading';
@@ -484,7 +484,8 @@ export class QrActionComponent implements OnInit, OnDestroy {
       next: (response) => {
         if (response.isValid) {
           this.qrType = response.type as 'CheckIn' | 'CheckOut';
-          this.requestLocation();
+          // Step 2: Check school settings to see if geofencing is enabled
+          this.checkGeofencingRequired();
         } else {
           this.state = 'error';
           this.errorMessage = response.message || this.translate.instant('QR_ACTION.INVALID_QR');
@@ -499,6 +500,31 @@ export class QrActionComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Check if geofencing is required before requesting location
+   */
+  private checkGeofencingRequired(): void {
+    const sub = this.qrService.getSchoolSettings().subscribe({
+      next: (settings) => {
+        if (settings.geofenceEnabled) {
+          // Geofencing is enabled - need to get location
+          this.schoolSettings = settings;
+          this.requestLocation();
+        } else {
+          // No geofencing - skip location and proceed directly
+          this.loadChildrenAndProcess();
+        }
+      },
+      error: () => {
+        // If settings fail to load, assume no geofencing and proceed
+        this.loadChildrenAndProcess();
+      }
+    });
+    this.subscriptions.push(sub);
+  }
+
+  private schoolSettings: any = null;
+
+  /**
    * Request location and continue flow
    */
   requestLocation(): void {
@@ -506,9 +532,9 @@ export class QrActionComponent implements OnInit, OnDestroy {
     this.locationRetryCount++;
 
     const sub = this.geolocationService.getCurrentPosition({
-      enableHighAccuracy: true,
-      timeout: 30000,
-      maximumAge: 5000
+      enableHighAccuracy: false, // Low accuracy is faster and sufficient for geofencing
+      timeout: 10000, // 10 seconds
+      maximumAge: 60000 // Accept cached position up to 1 minute
     }).subscribe({
       next: (position) => {
         this.currentPosition = {
@@ -516,7 +542,7 @@ export class QrActionComponent implements OnInit, OnDestroy {
           longitude: position.longitude
         };
         this.locationRetryCount = 0; // Reset on success
-        this.checkGeofenceAndLoadChildren();
+        this.validateGeofenceAndContinue();
       },
       error: (error: any) => {
         console.error('Location error:', error);
@@ -537,39 +563,28 @@ export class QrActionComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Check geofence and load children
+   * Validate geofence using cached settings and continue
    */
-  private checkGeofenceAndLoadChildren(): void {
-    this.state = 'loading';
+  private validateGeofenceAndContinue(): void {
+    if (this.schoolSettings && this.currentPosition) {
+      const distance = this.geolocationService.calculateDistance(
+        this.currentPosition.latitude,
+        this.currentPosition.longitude,
+        this.schoolSettings.latitude,
+        this.schoolSettings.longitude
+      );
 
-    const sub = this.qrService.getSchoolSettings().subscribe({
-      next: (settings) => {
-        if (settings.geofenceEnabled && this.currentPosition) {
-          const distance = this.geolocationService.calculateDistance(
-            this.currentPosition.latitude,
-            this.currentPosition.longitude,
-            settings.latitude,
-            settings.longitude
-          );
-
-          if (distance > settings.geofenceRadiusMeters) {
-            this.state = 'geofence-error';
-            this.geofenceMessage = this.translate.instant('QR_ACTION.GEOFENCE_MESSAGE', {
-              distance: Math.round(distance),
-              radius: settings.geofenceRadiusMeters
-            });
-            return;
-          }
-        }
-
-        this.loadChildrenAndProcess();
-      },
-      error: () => {
-        // If can't load settings, proceed anyway
-        this.loadChildrenAndProcess();
+      if (distance > this.schoolSettings.geofenceRadiusMeters) {
+        this.state = 'geofence-error';
+        this.geofenceMessage = this.translate.instant('QR_ACTION.GEOFENCE_MESSAGE', {
+          distance: Math.round(distance),
+          radius: this.schoolSettings.geofenceRadiusMeters
+        });
+        return;
       }
-    });
-    this.subscriptions.push(sub);
+    }
+
+    this.loadChildrenAndProcess();
   }
 
   /**

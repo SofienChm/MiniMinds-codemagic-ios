@@ -77,10 +77,10 @@ export class GeolocationService {
     }
 
     const defaultOptions: GeolocationOptions = {
-      enableHighAccuracy: true,
-      timeout: 30000, // 30 seconds - much longer for mobile GPS
-      maximumAge: 5000, // Allow cached position up to 5 seconds old
-      retries: 2
+      enableHighAccuracy: false, // Low accuracy is faster and sufficient for geofencing
+      timeout: 10000, // 10 seconds - faster timeout
+      maximumAge: 60000, // Allow cached position up to 1 minute old for speed
+      retries: 1
     };
 
     const mergedOptions = { ...defaultOptions, ...options };
@@ -110,28 +110,28 @@ export class GeolocationService {
   private getNativePosition(options: GeolocationOptions): Observable<GeolocationPosition> {
     return new Observable<GeolocationPosition>((observer) => {
       let isCancelled = false;
+      const timeout = options.timeout || 10000;
 
       const getPosition = async () => {
         try {
-          // First check/request permissions with timeout
+          // First check/request permissions with short timeout
           let permStatus;
           try {
             permStatus = await this.withTimeout(
               Geolocation.checkPermissions(),
-              5000,
+              3000, // 3 seconds for permission check
               'Permission check timed out'
             );
           } catch (permCheckError) {
             console.warn('Permission check failed, trying to request directly:', permCheckError);
-            // If check fails, try to request directly
             permStatus = { location: 'prompt', coarseLocation: 'prompt' };
           }
 
-          if (permStatus.location !== 'granted') {
+          if (permStatus.location !== 'granted' && permStatus.coarseLocation !== 'granted') {
             try {
               permStatus = await this.withTimeout(
                 Geolocation.requestPermissions(),
-                10000,
+                5000, // 5 seconds for permission request
                 'Permission request timed out'
               );
             } catch (permReqError) {
@@ -139,7 +139,7 @@ export class GeolocationService {
               if (!isCancelled) {
                 observer.error({
                   code: 1,
-                  message: 'Location permission request failed. Please enable location access in your device settings.'
+                  message: 'Location permission request failed. Please enable location in Settings.'
                 } as GeolocationError);
               }
               return;
@@ -150,21 +150,21 @@ export class GeolocationService {
             if (!isCancelled) {
               observer.error({
                 code: 1,
-                message: 'Location permission denied. Please enable location access in your device settings.'
+                message: 'Location permission denied. Please enable location in Settings.'
               } as GeolocationError);
             }
             return;
           }
 
-          // Try to get position with high accuracy first
+          // Get position - single attempt with configured timeout
           try {
             const position = await this.withTimeout(
               Geolocation.getCurrentPosition({
                 enableHighAccuracy: options.enableHighAccuracy,
-                timeout: options.timeout,
+                timeout: timeout,
                 maximumAge: options.maximumAge
               }),
-              (options.timeout || 30000) + 5000, // Add 5 seconds buffer
+              timeout + 2000, // Small buffer
               'Location request timed out'
             );
 
@@ -176,33 +176,9 @@ export class GeolocationService {
               });
               observer.complete();
             }
-          } catch (highAccuracyError: any) {
-            // If high accuracy fails, try with low accuracy as fallback
-            console.warn('High accuracy location failed, trying low accuracy:', highAccuracyError);
-
-            try {
-              const position = await this.withTimeout(
-                Geolocation.getCurrentPosition({
-                  enableHighAccuracy: false,
-                  timeout: options.timeout,
-                  maximumAge: 10000 // Allow older cached position
-                }),
-                (options.timeout || 30000) + 5000,
-                'Location request timed out (low accuracy)'
-              );
-
-              if (!isCancelled) {
-                observer.next({
-                  latitude: position.coords.latitude,
-                  longitude: position.coords.longitude,
-                  accuracy: position.coords.accuracy
-                });
-                observer.complete();
-              }
-            } catch (lowAccuracyError: any) {
-              if (!isCancelled) {
-                observer.error(this.parseNativeError(lowAccuracyError));
-              }
+          } catch (locationError: any) {
+            if (!isCancelled) {
+              observer.error(this.parseNativeError(locationError));
             }
           }
         } catch (error: any) {

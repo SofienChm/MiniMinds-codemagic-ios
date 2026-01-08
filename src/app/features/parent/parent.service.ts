@@ -63,6 +63,10 @@ export class ParentService {
     return this.http.post(`${this.apiUrl}/${parentId}/children/${childId}`, {});
   }
 
+  unlinkChildFromParent(parentId: number, childId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${parentId}/children/${childId}`);
+  }
+
   refreshParents(): void {
     this.loadParents().subscribe(parents => {
       this.parents = parents;

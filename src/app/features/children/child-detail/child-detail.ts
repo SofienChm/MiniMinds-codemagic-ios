@@ -336,10 +336,21 @@ export class ChildDetail implements OnInit, OnDestroy {
     this.qrService.getSchoolSettings().subscribe({
       next: (settings) => {
         this.schoolSettings = settings;
-        this.getLocation();
+        // Only request location if geofencing is enabled
+        if (settings.geofenceEnabled) {
+          this.getLocation();
+        } else {
+          // No geofencing - skip location and allow scanning immediately
+          this.isWithinGeofence = true;
+          this.currentPosition = { latitude: 0, longitude: 0, accuracy: 0 }; // Dummy position
+          this.qrScannerState = 'idle';
+        }
       },
       error: () => {
-        this.getLocation();
+        // If settings fail to load, assume no geofencing and allow scanning
+        this.isWithinGeofence = true;
+        this.currentPosition = { latitude: 0, longitude: 0, accuracy: 0 };
+        this.qrScannerState = 'idle';
       }
     });
   }
@@ -354,7 +365,7 @@ export class ChildDetail implements OnInit, OnDestroy {
       clearTimeout(this.locationTimeoutId);
     }
 
-    // Safety timeout - if location never returns after 35 seconds, show error
+    // Safety timeout - if location never returns after 12 seconds, show error
     this.locationTimeoutId = setTimeout(() => {
       if (this.qrScannerState === 'getting-location') {
         console.error('Location request timed out (safety timeout)');
@@ -362,12 +373,12 @@ export class ChildDetail implements OnInit, OnDestroy {
         this.qrScannerError = this.translate.instant('CHILD_DETAIL.QR_LOCATION_ERROR');
         this.locationRetryCount = 0;
       }
-    }, 35000);
+    }, 12000);
 
     this.geolocationService.getCurrentPosition({
-      enableHighAccuracy: true,
-      timeout: 30000,
-      maximumAge: 5000
+      enableHighAccuracy: false, // Use low accuracy for faster results
+      timeout: 10000, // 10 seconds max
+      maximumAge: 60000 // Accept cached position up to 1 minute old
     }).subscribe({
       next: (position) => {
         // Clear safety timeout

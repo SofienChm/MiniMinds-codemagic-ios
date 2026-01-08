@@ -338,7 +338,7 @@ export class ParentDetail implements OnInit, OnDestroy {
       cancelButtonText: this.translate.instant('COMMON.CANCEL')
     }).then((result) => {
       if (result.isConfirmed) {
-        this.childrenService.deleteChild(childId).subscribe({
+        this.parentService.unlinkChildFromParent(this.parent!.id!, childId).subscribe({
           next: () => {
             this.loadParentDetails(this.parent!.id!);
             Swal.fire(this.translate.instant('COMMON.REMOVED'), this.translate.instant('PARENTS.CHILD_REMOVED_SUCCESS'), 'success');

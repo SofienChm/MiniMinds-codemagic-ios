@@ -25,6 +25,7 @@ def capacitor_pods
   pod 'CapacitorSplashScreen', :path => '../../node_modules/@capacitor/splash-screen'
   pod 'CapacitorStatusBar', :path => '../../node_modules/@capacitor/status-bar'
   pod 'CapawesomeCapacitorBadge', :path => '../../node_modules/@capawesome/capacitor-badge'
+  pod 'NotnotsamuelCapacitorSwipeBack', :path => '../../node_modules/@notnotsamuel/capacitor-swipe-back'
 end
 
 target 'App' do
