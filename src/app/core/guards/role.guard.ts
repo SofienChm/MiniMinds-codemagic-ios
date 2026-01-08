@@ -1,14 +1,14 @@
 import { inject } from "@angular/core";
-import { Router, ActivatedRouteSnapshot } from "@angular/router";
+import { CanActivateFn, Router } from "@angular/router";
 import { AuthService } from "../services/auth";
 
 /**
  * Role-based guard that checks if the current user has one of the allowed roles.
  * Usage in routes:
- *   canActivate: [() => roleGuard(['Admin', 'Teacher'])]
+ *   canActivate: [roleGuard('Admin', 'Teacher')]
  */
-export const roleGuard = (allowedRoles: string[]) => {
-  return (route: ActivatedRouteSnapshot) => {
+export const roleGuard = (...allowedRoles: string[]): CanActivateFn => {
+  return () => {
     const authService = inject(AuthService);
     const router = inject(Router);
 
@@ -19,18 +19,17 @@ export const roleGuard = (allowedRoles: string[]) => {
     }
 
     // Redirect to forbidden page if user doesn't have required role
-    router.navigate(['/403']);
-    return false;
+    return router.createUrlTree(['/403']);
   };
 };
 
 /**
  * Guard that blocks specific roles from accessing a route.
  * Usage in routes:
- *   canActivate: [() => blockRolesGuard(['Parent'])]
+ *   canActivate: [blockRolesGuard('Parent')]
  */
-export const blockRolesGuard = (blockedRoles: string[]) => {
-  return (route: ActivatedRouteSnapshot) => {
+export const blockRolesGuard = (...blockedRoles: string[]): CanActivateFn => {
+  return () => {
     const authService = inject(AuthService);
     const router = inject(Router);
 
@@ -41,7 +40,6 @@ export const blockRolesGuard = (blockedRoles: string[]) => {
     }
 
     // Redirect to forbidden page if user's role is blocked
-    router.navigate(['/403']);
-    return false;
+    return router.createUrlTree(['/403']);
   };
 };

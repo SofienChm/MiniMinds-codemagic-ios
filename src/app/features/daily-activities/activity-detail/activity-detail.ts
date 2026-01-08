@@ -10,6 +10,7 @@ import { TitlePage, TitleAction, Breadcrumb } from '../../../shared/layouts/titl
 import { AuthService } from '../../../core/services/auth';
 import { ApiConfig } from '../../../core/config/api.config';
 import { PageTitleService } from '../../../core/services/page-title.service';
+import { ImageDownloadService } from '../../../core/services/image-download.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
 import { ParentChildHeaderSimpleComponent } from "../../../shared/components/parent-child-header-simple/parent-child-header-simple.component";
@@ -77,6 +78,7 @@ export class ActivityDetail implements OnInit, OnDestroy {
   showPhotoModal = false;
   fullImageData: string | null = null;
   loadingFullImage = false;
+  downloadingImage = false;
 
   // Activity templates for icon/color mapping
   activityTemplates: ActivityTemplate[] = [
@@ -116,7 +118,8 @@ export class ActivityDetail implements OnInit, OnDestroy {
     private location: Location,
     private http: HttpClient,
     private translate: TranslateService,
-    private pageTitleService: PageTitleService
+    private pageTitleService: PageTitleService,
+    private imageDownloadService: ImageDownloadService
   ) {}
 
   ngOnInit(): void {
@@ -430,6 +433,76 @@ export class ActivityDetail implements OnInit, OnDestroy {
     this.showPhotoModal = false;
     this.selectedPhoto = null;
     this.fullImageData = null;
+  }
+
+  /**
+   * Download/save the currently selected photo
+   */
+  async downloadPhoto(): Promise<void> {
+    if (!this.selectedPhoto || this.downloadingImage) return;
+
+    const imageData = this.fullImageData || this.selectedPhoto.thumbnailData;
+    if (!imageData) {
+      Swal.fire({
+        icon: 'error',
+        title: this.translate.instant('GALLERY.ERROR'),
+        text: this.translate.instant('GALLERY.NO_IMAGE_DATA')
+      });
+      return;
+    }
+
+    this.downloadingImage = true;
+
+    try {
+      const fileName = this.selectedPhoto.title ||
+                       this.selectedPhoto.fileName ||
+                       this.imageDownloadService.generateFileName('activity_photo');
+
+      // On mobile, use share to give user option to save to gallery
+      if (this.imageDownloadService.isNativePlatform()) {
+        const result = await this.imageDownloadService.shareImage(
+          imageData,
+          fileName,
+          this.selectedPhoto.title || 'Save Photo'
+        );
+
+        if (!result.success) {
+          Swal.fire({
+            icon: 'error',
+            title: this.translate.instant('GALLERY.ERROR'),
+            text: result.message
+          });
+        }
+      } else {
+        // On web, download directly
+        const result = await this.imageDownloadService.downloadImage(imageData, fileName);
+
+        if (result.success) {
+          Swal.fire({
+            icon: 'success',
+            title: this.translate.instant('GALLERY.SUCCESS'),
+            text: this.translate.instant('GALLERY.IMAGE_DOWNLOADED'),
+            timer: 2000,
+            showConfirmButton: false
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: this.translate.instant('GALLERY.ERROR'),
+            text: result.message
+          });
+        }
+      }
+    } catch (error: any) {
+      console.error('Error downloading photo:', error);
+      Swal.fire({
+        icon: 'error',
+        title: this.translate.instant('GALLERY.ERROR'),
+        text: error.message || this.translate.instant('GALLERY.DOWNLOAD_FAILED')
+      });
+    } finally {
+      this.downloadingImage = false;
+    }
   }
 
   loadFullImage(photoId: number): void {

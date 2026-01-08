@@ -2,9 +2,9 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
 
-// Role constants for route guards
-const ADMIN_ONLY = ['Admin'];
-const ADMIN_TEACHER = ['Admin', 'Teacher'];
+// Role guards for routes
+const ADMIN_ONLY = roleGuard('Admin');
+const ADMIN_TEACHER = roleGuard('Admin', 'Teacher');
 
 export const routes: Routes = [
     {
@@ -37,43 +37,41 @@ export const routes: Routes = [
       {
         path: 'parents',
         loadComponent: () => import('./features/parent/parent').then(m => m.Parent),
-        canActivate: [() => roleGuard(ADMIN_TEACHER)]
+        canActivate: [ADMIN_TEACHER]
       },
       {
         path: 'parents/add',
         loadComponent: () => import('./features/parent/add-parent/add-parent').then(m => m.AddParentComponent),
-        canActivate: [() => roleGuard(ADMIN_TEACHER)]
+        canActivate: [ADMIN_TEACHER]
       },
       {
         path: 'parents/edit/:id',
         loadComponent: () => import('./features/parent/edit-parent/edit-parent').then(m => m.EditParent),
-        canActivate: [() => roleGuard(ADMIN_TEACHER)]
+        canActivate: [ADMIN_TEACHER]
       },
       {
         path: 'parents/detail/:id',
         loadComponent: () => import('./features/parent/parent-detail/parent-detail').then(m => m.ParentDetail),
-        canActivate: [() => roleGuard(ADMIN_TEACHER)]
+        canActivate: [ADMIN_TEACHER]
       },
       // Children routes - Admin & Teacher only
       {
         path: 'children',
         loadComponent: () => import('./features/children/children').then(m => m.Children),
-        canActivate: [() => roleGuard(ADMIN_TEACHER)]
+        
       },
       {
         path: 'children/add',
         loadComponent: () => import('./features/children/add-children/add-children').then(m => m.AddChildren),
-        canActivate: [() => roleGuard(ADMIN_TEACHER)]
+        canActivate: [ADMIN_TEACHER]
       },
       {
         path: 'children/edit/:id',
         loadComponent: () => import('./features/children/edit-children/edit-children').then(m => m.EditChildren),
-        canActivate: [() => roleGuard(ADMIN_TEACHER)]
       },
       {
         path: 'children/detail/:id',
         loadComponent: () => import('./features/children/child-detail/child-detail').then(m => m.ChildDetail),
-        canActivate: [() => roleGuard(ADMIN_TEACHER)]
       },
       {
         path: 'events',
@@ -81,7 +79,8 @@ export const routes: Routes = [
       },
       {
         path: 'events/add',
-        loadComponent: () => import('./features/event/add-event/add-event').then(m => m.AddEvent)
+        loadComponent: () => import('./features/event/add-event/add-event').then(m => m.AddEvent),
+        canActivate: [ADMIN_TEACHER]
       },
       {
         path: 'events/edit/:id',
@@ -111,7 +110,7 @@ export const routes: Routes = [
       {
         path: 'attendance',
         loadComponent: () => import('./features/attendance-sheet/attendance-sheet').then(m => m.AttendanceSheet),
-        canActivate: [() => roleGuard(ADMIN_TEACHER)]
+        canActivate: [ADMIN_TEACHER]
       },
       {
         path: 'calendar',
@@ -119,7 +118,8 @@ export const routes: Routes = [
       },
       {
         path: 'holidays',
-        loadComponent: () => import('./features/holiday/holiday.component').then(m => m.HolidayComponent)
+        loadComponent: () => import('./features/holiday/holiday.component').then(m => m.HolidayComponent),
+        canActivate: [ADMIN_TEACHER]
       },
       {
         path: 'holidays/add',
@@ -133,12 +133,12 @@ export const routes: Routes = [
       {
         path: 'leaves',
         loadComponent: () => import('./features/leaves/leaves').then(m => m.Leaves),
-        canActivate: [() => roleGuard(ADMIN_TEACHER)]
+        canActivate: [ADMIN_TEACHER]
       },
       {
         path: 'leaves/add',
         loadComponent: () => import('./features/leaves/add-leave').then(m => m.AddLeave),
-        canActivate: [() => roleGuard(ADMIN_TEACHER)]
+        canActivate: [ADMIN_TEACHER]
       },
       {
         path: 'fees',
@@ -160,22 +160,22 @@ export const routes: Routes = [
       {
         path: 'educators',
         loadComponent: () => import('./features/educator/educator').then(m => m.Educator),
-        canActivate: [() => roleGuard(ADMIN_TEACHER)]
+        canActivate: [ADMIN_TEACHER]
       },
       {
         path: 'educators/add',
         loadComponent: () => import('./features/educator/add-educator/add-educator').then(m => m.AddEducator),
-        canActivate: [() => roleGuard(ADMIN_TEACHER)]
+        canActivate: [ADMIN_TEACHER]
       },
       {
         path: 'educators/edit/:id',
         loadComponent: () => import('./features/educator/edit-educator/edit-educator').then(m => m.EditEducator),
-        canActivate: [() => roleGuard(ADMIN_TEACHER)]
+        canActivate: [ADMIN_TEACHER]
       },
       {
         path: 'educators/detail/:id',
         loadComponent: () => import('./features/educator/educator-detail/educator-detail').then(m => m.EducatorDetail),
-        canActivate: [() => roleGuard(ADMIN_TEACHER)]
+        canActivate: [ADMIN_TEACHER]
       },
       {
         path: 'profile',
@@ -201,23 +201,23 @@ export const routes: Routes = [
       {
         path: 'settings',
         loadComponent: () => import('./features/settings/settings.component').then(m => m.SettingsComponent),
-        canActivate: [() => roleGuard(ADMIN_TEACHER)]
+        canActivate: [ADMIN_TEACHER]
       },
       // Classes routes - Admin & Teacher only
       {
         path: 'classes',
         loadComponent: () => import('./features/classes/classes.component').then(m => m.ClassesComponent),
-        canActivate: [() => roleGuard(ADMIN_TEACHER)]
+        canActivate: [ADMIN_TEACHER]
       },
       {
         path: 'classes/add',
         loadComponent: () => import('./features/classes/add-class/add-class.component').then(m => m.AddClassComponent),
-        canActivate: [() => roleGuard(ADMIN_TEACHER)]
+        canActivate: [ADMIN_TEACHER]
       },
       {
         path: 'classes/detail/:id',
         loadComponent: () => import('./features/classes/class-detail/class-detail.component').then(m => m.ClassDetailComponent),
-        canActivate: [() => roleGuard(ADMIN_TEACHER)]
+        canActivate: [ADMIN_TEACHER]
       },
       {
         path: 'learning-games',
@@ -275,7 +275,7 @@ export const routes: Routes = [
       {
         path: 'qr-management',
         loadComponent: () => import('./features/qr-management/qr-management').then(m => m.QrManagement),
-        canActivate: [() => roleGuard(ADMIN_TEACHER)]
+        canActivate: [ADMIN_TEACHER]
       },
       {
         path: 'base-ui',

@@ -408,13 +408,28 @@
             </span>
           </div>
 
+          <!-- Getting Location State -->
+          <div *ngIf="qrScannerState === 'getting-location'" class="text-center py-4">
+            <div class="spinner-border text-primary mb-3" role="status">
+              <span class="visually-hidden">{{ 'CHILD_DETAIL.LOADING' | translate }}</span>
+            </div>
+            <p class="text-muted">{{ 'CHILD_DETAIL.QR_GETTING_LOCATION' | translate }}</p>
+            <p class="text-muted small">{{ 'QR_ACTION.LOCATION_TIP' | translate }}</p>
+          </div>
+
           <!-- Idle State -->
           <div *ngIf="qrScannerState === 'idle'" class="text-center">
             <div class="qr-scanner-placeholder mb-3">
               <i class="bi bi-qr-code display-1 text-muted"></i>
               <p class="text-muted mt-2">{{ 'CHILD_DETAIL.QR_READY_TO_SCAN' | translate }}</p>
             </div>
-            <div *ngIf="!currentPosition" class="alert alert-warning">
+            <div *ngIf="qrScannerError" class="alert alert-danger">
+              <i class="bi bi-exclamation-triangle me-2"></i>{{ qrScannerError }}
+              <button class="btn btn-link btn-sm p-0 ms-2" (click)="retryLocation()">
+                <i class="bi bi-arrow-repeat me-1"></i>{{ 'CHILD_DETAIL.QR_TRY_AGAIN' | translate }}
+              </button>
+            </div>
+            <div *ngIf="!currentPosition && !qrScannerError" class="alert alert-warning">
               <i class="bi bi-geo-alt me-2"></i>{{ 'CHILD_DETAIL.QR_GETTING_LOCATION' | translate }}
             </div>
             <div *ngIf="currentPosition && schoolSettings?.geofenceEnabled && !isWithinGeofence" class="alert alert-danger">

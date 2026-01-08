@@ -71,14 +71,8 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
             break;
 
           case 403:
-            // Forbidden
-            errorMessage = 'You do not have permission to access this resource.';
-            Swal.fire({
-              icon: 'error',
-              title: 'Access Denied',
-              text: errorMessage,
-              confirmButtonColor: '#506EE4'
-            });
+            // Forbidden - redirect to 403 page
+            router.navigate(['/403']);
             break;
 
           case 404:

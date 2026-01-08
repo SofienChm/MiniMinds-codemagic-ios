@@ -16,6 +16,7 @@ import Swal from 'sweetalert2';
 import { ParentChildHeaderSimpleComponent } from '../../shared/components/parent-child-header-simple/parent-child-header-simple.component';
 import { Capacitor } from '@capacitor/core';
 import { PullToRefreshComponent } from '../../shared/components/pull-to-refresh/pull-to-refresh.component';
+import { ImageDownloadService } from '../../core/services/image-download.service';
 
 // Image compression settings - reduces storage by ~70%
 const IMAGE_MAX_WIDTH = 1920;
@@ -88,6 +89,9 @@ export class Gallery implements OnInit, OnDestroy {
   titleActions: TitleAction[] = [];
   private langChangeSub?: Subscription;
 
+  // Download state
+  downloadingImage = false;
+
   constructor(
     private galleryService: GalleryService,
     private childrenService: ChildrenService,
@@ -95,7 +99,8 @@ export class Gallery implements OnInit, OnDestroy {
     private router: Router,
     public permissions: PermissionService,
     private translate: TranslateService,
-    private pageTitleService: PageTitleService
+    private pageTitleService: PageTitleService,
+    private imageDownloadService: ImageDownloadService
   ) {}
 
   ngOnInit() {
@@ -662,6 +667,77 @@ export class Gallery implements OnInit, OnDestroy {
   closePreview() {
     this.showPreviewModal = false;
     this.selectedPhoto = null;
+  }
+
+  /**
+   * Download/save the currently selected photo
+   */
+  async downloadPhoto(): Promise<void> {
+    if (!this.selectedPhoto || this.downloadingImage) return;
+
+    const imageData = this.selectedPhoto.imageData || this.selectedPhoto.thumbnailData;
+    if (!imageData) {
+      Swal.fire({
+        icon: 'error',
+        title: this.translate.instant('GALLERY.ERROR'),
+        text: this.translate.instant('GALLERY.NO_IMAGE_DATA')
+      });
+      return;
+    }
+
+    this.downloadingImage = true;
+
+    try {
+      // Generate filename from title or use default
+      const fileName = this.selectedPhoto.title ||
+                       this.selectedPhoto.fileName ||
+                       this.imageDownloadService.generateFileName('miniminds_photo');
+
+      // On mobile, use share to give user option to save to gallery
+      if (this.imageDownloadService.isNativePlatform()) {
+        const result = await this.imageDownloadService.shareImage(
+          imageData,
+          fileName,
+          this.selectedPhoto.title || 'Save Photo'
+        );
+
+        if (!result.success) {
+          Swal.fire({
+            icon: 'error',
+            title: this.translate.instant('GALLERY.ERROR'),
+            text: result.message
+          });
+        }
+      } else {
+        // On web, download directly
+        const result = await this.imageDownloadService.downloadImage(imageData, fileName);
+
+        if (result.success) {
+          Swal.fire({
+            icon: 'success',
+            title: this.translate.instant('GALLERY.SUCCESS'),
+            text: this.translate.instant('GALLERY.IMAGE_DOWNLOADED'),
+            timer: 2000,
+            showConfirmButton: false
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: this.translate.instant('GALLERY.ERROR'),
+            text: result.message
+          });
+        }
+      }
+    } catch (error: any) {
+      console.error('Error downloading photo:', error);
+      Swal.fire({
+        icon: 'error',
+        title: this.translate.instant('GALLERY.ERROR'),
+        text: error.message || this.translate.instant('GALLERY.DOWNLOAD_FAILED')
+      });
+    } finally {
+      this.downloadingImage = false;
+    }
   }
 
   // Edit modal

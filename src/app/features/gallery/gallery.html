@@ -287,13 +287,21 @@
             <span *ngIf="selectedPhoto.uploadedByName"> by {{ selectedPhoto.uploadedByName }}</span>
           </p>
         </div>
-        <div *ngIf="canEdit()">
-          <button class="btn btn-outline-primary me-2" (click)="openEditModal(selectedPhoto); closePreview()">
-            <i class="bi bi-pencil me-1"></i>Edit
+        <div class="d-flex gap-2 flex-wrap">
+          <!-- Download/Save Button - Available to all users -->
+          <button class="btn btn-outline-success" (click)="downloadPhoto()" [disabled]="downloadingImage || loadingFullImage">
+            <i class="bi" [class.bi-download]="!downloadingImage" [class.bi-hourglass-split]="downloadingImage" class="me-1"></i>
+            {{ downloadingImage ? ('GALLERY.SAVING' | translate) : ('GALLERY.SAVE' | translate) }}
           </button>
-          <button class="btn btn-outline-danger" (click)="deletePhoto(selectedPhoto)">
-            <i class="bi bi-trash me-1"></i>Delete
-          </button>
+          <!-- Edit & Delete (Admin/Teacher only) -->
+          <ng-container *ngIf="canEdit()">
+            <button class="btn btn-outline-primary" (click)="openEditModal(selectedPhoto); closePreview()">
+              <i class="bi bi-pencil me-1"></i>{{ 'GALLERY.EDIT' | translate }}
+            </button>
+            <button class="btn btn-outline-danger" (click)="deletePhoto(selectedPhoto)">
+              <i class="bi bi-trash me-1"></i>{{ 'GALLERY.DELETE' | translate }}
+            </button>
+          </ng-container>
         </div>
       </div>
     </div>

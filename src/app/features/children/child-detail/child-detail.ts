@@ -43,7 +43,7 @@ export class ChildDetail implements OnInit, OnDestroy {
 
   // QR Scanner properties
   showQrScannerModal = false;
-  qrScannerState: 'idle' | 'scanning' | 'processing' | 'success' | 'error' = 'idle';
+  qrScannerState: 'idle' | 'scanning' | 'processing' | 'success' | 'error' | 'getting-location' = 'idle';
   html5QrCode: Html5Qrcode | null = null;
   currentPosition: GeolocationPosition | null = null;
   schoolSettings: SchoolSettings | null = null;
@@ -53,6 +53,10 @@ export class ChildDetail implements OnInit, OnDestroy {
   distanceToSchool = 0;
   childAttendanceStatus: { isCheckedIn: boolean; isCheckedOut: boolean; checkInTime?: string; checkOutTime?: string } | null = null;
   private scanSubscription?: Subscription;
+
+  // Location retry properties
+  private locationRetryCount = 0;
+  private maxLocationRetries = 3;
 
   breadcrumbs: Breadcrumb[] = [];
   get isParent(): boolean {
@@ -333,15 +337,44 @@ export class ChildDetail implements OnInit, OnDestroy {
   }
 
   getLocation(): void {
-    this.geolocationService.getCurrentPosition().subscribe({
+    this.qrScannerState = 'getting-location';
+    this.qrScannerError = '';
+    this.locationRetryCount++;
+
+    this.geolocationService.getCurrentPosition({
+      enableHighAccuracy: true,
+      timeout: 30000,
+      maximumAge: 5000
+    }).subscribe({
       next: (position) => {
         this.currentPosition = position;
+        this.locationRetryCount = 0; // Reset on success
+        this.qrScannerState = 'idle';
         this.checkGeofence();
       },
       error: (err) => {
-        this.qrScannerError = err.message || this.translate.instant('CHILD_DETAIL.QR_LOCATION_ERROR');
+        console.error('Location error in child detail:', err);
+
+        if (this.locationRetryCount < this.maxLocationRetries) {
+          // Auto-retry with a small delay
+          setTimeout(() => {
+            this.getLocation();
+          }, 1000);
+        } else {
+          this.qrScannerState = 'idle';
+          this.qrScannerError = err.message || this.translate.instant('CHILD_DETAIL.QR_LOCATION_ERROR');
+          this.locationRetryCount = 0; // Reset for manual retry
+        }
       }
     });
+  }
+
+  /**
+   * Retry getting location manually
+   */
+  retryLocation(): void {
+    this.qrScannerError = '';
+    this.getLocation();
   }
 
   checkGeofence(): void {

@@ -120,10 +120,11 @@ type QrActionState =
             <i class="bi bi-geo-alt"></i>
           </div>
           <h4>{{ 'QR_ACTION.LOCATION_REQUIRED' | translate }}</h4>
-          <p class="text-muted">{{ 'QR_ACTION.LOCATION_MESSAGE' | translate }}</p>
-          <button class="btn btn-primary btn-lg mt-4" (click)="requestLocation()">
-            <i class="bi bi-geo-alt me-2"></i>{{ 'QR_ACTION.ENABLE_LOCATION' | translate }}
+          <p class="text-muted">{{ locationErrorMessage || ('QR_ACTION.LOCATION_MESSAGE' | translate) }}</p>
+          <button class="btn btn-primary btn-lg mt-4" (click)="retryLocation()">
+            <i class="bi bi-arrow-repeat me-2"></i>{{ 'QR_ACTION.TRY_AGAIN' | translate }}
           </button>
+          <p class="text-muted small mt-3">{{ 'QR_ACTION.LOCATION_TIP' | translate }}</p>
         </div>
 
         <!-- Geofence Error State -->
@@ -429,6 +430,9 @@ export class QrActionComponent implements OnInit, OnDestroy {
 
   // Location
   currentPosition: { latitude: number; longitude: number } | null = null;
+  locationRetryCount = 0;
+  maxLocationRetries = 3;
+  locationErrorMessage = '';
 
   private subscriptions: Subscription[] = [];
 
@@ -499,17 +503,34 @@ export class QrActionComponent implements OnInit, OnDestroy {
    */
   requestLocation(): void {
     this.state = 'requesting-location';
+    this.locationRetryCount++;
 
-    const sub = this.geolocationService.getCurrentPosition().subscribe({
+    const sub = this.geolocationService.getCurrentPosition({
+      enableHighAccuracy: true,
+      timeout: 30000,
+      maximumAge: 5000
+    }).subscribe({
       next: (position) => {
         this.currentPosition = {
           latitude: position.latitude,
           longitude: position.longitude
         };
+        this.locationRetryCount = 0; // Reset on success
         this.checkGeofenceAndLoadChildren();
       },
-      error: () => {
-        this.state = 'location-required';
+      error: (error: any) => {
+        console.error('Location error:', error);
+        this.locationErrorMessage = error?.message || this.translate.instant('QR_ACTION.LOCATION_MESSAGE');
+
+        if (this.locationRetryCount < this.maxLocationRetries) {
+          // Auto-retry with a small delay
+          setTimeout(() => {
+            this.requestLocation();
+          }, 1000);
+        } else {
+          this.state = 'location-required';
+          this.locationRetryCount = 0; // Reset for manual retry
+        }
       }
     });
     this.subscriptions.push(sub);
@@ -713,6 +734,14 @@ export class QrActionComponent implements OnInit, OnDestroy {
         // Ignore haptics errors
       }
     }
+  }
+
+  /**
+   * Retry location manually (after max auto-retries failed)
+   */
+  retryLocation(): void {
+    this.locationErrorMessage = '';
+    this.requestLocation();
   }
 
   /**

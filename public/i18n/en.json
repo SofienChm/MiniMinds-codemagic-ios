@@ -1519,7 +1519,13 @@
     "PREVIOUS": "Previous",
     "NEXT": "Next",
     "PAGE": "Page",
-    "OF": "of"
+    "OF": "of",
+    "SAVING": "Saving...",
+    "SUCCESS": "Success",
+    "ERROR": "Error",
+    "IMAGE_DOWNLOADED": "Image saved successfully!",
+    "DOWNLOAD_FAILED": "Failed to save image",
+    "NO_IMAGE_DATA": "No image data available"
   },
   "CLASSES": {
     "TITLE": "Classes Management",
@@ -1632,6 +1638,7 @@
     "PLEASE_WAIT": "Please wait while we verify the QR code",
     "GETTING_LOCATION": "Getting your location...",
     "LOCATION_WAIT": "Please wait while we verify your location",
+    "LOCATION_TIP": "Make sure location services are enabled in your device settings and you have a clear view of the sky for GPS signal.",
     "SELECT_CHECKIN": "Select children to check in",
     "SELECT_CHECKOUT": "Select children to check out",
     "SELECT_ALL": "Select All",

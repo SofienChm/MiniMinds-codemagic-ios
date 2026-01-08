@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.miniminds.app',
-  appName: 'miniminds',
+  appName: 'Miniminds',
   webDir: 'dist/miniminds-web/browser',
 
   // Server configuration for deep linking

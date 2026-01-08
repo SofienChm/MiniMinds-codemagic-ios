@@ -587,9 +587,17 @@
         <span class="photo-date">{{ formatTimeAgo(selectedPhoto.createdAt) }}</span>
         <span class="photo-uploader" *ngIf="selectedPhoto.uploadedByName">by {{ selectedPhoto.uploadedByName }}</span>
       </div>
-      <button class="btn btn-sm btn-outline-danger" *ngIf="canEdit()" (click)="deletePhoto(selectedPhoto)">
-        <i class="bi bi-trash me-1"></i>{{ 'DAILY_REPORT.DELETE' | translate }}
-      </button>
+      <div class="d-flex gap-2">
+        <!-- Download/Save Button -->
+        <button class="btn btn-sm btn-outline-success" (click)="downloadPhoto()" [disabled]="downloadingImage || loadingFullImage">
+          <i class="bi" [class.bi-download]="!downloadingImage" [class.bi-hourglass-split]="downloadingImage" class="me-1"></i>
+          {{ downloadingImage ? ('GALLERY.SAVING' | translate) : ('GALLERY.SAVE' | translate) }}
+        </button>
+        <!-- Delete Button (Admin/Teacher only) -->
+        <button class="btn btn-sm btn-outline-danger" *ngIf="canEdit()" (click)="deletePhoto(selectedPhoto)">
+          <i class="bi bi-trash me-1"></i>{{ 'DAILY_REPORT.DELETE' | translate }}
+        </button>
+      </div>
     </div>
   </div>
 </div>
