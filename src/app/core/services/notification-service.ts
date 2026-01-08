@@ -79,9 +79,18 @@ export class NotificationService {
 
   handleNotificationClick(notification: Notification): void {
     this.markAsRead(notification.id).subscribe();
-    
+
     if (notification.redirectUrl) {
-      this.router.navigate([notification.redirectUrl]);
+      let url = notification.redirectUrl;
+
+      // Handle /reclamations/:id - convert to /reclamations?id=:id since there's no detail route
+      const reclamationMatch = url.match(/^\/reclamations\/(\d+)$/);
+      if (reclamationMatch) {
+        url = `/reclamations?id=${reclamationMatch[1]}`;
+      }
+
+      // Use navigateByUrl for full path navigation (handles /path/to/page, /page?id=123, etc.)
+      this.router.navigateByUrl(url);
     }
   }
 

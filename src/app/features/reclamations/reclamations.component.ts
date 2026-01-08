@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { ReclamationsService, Reclamation, ReclamationUser } from './reclamations.service';
 import { AuthService } from '../../core/services/auth';
@@ -40,15 +41,72 @@ export class ReclamationsComponent implements OnInit, OnDestroy {
     private reclamationsService: ReclamationsService,
     public authService: AuthService,
     private pageTitleService: PageTitleService,
-    private translateService: TranslateService
+    private translateService: TranslateService,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
     this.pageTitleService.setTitle(this.translateService.instant('RECLAMATIONS_PAGE.TITLE'));
     this.currentUserId = this.getCurrentUserId();
     this.loadUsers();
-    this.loadReclamations();
+    this.loadReclamationsAndCheckQueryParam();
     this.autoSelectAdminForParents();
+  }
+
+  private loadReclamationsAndCheckQueryParam(): void {
+    // Load reclamations and then check if we need to auto-open one from query param
+    let sentLoaded = false;
+    let receivedLoaded = false;
+
+    const checkAndOpenReclamation = () => {
+      if (!sentLoaded || !receivedLoaded) return;
+
+      // Check for id query parameter (from notification click)
+      this.route.queryParams.subscribe(params => {
+        const reclamationId = params['id'];
+        if (reclamationId) {
+          const id = parseInt(reclamationId, 10);
+          // Try to find in received first, then sent
+          let reclamation = this.receivedReclamations.find(r => r.id === id);
+          if (reclamation) {
+            this.activeTab = 'inbox';
+            this.selectReclamation(reclamation);
+          } else {
+            reclamation = this.sentReclamations.find(r => r.id === id);
+            if (reclamation) {
+              this.activeTab = 'sent';
+              this.selectReclamation(reclamation);
+            }
+          }
+        }
+      });
+    };
+
+    this.reclamationsService.getSentReclamations().subscribe({
+      next: (reclamations) => {
+        this.sentReclamations = reclamations;
+        sentLoaded = true;
+        checkAndOpenReclamation();
+      },
+      error: (err) => {
+        console.error('Error loading sent reclamations:', err);
+        sentLoaded = true;
+        checkAndOpenReclamation();
+      }
+    });
+
+    this.reclamationsService.getReceivedReclamations().subscribe({
+      next: (reclamations) => {
+        this.receivedReclamations = reclamations;
+        receivedLoaded = true;
+        checkAndOpenReclamation();
+      },
+      error: (err) => {
+        console.error('Error loading received reclamations:', err);
+        receivedLoaded = true;
+        checkAndOpenReclamation();
+      }
+    });
   }
 
   private autoSelectAdminForParents(): void {
