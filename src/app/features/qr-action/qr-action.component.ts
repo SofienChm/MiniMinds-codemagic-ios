@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -442,7 +442,9 @@ export class QrActionComponent implements OnInit, OnDestroy {
     private translate: TranslateService,
     private qrService: QrCheckinService,
     private geolocationService: GeolocationService,
-    private authService: AuthService
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef,
+    private ngZone: NgZone
   ) {}
 
   ngOnInit(): void {
@@ -690,19 +692,25 @@ export class QrActionComponent implements OnInit, OnDestroy {
    * Process attendance for selected children
    */
   processSelectedChildren(): void {
-    if (this.selectedChildIds.length === 0 || !this.currentPosition) return;
+    if (this.selectedChildIds.length === 0) return;
 
     this.state = 'processing';
+    this.cdr.detectChanges();
+
     this.processingChildren = this.allChildren
       .filter(c => this.selectedChildIds.includes(c.id))
       .map(c => c.firstName);
 
-    const request = {
+    const request: any = {
       qrCode: this.qrCode,
-      childIds: this.selectedChildIds,
-      latitude: this.currentPosition.latitude,
-      longitude: this.currentPosition.longitude
+      childIds: this.selectedChildIds
     };
+
+    // Only include location if we have it (geofencing enabled)
+    if (this.currentPosition) {
+      request.latitude = this.currentPosition.latitude;
+      request.longitude = this.currentPosition.longitude;
+    }
 
     const action$ = this.qrType === 'CheckIn'
       ? this.qrService.qrCheckIn(request)
@@ -710,27 +718,34 @@ export class QrActionComponent implements OnInit, OnDestroy {
 
     const sub = action$.subscribe({
       next: (result) => {
-        // Trigger haptic feedback on success
-        this.triggerHaptic(result.success);
+        // Run inside NgZone to ensure change detection works on Android/iOS
+        this.ngZone.run(() => {
+          // Trigger haptic feedback on success
+          this.triggerHaptic(result.success !== false);
 
-        if (result.success) {
-          this.state = 'success';
-          this.successMessage = this.qrType === 'CheckIn'
-            ? this.translate.instant('QR_ACTION.CHECKIN_SUCCESS')
-            : this.translate.instant('QR_ACTION.CHECKOUT_SUCCESS');
+          if (result.success !== false) {
+            this.state = 'success';
+            this.successMessage = this.qrType === 'CheckIn'
+              ? this.translate.instant('QR_ACTION.CHECKIN_SUCCESS')
+              : this.translate.instant('QR_ACTION.CHECKOUT_SUCCESS');
 
-          this.processedChildren = this.processingChildren;
-          this.resultDetails = result.results || [];
-        } else {
-          this.state = 'error';
-          this.errorMessage = result.message || this.translate.instant('QR_ACTION.ACTION_FAILED');
-          this.resultDetails = result.results || [];
-        }
+            this.processedChildren = this.processingChildren;
+            this.resultDetails = result.results || [];
+          } else {
+            this.state = 'error';
+            this.errorMessage = result.message || this.translate.instant('QR_ACTION.ACTION_FAILED');
+            this.resultDetails = result.results || [];
+          }
+          this.cdr.detectChanges();
+        });
       },
       error: (err) => {
-        this.triggerHaptic(false);
-        this.state = 'error';
-        this.errorMessage = err.error?.message || this.translate.instant('QR_ACTION.ACTION_FAILED');
+        this.ngZone.run(() => {
+          this.triggerHaptic(false);
+          this.state = 'error';
+          this.errorMessage = err.error?.message || this.translate.instant('QR_ACTION.ACTION_FAILED');
+          this.cdr.detectChanges();
+        });
       }
     });
     this.subscriptions.push(sub);

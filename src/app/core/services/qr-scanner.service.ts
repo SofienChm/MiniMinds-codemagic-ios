@@ -211,6 +211,17 @@ export class QrScannerService {
     }
 
     try {
+      // On Android, check and install Google Barcode Scanner module if needed
+      if (Capacitor.getPlatform() === 'android') {
+        const moduleAvailable = await this.checkAndInstallGoogleModule();
+        if (!moduleAvailable) {
+          return {
+            success: false,
+            error: 'Google Barcode Scanner is being installed. Please try again in a moment.'
+          };
+        }
+      }
+
       const hasPermission = await this.requestPermission();
       if (!hasPermission) {
         return { success: false, error: 'Camera permission denied' };
@@ -229,7 +240,35 @@ export class QrScannerService {
       if (error.message?.includes('canceled')) {
         return { success: false, error: 'Scan cancelled' };
       }
+      // Handle Google module not available error
+      if (error.message?.includes('Google Barcode Scanner') || error.message?.includes('installGoogleBarcodeScanner')) {
+        // Try to install the module
+        this.installGoogleBarcodeModule();
+        return {
+          success: false,
+          error: 'Installing barcode scanner. Please try again in a few seconds.'
+        };
+      }
       return { success: false, error: error.message || 'Scan failed' };
+    }
+  }
+
+  /**
+   * Check if Google module is available and install if needed
+   */
+  private async checkAndInstallGoogleModule(): Promise<boolean> {
+    try {
+      const result = await BarcodeScanner.isGoogleBarcodeScannerModuleAvailable();
+      if (!result.available) {
+        // Start installation in background
+        BarcodeScanner.installGoogleBarcodeScannerModule();
+        // Return false to indicate module is being installed
+        return false;
+      }
+      return true;
+    } catch {
+      // If check fails, assume it's available and let scan fail naturally
+      return true;
     }
   }
 

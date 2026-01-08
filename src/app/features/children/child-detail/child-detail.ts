@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -81,7 +81,9 @@ export class ChildDetail implements OnInit, OnDestroy {
     private translate: TranslateService,
     private qrService: QrCheckinService,
     private geolocationService: GeolocationService,
-    private qrScannerService: QrScannerService
+    private qrScannerService: QrScannerService,
+    private cdr: ChangeDetectorRef,
+    private ngZone: NgZone
   ) {}
 
   ngOnInit() {
@@ -558,18 +560,24 @@ export class ChildDetail implements OnInit, OnDestroy {
     // First validate the QR code
     this.qrService.validateQrCode(code).subscribe({
       next: (response) => {
-        if (response.isValid) {
-          this.processAttendance(code, response.type as 'CheckIn' | 'CheckOut');
-        } else {
-          this.triggerHaptic(false);
-          this.qrScannerState = 'error';
-          this.qrScannerError = response.message || this.translate.instant('CHILD_DETAIL.QR_INVALID');
-        }
+        this.ngZone.run(() => {
+          if (response.isValid) {
+            this.processAttendance(code, response.type as 'CheckIn' | 'CheckOut');
+          } else {
+            this.triggerHaptic(false);
+            this.qrScannerState = 'error';
+            this.qrScannerError = response.message || this.translate.instant('CHILD_DETAIL.QR_INVALID');
+            this.cdr.detectChanges();
+          }
+        });
       },
       error: (err) => {
-        this.triggerHaptic(false);
-        this.qrScannerState = 'error';
-        this.qrScannerError = err.error?.message || this.translate.instant('CHILD_DETAIL.QR_VALIDATION_ERROR');
+        this.ngZone.run(() => {
+          this.triggerHaptic(false);
+          this.qrScannerState = 'error';
+          this.qrScannerError = err.error?.message || this.translate.instant('CHILD_DETAIL.QR_VALIDATION_ERROR');
+          this.cdr.detectChanges();
+        });
       }
     });
   }
@@ -610,23 +618,31 @@ export class ChildDetail implements OnInit, OnDestroy {
 
     action$.subscribe({
       next: (result) => {
-        if (result.success) {
-          this.triggerHaptic(true);
-          this.qrScannerState = 'success';
-          this.qrScannerSuccess = qrType === 'CheckIn'
-            ? this.translate.instant('CHILD_DETAIL.QR_CHECKIN_SUCCESS', { name: this.child?.firstName })
-            : this.translate.instant('CHILD_DETAIL.QR_CHECKOUT_SUCCESS', { name: this.child?.firstName });
-          this.loadChildAttendanceStatus();
-        } else {
-          this.triggerHaptic(false);
-          this.qrScannerState = 'error';
-          this.qrScannerError = result.message || this.translate.instant('CHILD_DETAIL.QR_ACTION_FAILED');
-        }
+        // Run inside NgZone to ensure change detection works on iOS
+        this.ngZone.run(() => {
+          // Treat any response as success if success is not explicitly false
+          if (result.success !== false) {
+            this.triggerHaptic(true);
+            this.qrScannerState = 'success';
+            this.qrScannerSuccess = qrType === 'CheckIn'
+              ? this.translate.instant('CHILD_DETAIL.QR_CHECKIN_SUCCESS', { name: this.child?.firstName })
+              : this.translate.instant('CHILD_DETAIL.QR_CHECKOUT_SUCCESS', { name: this.child?.firstName });
+            this.loadChildAttendanceStatus();
+          } else {
+            this.triggerHaptic(false);
+            this.qrScannerState = 'error';
+            this.qrScannerError = result.message || this.translate.instant('CHILD_DETAIL.QR_ACTION_FAILED');
+          }
+          this.cdr.detectChanges();
+        });
       },
       error: (err) => {
-        this.triggerHaptic(false);
-        this.qrScannerState = 'error';
-        this.qrScannerError = err.error?.message || this.translate.instant('CHILD_DETAIL.QR_ACTION_FAILED');
+        this.ngZone.run(() => {
+          this.triggerHaptic(false);
+          this.qrScannerState = 'error';
+          this.qrScannerError = err.error?.message || this.translate.instant('CHILD_DETAIL.QR_ACTION_FAILED');
+          this.cdr.detectChanges();
+        });
       }
     });
   }
