@@ -14,7 +14,6 @@
 <div *ngIf="isParent()" [class]="isParent() ? '' : ' mt-4'">
     <div *ngIf="child && !loading" class="parent-detailchild font-inter">
       <app-parent-child-header
-        [title]="'EDIT_CHILD.TITLE' | translate"
         [children]="[child]"
         [currentChildIndex]="0"
         [showDatePicker]="false"

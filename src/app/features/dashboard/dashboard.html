@@ -404,9 +404,12 @@
           </div>
         </div>
         <!-- Loaded state -->
-        <div [class]="myChildren.length > 1 ? 'child-status-card' : 'child-status-card one'" class="child-status-card" *ngIf="!loadingStates.children && myChildren.length > 0">
+        <div [class]="myChildren.length > 1 ? 'child-status-card children-carousel' : 'child-status-card one'"
+             class="child-status-card"
+             *ngIf="!loadingStates.children && myChildren.length > 0"
+             (touchstart)="onTouchStart($event)"
+             (touchend)="onTouchEnd($event)">
           <div  [class]="myChildren.length > 1 ? 'card-header-row' : 'one-child'">
-            <h2 class="section-title" *ngIf="myChildren.length > 1">{{ 'DASHBOARD.CHILD_STATUS' | translate }}</h2>
             <div class="slider-controls" *ngIf="myChildren.length > 1">
               <button class="slider-btn" (click)="prevChild()" [disabled]="selectedChildIndex === 0">
                 <i class="bi bi-chevron-left"></i>

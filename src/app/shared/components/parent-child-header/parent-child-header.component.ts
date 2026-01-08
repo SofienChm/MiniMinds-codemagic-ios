@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-parent-child-header',
@@ -35,7 +36,12 @@ export class ParentChildHeaderComponent {
   get child() {
     return this.children[this.currentChildIndex];
   }
-
+  back() {
+    this.location.back();
+  }
+  constructor(
+    private location: Location
+  ) {}
 
     calculateAge(dateOfBirth: string): { years: number, months: number } {
     const today = new Date();

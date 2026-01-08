@@ -1,5 +1,6 @@
 <div *ngIf="isParent">
   <app-parent-child-header
+    [class]="children.length > 1 ? 'header-with-carrousel' : ''"
     [children]="children"
     [currentChildIndex]="currentChildIndex"
     [selectedDate]="selectedDate"

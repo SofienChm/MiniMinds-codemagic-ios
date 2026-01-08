@@ -10,8 +10,6 @@ import { LanguageSelector } from '../../components/language-selector/language-se
 import { TranslateModule } from '@ngx-translate/core';
 import { MessagesService } from '../../../core/services/messages.service';
 import { PageTitleService } from '../../../core/services/page-title.service';
-import { HttpClient } from '@angular/common/http';
-import { ApiConfig } from '../../../core/config/api.config';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
@@ -33,8 +31,6 @@ export class Header implements OnInit, OnDestroy {
   isAdmin = false;
   isParent = false;
   pageTitle = '';
-  private messageCountIntervalId?: any;
-  private apiUrl = ApiConfig.ENDPOINTS.PARENTS;
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -43,8 +39,7 @@ export class Header implements OnInit, OnDestroy {
     private pushNotificationService: PushNotificationService,
     private messagesService: MessagesService,
     private pageTitleService: PageTitleService,
-    private router: Router,
-    private http: HttpClient
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -55,9 +50,6 @@ export class Header implements OnInit, OnDestroy {
     if (this.currentUser) {
       this.loadNotifications();
       this.loadMessagesUnreadCount();
-      if (this.isParent) {
-        this.loadParentProfilePicture();
-      }
       
       const token = localStorage.getItem('token');
       let userId = localStorage.getItem('userId');
@@ -261,19 +253,6 @@ export class Header implements OnInit, OnDestroy {
     // Close user menu if clicked outside
     if (this.showUserMenu && !target.closest('.dropdown')) {
       this.showUserMenu = false;
-    }
-  }
-
-  loadParentProfilePicture() {
-    const parentId = this.authService.getParentId();
-    if (parentId) {
-      this.http.get<any>(`${this.apiUrl}/${parentId}`).subscribe({
-        next: (parent) => {
-          if (parent.profilePicture) {
-            this.authService.updateProfilePicture(parent.profilePicture);
-          }
-        }
-      });
     }
   }
 

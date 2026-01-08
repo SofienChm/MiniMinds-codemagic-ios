@@ -895,6 +895,34 @@ export class Dashboard implements OnInit, OnDestroy {
     this.loadSelectedChildData();
   }
 
+  // Swipe functionality for child carousel
+  private touchStartX = 0;
+  private touchEndX = 0;
+  private readonly swipeThreshold = 50; // Minimum distance for swipe
+
+  onTouchStart(event: TouchEvent) {
+    this.touchStartX = event.changedTouches[0].screenX;
+  }
+
+  onTouchEnd(event: TouchEvent) {
+    this.touchEndX = event.changedTouches[0].screenX;
+    this.handleSwipe();
+  }
+
+  private handleSwipe() {
+    const swipeDistance = this.touchEndX - this.touchStartX;
+
+    if (Math.abs(swipeDistance) > this.swipeThreshold) {
+      if (swipeDistance > 0) {
+        // Swipe right - go to previous child
+        this.prevChild();
+      } else {
+        // Swipe left - go to next child
+        this.nextChild();
+      }
+    }
+  }
+
   getSelectedChild() {
     return this.myChildren[this.selectedChildIndex] || null;
   }
