@@ -396,11 +396,14 @@
         </div>
         <!-- Child Status Card with Slider -->
         <!-- Loading state for children -->
-        <div *ngIf="loadingStates.children" class="child-status-card skeleton-child-card">
-          <div class="skeleton-avatar"></div>
-          <div class="skeleton-text-group">
-            <div class="skeleton-text"></div>
-            <div class="skeleton-text short"></div>
+        <div *ngIf="loadingStates.children" class="child-status-card">
+          <div class="child-info d-flex align-items-center gap-3">
+            <app-skeleton [height]="80" [width]="'80px'" [circle]="true"></app-skeleton>
+            <div class="child-details flex-grow-1">
+              <app-skeleton [height]="24" [width]="'60%'" class="mb-2"></app-skeleton>
+              <app-skeleton [height]="16" [width]="'40%'" class="mb-2"></app-skeleton>
+              <app-skeleton [height]="14" [width]="'50%'"></app-skeleton>
+            </div>
           </div>
         </div>
         <!-- Loaded state -->
@@ -448,11 +451,13 @@
           <h2 class="section-title">{{ 'DASHBOARD.TODAY_STATS' | translate }} - {{ getSelectedChildName() }}</h2>
           <!-- Loading state -->
           <div *ngIf="loadingStates.activities" class="stats-grid">
-            <div class="stat-item skeleton-stat" *ngFor="let i of [1,2,3]">
-              <div class="skeleton-icon"></div>
-              <div class="skeleton-text-group">
-                <div class="skeleton-text"></div>
-                <div class="skeleton-text short"></div>
+            <div class="stat-item" *ngFor="let i of [1,2,3]">
+              <div class="stat-icon-wrapper">
+                <app-skeleton [height]="40" [width]="'40px'" [circle]="true"></app-skeleton>
+              </div>
+              <div class="stat-info flex-grow-1">
+                <app-skeleton [height]="16" [width]="'70%'" class="mb-1"></app-skeleton>
+                <app-skeleton [height]="14" [width]="'50%'"></app-skeleton>
               </div>
             </div>
           </div>
@@ -491,8 +496,8 @@
         <div class="activities-section">
           <h2 class="section-title">{{ 'DASHBOARD.ACTIVITIES' | translate }} - {{ getSelectedChildName() }}</h2>
           <!-- Loading state -->
-          <div *ngIf="loadingStates.activities" class="skeleton-timeline">
-            <div class="skeleton-timeline-item" *ngFor="let i of [1,2,3]"></div>
+          <div *ngIf="loadingStates.activities">
+            <app-skeleton-activity-timeline [count]="4"></app-skeleton-activity-timeline>
           </div>
           <!-- Loaded state -->
           <div *ngIf="!loadingStates.activities">
@@ -527,8 +532,17 @@
         <div class="upcoming-events">
           <h2 class="section-title">{{ 'DASHBOARD.UPCOMING_EVENTS' | translate }}</h2>
           <!-- Loading state -->
-          <div *ngIf="loadingStates.events" class="skeleton-events-parent">
-            <div class="skeleton-event-card" *ngFor="let i of [1,2]"></div>
+          <div *ngIf="loadingStates.events">
+            <div class="event-card mb-3" *ngFor="let i of [1,2]">
+              <div class="d-flex align-items-center gap-3">
+                <app-skeleton [height]="50" [width]="'50px'" [circle]="true"></app-skeleton>
+                <div class="flex-grow-1">
+                  <app-skeleton [height]="18" [width]="'70%'" class="mb-2"></app-skeleton>
+                  <app-skeleton [height]="14" [width]="'50%'" class="mb-1"></app-skeleton>
+                  <app-skeleton [height]="14" [width]="'40%'"></app-skeleton>
+                </div>
+              </div>
+            </div>
           </div>
           <!-- Loaded state -->
           <div *ngIf="!loadingStates.events">
@@ -557,7 +571,9 @@
           <h2 class="section-title">{{ 'DASHBOARD.RECENT_PHOTOS' | translate }} - {{ getSelectedChildName() }}</h2>
           <!-- Loading state -->
           <div *ngIf="loadingStates.photos" class="photos-grid">
-            <div class="photo-item skeleton-photo" *ngFor="let i of [1,2,3]"></div>
+            <div class="photo-item" *ngFor="let i of [1,2,3]">
+              <app-skeleton [height]="150" [width]="'100%'" borderRadius="12px"></app-skeleton>
+            </div>
           </div>
           <!-- Loaded state -->
           <div *ngIf="!loadingStates.photos">

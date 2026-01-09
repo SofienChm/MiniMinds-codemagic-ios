@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -14,15 +14,18 @@ import { AppCurrencyPipe } from '../../core/services/currency/currency.pipe';
 import { PageTitleService } from '../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
+import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
+import { PullToRefreshComponent } from '../../shared/components/pull-to-refresh/pull-to-refresh.component';
 
 @Component({
   selector: 'app-event',
   standalone: true,
-  imports: [CommonModule, FormsModule, TitlePage, ParentChildHeaderSimpleComponent, TranslateModule, NgSelectModule, AppCurrencyPipe],
+  imports: [CommonModule, FormsModule, TitlePage, ParentChildHeaderSimpleComponent, TranslateModule, NgSelectModule, AppCurrencyPipe, SkeletonComponent, PullToRefreshComponent],
   templateUrl: './event.html',
   styleUrl: './event.scss'
 })
 export class Event implements OnInit, OnDestroy {
+  @ViewChild('pullToRefresh') pullToRefresh!: PullToRefreshComponent;
   private langChangeSub?: Subscription;
   private eventsSub?: Subscription;
   events: EventModel[] = [];
@@ -347,5 +350,13 @@ export class Event implements OnInit, OnDestroy {
   // TrackBy function for ngFor performance optimization
   trackById(index: number, item: EventModel): number | undefined {
     return item.id;
+  }
+
+  // Pull-to-refresh handler
+  onRefresh(): void {
+    this.loadEvents();
+    setTimeout(() => {
+      this.pullToRefresh?.completeRefresh();
+    }, 500);
   }
 }

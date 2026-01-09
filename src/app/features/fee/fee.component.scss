@@ -164,3 +164,10 @@
       }
     }
 }
+
+@media (max-width: 768px) {
+  .parent-detailchild .body {
+    padding: 16px;
+    padding-bottom: 0 !important;
+  }
+}

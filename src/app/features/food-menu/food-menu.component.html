@@ -236,10 +236,12 @@
           </div>
           <h5 class="empty-title">{{ 'FOOD_MENU.NO_MENUS_FOUND' | translate }}</h5>
           <p class="empty-description">{{ 'FOOD_MENU.START_CREATING' | translate }}</p>
-          <button *ngIf="canEdit()" class="action-btn custom-btn-2 btn-add-global-2" (click)="router.navigate(['/food-menu/add'])">
-            <i class="bi bi-plus-circle-dotted me-2"></i>
-            {{ 'FOOD_MENU.CREATE_FIRST_MENU' | translate }}
-          </button>
+          <div class="d-flex justify-content-center ">
+            <button *ngIf="canEdit()" class="action-btn custom-btn-2 btn-add-global-2" (click)="router.navigate(['/food-menu/add'])">
+              <i class="bi bi-plus-circle-dotted me-2"></i>
+              {{ 'FOOD_MENU.CREATE_FIRST_MENU' | translate }}
+            </button>
+          </div>
         </div>
       </div>
     </div>

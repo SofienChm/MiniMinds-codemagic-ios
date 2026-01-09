@@ -66,10 +66,22 @@
       </div>
     </div>
 
-    <!-- Loading -->
-    <div *ngIf="loading" class="text-center py-5">
-      <div class="spinner-border text-primary" role="status"></div>
-      <p class="mt-2 text-muted">Loading menu...</p>
+    <!-- Loading Skeleton -->
+    <div *ngIf="loading">
+      <div class="menu-skeleton" *ngFor="let i of [1,2,3]" style="background: white; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+        <app-skeleton [height]="24" [width]="'40%'" class="mb-3"></app-skeleton>
+        <div class="row">
+          <div class="col-md-6 mb-3" *ngFor="let j of [1,2]">
+            <div class="d-flex gap-3">
+              <app-skeleton [height]="60" [width]="'60px'" borderRadius="8px"></app-skeleton>
+              <div class="flex-grow-1">
+                <app-skeleton [height]="16" [width]="'70%'" class="mb-2"></app-skeleton>
+                <app-skeleton [height]="14" [width]="'50%'"></app-skeleton>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- No Menu Selected -->

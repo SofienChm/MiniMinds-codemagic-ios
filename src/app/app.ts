@@ -74,11 +74,11 @@ export class App implements OnInit, OnDestroy {
   }
 
   private async initializeSwipeBack(): Promise<void> {
-    // Only enable on iOS native platform
-    if (Capacitor.getPlatform() === 'ios') {
+    // Enable on both iOS and Android native platforms
+    if (Capacitor.isNativePlatform()) {
       try {
         await CapacitorSwipeBackPlugin.enable();
-        console.log('iOS swipe back gesture enabled');
+        console.log(`${Capacitor.getPlatform()} swipe back gesture enabled`);
       } catch (error) {
         console.error('Failed to enable swipe back gesture:', error);
       }

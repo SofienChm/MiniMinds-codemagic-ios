@@ -13,11 +13,12 @@ import { Subject, takeUntil } from 'rxjs';
 import Swal from 'sweetalert2';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { PullToRefreshComponent } from '../../shared/components/pull-to-refresh/pull-to-refresh.component';
+import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 
 @Component({
   selector: 'app-messages',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgSelectModule, ParentChildHeaderSimpleComponent, TranslateModule, PullToRefreshComponent],
+  imports: [CommonModule, FormsModule, NgSelectModule, ParentChildHeaderSimpleComponent, TranslateModule, PullToRefreshComponent, SkeletonComponent],
   templateUrl: './messages.component.html',
   styleUrl: './messages.component.scss'
 })
@@ -36,6 +37,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
   statusFilter: 'all' | 'unread' | 'read' = 'all';
   showFilterMenu = false;
   replyText = '';
+  loading = true;
 
   composeForm = {
     recipientType: 'individual',
@@ -143,15 +145,27 @@ export class MessagesComponent implements OnInit, OnDestroy {
 
   loadInbox(): void {
     this.messagesService.getInbox().subscribe({
-      next: (messages) => this.inbox = messages,
-      error: (err) => console.error('Error loading inbox:', err)
+      next: (messages) => {
+        this.inbox = messages;
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error loading inbox:', err);
+        this.loading = false;
+      }
     });
   }
 
   loadSent(): void {
     this.messagesService.getSent().subscribe({
-      next: (messages) => this.sent = messages,
-      error: (err) => console.error('Error loading sent:', err)
+      next: (messages) => {
+        this.sent = messages;
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error loading sent:', err);
+        this.loading = false;
+      }
     });
   }
 

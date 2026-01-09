@@ -10,11 +10,12 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { PageTitleService } from '../../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
+import { SkeletonComponent } from '../../../shared/components/skeleton/skeleton.component';
 
 @Component({
   selector: 'app-parent-menu-view',
   standalone: true,
-  imports: [CommonModule, FormsModule, ParentChildHeaderSimpleComponent, TranslateModule],
+  imports: [CommonModule, FormsModule, ParentChildHeaderSimpleComponent, TranslateModule, SkeletonComponent],
   templateUrl: './parent-menu-view.component.html',
   styleUrl: './parent-menu-view.component.scss'
 })

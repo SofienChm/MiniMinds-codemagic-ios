@@ -26,14 +26,18 @@
 <app-pull-to-refresh #pullToRefresh (refresh)="onRefresh()" *ngIf="isParent">
   <div class="container-fluid">
     <div class="activities-container">
-      <h2 *ngIf="children.length > 1">{{ 'DAILY_REPORT.TODAYS_ACTIVITIES' | translate }} - {{ getSelectedChildName() }}
-        <span *ngIf="loading" class="spinner-border spinner-border-sm ms-2" role="status"></span>
-      </h2>
+      <h2 *ngIf="children.length > 1">{{ 'DAILY_REPORT.TODAYS_ACTIVITIES' | translate }} - {{ getSelectedChildName() }}</h2>
+
+      <!-- Loading Skeleton -->
+      <div *ngIf="loading" class="mb-5">
+        <app-skeleton-activity-timeline [count]="6"></app-skeleton-activity-timeline>
+      </div>
+
       <div *ngIf="!loading && activities.length === 0" class="text-center py-4 text-muted">
         <i class="bi bi-calendar-x fs-1 mb-2"></i>
         <p>{{ 'DAILY_REPORT.NO_ACTIVITIES_TODAY' | translate }}</p>
       </div>
-      <div *ngIf="activities.length > 0" class="mb-5 container-fluid" [style.opacity]="loading ? '0.5' : '1'">
+      <div *ngIf="!loading && activities.length > 0" class="mb-5 container-fluid">
         <div class="activity-row row" *ngFor="let activityGroup of getActivityRows(); let i = index">
           <div class="activity-card col-6"
               *ngFor="let activity of activityGroup"

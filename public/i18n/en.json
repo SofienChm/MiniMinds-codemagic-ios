@@ -493,7 +493,8 @@
     "QR_STATUS_LOADING": "Loading status...",
     "QR_STATUS_CHECKED_IN": "Checked in at {{time}}",
     "QR_STATUS_CHECKED_OUT": "Checked out at {{time}}",
-    "QR_STATUS_NOT_CHECKED_IN": "Not checked in today"
+    "QR_STATUS_NOT_CHECKED_IN": "Not checked in today",
+    "TODAY_STATS": "Today's Status"
   },
   "ADD_EVENT": {
     "TITLE": "Add Event",

@@ -906,7 +906,8 @@ input.form-control {
 ///parent-detailchild
 .parent-detailchild{
   .header-info{
-    background: linear-gradient(135deg, #B8E6F0 0%, #D4F1E8 100%);
+    // background: linear-gradient(135deg, #B8E6F0 0%, #D4F1E8 100%);
+    background: linear-gradient(135deg, #90b9fc 0%, #95f2d7 100%);
     padding: 35px 20px 16px;
     padding-top: calc(env(safe-area-inset-top, 0px) + 16px); // Safe area support for iOS
     border-radius: 0 0 32px 32px;
@@ -962,16 +963,14 @@ input.form-control {
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
       transform: translateY(85px);
       margin-top: -90px;
+      .info-title{
+        &.status{
+          font-weight: 600;
+        }
+      }
       .badge{
-        color: green;
         position: absolute;
-        right: 20px;
-        &.badge-active{
-        color: #1ABE17;
-        }
-        &.badge-inactive{
-          color: #DC3545;
-        }
+        right: 10px;
       }
     }
   }

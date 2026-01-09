@@ -7,11 +7,12 @@ import { AuthService } from '../../core/services/auth';
 import { ParentChildHeaderSimpleComponent } from '../../shared/components/parent-child-header-simple/parent-child-header-simple.component';
 import { TitlePage } from '../../shared/layouts/title-page/title-page';
 import { PullToRefreshComponent } from '../../shared/components/pull-to-refresh/pull-to-refresh.component';
+import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 
 @Component({
   selector: 'app-notifications',
   standalone: true,
-  imports: [CommonModule, ParentChildHeaderSimpleComponent, TitlePage, PullToRefreshComponent],
+  imports: [CommonModule, ParentChildHeaderSimpleComponent, TitlePage, PullToRefreshComponent, SkeletonComponent],
   templateUrl: './notifications.component.html',
   styleUrl: './notifications.component.scss'
 })
@@ -86,6 +87,10 @@ export class NotificationsComponent implements OnInit {
 
   get hasMoreNotifications(): boolean {
     return this.displayedNotifications.length < this.filteredNotifications.length;
+  }
+
+  get hasUnreadNotifications(): boolean {
+    return this.filteredNotifications.some(n => !n.isRead);
   }
 
   setActiveTab(tab: 'all' | 'unread'): void {

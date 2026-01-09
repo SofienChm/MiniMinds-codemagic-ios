@@ -1,28 +1,107 @@
 <div *ngIf="isParent">
+  <!-- Loading Skeleton for Parent View -->
+  <div *ngIf="loading" class="parent-detailchild font-inter">
+    <!-- Header Skeleton -->
+    <div class="dashboard-header" style="background: linear-gradient(135deg, #B8E6F0 0%, #D4F1E8 100%); padding: 35px 20px 16px; padding-top: calc(env(safe-area-inset-top, 0px) + 16px); border-radius: 0 0 32px 32px; margin-bottom: 80px;">
+      <div class="title-icons d-flex justify-content-between mb-4">
+        <app-skeleton [height]="24" [width]="'150px'"></app-skeleton>
+        <app-skeleton [height]="32" [width]="'32px'" [circle]="true"></app-skeleton>
+      </div>
+
+      <!-- Child info card skeleton -->
+      <div style="background: white; border-radius: 14px; padding: 20px; margin: 20px 20px 24px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); transform: translateY(85px); margin-top: -90px;">
+        <div class="d-flex flex-column align-items-center text-center mb-3">
+          <app-skeleton [height]="112" [width]="'112px'" [circle]="true" class="mb-3"></app-skeleton>
+          <app-skeleton [height]="28" [width]="'60%'" class="mb-2"></app-skeleton>
+          <app-skeleton [height]="16" [width]="'40%'" class="mb-2"></app-skeleton>
+          <app-skeleton [height]="14" [width]="'50%'"></app-skeleton>
+        </div>
+        <div class="mb-2">
+          <app-skeleton [height]="14" [width]="'30%'" class="mb-1"></app-skeleton>
+          <app-skeleton [height]="16" [width]="'40%'"></app-skeleton>
+        </div>
+      </div>
+    </div>
+
+    <!-- Body Content Skeleton -->
+    <div class="body container-fluid">
+      <!-- QR Button Skeleton -->
+      <div class="qr-scan-card card mb-3">
+        <app-skeleton [height]="56" [width]="'100%'" borderRadius="12px"></app-skeleton>
+      </div>
+
+      <!-- Info Cards Skeleton -->
+      <div class="info-card card-mobile card mb-3">
+        <div class="card-title mb-3">
+          <app-skeleton [height]="40" [width]="'40px'" [circle]="true" class="d-inline-block me-2"></app-skeleton>
+          <app-skeleton [height]="24" [width]="'150px'" class="d-inline-block"></app-skeleton>
+        </div>
+        <div class="info-row mb-2" *ngFor="let i of [1,2,3,4]">
+          <app-skeleton [height]="16" [width]="'30%'" class="mb-1"></app-skeleton>
+          <app-skeleton [height]="16" [width]="'50%'"></app-skeleton>
+        </div>
+      </div>
+
+      <div class="info-card card-mobile card mb-3">
+        <div class="card-title mb-3">
+          <app-skeleton [height]="40" [width]="'40px'" [circle]="true" class="d-inline-block me-2"></app-skeleton>
+          <app-skeleton [height]="24" [width]="'150px'" class="d-inline-block"></app-skeleton>
+        </div>
+        <div class="info-row mb-2" *ngFor="let i of [1,2]">
+          <app-skeleton [height]="16" [width]="'30%'" class="mb-1"></app-skeleton>
+          <app-skeleton [height]="16" [width]="'50%'"></app-skeleton>
+        </div>
+      </div>
+
+      <div class="info-card card-mobile card mb-3">
+        <div class="card-title mb-3">
+          <app-skeleton [height]="40" [width]="'40px'" [circle]="true" class="d-inline-block me-2"></app-skeleton>
+          <app-skeleton [height]="24" [width]="'150px'" class="d-inline-block"></app-skeleton>
+        </div>
+        <div class="info-row mb-2" *ngFor="let i of [1,2]">
+          <app-skeleton [height]="16" [width]="'30%'" class="mb-1"></app-skeleton>
+          <app-skeleton [height]="16" [width]="'50%'"></app-skeleton>
+        </div>
+      </div>
+
+      <!-- Parent Info Skeleton -->
+      <div class="other-information">
+        <app-skeleton [height]="24" [width]="'150px'" class="mb-3"></app-skeleton>
+        <div class="profile-info-card_parent mb-3" style="background: #fff; border-radius: 10px; box-shadow: 0 1px 7px rgba(50, 50, 93, 0.1); padding: 15px 12px;">
+          <div class="d-flex gap-3 align-items-center">
+            <app-skeleton [height]="48" [width]="'48px'" [circle]="true"></app-skeleton>
+            <div class="flex-grow-1">
+              <app-skeleton [height]="18" [width]="'60%'" class="mb-2"></app-skeleton>
+              <app-skeleton [height]="14" [width]="'40%'"></app-skeleton>
+            </div>
+            <app-skeleton [height]="20" [width]="'20px'"></app-skeleton>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loaded Content -->
   <div *ngIf="child && !loading" class="parent-detailchild font-inter">
     <app-parent-child-header  [children]="[child]" [currentChildIndex]="0" [showDatePicker]="false"
       [showSettings]="false" [showEdit]="true" [showImages]="true" [hasCustomContent]="true" (onBack)="back()"
       (onEdit)="editChild()">
 
-      <div headerCard>
-        <span class="badge d-inline-flex align-items-center mb-2"
-          [ngClass]="{'badge-active': isActive, 'badge-inactive': !isActive}">
-          <i class="ti ti-circle-filled fs-5 me-1"></i>{{ isActive ? ('CHILD_DETAIL.ACTIVE' | translate) : ('CHILD_DETAIL.INACTIVE' | translate) }}
-        </span>
+      <div headerCard class="d-flex gap-3">
         <div>
-          <div class="info-title">{{ 'CHILD_DETAIL.ENROLLMENT_DATE' | translate }}</div>
-          <div class="info-desc">{{ child.enrollmentDate | date:'yy/MM/dd' }}</div>
+          <span (click)="openQrScannerModal()" class="badge scan-qr d-inline-flex align-items-center mb-2">
+            <i class="bi bi-qr-code-scan"></i>
+          </span>
+          <div>
+            <div class="info-title status">{{ 'CHILD_DETAIL.TODAY_STATS' | translate }}</div>
+            <div class="info-desc" *ngIf="attendanceStatus === 'CHECKED_IN'">Checked In <span *ngIf="attendanceTime">at {{ attendanceTime }}</span></div>
+            <div class="info-desc" *ngIf="attendanceStatus === 'CHECKED_OUT'">Checked Out <span *ngIf="attendanceTime">at {{ attendanceTime }}</span></div>
+            <div class="info-desc" *ngIf="attendanceStatus === 'NOT_CHECKED_IN'">Not Checked In</div>
+          </div>
         </div>
       </div>
     </app-parent-child-header>
     <div class="body container-fluid">
-      <!-- QR Scan Button for Parent View -->
-      <div class="qr-scan-card card mb-3">
-        <button (click)="openQrScannerModal()" class="btn btn-qr-scan-large w-100">
-          <i class="bi bi-qr-code-scan me-2"></i>{{ 'CHILD_DETAIL.SCAN_QR' | translate }}
-        </button>
-      </div>
-
       <div class="info-card card-mobile card mb-3">
         <div class="card-title">
           <div class="icon-box">

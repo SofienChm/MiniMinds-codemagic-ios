@@ -21,10 +21,24 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { CalendarComponent } from '../../shared/components/calendar/calendar.component';
 import { DashboardService, AdminDashboardData, ParentDashboardData } from '../../core/services/dashboard.service';
 import type { ChartConfiguration } from 'chart.js';
+import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
+import { SkeletonStatCardComponent } from '../../shared/components/skeleton/skeleton-stat-card.component';
+import { SkeletonActivityTimelineComponent } from '../../shared/components/skeleton/skeleton-activity-timeline.component';
+import { SkeletonChildCardComponent } from '../../shared/components/skeleton/skeleton-child-card.component';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, RouterModule, BaseChartDirective, TranslateModule, CalendarComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    BaseChartDirective,
+    TranslateModule,
+    CalendarComponent,
+    SkeletonComponent,
+    SkeletonStatCardComponent,
+    SkeletonActivityTimelineComponent,
+    SkeletonChildCardComponent
+  ],
   standalone: true,
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'

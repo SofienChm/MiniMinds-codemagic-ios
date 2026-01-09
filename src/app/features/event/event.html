@@ -3,11 +3,29 @@
     [title]="'EVENTS.TITLE' | translate"
   >
   </app-parent-child-header-simple>
+  <app-pull-to-refresh #pullToRefresh (refresh)="onRefresh()" *ngIf="isParent && !loading">
+
   <div class="body container-fluid">
       <div class="main-information">
-        <div *ngIf="loading" class="loading-state">
-          <div class="spinner"></div>
-          <p>{{ 'EVENTS.LOADING' | translate }}</p>
+        <!-- Loading Skeleton -->
+        <div *ngIf="loading" class="events-list">
+          <div *ngFor="let i of [1,2,3,4,5]" class="events-card mb-3" style="background: white; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+            <div class="event-upper d-flex gap-3 mb-3">
+              <app-skeleton [height]="100" [width]="'100px'" borderRadius="12px"></app-skeleton>
+              <div class="flex-grow-1">
+                <div class="d-flex justify-content-between mb-2">
+                  <app-skeleton [height]="20" [width]="'60%'"></app-skeleton>
+                  <app-skeleton [height]="24" [width]="'70px'" borderRadius="12px"></app-skeleton>
+                </div>
+                <app-skeleton [height]="16" [width]="'40%'" class="mb-2"></app-skeleton>
+                <app-skeleton [height]="14" [width]="'90%'" class="mb-1"></app-skeleton>
+                <app-skeleton [height]="14" [width]="'70%'"></app-skeleton>
+              </div>
+            </div>
+            <div class="event-bottom_content">
+              <app-skeleton [height]="24" [width]="'80px'" borderRadius="12px"></app-skeleton>
+            </div>
+          </div>
         </div>
 
         <div *ngIf="!loading && events.length === 0" class="empty-state">
@@ -53,6 +71,7 @@
         </div>
       </div>
     </div>
+  </app-pull-to-refresh>
 </div>
 <div class="container-fluid mt-4" *ngIf="!isParent">
   <app-title-page

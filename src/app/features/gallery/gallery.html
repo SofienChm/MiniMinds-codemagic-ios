@@ -60,11 +60,9 @@
     </div>
   </div>
 
-  <!-- Loading -->
-  <div *ngIf="loading" class="text-center py-5">
-    <div class="spinner-border" role="status">
-      <span class="visually-hidden">Loading...</span>
-    </div>
+  <!-- Loading Skeleton -->
+  <div *ngIf="loading">
+    <app-skeleton-photo-grid [count]="pageSize"></app-skeleton-photo-grid>
   </div>
 
   <!-- Empty State -->

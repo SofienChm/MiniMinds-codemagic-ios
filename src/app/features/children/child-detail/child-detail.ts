@@ -22,10 +22,18 @@ import { QrScannerService } from '../../../core/services/qr-scanner.service';
 import { Subscription } from 'rxjs';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import { Capacitor } from '@capacitor/core';
+import { SkeletonComponent } from '../../../shared/components/skeleton/skeleton.component';
 
 @Component({
   selector: 'app-child-detail',
-  imports: [CommonModule, TitlePage, FormsModule, ParentChildHeaderComponent, TranslateModule],
+  imports: [
+    CommonModule,
+    TitlePage,
+    FormsModule,
+    ParentChildHeaderComponent,
+    TranslateModule,
+    SkeletonComponent
+  ],
   standalone: true,
   templateUrl: './child-detail.html',
   styleUrl: './child-detail.scss'
@@ -140,6 +148,9 @@ export class ChildDetail implements OnInit, OnDestroy {
         console.log('ChildParents:', child.childParents);
         this.currentParentIndex = 0;
         this.loading = false;
+
+        // Load today's attendance status
+        this.loadChildAttendanceStatus();
       },
       error: (error) => {
         console.error('Error loading child:', error);
@@ -147,6 +158,37 @@ export class ChildDetail implements OnInit, OnDestroy {
         this.router.navigate(['/children']);
       }
     });
+  }
+
+  get attendanceStatus(): string {
+    if (!this.childAttendanceStatus) {
+      return 'NOT_CHECKED_IN';
+    }
+    if (this.childAttendanceStatus.isCheckedOut) {
+      return 'CHECKED_OUT';
+    }
+    if (this.childAttendanceStatus.isCheckedIn) {
+      return 'CHECKED_IN';
+    }
+    return 'NOT_CHECKED_IN';
+  }
+
+
+  get attendanceTime(): string {
+    if (!this.childAttendanceStatus) return '';
+    if (this.childAttendanceStatus.checkOutTime) {
+      return new Date(this.childAttendanceStatus.checkOutTime).toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+    if (this.childAttendanceStatus.checkInTime) {
+      return new Date(this.childAttendanceStatus.checkInTime).toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+    return '';
   }
 
   getAge(dateOfBirth: string): number {

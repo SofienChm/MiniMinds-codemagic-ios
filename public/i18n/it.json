@@ -394,7 +394,8 @@
     "PARENT_REMOVE_ERROR": "Impossibile rimuovere il genitore",
     "BIRTHDAY": "Compleanno",
     "NA": "N/D",
-    "CHILD_PROFILE": "Profilo del bambino"
+    "CHILD_PROFILE": "Profilo del bambino",
+    "TODAY_STATS": "stato attuale"
   },
   "ADD_EVENT": {
     "TITLE": "Aggiungi Evento",

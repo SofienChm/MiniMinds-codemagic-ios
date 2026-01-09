@@ -44,9 +44,9 @@
         <ng-content select="[headerCard]"></ng-content>
         <div *ngIf="showDatePicker && !hasCustomContent" class="row justify-content-around">
           <div class="d-flex">
-            <label class="form-label col-form-label col-5">Select Date</label>
-            <div class="col-7">
-              <input type="date" class="form-control" [ngModel]="selectedDate" (ngModelChange)="onDateChange.emit($event)">
+            <label class="form-label col-form-label col-5" (click)="dateInput.showPicker()">Select Date</label>
+            <div class="col-7" style="position: relative;">
+              <input #dateInput type="date" class="form-control" [ngModel]="selectedDate" (ngModelChange)="onDateChange.emit($event)" style="cursor: pointer;">
             </div>
           </div>
         </div>

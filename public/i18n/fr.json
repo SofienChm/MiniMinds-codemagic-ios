@@ -398,7 +398,8 @@
     "PARENT_REMOVE_ERROR": "Échec du retrait du parent",
     "BIRTHDAY": "Anniversaire",
     "NA": "N/D",
-    "CHILD_PROFILE": "Profil de l'enfant"
+    "CHILD_PROFILE": "Profil de l'enfant",
+    "TODAY_STATS": "Status du jour"
   },
   "ADD_EVENT": {
     "TITLE": "Ajouter un Événement",

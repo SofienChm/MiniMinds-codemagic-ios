@@ -230,6 +230,22 @@ img {
 ::ng-deep {
   .header-info_card{
     margin-top: -70px !important;
+    .scan-qr {
+      i {
+        font-size: 36px;
+        color: var(--primary-color);
+      }
+    }
+
+    // Attendance status badge styles
+    .status-checked-in {
+      background-color: #D4EDDA !important;
+      color: #155724 !important;
+      i {
+        font-size: 36px;
+        color: #28A745;
+      }
+    }
   }
   .header-info {
     margin-bottom: 65px !important;

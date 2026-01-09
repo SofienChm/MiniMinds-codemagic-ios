@@ -16,11 +16,12 @@ import { AuthService } from '../../../core/services/auth';
 import { Location } from '@angular/common';
 import { ParentChildHeaderComponent } from '../../../shared/components/parent-child-header/parent-child-header.component';
 import { PageTitleService } from '../../../core/services/page-title.service';
+import { SkeletonComponent } from '../../../shared/components/skeleton/skeleton.component';
 
 @Component({
   selector: 'app-parent-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, TitlePage, ParentChildHeaderComponent, TranslateModule],
+  imports: [CommonModule, FormsModule, TitlePage, ParentChildHeaderComponent, TranslateModule, SkeletonComponent],
   templateUrl: './parent-detail.html',
   styleUrls: ['./parent-detail.scss']
 })

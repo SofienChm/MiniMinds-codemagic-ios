@@ -17,6 +17,7 @@ import { ParentChildHeaderSimpleComponent } from '../../shared/components/parent
 import { Capacitor } from '@capacitor/core';
 import { PullToRefreshComponent } from '../../shared/components/pull-to-refresh/pull-to-refresh.component';
 import { ImageDownloadService } from '../../core/services/image-download.service';
+import { SkeletonPhotoGridComponent } from '../../shared/components/skeleton/skeleton-photo-grid.component';
 
 // Image compression settings - reduces storage by ~70%
 const IMAGE_MAX_WIDTH = 1920;
@@ -26,7 +27,15 @@ const IMAGE_QUALITY = 0.8; // 80% quality - good balance between size and qualit
 @Component({
   selector: 'app-gallery',
   standalone: true,
-  imports: [CommonModule, FormsModule, TitlePage, TranslateModule, ParentChildHeaderSimpleComponent, PullToRefreshComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    TitlePage,
+    TranslateModule,
+    ParentChildHeaderSimpleComponent,
+    PullToRefreshComponent,
+    SkeletonPhotoGridComponent
+  ],
   templateUrl: './gallery.html',
   styleUrl: './gallery.scss'
 })

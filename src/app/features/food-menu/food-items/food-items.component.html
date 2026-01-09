@@ -125,11 +125,20 @@
     </div>
 
     <div *ngIf="filteredItems.length === 0" class="col-12 text-center py-5">
-      <i class="bi bi-egg-fried display-4 text-muted"></i>
-      <p class="mt-3 text-muted">No food items found</p>
-      <button class="btn btn-primary" (click)="openAddForm()">
-        Add Your First Food Item
-      </button>
+      <div class="card card-general empty-state-card">
+        <div class="card-body text-center py-5">
+          <div class="empty-icon-wrapper mb-3">
+            <i class="bi bi-egg-fried"></i>
+          </div>
+          <h5 class="empty-title">No food items found</h5>
+          <div class="d-flex justify-content-center ">
+            <button class="action-btn custom-btn-2 btn-add-global-2" (click)="openAddForm()">
+              <i class="bi bi-plus-circle-dotted me-2"></i>
+             Add Your First Food Item
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
