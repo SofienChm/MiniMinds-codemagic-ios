@@ -211,9 +211,9 @@ export class ParentDetail implements OnInit, OnDestroy {
       denyButtonColor: '#6c757d',
       cancelButtonColor: '#d33',
       customClass: {
-        confirmButton: 'btn btn-primary me-2',
-        denyButton: 'btn btn-secondary me-2',
-        cancelButton: 'btn btn-outline-secondary btn-cancel-global'
+        confirmButton: 'custom-btn-2 btn-add-global-2 me-2',
+        denyButton: 'custom-btn-2 btn-edit-global-2 me-2',
+        cancelButton: 'custom-btn-2 btn-cancel-2'
       },
       buttonsStyling: false
     }).then((result) => {

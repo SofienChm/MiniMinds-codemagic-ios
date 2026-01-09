@@ -110,13 +110,13 @@
               </div>
               <div class="col-md-12" *ngIf="isParent">
                 <div class="text-end">
-                  <button class="btn btn-secondary me-2" (click)="goBack()">
+                  <button class="btn btn-secondary back me-2" (click)="goBack()">
                     <i class="bi bi-arrow-left me-2"></i>{{ 'FEES_PAGE.BACK' | translate }}
                   </button>
-                  <button *ngIf="fee.status === 'pending'" class="btn btn-success me-2" (click)="payOnline()" [disabled]="loading">
+                  <button *ngIf="fee.status === 'pending'" class="btn btn-success pay me-2" (click)="payOnline()" [disabled]="loading">
                     <i class="bi bi-credit-card me-2"></i>{{ 'FEES_PAGE.PAY_ONLINE' | translate }}
                   </button>
-                  <button class="btn btn-info me-2" (click)="print()">
+                  <button class="btn btn-info print me-2" (click)="print()">
                     <i class="bi bi-printer me-2"></i>{{ 'FEES_PAGE.PRINT' | translate }}
                   </button>
                 </div>

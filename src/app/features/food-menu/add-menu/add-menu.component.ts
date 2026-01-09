@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FoodMenuService } from '../food-menu.service';
 import { FoodItem, Menu, CreateMenuItemDto, MEAL_TYPES, FOOD_CATEGORIES } from '../food-menu.interface';
-import { TitlePage, Breadcrumb } from '../../../shared/layouts/title-page/title-page';
+import { TitlePage, Breadcrumb, TitleAction } from '../../../shared/layouts/title-page/title-page';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { PageTitleService } from '../../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
@@ -41,6 +41,7 @@ export class AddMenuComponent implements OnInit, OnDestroy {
   categories = FOOD_CATEGORIES;
 
   breadcrumbs: Breadcrumb[] = [];
+  titleActions: TitleAction[] = [];
   private langChangeSub?: Subscription;
 
   constructor(
@@ -54,6 +55,7 @@ export class AddMenuComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.pageTitleService.setTitle(this.translate.instant('FOOD_MENU.ADD_MENU'));
     this.setupBreadcrumbs();
+    this.setupTitleActions();
 
     // Check for date query param
     this.route.queryParams.subscribe(params => {
@@ -67,6 +69,7 @@ export class AddMenuComponent implements OnInit, OnDestroy {
     this.langChangeSub = this.translate.onLangChange.subscribe(() => {
       this.pageTitleService.setTitle(this.translate.instant('FOOD_MENU.ADD_MENU'));
       this.setupBreadcrumbs();
+      this.setupTitleActions();
     });
   }
 
@@ -79,6 +82,17 @@ export class AddMenuComponent implements OnInit, OnDestroy {
       { label: this.translate.instant('BREADCRUMBS.DASHBOARD'), url: '/dashboard' },
       { label: this.translate.instant('FOOD_MENU.TITLE'), url: '/food-menu' },
       { label: this.translate.instant('FOOD_MENU.ADD_MENU') }
+    ];
+  }
+
+  private setupTitleActions(): void {
+    this.titleActions = [
+      {
+        label: this.translate.instant('COMMON.BACK'),
+        class: 'btn-cancel-2',
+        icon: 'bi bi-arrow-left',
+        action: () => this.router.navigate(['/food-menu'])
+      }
     ];
   }
 

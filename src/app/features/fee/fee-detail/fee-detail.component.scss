@@ -81,3 +81,21 @@
 .badge.bg-primary{
   background-color :var(--secondary-color) !important;
 }
+
+@media screen and (max-width: 767px) {
+  .print {
+    background: var(--secondary-color) !important;
+    color: white !important;
+    border: none !important;
+  }
+  .pay {
+    background: var(--gradient-primary) !important;
+    color: #fff !important;
+    border: none !important;
+  }
+  .back {
+    background: #e9edf4 !important;
+    color: black !important;
+    border: none !important;
+  }
+}

@@ -74,6 +74,12 @@ export class FoodItemsComponent implements OnInit, OnDestroy {
   private setupTitleActions(): void {
     this.titleActions = [
       {
+        label: this.translate.instant('COMMON.BACK'),
+        class: 'btn-cancel-2 me-2',
+        icon: 'bi bi-arrow-left',
+        action: () => this.router.navigate(['/food-menu'])
+      },
+      {
         label: this.translate.instant('FOOD_MENU.ADD_FOOD_ITEM'),
         class: 'btn-add-global-2',
         action: () => this.openAddForm()
