@@ -1582,7 +1582,8 @@
     "MALE": "Masculin",
     "FEMALE": "Féminin",
     "ACTIVATE": "Activer",
-    "DEACTIVATE": "Désactiver"
+    "DEACTIVATE": "Désactiver",
+    "SUCCESS": "Succès"
   },
   "EDUCATORS": {
     "TITLE": "Gestion des Éducateurs",

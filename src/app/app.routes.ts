@@ -52,7 +52,6 @@ export const routes: Routes = [
       {
         path: 'parents/detail/:id',
         loadComponent: () => import('./features/parent/parent-detail/parent-detail').then(m => m.ParentDetail),
-        canActivate: [ADMIN_TEACHER]
       },
       // Children routes - Admin & Teacher only
       {

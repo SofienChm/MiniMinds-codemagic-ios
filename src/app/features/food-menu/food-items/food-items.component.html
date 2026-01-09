@@ -180,6 +180,27 @@
                   placeholder="Optional description..."></textarea>
       </div>
 
+      <!-- Image Upload -->
+      <div class="mb-3">
+        <label class="form-label">{{ 'FOOD_MENU.FOOD_IMAGE' | translate }}</label>
+        <div class="file-upload-area">
+          <input type="file" #fileInput id="foodImage" class="file-input"
+                 (change)="onImageSelect($event)"
+                 accept="image/jpeg,image/png,image/gif,image/webp">
+          <label for="foodImage" class="file-upload-label">
+            <div *ngIf="!imagePreview" class="upload-placeholder">
+              <i class="bi bi-cloud-upload"></i>
+              <span>{{ 'GLOBAL.UPLOAD_PHOTO' | translate }}</span>
+            </div>
+            <img *ngIf="imagePreview" [src]="imagePreview" class="preview-image" alt="Food preview">
+          </label>
+          <button *ngIf="imagePreview" type="button" class="btn-remove-image" (click)="removeImage()">
+            <i class="bi bi-x-circle"></i>
+            {{ 'GLOBAL.REMOVE_PHOTO' | translate }}
+          </button>
+        </div>
+      </div>
+
       <!-- Nutritional Information - COMMENTED OUT
       <h6 class="mt-4 mb-3">Nutritional Information (per serving)</h6>
       <div class="row">

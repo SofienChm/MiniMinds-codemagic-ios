@@ -136,3 +136,14 @@
     margin-bottom: 20px !important;
   }
 }
+
+.preferences {
+  background: var(--primary-color);
+  color: #fff;
+
+  &:disabled {
+    background: #a0c4ff;
+    border-color: #a0c4ff;
+    color: #e0e0e0;
+  }
+}

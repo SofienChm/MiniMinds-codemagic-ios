@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TitlePage } from '../../shared/layouts/title-page/title-page';
 import { EventService } from '../event/event.service';
@@ -15,14 +15,16 @@ import { Router } from '@angular/router';
 import { ParentChildHeaderSimpleComponent } from '../../shared/components/parent-child-header-simple/parent-child-header-simple.component';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { PageTitleService } from '../../core/services/page-title.service';
+import { PullToRefreshComponent } from '../../shared/components/pull-to-refresh/pull-to-refresh.component';
 
 @Component({
   selector: 'app-calendar-page',
-  imports: [CommonModule, TitlePage, FullCalendarModule, ParentChildHeaderSimpleComponent, TranslateModule],
+  imports: [CommonModule, TitlePage, FullCalendarModule, ParentChildHeaderSimpleComponent, TranslateModule, PullToRefreshComponent],
   templateUrl: './calendar.component.html',
   styleUrls: ['./calendar.component.scss']
 })
 export class CalendarPageComponent implements OnInit {
+  @ViewChild('pullToRefresh') pullToRefresh?: PullToRefreshComponent;
   selectedDate: Date = new Date();
   events: EventModel[] = [];
   holidays: Holiday[] = [];
@@ -190,6 +192,16 @@ export class CalendarPageComponent implements OnInit {
 
   goToEventDetail(event: EventModel) {
     this.router.navigate(['/events/detail', event.id]);
+  }
+
+  onRefresh() {
+    this.loadEvents();
+    this.loadHolidays();
+
+    // Complete the refresh after a short delay to ensure data is loaded
+    setTimeout(() => {
+      this.pullToRefresh?.completeRefresh();
+    }, 1000);
   }
 
 }

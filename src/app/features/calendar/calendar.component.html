@@ -4,56 +4,57 @@
         [title]="'CALENDAR_PAGE.CALENDAR' | translate"
       >
       </app-parent-child-header-simple>
-
-      <div class="body container-fluid">
-        <div class="main-information">
-          <full-calendar [options]="calendarOptions"></full-calendar>
+      <app-pull-to-refresh #pullToRefresh (refresh)="onRefresh()" *ngIf="isParent">
+        <div class="body container-fluid">
           <div class="main-information">
-            <h5 class="title-body">
-              {{ 'CALENDAR_PAGE.UPCOMING_EVENTS_HOLIDAYS' | translate }}
-            </h5>
-              
-            <div class="profile-info-grid" *ngIf="getUpcomingEvents().length > 0">
-              <div *ngFor="let item of getUpcomingEvents()" class="event-item mb-3"  style="cursor: pointer;">
-                <div class="d-flex align-items-center p-3 bg-light rounded event-card">
-                  <div [ngClass]="{'isholiday': isHoliday(item)}" class="event-icon me-2">
-                    <div class="icon-circle d-flex flex-column align-items-center justify-content-center">
-                      <div class="day">{{ getItemDateTime(item) | date:'d' }}</div>
-                      <div class="month">{{ getItemDateTime(item) | date:'MMM' }}</div>
+            <full-calendar [options]="calendarOptions"></full-calendar>
+            <div class="main-information">
+              <h5 class="title-body">
+                {{ 'CALENDAR_PAGE.UPCOMING_EVENTS_HOLIDAYS' | translate }}
+              </h5>
+                
+              <div class="profile-info-grid" *ngIf="getUpcomingEvents().length > 0">
+                <div *ngFor="let item of getUpcomingEvents()" class="event-item mb-3"  style="cursor: pointer;">
+                  <div class="d-flex align-items-center p-3 bg-light rounded event-card">
+                    <div [ngClass]="{'isholiday': isHoliday(item)}" class="event-icon me-2">
+                      <div class="icon-circle d-flex flex-column align-items-center justify-content-center">
+                        <div class="day">{{ getItemDateTime(item) | date:'d' }}</div>
+                        <div class="month">{{ getItemDateTime(item) | date:'MMM' }}</div>
+                      </div>
                     </div>
-                  </div>
-                  <div class="event-content flex-grow-1">
-                    <div class="d-flex justify-content-between align-items-start">
-                      <h6 class="event-name mb-0"> {{ item.name }} </h6>
-                    </div>
-                    <div class="event-details">
-                      <small class="text-muted clplace" *ngIf="isEvent(item) && item.place">
-                        <i class="bi bi-geo-alt"></i> {{ item.place }}
-                      </small>
-                      <div>
+                    <div class="event-content flex-grow-1">
+                      <div class="d-flex justify-content-between align-items-start">
+                        <h6 class="event-name mb-0"> {{ item.name }} </h6>
+                      </div>
+                      <div class="event-details">
+                        <small class="text-muted clplace" *ngIf="isEvent(item) && item.place">
+                          <i class="bi bi-geo-alt"></i> {{ item.place }}
+                        </small>
+                        <div>
 
-                      <small class="text-muted date-type">
-                        <span class="me-2" ><i class="bi bi-calendar2-event"></i> {{ isEvent(item) ? item.type : ('CALENDAR_PAGE.HOLIDAY' | translate) }} </span>
-                        <span><i class="bi bi-clock-history"></i> {{ getItemDateTime(item) | date:'shortTime' }}</span>
-                      </small>
+                        <small class="text-muted date-type">
+                          <span class="me-2" ><i class="bi bi-calendar2-event"></i> {{ isEvent(item) ? item.type : ('CALENDAR_PAGE.HOLIDAY' | translate) }} </span>
+                          <span><i class="bi bi-clock-history"></i> {{ getItemDateTime(item) | date:'shortTime' }}</span>
+                        </small>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
+              
               </div>
-            
-            </div>
-            <div class="card card-general shadow-sm" *ngIf="getUpcomingEvents().length == 0">
-              <div class="text-center">
-                <div class="card-body text-center text-muted py-4">
-                  <i class="bi bi-calendar-x icon-3x mb-3 opacity-25"></i>
-                  <p class="mb-0">{{ 'CALENDAR_PAGE.NO_UPCOMING_EVENTS' | translate }}</p>
+              <div class="card card-general shadow-sm" *ngIf="getUpcomingEvents().length == 0">
+                <div class="text-center">
+                  <div class="card-body text-center text-muted py-4">
+                    <i class="bi bi-calendar-x icon-3x mb-3 opacity-25"></i>
+                    <p class="mb-0">{{ 'CALENDAR_PAGE.NO_UPCOMING_EVENTS' | translate }}</p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </app-pull-to-refresh>
     </div>
 </div>
 

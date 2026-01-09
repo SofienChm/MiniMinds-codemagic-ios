@@ -101,7 +101,7 @@
               {{ selectedMenu.menuDate | date:'fullDate' }}
             </small>
           </div>
-          <button class="btn btn-primary" (click)="saveSelections()" [disabled]="savingSelections">
+          <button class="btn preferences " (click)="saveSelections()" [disabled]="savingSelections">
             <span *ngIf="savingSelections" class="spinner-border spinner-border-sm me-2"></span>
             {{ savingSelections ? 'Saving...' : 'Save Preferences' }}
           </button>

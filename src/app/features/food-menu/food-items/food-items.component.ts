@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -18,6 +18,8 @@ import Swal from 'sweetalert2';
   styleUrl: './food-items.component.scss'
 })
 export class FoodItemsComponent implements OnInit, OnDestroy {
+  @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
+
   foodItems: FoodItem[] = [];
   filteredItems: FoodItem[] = [];
   loading = false;
@@ -30,6 +32,9 @@ export class FoodItemsComponent implements OnInit, OnDestroy {
   editingItem: FoodItem | null = null;
   formItem: Partial<FoodItem> = this.getEmptyItem();
   saving = false;
+
+  // Image upload state
+  imagePreview: string | null = null;
 
   categories = FOOD_CATEGORIES;
   allergens = COMMON_ALLERGENS;
@@ -97,6 +102,12 @@ export class FoodItemsComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Error loading food items:', error);
+        Swal.fire({
+          icon: 'error',
+          title: this.translate.instant('COMMON.ERROR'),
+          text: this.translate.instant('FOOD_MENU.ERROR_LOADING_ITEMS'),
+          confirmButtonColor: '#7dd3c0'
+        });
         this.loading = false;
       }
     });
@@ -145,17 +156,21 @@ export class FoodItemsComponent implements OnInit, OnDestroy {
   openAddForm() {
     this.editingItem = null;
     this.formItem = this.getEmptyItem();
+    this.imagePreview = null;
     this.showForm = true;
   }
 
   openEditForm(item: FoodItem) {
     this.editingItem = item;
     this.formItem = { ...item };
+    this.imagePreview = item.imageUrl || null;
     this.showForm = true;
   }
 
   closeForm() {
     this.showForm = false;
+    this.imagePreview = null;
+    this.resetFileInput();
     this.editingItem = null;
     this.formItem = this.getEmptyItem();
   }
@@ -181,12 +196,19 @@ export class FoodItemsComponent implements OnInit, OnDestroy {
       }
       this.closeForm();
       this.loadFoodItems();
+      Swal.fire({
+        icon: 'success',
+        title: this.translate.instant('COMMON.SUCCESS'),
+        text: this.editingItem ? this.translate.instant('FOOD_MENU.ITEM_UPDATED') : this.translate.instant('FOOD_MENU.ITEM_CREATED'),
+        confirmButtonColor: '#7dd3c0',
+        timer: 2000
+      });
     } catch (error) {
       console.error('Error saving food item:', error);
       Swal.fire({
         icon: 'error',
         title: this.translate.instant('COMMON.ERROR'),
-        text: 'Error saving food item. Please try again.',
+        text: this.translate.instant('FOOD_MENU.ERROR_SAVING_ITEM'),
         confirmButtonColor: '#7dd3c0'
       });
     } finally {
@@ -198,7 +220,7 @@ export class FoodItemsComponent implements OnInit, OnDestroy {
     const result = await Swal.fire({
       icon: 'warning',
       title: this.translate.instant('COMMON.CONFIRM'),
-      text: `Are you sure you want to delete "${item.name}"?`,
+      text: this.translate.instant('FOOD_MENU.DELETE_ITEM_CONFIRM', { name: item.name }),
       showCancelButton: true,
       confirmButtonColor: '#d33',
       cancelButtonColor: '#6c757d',
@@ -210,12 +232,19 @@ export class FoodItemsComponent implements OnInit, OnDestroy {
       try {
         await this.foodMenuService.deleteFoodItem(item.id!).toPromise();
         this.loadFoodItems();
+        Swal.fire({
+          icon: 'success',
+          title: this.translate.instant('COMMON.SUCCESS'),
+          text: this.translate.instant('FOOD_MENU.ITEM_DELETED'),
+          confirmButtonColor: '#7dd3c0',
+          timer: 2000
+        });
       } catch (error) {
         console.error('Error deleting food item:', error);
         Swal.fire({
           icon: 'error',
           title: this.translate.instant('COMMON.ERROR'),
-          text: 'Error deleting food item.',
+          text: this.translate.instant('FOOD_MENU.ERROR_DELETING_ITEM'),
           confirmButtonColor: '#7dd3c0'
         });
       }
@@ -226,8 +255,22 @@ export class FoodItemsComponent implements OnInit, OnDestroy {
     try {
       await this.foodMenuService.toggleFoodItemStatus(item.id!).toPromise();
       this.loadFoodItems();
+      Swal.fire({
+        icon: 'success',
+        title: this.translate.instant('COMMON.SUCCESS'),
+        text: this.translate.instant('FOOD_MENU.STATUS_UPDATED'),
+        confirmButtonColor: '#7dd3c0',
+        timer: 1500,
+        showConfirmButton: false
+      });
     } catch (error) {
       console.error('Error toggling status:', error);
+      Swal.fire({
+        icon: 'error',
+        title: this.translate.instant('COMMON.ERROR'),
+        text: this.translate.instant('FOOD_MENU.ERROR_UPDATING_STATUS'),
+        confirmButtonColor: '#7dd3c0'
+      });
     }
   }
 
@@ -287,5 +330,57 @@ export class FoodItemsComponent implements OnInit, OnDestroy {
       'Other': '#6c757d'
     };
     return colors[category] || '#6c757d';
+  }
+
+  // Image upload methods
+  onImageSelect(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      Swal.fire({
+        icon: 'error',
+        title: this.translate.instant('COMMON.ERROR'),
+        text: this.translate.instant('FOOD_MENU.INVALID_IMAGE_TYPE'),
+        confirmButtonColor: '#7dd3c0'
+      });
+      this.resetFileInput();
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      Swal.fire({
+        icon: 'error',
+        title: this.translate.instant('COMMON.ERROR'),
+        text: this.translate.instant('FOOD_MENU.IMAGE_TOO_LARGE'),
+        confirmButtonColor: '#7dd3c0'
+      });
+      this.resetFileInput();
+      return;
+    }
+
+    // Read file and create preview
+    const reader = new FileReader();
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      this.imagePreview = e.target?.result as string;
+      this.formItem.imageUrl = this.imagePreview;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  removeImage(): void {
+    this.imagePreview = null;
+    this.formItem.imageUrl = '';
+    this.resetFileInput();
+  }
+
+  private resetFileInput(): void {
+    if (this.fileInput?.nativeElement) {
+      this.fileInput.nativeElement.value = '';
+    }
   }
 }
