@@ -1384,6 +1384,25 @@
     "PARENT_MENU_VIEW": "Weekly Menu",
     "ADD_FOOD_ITEM": "Add Food Item"
   },
+  "ATTENDANCE_LIST": {
+    "TITLE": "Attendance List",
+    "DASHBOARD": "Dashboard",
+    "ATTENDANCE_LIST": "Attendance List",
+    "SEARCH_PLACEHOLDER": "Search by name...",
+    "REFRESH": "Refresh",
+    "CHILDREN_LIST": "Children List",
+    "CHILDREN": "children",
+    "LOADING": "Loading...",
+    "NO_CHILDREN": "No children found",
+    "CHILD": "Child",
+    "STATUS": "Status",
+    "ACTIONS": "Actions",
+    "CHECKED_IN": "Checked In",
+    "NOT_CHECKED_IN": "Not Checked In",
+    "CHECK_IN": "Check In",
+    "CHECK_OUT": "Check Out",
+    "TOTAL": "Total"
+  },
   "ATTENDANCE_PAGE": {
     "TITLE": "Attendance Management",
     "DASHBOARD": "Dashboard",

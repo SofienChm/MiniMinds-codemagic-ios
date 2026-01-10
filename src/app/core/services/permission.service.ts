@@ -22,4 +22,8 @@ export class PermissionService {
   canManageUsers(): boolean {
     return this.authService.isAdmin();
   }
+  
+  onlyAdmin(): boolean {
+    return this.authService.isAdmin();
+  }
 }

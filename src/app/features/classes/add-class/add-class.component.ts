@@ -7,6 +7,8 @@ import { ClassModel } from '../classes.interface';
 import { TitlePage, Breadcrumb } from '../../../shared/layouts/title-page/title-page';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { PageTitleService } from '../../../core/services/page-title.service';
+import { EducatorService } from '../../educator/educator.service';
+import { EducatorModel } from '../../educator/educator.interface';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
 
@@ -28,12 +30,14 @@ export class AddClassComponent implements OnInit, OnDestroy {
     isActive: true
   };
 
+  educators: EducatorModel[] = [];
   saving = false;
   breadcrumbs: Breadcrumb[] = [];
   private langChangeSub?: Subscription;
 
   constructor(
     private classesService: ClassesService,
+    private educatorService: EducatorService,
     private router: Router,
     private translate: TranslateService,
     private pageTitleService: PageTitleService
@@ -42,10 +46,18 @@ export class AddClassComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.pageTitleService.setTitle(this.translate.instant('CLASSES.ADD_CLASS'));
     this.setupBreadcrumbs();
+    this.loadEducators();
 
     this.langChangeSub = this.translate.onLangChange.subscribe(() => {
       this.pageTitleService.setTitle(this.translate.instant('CLASSES.ADD_CLASS'));
       this.setupBreadcrumbs();
+    });
+  }
+
+  loadEducators(): void {
+    this.educatorService.loadEducators().subscribe({
+      next: (educators) => this.educators = educators,
+      error: (error) => console.error('Error loading educators:', error)
     });
   }
 

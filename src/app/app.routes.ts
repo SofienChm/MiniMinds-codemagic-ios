@@ -112,6 +112,11 @@ export const routes: Routes = [
         canActivate: [ADMIN_TEACHER]
       },
       {
+        path: 'attendance-list',
+        loadComponent: () => import('./features/attendance-sheet/attendance-list/attendance-list').then(m => m.AttendanceList),
+        canActivate: [ADMIN_TEACHER]
+      },
+      {
         path: 'calendar',
         loadComponent: () => import('./features/calendar/calendar.component').then(m => m.CalendarPageComponent)
       },

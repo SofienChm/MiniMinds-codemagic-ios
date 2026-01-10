@@ -56,7 +56,7 @@ export class QrCheckin implements OnInit, OnDestroy, AfterViewInit {
   ) {}
 
   ngOnInit(): void {
-    if (!this.authService.isParent()) {
+    if (!this.authService.isParent() && !this.authService.isTeacher()) {
       this.router.navigate(['/dashboard']);
       return;
     }
@@ -88,7 +88,12 @@ export class QrCheckin implements OnInit, OnDestroy, AfterViewInit {
   }
 
   loadChildrenStatus(): void {
-    this.qrService.getMyChildrenStatus().subscribe({
+    // Load children based on user role
+    const childrenObservable = this.authService.isParent()
+      ? this.qrService.getMyChildrenStatus()
+      : this.qrService.getTeacherChildrenStatus();
+
+    childrenObservable.subscribe({
       next: (children) => {
         this.children = children;
       },

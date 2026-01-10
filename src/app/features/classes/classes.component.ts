@@ -7,6 +7,8 @@ import { ClassModel } from './classes.interface';
 import { TitlePage, Breadcrumb, TitleAction } from '../../shared/layouts/title-page/title-page';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { PageTitleService } from '../../core/services/page-title.service';
+import { EducatorService } from '../educator/educator.service';
+import { EducatorModel } from '../educator/educator.interface';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
 
@@ -19,6 +21,7 @@ import Swal from 'sweetalert2';
 })
 export class ClassesComponent implements OnInit, OnDestroy {
   classes: ClassModel[] = [];
+  educators: EducatorModel[] = [];
   selectedClass: ClassModel | null = null;
   showDetailModal = false;
   showEditModal = false;
@@ -29,6 +32,7 @@ export class ClassesComponent implements OnInit, OnDestroy {
 
   constructor(
     private classesService: ClassesService,
+    private educatorService: EducatorService,
     private router: Router,
     private fb: FormBuilder,
     private translate: TranslateService,
@@ -37,6 +41,7 @@ export class ClassesComponent implements OnInit, OnDestroy {
     this.classForm = this.fb.group({
       name: ['', [Validators.required, Validators.maxLength(100)]],
       description: [''],
+      teacherId: [null],
       capacity: [20, [Validators.required, Validators.min(1)]],
       ageGroupMin: [2, [Validators.required, Validators.min(0)]],
       ageGroupMax: [5, [Validators.required, Validators.min(0)]],
@@ -50,11 +55,19 @@ export class ClassesComponent implements OnInit, OnDestroy {
     this.setupBreadcrumbs();
     this.setupTitleActions();
     this.loadClasses();
+    this.loadEducators();
 
     this.langChangeSub = this.translate.onLangChange.subscribe(() => {
       this.pageTitleService.setTitle(this.translate.instant('CLASSES.TITLE'));
       this.setupBreadcrumbs();
       this.setupTitleActions();
+    });
+  }
+
+  loadEducators(): void {
+    this.educatorService.loadEducators().subscribe({
+      next: (educators) => this.educators = educators,
+      error: (error) => console.error('Error loading educators:', error)
     });
   }
 
@@ -102,6 +115,7 @@ export class ClassesComponent implements OnInit, OnDestroy {
     this.classForm.patchValue({
       name: classItem.name,
       description: classItem.description,
+      teacherId: classItem.teacherId,
       capacity: classItem.capacity,
       ageGroupMin: classItem.ageGroupMin,
       ageGroupMax: classItem.ageGroupMax,

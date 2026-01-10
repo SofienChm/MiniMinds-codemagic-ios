@@ -1,0 +1,107 @@
+<div class="container-fluid mt-4">
+  <app-title-page
+    [title]="'ATTENDANCE_LIST.TITLE' | translate"
+    [breadcrumbs]="[{label: 'ATTENDANCE_LIST.DASHBOARD' | translate, url: '/dashboard'}, {label: 'ATTENDANCE_LIST.ATTENDANCE_LIST' | translate}]">
+  </app-title-page>
+</div>
+
+<div class="container-fluid mt-4">
+  <!-- Search and Refresh -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="row align-items-center">
+        <div class="col-md-8 mb-2 mb-md-0">
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'ATTENDANCE_LIST.SEARCH_PLACEHOLDER' | translate"
+            [(ngModel)]="searchTerm">
+        </div>
+        <div class="col-md-4 d-flex justify-content-md-end">
+          <button class="custom-btn-2 btn-add-global-2" (click)="refresh()">
+            <i class="bi bi-arrow-clockwise"></i> {{ 'ATTENDANCE_LIST.REFRESH' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Children Attendance List -->
+  <div class="card flex-fill card-general card-recently mb-3">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">
+        <i class="bi bi-people"></i>
+        {{ 'ATTENDANCE_LIST.CHILDREN_LIST' | translate }}
+      </h5>
+      <span class="badge bg-primary">{{ filteredChildren.length }} {{ 'ATTENDANCE_LIST.CHILDREN' | translate }}</span>
+    </div>
+    <div class="card-body">
+      <div *ngIf="loading" class="text-center p-4">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">{{ 'ATTENDANCE_LIST.LOADING' | translate }}</span>
+        </div>
+      </div>
+
+      <div *ngIf="!loading && filteredChildren.length === 0" class="text-center p-4 text-muted">
+        <i class="bi bi-person-x fs-1"></i>
+        <p class="mt-2">{{ 'ATTENDANCE_LIST.NO_CHILDREN' | translate }}</p>
+      </div>
+
+      <div *ngIf="!loading && filteredChildren.length > 0" class="table-responsive custom-table">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>{{ 'ATTENDANCE_LIST.CHILD' | translate }}</th>
+              <th>{{ 'ATTENDANCE_LIST.STATUS' | translate }}</th>
+              <th>{{ 'ATTENDANCE_LIST.ACTIONS' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of filteredChildren" class="attendance-row">
+              <td class="name-last">
+                <div class="d-flex align-items-center">
+                  <a href="#" class="child-avatar flex-shrink-0">
+                    <img
+                      loading="lazy"
+                      [src]="item.child.profilePicture || 'assets/child.png'"
+                      class="img-fluid rounded-circle"
+                      alt="Child"
+                      width="40"
+                      height="40">
+                  </a>
+                  <div class="ms-2">
+                    <span class="title-dt-body-card">{{ item.child.firstName }} {{ item.child.lastName }}</span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="status-badge" [class.status-present]="item.isCheckedIn" [class.status-not-present]="!item.isCheckedIn">
+                  {{ item.isCheckedIn ? ('ATTENDANCE_LIST.CHECKED_IN' | translate) : ('ATTENDANCE_LIST.NOT_CHECKED_IN' | translate) }}
+                </span>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <button
+                    class="btn btn-sm btn-checkin me-2"
+                    [disabled]="item.isCheckedIn"
+                    (click)="checkIn(item)">
+                    <i class="bi bi-box-arrow-in-right"></i> {{ 'ATTENDANCE_LIST.CHECK_IN' | translate }}
+                  </button>
+                  <button
+                    class="btn btn-sm btn-checkout"
+                    [disabled]="!item.isCheckedIn"
+                    (click)="checkOut(item)">
+                    <i class="bi bi-box-arrow-right"></i> {{ 'ATTENDANCE_LIST.CHECK_OUT' | translate }}
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card-footer d-flex align-items-center justify-content-between">
+      <span class="text-muted">{{ 'ATTENDANCE_LIST.TOTAL' | translate }}: {{ filteredChildren.length }} {{ 'ATTENDANCE_LIST.CHILDREN' | translate }}</span>
+    </div>
+  </div>
+</div>

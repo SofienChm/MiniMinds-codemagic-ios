@@ -90,12 +90,12 @@
             <p class="mb-0 text-muted">{{ child.gender }} - {{ getAge(child.dateOfBirth) }} {{ 'EDUCATOR_DETAIL.YEARS_OLD' | translate }}</p>
             <small class="text-muted">{{ 'EDUCATOR_DETAIL.BORN' | translate }} {{ child.dateOfBirth | date:'mediumDate' }}</small>
           </div>
-          <div class="text-end">
-            <button class="btn btn-outline-danger btn-sm me-2" (click)="removeChild(child.id!)">
-              <i class="bi bi-x-circle"></i> {{ 'EDUCATOR_DETAIL.REMOVE' | translate }}
+          <div class="text-end d-flex gap-2">
+            <button class="btn btn-sm btn-remove" (click)="removeChild(child.id!)">
+              <i class="bi bi-x-circle"></i> 
             </button>
-            <button class="btn btn-outline-info btn-sm" (click)="viewChildDetails(child.id!)">
-              <i class="bi bi-eye"></i> {{ 'EDUCATOR_DETAIL.VIEW' | translate }}
+            <button class="btn btn-sm btn-view" (click)="viewChildDetails(child.id!)">
+              <i class="bi bi-eye"></i>
             </button>
           </div>
         </div>

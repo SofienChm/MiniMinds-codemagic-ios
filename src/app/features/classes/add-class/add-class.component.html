@@ -36,6 +36,18 @@
             <input type="number" class="form-control" [(ngModel)]="classData.ageGroupMax" name="ageGroupMax" required min="0">
           </div>
         </div>
+        <div class="row">
+          <div class="col-md-12 mb-3">
+            <label class="form-label">Assign Teacher (Optional)</label>
+            <select class="form-select" [(ngModel)]="classData.teacherId" name="teacherId">
+              <option [ngValue]="null">-- No Teacher Assigned --</option>
+              <option *ngFor="let educator of educators" [ngValue]="educator.id">
+                {{ educator.firstName }} {{ educator.lastName }} ({{ educator.email }})
+              </option>
+            </select>
+            <small class="form-text text-muted">You can assign a teacher now or later. Children can only be assigned to classes that have a teacher.</small>
+          </div>
+        </div>
         <div class="mb-3">
           <label class="form-label">Schedule</label>
           <input type="text" class="form-control" [(ngModel)]="classData.schedule" name="schedule" placeholder="e.g., Mon-Fri 9:00 AM - 3:00 PM">

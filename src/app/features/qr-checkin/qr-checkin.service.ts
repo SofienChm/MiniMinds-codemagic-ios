@@ -36,10 +36,17 @@ export class QrCheckinService {
   }
 
   /**
-   * Get my children's attendance status for today
+   * Get my children's attendance status for today (Parent role)
    */
   getMyChildrenStatus(): Observable<ChildAttendanceStatus[]> {
     return this.http.get<ChildAttendanceStatus[]>(`${this.attendanceUrl}/MyChildren`);
+  }
+
+  /**
+   * Get teacher's class children attendance status for today (Teacher role)
+   */
+  getTeacherChildrenStatus(): Observable<ChildAttendanceStatus[]> {
+    return this.http.get<ChildAttendanceStatus[]>(`${this.attendanceUrl}/TeacherChildren`);
   }
 
   /**
