@@ -375,12 +375,11 @@
 </div>
 
 <!-- Parent Dashboard -->
-<div class="parent">
-  <div *ngIf="userRole === 'Parent'">
-    <!-- New Design -->
-    <div class="parent-dashboard-new">
-      <!-- Header Section -->
-      <div class="dashboard-header">
+<ion-content *ngIf="userRole === 'Parent'" class="parent">
+  <!-- New Design -->
+  <div class="parent-dashboard-new">
+    <!-- Header Section -->
+    <div class="dashboard-header">
         <div class="header-content">
           <div class="row welcome-text">
             <div class="col-10 text-dash">
@@ -597,5 +596,4 @@
         </div>
       </div>
     </div>
-  </div>
-</div>
+</ion-content>

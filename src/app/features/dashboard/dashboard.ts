@@ -22,9 +22,8 @@ import { CalendarComponent } from '../../shared/components/calendar/calendar.com
 import { DashboardService, AdminDashboardData, ParentDashboardData } from '../../core/services/dashboard.service';
 import type { ChartConfiguration } from 'chart.js';
 import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
-import { SkeletonStatCardComponent } from '../../shared/components/skeleton/skeleton-stat-card.component';
 import { SkeletonActivityTimelineComponent } from '../../shared/components/skeleton/skeleton-activity-timeline.component';
-import { SkeletonChildCardComponent } from '../../shared/components/skeleton/skeleton-child-card.component';
+import { IonContent } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-dashboard',
@@ -35,9 +34,8 @@ import { SkeletonChildCardComponent } from '../../shared/components/skeleton/ske
     TranslateModule,
     CalendarComponent,
     SkeletonComponent,
-    SkeletonStatCardComponent,
     SkeletonActivityTimelineComponent,
-    SkeletonChildCardComponent
+    IonContent
   ],
   standalone: true,
   templateUrl: './dashboard.html',

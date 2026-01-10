@@ -18,7 +18,6 @@ import { PageTitleService } from '../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
 import { PullToRefreshComponent } from '../../shared/components/pull-to-refresh/pull-to-refresh.component';
 import { SkeletonActivityTimelineComponent } from '../../shared/components/skeleton/skeleton-activity-timeline.component';
-import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 
 // Register Chart.js components
 Chart.register(ArcElement, Tooltip, Legend, DoughnutController, LineElement, LineController, LinearScale, CategoryScale, PointElement);
@@ -26,7 +25,7 @@ Chart.register(ArcElement, Tooltip, Legend, DoughnutController, LineElement, Lin
 @Component({
   selector: 'app-daily-activities',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, NgSelectModule, TranslateModule, TitlePage, BaseChartDirective, ParentChildHeaderComponent, PullToRefreshComponent, SkeletonActivityTimelineComponent, SkeletonComponent],
+  imports: [CommonModule, FormsModule, RouterModule, NgSelectModule, TranslateModule, TitlePage, BaseChartDirective, ParentChildHeaderComponent, PullToRefreshComponent, SkeletonActivityTimelineComponent],
   templateUrl: './daily-activities.html',
   styleUrls: ['./daily-activities.scss']
 })

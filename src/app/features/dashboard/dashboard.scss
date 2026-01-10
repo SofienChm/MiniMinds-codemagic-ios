@@ -318,6 +318,23 @@
   }
 }
 
+/* Ion Content Styling for Parent Dashboard */
+ion-content.parent {
+  --background: #ffffff;
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  display: block !important;
+  position: relative !important;
+  min-height: calc(100vh - 95px) !important;
+
+  // Ensure the scroll content is visible
+  .inner-scroll {
+    display: block !important;
+  }
+}
+
 /* New Parent Dashboard Design */
 .parent-dashboard-new {
   max-width: 768px;

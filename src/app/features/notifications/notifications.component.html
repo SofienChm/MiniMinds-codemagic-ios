@@ -1,10 +1,10 @@
-<div [class]="isParent ? '' : ' mt-4'">
+<ion-content *ngIf="isParent" class="parent-notifications">
   <div class="parent-detailchild font-inter">
     <app-parent-child-header-simple
       title="Notifications"
     >
     </app-parent-child-header-simple>
-    <app-pull-to-refresh #pullToRefresh (refresh)="onRefresh()" *ngIf="isParent && !loading">
+    <!-- <app-pull-to-refresh #pullToRefresh (refresh)="onRefresh()" *ngIf="!loading"> -->
 
     <div class="body container-fluid">
       <div class="main-information">
@@ -70,9 +70,9 @@
         </div>
       </div>
     </div>
-    </app-pull-to-refresh>
+    <!-- </app-pull-to-refresh> -->
   </div>
-</div>
+</ion-content>
 
 <div *ngIf="!isParent" [class]="isParent ? '' : 'container-fluid mt-4'">
   <app-title-page 

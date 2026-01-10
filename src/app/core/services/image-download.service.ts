@@ -17,6 +17,19 @@ export class ImageDownloadService {
 
   /**
    * Download/save an image - works on both web and mobile
+   *
+   * ANDROID BEHAVIOR (API 29+):
+   * - Opens Android share sheet where user can select "Save to Gallery" or other apps
+   * - This is the Google-recommended approach for scoped storage compliance
+   * - Images can be saved to Photos, Drive, or any other app the user chooses
+   *
+   * iOS BEHAVIOR:
+   * - Saves directly to Files app under MiniMinds folder
+   * - User can access via Files app
+   *
+   * WEB BEHAVIOR:
+   * - Downloads directly to browser's Downloads folder
+   *
    * @param imageData Base64 data URL or URL of the image
    * @param fileName Name for the saved file
    * @returns Promise with download result
@@ -82,24 +95,26 @@ export class ImageDownloadService {
 
   /**
    * Save image to device storage (mobile)
+   * On Android 10+ (API 29+), uses scoped storage via Share API
+   * This is compliant with Google Play Store policies
    */
   private async saveToDevice(imageData: string, fileName: string): Promise<DownloadResult> {
+    const platform = Capacitor.getPlatform();
+
+    // For Android, always use Share API (scoped storage compliant)
+    if (platform === 'android') {
+      // Use Share API which handles scoped storage properly
+      return this.shareImage(imageData, fileName, 'Save Image to Gallery');
+    }
+
+    // For iOS, we can still use Filesystem with Documents directory
     try {
       const base64Data = this.extractBase64Data(imageData);
       const mimeType = this.getMimeType(imageData);
       const extension = this.getExtension(mimeType);
       const finalFileName = this.ensureExtension(fileName, extension);
 
-      // Request permissions first on Android
-      if (Capacitor.getPlatform() === 'android') {
-        const permResult = await Filesystem.requestPermissions();
-        if (permResult.publicStorage !== 'granted') {
-          // Try with limited access
-          console.warn('Storage permission not fully granted, saving to app directory');
-        }
-      }
-
-      // Try to save to Documents directory (accessible to user)
+      // iOS: Save to Documents directory (user accessible via Files app)
       const savedFile = await Filesystem.writeFile({
         path: `MiniMinds/${finalFileName}`,
         data: base64Data,
@@ -109,38 +124,13 @@ export class ImageDownloadService {
 
       return {
         success: true,
-        message: `Image saved to Documents/MiniMinds/${finalFileName}`,
+        message: `Image saved to Files/MiniMinds/${finalFileName}`,
         filePath: savedFile.uri
       };
     } catch (error: any) {
-      console.error('Error saving to Documents, trying external:', error);
+      console.error('Error saving to iOS Documents:', error);
 
-      // Fallback: try saving to external storage on Android
-      if (Capacitor.getPlatform() === 'android') {
-        try {
-          const base64Data = this.extractBase64Data(imageData);
-          const mimeType = this.getMimeType(imageData);
-          const extension = this.getExtension(mimeType);
-          const finalFileName = this.ensureExtension(fileName, extension);
-
-          const savedFile = await Filesystem.writeFile({
-            path: `Download/MiniMinds/${finalFileName}`,
-            data: base64Data,
-            directory: Directory.ExternalStorage,
-            recursive: true
-          });
-
-          return {
-            success: true,
-            message: `Image saved to Downloads/MiniMinds/${finalFileName}`,
-            filePath: savedFile.uri
-          };
-        } catch (extError: any) {
-          console.error('External storage also failed:', extError);
-        }
-      }
-
-      // Last resort: use share functionality
+      // Fallback to share functionality
       return this.shareImage(imageData, fileName, 'Save Image');
     }
   }

@@ -8,11 +8,12 @@ import { ParentChildHeaderSimpleComponent } from '../../shared/components/parent
 import { TitlePage } from '../../shared/layouts/title-page/title-page';
 import { PullToRefreshComponent } from '../../shared/components/pull-to-refresh/pull-to-refresh.component';
 import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
+import { IonContent } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-notifications',
   standalone: true,
-  imports: [CommonModule, ParentChildHeaderSimpleComponent, TitlePage, PullToRefreshComponent, SkeletonComponent],
+  imports: [CommonModule, ParentChildHeaderSimpleComponent, TitlePage, PullToRefreshComponent, SkeletonComponent, IonContent],
   templateUrl: './notifications.component.html',
   styleUrl: './notifications.component.scss'
 })

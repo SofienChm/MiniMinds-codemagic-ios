@@ -88,7 +88,7 @@
     <!-- Detail Header Card -->
     <div class="nd-detail-header-card">
       <div class="nd-detail-avatar">
-        {{ getUserName(activeTab === 'sent' ? selectedReclamation.recipientId : selectedReclamation.senderId)?.charAt(0)?.toUpperCase() || '?' }}
+        {{ getUserName(activeTab === 'sent' ? selectedReclamation.recipientId : selectedReclamation.senderId).charAt(0).toUpperCase() || '?' }}
       </div>
       <div class="nd-detail-info">
         <div class="nd-detail-name">{{ getUserName(activeTab === 'sent' ? selectedReclamation.recipientId : selectedReclamation.senderId) }}</div>
