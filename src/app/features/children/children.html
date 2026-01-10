@@ -72,7 +72,7 @@
                         <h6 class="text-dark text-truncate mb-0 title-card__name">
                           <a href="#" (click)="viewDetails(child); $event.preventDefault()">{{ child.firstName }} {{ child.lastName }}</a>
                         </h6>
-                        <p class="mb-0 card-age">{{ 'CHILDREN.AGE' | translate }}: {{ getAge(child.dateOfBirth) }} {{ 'CHILDREN.YEARS' | translate }}</p>
+                        <p class="mb-0 card-age">{{ 'CHILDREN.AGE' | translate }}: {{ getAgeDisplay(child.dateOfBirth) }}</p>
 
                       </div>
                     </div>
@@ -270,7 +270,7 @@
                 <h6 class="text-dark text-truncate mb-0 title-card__name">
                   <a href="#" (click)="viewDetails(child); $event.preventDefault()">{{ child.firstName }} {{ child.lastName }}</a>
                 </h6>
-                <p class="mb-0 card-age">{{ 'CHILDREN.AGE' | translate }}: {{ getAge(child.dateOfBirth) }} {{ 'CHILDREN.YEARS' | translate }}</p>
+                <p class="mb-0 card-age">{{ 'CHILDREN.AGE' | translate }}: {{ getAgeDisplay(child.dateOfBirth) }}</p>
 
               </div>
             </div>
@@ -339,7 +339,7 @@
                 <td class="name-last">
                   <span>{{ child.firstName }} {{ child.lastName }}</span>
                 </td>
-                <td>{{ getAge(child.dateOfBirth) }} {{ 'CHILDREN.YEARS' | translate }}</td>
+                <td>{{ getAgeDisplay(child.dateOfBirth) }}</td>
                 <td>{{ child.gender }}</td>
                 <td>{{ child.parent?.firstName }} {{ child.parent?.lastName }}</td>
                 <td>{{ child.enrollmentDate | date:'shortDate' }}</td>

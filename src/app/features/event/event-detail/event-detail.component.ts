@@ -16,11 +16,12 @@ import { AppCurrencyPipe } from '../../../core/services/currency/currency.pipe';
 import { PageTitleService } from '../../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
+import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-event-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, TitlePage, AppCurrencyPipe, TranslateModule],
+  imports: [CommonModule, RouterModule, FormsModule, TitlePage, AppCurrencyPipe, TranslateModule, IonContent, IonRefresher, IonRefresherContent],
   templateUrl: './event-detail.component.html',
   styleUrls: ['./event-detail.component.scss']
 })
@@ -305,5 +306,16 @@ export class EventDetailComponent implements OnInit, OnDestroy {
     if (!this.event?.participants) return '';
     const participant = this.event.participants.find(p => p.child);
     return participant?.status || '';
+  }
+
+  // Pull-to-refresh handler for Ionic refresher
+  onRefresh(event?: any): void {
+    this.loadEvent();
+    setTimeout(() => {
+      // Complete the Ionic refresher
+      if (event?.target) {
+        event.target.complete();
+      }
+    }, 500);
   }
 }

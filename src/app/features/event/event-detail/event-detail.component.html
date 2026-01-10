@@ -1,5 +1,10 @@
-<div *ngIf="isParent" class="parent-detailchild font-inter">
-  <div class="header-info" *ngIf="!loading && event">
+<ion-content *ngIf="isParent" class="parent-event-detail-page">
+  <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="parent-detailchild font-inter">
+    <div class="header-info" *ngIf="!loading && event">
     <div class="title-icons mb-3" (click)="back()">
       <div class="page-back">
         <i class="bi bi-arrow-left"></i>
@@ -75,7 +80,8 @@
       </div>
     </div>
   </div>
-</div>
+  </div>
+</ion-content>
 
 <div class="container-fluid mt-4" *ngIf="!isParent && !loading && event">
   <app-title-page *ngIf="!isParent"

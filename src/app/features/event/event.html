@@ -1,9 +1,13 @@
-<div *ngIf="isParent" class="parent-detailchild font-inter">
-  <app-parent-child-header-simple *ngIf="isParent"
-    [title]="'EVENTS.TITLE' | translate"
-  >
-  </app-parent-child-header-simple>
-  <app-pull-to-refresh #pullToRefresh (refresh)="onRefresh()" *ngIf="isParent && !loading">
+<ion-content *ngIf="isParent" class="parent-events">
+  <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="parent-detailchild font-inter">
+    <app-parent-child-header-simple
+      [title]="'EVENTS.TITLE' | translate"
+    >
+    </app-parent-child-header-simple>
 
   <div class="body container-fluid">
       <div class="main-information">
@@ -71,8 +75,9 @@
         </div>
       </div>
     </div>
-  </app-pull-to-refresh>
-</div>
+  </div>
+</ion-content>
+
 <div class="container-fluid mt-4" *ngIf="!isParent">
   <app-title-page
     [title]="'EVENTS.TITLE' | translate"

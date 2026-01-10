@@ -1,3 +1,19 @@
+// Ion Content Styling for Parent Child Detail
+ion-content.parent-child-detail-page {
+  --background: #ffffff;
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  display: block !important;
+  position: relative !important;
+  min-height: calc(100vh - 95px) !important;
+
+  .inner-scroll {
+    display: block !important;
+  }
+}
+
 .card {
   box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
   border: 1px solid rgba(0, 0, 0, 0.125);

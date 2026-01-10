@@ -1,8 +1,16 @@
 import { Injectable } from '@angular/core';
-import { Capacitor } from '@capacitor/core';
+import { Capacitor, registerPlugin } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
 import { saveAs } from 'file-saver';
+
+// Define the SaveToGallery plugin interface
+export interface SaveToGalleryPlugin {
+  saveImage(options: { base64Data: string; fileName: string }): Promise<{ success: boolean; message: string; uri: string }>;
+}
+
+// Register the custom plugin
+const SaveToGallery = registerPlugin<SaveToGalleryPlugin>('SaveToGallery');
 
 export interface DownloadResult {
   success: boolean;
@@ -19,16 +27,16 @@ export class ImageDownloadService {
    * Download/save an image - works on both web and mobile
    *
    * ANDROID BEHAVIOR (API 29+):
-   * - Opens Android share sheet where user can select "Save to Gallery" or other apps
-   * - This is the Google-recommended approach for scoped storage compliance
-   * - Images can be saved to Photos, Drive, or any other app the user chooses
+   * - Saves DIRECTLY to device gallery using MediaStore API (scoped storage compliant)
+   * - Images appear in Gallery/Photos app under "MiniMinds" folder
+   * - No share sheet, automatic save
    *
    * iOS BEHAVIOR:
-   * - Saves directly to Files app under MiniMinds folder
+   * - Saves to Files app under MiniMinds folder
    * - User can access via Files app
    *
    * WEB BEHAVIOR:
-   * - Downloads directly to browser's Downloads folder
+   * - Downloads to browser's Downloads folder
    *
    * @param imageData Base64 data URL or URL of the image
    * @param fileName Name for the saved file
@@ -95,26 +103,41 @@ export class ImageDownloadService {
 
   /**
    * Save image to device storage (mobile)
-   * On Android 10+ (API 29+), uses scoped storage via Share API
-   * This is compliant with Google Play Store policies
+   *
+   * ANDROID: Uses custom MediaStore plugin to save directly to gallery (scoped storage compliant)
+   * iOS: Saves to Documents/MiniMinds folder
    */
   private async saveToDevice(imageData: string, fileName: string): Promise<DownloadResult> {
     const platform = Capacitor.getPlatform();
+    const base64Data = this.extractBase64Data(imageData);
+    const mimeType = this.getMimeType(imageData);
+    const extension = this.getExtension(mimeType);
+    const finalFileName = this.ensureExtension(fileName, extension);
 
-    // For Android, always use Share API (scoped storage compliant)
+    // For Android, use custom plugin to save directly to gallery
     if (platform === 'android') {
-      // Use Share API which handles scoped storage properly
-      return this.shareImage(imageData, fileName, 'Save Image to Gallery');
+      try {
+        // Use custom SaveToGallery plugin (uses MediaStore API)
+        const result = await SaveToGallery.saveImage({
+          base64Data: imageData, // Pass full data URL
+          fileName: finalFileName
+        });
+
+        return {
+          success: result.success,
+          message: result.message,
+          filePath: result.uri
+        };
+      } catch (error: any) {
+        console.error('Error saving to Android gallery:', error);
+
+        // Fallback to share functionality if plugin fails
+        return this.shareImage(imageData, fileName, 'Save Image to Gallery');
+      }
     }
 
-    // For iOS, we can still use Filesystem with Documents directory
+    // For iOS, use Filesystem with Documents directory
     try {
-      const base64Data = this.extractBase64Data(imageData);
-      const mimeType = this.getMimeType(imageData);
-      const extension = this.getExtension(mimeType);
-      const finalFileName = this.ensureExtension(fileName, extension);
-
-      // iOS: Save to Documents directory (user accessible via Files app)
       const savedFile = await Filesystem.writeFile({
         path: `MiniMinds/${finalFileName}`,
         data: base64Data,

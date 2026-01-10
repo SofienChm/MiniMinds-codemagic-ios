@@ -1,7 +1,12 @@
-<div *ngIf="isParent" class="parent-detailchild new-design">
-  <app-parent-child-header-simple [title]="'RECLAMATIONS_PAGE.TITLE' | translate">
-    <span class="nd-unread-badge">{{ getOpenCount() }} {{ 'RECLAMATIONS_PAGE.OPEN' | translate }}</span>
-  </app-parent-child-header-simple>
+<ion-content *ngIf="isParent" class="parent-reclamations">
+  <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="parent-detailchild new-design">
+    <app-parent-child-header-simple [title]="'RECLAMATIONS_PAGE.TITLE' | translate">
+      <span class="nd-unread-badge">{{ getOpenCount() }} {{ 'RECLAMATIONS_PAGE.OPEN' | translate }}</span>
+    </app-parent-child-header-simple>
 
   <!-- Tab Bar -->
   <div class="nd-tab-bar">
@@ -170,7 +175,8 @@
   <button class="nd-fab" (click)="openNewReclamationModal()" *ngIf="!showNewReclamationModal && !showModal">
     <i class="bi bi-pencil"></i>
   </button>
-</div>
+  </div>
+</ion-content>
 
 <div *ngIf="!isParent" class="container-fluid mt-4">
   

@@ -14,11 +14,12 @@ import Swal from 'sweetalert2';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { PullToRefreshComponent } from '../../shared/components/pull-to-refresh/pull-to-refresh.component';
 import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
+import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-messages',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgSelectModule, ParentChildHeaderSimpleComponent, TranslateModule, PullToRefreshComponent, SkeletonComponent],
+  imports: [CommonModule, FormsModule, NgSelectModule, ParentChildHeaderSimpleComponent, TranslateModule, PullToRefreshComponent, SkeletonComponent, IonContent, IonRefresher, IonRefresherContent],
   templateUrl: './messages.component.html',
   styleUrl: './messages.component.scss'
 })
@@ -487,11 +488,16 @@ export class MessagesComponent implements OnInit, OnDestroy {
     return this.inbox.filter(m => !m.isRead).length;
   }
 
-  // Pull-to-refresh handler
-  onRefresh(): void {
+  // Pull-to-refresh handler for Ionic refresher
+  onRefresh(event?: any): void {
     this.loadInbox();
     this.loadSent();
     setTimeout(() => {
+      // Complete the Ionic refresher
+      if (event?.target) {
+        event.target.complete();
+      }
+      // Fallback for custom pull-to-refresh (if still used elsewhere)
       this.pullToRefresh?.completeRefresh();
     }, 500);
   }

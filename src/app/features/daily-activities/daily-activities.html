@@ -1,4 +1,8 @@
-<div *ngIf="isParent">
+<ion-content *ngIf="isParent" class="parent-activities">
+  <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
   <app-parent-child-header
     [class]="children.length > 1 ? 'header-with-carrousel' : ''"
     [children]="children"
@@ -9,21 +13,8 @@
     (onNextChild)="nextChild()"
     (onDateChange)="selectedDate = $event; onDateChange()">
   </app-parent-child-header>
-</div>
 
-<div [class]="isParent ? '' : 'container-fluid mt-4'">
-  <app-title-page *ngIf="!isParent"
-    [title]="'DAILY_REPORT.TITLE' | translate"
-    [subtitle]="'DAILY_REPORT.SUBTITLE' | translate"
-    icon="bi bi-clipboard-data"
-    [breadcrumbs]="[{label: 'BREADCRUMBS.DASHBOARD' | translate, url: '/dashboard'}, {label: 'DAILY_REPORT.TITLE' | translate}]">
-  </app-title-page>
-</div>
-
-
-
-<!-- parent view-->
-<app-pull-to-refresh #pullToRefresh (refresh)="onRefresh()" *ngIf="isParent">
+  <!-- parent view-->
   <div class="container-fluid">
     <div class="activities-container">
       <h2 *ngIf="children.length > 1">{{ 'DAILY_REPORT.TODAYS_ACTIVITIES' | translate }} - {{ getSelectedChildName() }}</h2>
@@ -54,8 +45,18 @@
       </div>
     </div>
   </div>
-</app-pull-to-refresh>
-  <!-- Stats Overview -->
+</ion-content>
+
+<div [class]="isParent ? '' : 'container-fluid mt-4'">
+  <app-title-page *ngIf="!isParent"
+    [title]="'DAILY_REPORT.TITLE' | translate"
+    [subtitle]="'DAILY_REPORT.SUBTITLE' | translate"
+    icon="bi bi-clipboard-data"
+    [breadcrumbs]="[{label: 'BREADCRUMBS.DASHBOARD' | translate, url: '/dashboard'}, {label: 'DAILY_REPORT.TITLE' | translate}]">
+  </app-title-page>
+</div>
+
+<!-- Stats Overview -->
 <div class="container-fluid" *ngIf="!isParent">
   <div class="row mb-4">
     <div class="col-xl-8 first-dashbord-card order-2 order-xl-1">

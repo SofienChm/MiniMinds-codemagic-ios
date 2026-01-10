@@ -8,12 +8,12 @@ import { ParentChildHeaderSimpleComponent } from '../../shared/components/parent
 import { TitlePage } from '../../shared/layouts/title-page/title-page';
 import { PullToRefreshComponent } from '../../shared/components/pull-to-refresh/pull-to-refresh.component';
 import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
-import { IonContent } from '@ionic/angular/standalone';
+import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-notifications',
   standalone: true,
-  imports: [CommonModule, ParentChildHeaderSimpleComponent, TitlePage, PullToRefreshComponent, SkeletonComponent, IonContent],
+  imports: [CommonModule, ParentChildHeaderSimpleComponent, TitlePage, PullToRefreshComponent, SkeletonComponent, IonContent, IonRefresher, IonRefresherContent],
   templateUrl: './notifications.component.html',
   styleUrl: './notifications.component.scss'
 })
@@ -165,10 +165,15 @@ export class NotificationsComponent implements OnInit {
     return name.substring(0, 2).toUpperCase();
   }
 
-  // Pull-to-refresh handler
-  onRefresh(): void {
+  // Pull-to-refresh handler for Ionic refresher
+  onRefresh(event?: any): void {
     this.loadNotifications();
     setTimeout(() => {
+      // Complete the Ionic refresher
+      if (event?.target) {
+        event.target.complete();
+      }
+      // Fallback for custom pull-to-refresh (if still used elsewhere)
       this.pullToRefresh?.completeRefresh();
     }, 500);
   }

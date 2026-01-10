@@ -23,6 +23,7 @@ import { Subscription } from 'rxjs';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import { Capacitor } from '@capacitor/core';
 import { SkeletonComponent } from '../../../shared/components/skeleton/skeleton.component';
+import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-child-detail',
@@ -32,7 +33,10 @@ import { SkeletonComponent } from '../../../shared/components/skeleton/skeleton.
     FormsModule,
     ParentChildHeaderComponent,
     TranslateModule,
-    SkeletonComponent
+    SkeletonComponent,
+    IonContent,
+    IonRefresher,
+    IonRefresherContent
   ],
   standalone: true,
   templateUrl: './child-detail.html',
@@ -200,6 +204,35 @@ export class ChildDetail implements OnInit, OnDestroy {
       age--;
     }
     return age;
+  }
+
+  getAgeDisplay(dateOfBirth: string): string {
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+
+    let years = today.getFullYear() - birthDate.getFullYear();
+    let months = today.getMonth() - birthDate.getMonth();
+
+    if (months < 0 || (months === 0 && today.getDate() < birthDate.getDate())) {
+      years--;
+      months += 12;
+    }
+
+    if (today.getDate() < birthDate.getDate()) {
+      months--;
+      if (months < 0) {
+        months += 12;
+        years--;
+      }
+    }
+
+    // If under 1 year old, show months
+    if (years === 0) {
+      return months === 1 ? '1 month old' : `${months} months old`;
+    }
+
+    // Otherwise show years
+    return years === 1 ? '1 year old' : `${years} years old`;
   }
 
   getProfilePicture(picture: string | undefined | null, defaultPicture: string = 'assets/default-avatar.svg'): string {
@@ -721,5 +754,16 @@ export class ChildDetail implements OnInit, OnDestroy {
       hour: '2-digit',
       minute: '2-digit'
     });
+  }
+
+  // Pull-to-refresh handler for Ionic refresher
+  onRefresh(event?: any): void {
+    this.loadChild();
+    setTimeout(() => {
+      // Complete the Ionic refresher
+      if (event?.target) {
+        event.target.complete();
+      }
+    }, 500);
   }
 }

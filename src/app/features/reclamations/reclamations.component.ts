@@ -10,11 +10,12 @@ import { ParentChildHeaderSimpleComponent } from '../../shared/components/parent
 import Swal from 'sweetalert2';
 import { PageTitleService } from '../../core/services/page-title.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-reclamations',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgSelectModule, ParentChildHeaderSimpleComponent, TranslateModule],
+  imports: [CommonModule, FormsModule, NgSelectModule, ParentChildHeaderSimpleComponent, TranslateModule, IonContent, IonRefresher, IonRefresherContent],
   templateUrl: './reclamations.component.html',
   styleUrls: ['./reclamations.component.scss']
 })
@@ -433,5 +434,16 @@ export class ReclamationsComponent implements OnInit, OnDestroy {
 
   getOpenCount(): number {
     return this.receivedReclamations.filter(r => !r.isResolved).length;
+  }
+
+  // Pull-to-refresh handler for Ionic refresher
+  onRefresh(event?: any): void {
+    this.loadReclamations();
+    setTimeout(() => {
+      // Complete the Ionic refresher
+      if (event?.target) {
+        event.target.complete();
+      }
+    }, 500);
   }
 }

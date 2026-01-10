@@ -1,6 +1,11 @@
-<div *ngIf="isParent">
-  <!-- Loading Skeleton for Parent View -->
-  <div *ngIf="loading" class="parent-detailchild font-inter">
+<ion-content *ngIf="isParent" class="parent-child-detail-page">
+  <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div>
+    <!-- Loading Skeleton for Parent View -->
+    <div *ngIf="loading" class="parent-detailchild font-inter">
     <!-- Header Skeleton -->
     <div class="dashboard-header" style="background: linear-gradient(135deg, #B8E6F0 0%, #D4F1E8 100%); padding: 35px 20px 16px; padding-top: calc(env(safe-area-inset-top, 0px) + 16px); border-radius: 0 0 32px 32px; margin-bottom: 80px;">
       <div class="title-icons d-flex justify-content-between mb-4">
@@ -116,7 +121,7 @@
         </div>
         <div class="info-row">
             <div class="info-label">Age </div>
-            <div class="info-value">{{ getAge(child.dateOfBirth) }} years old</div>
+            <div class="info-value">{{ getAgeDisplay(child.dateOfBirth) }}</div>
         </div>
         <div class="info-row">
             <div class="info-label">Birthday</div>
@@ -182,7 +187,8 @@
       </div>
     </div>
   </div>
-</div>
+  </div>
+</ion-content>
 
 <div class="container-fluid mt-4">
   <app-title-page *ngIf="!isParent" [title]="'CHILD_DETAIL.TITLE' | translate" [subtitle]="'CHILD_DETAIL.SUBTITLE' | translate"
@@ -211,7 +217,7 @@
             </div>
             <div class="overflow-hidden">
               <h5 class="mb-1 text-truncate name-user">{{ child.firstName }} {{ child.lastName }}</h5>
-              <p class="age">{{ 'CHILD_DETAIL.AGE' | translate }} : {{ getAge(child.dateOfBirth) }} {{ 'CHILD_DETAIL.YEARS_OLD' | translate }}</p>
+              <p class="age">{{ 'CHILD_DETAIL.AGE' | translate }} : {{ getAgeDisplay(child.dateOfBirth) }}</p>
             </div>
           </div>
         </div>

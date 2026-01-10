@@ -25,6 +25,12 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         return throwError(() => error);
       }
 
+      // Check if this is a GET request with cached data available
+      // The cache interceptor runs before error interceptor, so if we have cached data,
+      // it would have already been returned and we wouldn't be here.
+      // However, for status 0 (network error) on GET requests, we should be less intrusive
+      const isGetRequest = cleanReq.method === 'GET';
+
       let errorMessage = 'An unexpected error occurred';
 
       if (error.error instanceof ErrorEvent) {
@@ -35,6 +41,14 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         switch (error.status) {
           case 0:
             // Network error
+            // For GET requests, cache interceptor handles it. Only show error for write operations.
+            if (isGetRequest) {
+              // Silent fail for GET requests - cache interceptor would have handled it if data was available
+              console.log(`[Error] Network error for GET request (cache miss): ${cleanReq.url}`);
+              return throwError(() => error);
+            }
+
+            // For write operations (POST/PUT/DELETE), show error
             errorMessage = 'No internet connection. Please check your network.';
             Swal.fire({
               icon: 'error',

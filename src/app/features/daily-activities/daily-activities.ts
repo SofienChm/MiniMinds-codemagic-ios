@@ -18,6 +18,7 @@ import { PageTitleService } from '../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
 import { PullToRefreshComponent } from '../../shared/components/pull-to-refresh/pull-to-refresh.component';
 import { SkeletonActivityTimelineComponent } from '../../shared/components/skeleton/skeleton-activity-timeline.component';
+import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
 
 // Register Chart.js components
 Chart.register(ArcElement, Tooltip, Legend, DoughnutController, LineElement, LineController, LinearScale, CategoryScale, PointElement);
@@ -25,7 +26,7 @@ Chart.register(ArcElement, Tooltip, Legend, DoughnutController, LineElement, Lin
 @Component({
   selector: 'app-daily-activities',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, NgSelectModule, TranslateModule, TitlePage, BaseChartDirective, ParentChildHeaderComponent, PullToRefreshComponent, SkeletonActivityTimelineComponent],
+  imports: [CommonModule, FormsModule, RouterModule, NgSelectModule, TranslateModule, TitlePage, BaseChartDirective, ParentChildHeaderComponent, PullToRefreshComponent, SkeletonActivityTimelineComponent, IonContent, IonRefresher, IonRefresherContent],
   templateUrl: './daily-activities.html',
   styleUrls: ['./daily-activities.scss']
 })
@@ -442,11 +443,16 @@ export class DailyActivities implements OnInit, AfterViewInit, OnDestroy {
     return child.id;
   }
 
-  // Pull-to-refresh handler
-  onRefresh(): void {
+  // Pull-to-refresh handler for Ionic refresher
+  onRefresh(event?: any): void {
     this.loadActivities();
     // Complete refresh after data loads
     setTimeout(() => {
+      // Complete the Ionic refresher
+      if (event?.target) {
+        event.target.complete();
+      }
+      // Fallback for custom pull-to-refresh (if still used elsewhere)
       this.pullToRefresh?.completeRefresh();
     }, 500);
   }

@@ -1,13 +1,16 @@
-<div class="parent-detailchild new-design">
-  <app-parent-child-header-simple
-    [title]="'MESSAGES_PAGE.TITLE' | translate"
-  >
-    <span class="nd-unread-badge">{{ getUnreadCount() }} {{ 'MESSAGES_PAGE.UNREAD' | translate }}</span>
-  </app-parent-child-header-simple>
-  
-  <app-pull-to-refresh #pullToRefresh (refresh)="onRefresh()" *ngIf="isParent">
+<ion-content *ngIf="isParent" class="parent-messages">
+  <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
 
-  <!-- Tab Bar -->
+  <div class="parent-detailchild new-design">
+    <app-parent-child-header-simple
+      [title]="'MESSAGES_PAGE.TITLE' | translate"
+    >
+      <span class="nd-unread-badge">{{ getUnreadCount() }} {{ 'MESSAGES_PAGE.UNREAD' | translate }}</span>
+    </app-parent-child-header-simple>
+
+    <!-- Tab Bar -->
   <div class="nd-tab-bar">
     <div class="nd-tab" [class.active]="activeTab === 'received'" (click)="switchTab('received')">
       {{ 'MESSAGES_PAGE.INBOX' | translate }}
@@ -192,12 +195,13 @@
       </button>
     </div>
   </div>
-  </app-pull-to-refresh>
-   <!-- Floating Action Button -->
+
+  <!-- Floating Action Button -->
   <button class="nd-fab" (click)="openNewMessageModal()" *ngIf="!showNewMessageModal && !showModal">
     <i class="bi bi-pencil"></i>
   </button>
-</div>
+  </div>
+</ion-content>
 
 <div *ngIf="!isParent" class="container-fluid mt-4">
 

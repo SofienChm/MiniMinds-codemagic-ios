@@ -321,6 +321,35 @@ export class Children implements OnInit, OnDestroy {
     return age;
   }
 
+  getAgeDisplay(dateOfBirth: string): string {
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+
+    let years = today.getFullYear() - birthDate.getFullYear();
+    let months = today.getMonth() - birthDate.getMonth();
+
+    if (months < 0 || (months === 0 && today.getDate() < birthDate.getDate())) {
+      years--;
+      months += 12;
+    }
+
+    if (today.getDate() < birthDate.getDate()) {
+      months--;
+      if (months < 0) {
+        months += 12;
+        years--;
+      }
+    }
+
+    // If under 1 year old, show months
+    if (years === 0) {
+      return months === 1 ? '1 month old' : `${months} months old`;
+    }
+
+    // Otherwise show years
+    return years === 1 ? '1 year old' : `${years} years old`;
+  }
+
   toggleExportDropdown() {
     this.showExportDropdown = !this.showExportDropdown;
   }

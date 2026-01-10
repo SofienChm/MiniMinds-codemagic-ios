@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -16,16 +16,16 @@ import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
 import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 import { PullToRefreshComponent } from '../../shared/components/pull-to-refresh/pull-to-refresh.component';
+import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-event',
   standalone: true,
-  imports: [CommonModule, FormsModule, TitlePage, ParentChildHeaderSimpleComponent, TranslateModule, NgSelectModule, AppCurrencyPipe, SkeletonComponent, PullToRefreshComponent],
+  imports: [CommonModule, FormsModule, TitlePage, ParentChildHeaderSimpleComponent, TranslateModule, NgSelectModule, AppCurrencyPipe, SkeletonComponent, PullToRefreshComponent, IonContent, IonRefresher, IonRefresherContent],
   templateUrl: './event.html',
   styleUrl: './event.scss'
 })
 export class Event implements OnInit, OnDestroy {
-  @ViewChild('pullToRefresh') pullToRefresh!: PullToRefreshComponent;
   private langChangeSub?: Subscription;
   private eventsSub?: Subscription;
   events: EventModel[] = [];
@@ -352,11 +352,14 @@ export class Event implements OnInit, OnDestroy {
     return item.id;
   }
 
-  // Pull-to-refresh handler
-  onRefresh(): void {
+  // Pull-to-refresh handler for Ionic refresher
+  onRefresh(event?: any): void {
     this.loadEvents();
     setTimeout(() => {
-      this.pullToRefresh?.completeRefresh();
+      // Complete the Ionic refresher
+      if (event?.target) {
+        event.target.complete();
+      }
     }, 500);
   }
 }

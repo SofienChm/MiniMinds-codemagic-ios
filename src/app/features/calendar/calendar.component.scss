@@ -1,5 +1,22 @@
 /* Calendar page specific styles */
 
+/* Ion Content Styling for Parent Calendar */
+ion-content.parent-calendar {
+  --background: #ffffff;
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  display: block !important;
+  position: relative !important;
+  min-height: calc(100vh - 95px) !important;
+
+  // Ensure the scroll content is visible
+  .inner-scroll {
+    display: block !important;
+  }
+}
+
 ::ng-deep {
   .header-info{
     margin-bottom: 35px !important;
@@ -377,6 +394,12 @@
       span {
         font-size: 12px; 
       }
+    }
+    .calender-mobile {
+      padding: 0px;
+    }
+    .selectdate-mobile {
+      padding: 0px;
     }
   }
 }

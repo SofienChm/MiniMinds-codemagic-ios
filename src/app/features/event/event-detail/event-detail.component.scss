@@ -1,3 +1,19 @@
+// Ion Content Styling for Parent Event Detail
+ion-content.parent-event-detail-page {
+  --background: #ffffff;
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  display: block !important;
+  position: relative !important;
+  min-height: calc(100vh - 95px) !important;
+
+  .inner-scroll {
+    display: block !important;
+  }
+}
+
 // Brand Colors
 $primary-color: #202c4b;
 $secondary-color: #feccfd;

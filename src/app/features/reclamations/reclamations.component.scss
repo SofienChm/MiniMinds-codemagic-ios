@@ -1,3 +1,19 @@
+// Ion Content Styling for Parent Reclamations
+ion-content.parent-reclamations {
+  --background: #ffffff;
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  display: block !important;
+  position: relative !important;
+  min-height: calc(100vh - 95px) !important;
+
+  .inner-scroll {
+    display: block !important;
+  }
+}
+
 .panel { border: 1px solid #e5e7eb; border-radius: 10px; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.04); overflow: hidden; height: calc(100vh - 200px); display: flex; flex-direction: column; padding-bottom: 25px;}
 .panel-header { padding: 12px 14px; border-bottom: 1px solid #e5e7eb; font-weight: 600; display:flex; align-items:center; justify-content:space-between; }
 .header-left { display: flex; align-items: center; gap: 12px; }

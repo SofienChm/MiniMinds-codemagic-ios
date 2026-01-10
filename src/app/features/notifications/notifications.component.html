@@ -1,10 +1,13 @@
 <ion-content *ngIf="isParent" class="parent-notifications">
+  <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
   <div class="parent-detailchild font-inter">
     <app-parent-child-header-simple
       title="Notifications"
     >
     </app-parent-child-header-simple>
-    <!-- <app-pull-to-refresh #pullToRefresh (refresh)="onRefresh()" *ngIf="!loading"> -->
 
     <div class="body container-fluid">
       <div class="main-information">

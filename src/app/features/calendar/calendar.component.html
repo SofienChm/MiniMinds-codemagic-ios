@@ -1,11 +1,14 @@
-<div *ngIf="isParent && !loading" [class]="isParent ? '' : ' mt-4'">
-    <div class="parent-detailchild font-inter">
-      <app-parent-child-header-simple *ngIf="isParent"
-        [title]="'CALENDAR_PAGE.CALENDAR' | translate"
-      >
-      </app-parent-child-header-simple>
-      <app-pull-to-refresh #pullToRefresh (refresh)="onRefresh()" *ngIf="isParent">
-        <div class="body container-fluid">
+<ion-content *ngIf="isParent && !loading" class="parent-calendar">
+  <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="parent-detailchild font-inter">
+    <app-parent-child-header-simple
+      [title]="'CALENDAR_PAGE.CALENDAR' | translate"
+    >
+    </app-parent-child-header-simple>
+    <div class="body container-fluid">
           <div class="main-information">
             <full-calendar [options]="calendarOptions"></full-calendar>
             <div class="main-information">
@@ -54,9 +57,8 @@
             </div>
           </div>
         </div>
-      </app-pull-to-refresh>
-    </div>
-</div>
+  </div>
+</ion-content>
 
 <div *ngIf="!isParent"  [class]="isParent ? '' : 'container-fluid mt-4'">
   <app-title-page
@@ -65,7 +67,7 @@
   </app-title-page>
   <div class="container-fluid">
   <div class="row">
-    <div class="col-lg-8 p-0">
+    <div class="col-lg-8 calender-mobile">
       <div class="card card-general">
         <div class="card-body">
           <full-calendar [options]="calendarOptions"></full-calendar>
@@ -73,7 +75,7 @@
       </div>
     </div>
 
-    <div class="col-lg-4 p-0">
+    <div class="col-lg-4 selectdate-mobile">
       <div class="card card-general shadow-sm selected-day">
         <div class="card-header">
           <i class="bi bi-check2-circle"></i>
