@@ -443,17 +443,14 @@ export class DailyActivities implements OnInit, AfterViewInit, OnDestroy {
     return child.id;
   }
 
-  // Pull-to-refresh handler for Ionic refresher
+  // Pull-to-refresh handler
   onRefresh(event?: any): void {
     this.loadActivities();
     // Complete refresh after data loads
     setTimeout(() => {
-      // Complete the Ionic refresher
       if (event?.target) {
         event.target.complete();
       }
-      // Fallback for custom pull-to-refresh (if still used elsewhere)
-      this.pullToRefresh?.completeRefresh();
     }, 500);
   }
 

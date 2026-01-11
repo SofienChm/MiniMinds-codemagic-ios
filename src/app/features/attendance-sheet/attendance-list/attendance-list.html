@@ -1,7 +1,8 @@
 <div class="container-fluid mt-4">
   <app-title-page
     [title]="'ATTENDANCE_LIST.TITLE' | translate"
-    [breadcrumbs]="[{label: 'ATTENDANCE_LIST.DASHBOARD' | translate, url: '/dashboard'}, {label: 'ATTENDANCE_LIST.ATTENDANCE_LIST' | translate}]">
+    [breadcrumbs]="[{label: 'ATTENDANCE_LIST.DASHBOARD' | translate, url: '/dashboard'}, {label: 'ATTENDANCE_LIST.ATTENDANCE_LIST' | translate}]"
+    [actions]="titleActions">
   </app-title-page>
 </div>
 
@@ -102,6 +103,99 @@
     </div>
     <div class="card-footer d-flex align-items-center justify-content-between">
       <span class="text-muted">{{ 'ATTENDANCE_LIST.TOTAL' | translate }}: {{ filteredChildren.length }} {{ 'ATTENDANCE_LIST.CHILDREN' | translate }}</span>
+    </div>
+  </div>
+</div>
+
+<!-- QR Scanner Modal -->
+<div class="modal fade show d-block" *ngIf="showQrScannerModal" style="background-color: rgba(0,0,0,0.5)"
+  (click)="closeQrScannerModal()">
+  <div class="modal-dialog modal-dialog-centered modal-lg" (click)="$event.stopPropagation()">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-qr-code-scan me-2"></i>{{ 'ATTENDANCE_LIST.QR_SCAN_TITLE' | translate }}
+        </h5>
+        <button type="button" class="btn-close" (click)="closeQrScannerModal()"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Getting Location State -->
+        <div *ngIf="qrScannerState === 'getting-location'" class="text-center py-4">
+          <div class="spinner-border text-primary mb-3" role="status">
+            <span class="visually-hidden">{{ 'ATTENDANCE_LIST.LOADING' | translate }}</span>
+          </div>
+          <p class="text-muted">{{ 'ATTENDANCE_LIST.QR_GETTING_LOCATION' | translate }}</p>
+        </div>
+
+        <!-- Idle State -->
+        <div *ngIf="qrScannerState === 'idle'" class="text-center">
+          <div class="qr-scanner-placeholder mb-3">
+            <i class="bi bi-qr-code display-1 text-muted"></i>
+            <p class="text-muted mt-2">{{ 'ATTENDANCE_LIST.QR_READY_TO_SCAN' | translate }}</p>
+          </div>
+          <div *ngIf="qrScannerError" class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle me-2"></i>{{ qrScannerError }}
+            <button class="btn btn-link btn-sm p-0 ms-2" (click)="retryLocation()">
+              <i class="bi bi-arrow-repeat me-1"></i>{{ 'ATTENDANCE_LIST.QR_TRY_AGAIN' | translate }}
+            </button>
+          </div>
+          <div *ngIf="!currentPosition && !qrScannerError" class="alert alert-warning">
+            <i class="bi bi-geo-alt me-2"></i>{{ 'ATTENDANCE_LIST.QR_GETTING_LOCATION' | translate }}
+          </div>
+          <div *ngIf="currentPosition && schoolSettings?.geofenceEnabled && !isWithinGeofence" class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            {{ 'ATTENDANCE_LIST.QR_OUTSIDE_GEOFENCE' | translate: { distance: (distanceToSchool | number:'1.0-0') } }}
+          </div>
+          <button class="btn btn-primary btn-lg w-100" (click)="startQrScanner()"
+            [disabled]="!currentPosition || (schoolSettings?.geofenceEnabled && !isWithinGeofence)">
+            <i class="bi bi-camera me-2"></i>{{ 'ATTENDANCE_LIST.QR_START_SCAN' | translate }}
+          </button>
+        </div>
+
+        <!-- Scanning State -->
+        <div *ngIf="qrScannerState === 'scanning'" class="text-center">
+          <div id="attendance-qr-reader" class="qr-reader-container mb-3"></div>
+          <p class="text-muted">{{ 'ATTENDANCE_LIST.QR_SCANNING_INSTRUCTION' | translate }}</p>
+          <button class="btn btn-outline-secondary" (click)="stopQrScanner(); qrScannerState = 'idle'">
+            <i class="bi bi-x-circle me-2"></i>{{ 'ATTENDANCE_LIST.QR_CANCEL_SCAN' | translate }}
+          </button>
+        </div>
+
+        <!-- Processing State -->
+        <div *ngIf="qrScannerState === 'processing'" class="text-center py-4">
+          <div class="spinner-border text-primary mb-3" role="status">
+            <span class="visually-hidden">{{ 'ATTENDANCE_LIST.LOADING' | translate }}</span>
+          </div>
+          <p class="text-muted">{{ 'ATTENDANCE_LIST.QR_PROCESSING' | translate }}</p>
+        </div>
+
+        <!-- Success State -->
+        <div *ngIf="qrScannerState === 'success'" class="text-center py-4">
+          <div class="success-icon mb-3">
+            <i class="bi bi-check-circle-fill text-success display-1"></i>
+          </div>
+          <h5 class="text-success mb-3">{{ qrScannerSuccess }}</h5>
+          <button class="btn btn-primary" (click)="closeQrScannerModal()">
+            <i class="bi bi-check me-2"></i>{{ 'ATTENDANCE_LIST.QR_DONE' | translate }}
+          </button>
+        </div>
+
+        <!-- Error State -->
+        <div *ngIf="qrScannerState === 'error'" class="text-center py-4">
+          <div class="error-icon mb-3">
+            <i class="bi bi-x-circle-fill text-danger display-1"></i>
+          </div>
+          <h5 class="text-danger mb-3">{{ qrScannerError }}</h5>
+          <div class="d-flex gap-2 justify-content-center">
+            <button class="btn btn-outline-secondary" (click)="closeQrScannerModal()">
+              {{ 'ATTENDANCE_LIST.CANCEL' | translate }}
+            </button>
+            <button class="btn btn-primary" (click)="qrScannerState = 'idle'; qrScannerError = ''">
+              <i class="bi bi-arrow-repeat me-2"></i>{{ 'ATTENDANCE_LIST.QR_TRY_AGAIN' | translate }}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>

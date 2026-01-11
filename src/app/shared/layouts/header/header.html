@@ -10,7 +10,7 @@
       <app-language-selector></app-language-selector>
 
       <!-- Quick Links Dropdown -->
-      <div class="position-relative">
+      <div class="position-relative position-relative-mobile">
         <button class="btn btn-header btn-outline-light bg-white btn-icon position-relative me-1" (click)="toggleQuickLinks()">
           <i class="bi bi-plus"></i>
         </button>
@@ -53,7 +53,7 @@
           <span *ngIf="messagesUnreadCount > 0" class="notification-status-dot"></span>
         </a>
 
-        <a class="btn btn-header btn-outline-light bg-white btn-icon position-relative me-1" (click)="toggleNotifications()">
+        <a class="btn btn-header btn-outline-light bg-white btn-icon position-relative-mobile me-1" (click)="toggleNotifications()">
           <i class="bi bi-bell"></i>
           <span *ngIf="unreadCount > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
             {{ unreadCount }}

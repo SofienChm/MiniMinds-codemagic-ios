@@ -74,11 +74,11 @@ import { CommonModule } from '@angular/common';
       .skeleton {
         background: linear-gradient(
           90deg,
-          #2a2a2a 0%,
-          #2a2a2a 40%,
-          #3a3a3a 50%,
-          #2a2a2a 60%,
-          #2a2a2a 100%
+          #f0f0f0 0%,
+          #f0f0f0 40%,
+          #e8e8e8 50%,
+          #f0f0f0 60%,
+          #f0f0f0 100%
         );
       }
     }

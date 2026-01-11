@@ -593,7 +593,12 @@ export class QrActionComponent implements OnInit, OnDestroy {
    * Load children and automatically process if only one eligible
    */
   private loadChildrenAndProcess(): void {
-    const sub = this.qrService.getMyChildrenStatus().subscribe({
+    // Load children based on user role (parent or teacher)
+    const childrenObservable = this.authService.isParent()
+      ? this.qrService.getMyChildrenStatus()
+      : this.qrService.getTeacherChildrenStatus();
+
+    const sub = childrenObservable.subscribe({
       next: (children) => {
         this.allChildren = children.map(c => ({
           id: c.id,
