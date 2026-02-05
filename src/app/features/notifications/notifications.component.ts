@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NotificationService } from '../../core/services/notification-service';
 import { Notification } from '../../core/interfaces/notification.interface';
 import { AuthService } from '../../core/services/auth';
@@ -12,7 +13,7 @@ import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/st
 @Component({
   selector: 'app-notifications',
   standalone: true,
-  imports: [CommonModule, ParentChildHeaderSimpleComponent, TitlePage, SkeletonComponent, IonContent, IonRefresher, IonRefresherContent],
+  imports: [CommonModule, TranslateModule, ParentChildHeaderSimpleComponent, TitlePage, SkeletonComponent, IonContent, IonRefresher, IonRefresherContent],
   templateUrl: './notifications.component.html',
   styleUrl: './notifications.component.scss'
 })
@@ -33,7 +34,8 @@ export class NotificationsComponent implements OnInit {
   constructor(
     private notificationService: NotificationService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private translate: TranslateService
   ) {}
 
   ngOnInit(): void {
@@ -145,13 +147,61 @@ export class NotificationsComponent implements OnInit {
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
-    
-    if (seconds < 0) return 'Just now';
-    if (seconds < 60) return `Today, ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`;
-    if (minutes < 60) return `Today, ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`;
-    if (hours < 24) return `Today, ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`;
-    if (days === 1) return `Yesterday, ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`;
-    return date.toLocaleDateString();
+
+    const timeStr = date.toLocaleTimeString(this.translate.currentLang || 'en', { hour: 'numeric', minute: '2-digit', hour12: true });
+    const todayLabel = this.translate.instant('NOTIFICATIONS_PAGE.TIME.TODAY');
+    const yesterdayLabel = this.translate.instant('NOTIFICATIONS_PAGE.TIME.YESTERDAY');
+    const justNowLabel = this.translate.instant('NOTIFICATIONS_PAGE.TIME.JUST_NOW');
+
+    if (seconds < 0) return justNowLabel;
+    if (seconds < 60) return `${todayLabel}, ${timeStr}`;
+    if (minutes < 60) return `${todayLabel}, ${timeStr}`;
+    if (hours < 24) return `${todayLabel}, ${timeStr}`;
+    if (days === 1) return `${yesterdayLabel}, ${timeStr}`;
+    return date.toLocaleDateString(this.translate.currentLang || 'en');
+  }
+
+  /**
+   * Get the translated title for a notification.
+   * Uses titleKey if available, otherwise falls back to title.
+   */
+  getTranslatedTitle(notification: Notification): string {
+    if (notification.titleKey) {
+      const params = this.parseMessageParams(notification.messageParams);
+      const translated = this.translate.instant(notification.titleKey, params);
+      // If translation key not found, it returns the key itself - fallback to title
+      return translated === notification.titleKey ? notification.title : translated;
+    }
+    return notification.title;
+  }
+
+  /**
+   * Get the translated message for a notification.
+   * Uses messageKey if available, otherwise falls back to message.
+   */
+  getTranslatedMessage(notification: Notification): string {
+    if (notification.messageKey) {
+      const params = this.parseMessageParams(notification.messageParams);
+      const translated = this.translate.instant(notification.messageKey, params);
+      // If translation key not found, it returns the key itself - fallback to message
+      return translated === notification.messageKey ? notification.message : translated;
+    }
+    return notification.message;
+  }
+
+  /**
+   * Parse messageParams from JSON string or return as-is if already an object
+   */
+  private parseMessageParams(messageParams?: string | Record<string, string>): Record<string, string> {
+    if (!messageParams) return {};
+    if (typeof messageParams === 'string') {
+      try {
+        return JSON.parse(messageParams);
+      } catch {
+        return {};
+      }
+    }
+    return messageParams;
   }
 
   getAvatarText(name: string): string {

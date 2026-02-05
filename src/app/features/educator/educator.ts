@@ -123,7 +123,7 @@ export class Educator implements OnInit, OnDestroy {
       error: (error) => {
         console.error('Error loading educators:', error);
         this.loading = false;
-        const errorMessage = error?.error?.message || this.translate.instant('EDUCATORS.LOAD_ERROR');
+        const errorMessage = this.extractErrorMessage(error);
         this.simpleToast.error(errorMessage);
       }
     });
@@ -162,8 +162,13 @@ export class Educator implements OnInit, OnDestroy {
             this.loadEducators();
           },
           error: (error) => {
-            const errorMessage = error?.error?.message || this.translate.instant('EDUCATORS.DELETE_ERROR');
-            this.simpleToast.error(errorMessage);
+            console.error('Error deleting educator:', error);
+            const errorMessage = this.extractErrorMessage(error, 'delete');
+            Swal.fire({
+              icon: 'error',
+              title: this.translate.instant('MESSAGES.ERROR'),
+              text: errorMessage
+            });
           }
         });
       }
@@ -278,5 +283,84 @@ export class Educator implements OnInit, OnDestroy {
   // TrackBy function for ngFor performance optimization
   trackById(index: number, item: EducatorModel): number | undefined {
     return item.id;
+  }
+
+  /**
+   * Extract user-friendly error message from HTTP error response
+   */
+  private extractErrorMessage(error: any, operation: 'load' | 'delete' = 'load'): string {
+    const defaultMessage = operation === 'delete'
+      ? this.translate.instant('EDUCATORS.DELETE_ERROR')
+      : this.translate.instant('EDUCATORS.LOAD_ERROR');
+
+    // Handle network errors (no internet, server unreachable)
+    if (error?.status === 0) {
+      return this.translate.instant('ERRORS.NETWORK_ERROR') || 'Network error. Please check your internet connection.';
+    }
+
+    // Handle timeout errors
+    if (error?.name === 'TimeoutError' || error?.message?.includes('timeout')) {
+      return this.translate.instant('ERRORS.TIMEOUT') || 'Request timed out. Please try again.';
+    }
+
+    // Handle server errors (500+)
+    if (error?.status >= 500) {
+      return this.translate.instant('ERRORS.SERVER_ERROR') || 'Server error. Please try again later.';
+    }
+
+    // Handle 403 Forbidden
+    if (error?.status === 403) {
+      return this.translate.instant('ERRORS.FORBIDDEN') || 'You do not have permission to perform this action.';
+    }
+
+    // Handle 401 Unauthorized
+    if (error?.status === 401) {
+      return this.translate.instant('ERRORS.UNAUTHORIZED') || 'Your session has expired. Please log in again.';
+    }
+
+    // Handle 404 Not Found
+    if (error?.status === 404) {
+      return this.translate.instant('ERRORS.EDUCATOR_NOT_FOUND') || 'Educator not found. They may have been deleted.';
+    }
+
+    if (error?.error) {
+      // Handle custom error message format
+      if (error.error.message) {
+        return error.error.message;
+      }
+
+      // Handle title property
+      if (error.error.title) {
+        return error.error.title;
+      }
+
+      // Handle string error
+      if (typeof error.error === 'string') {
+        return error.error;
+      }
+
+      // Handle .NET validation errors format
+      if (error.error.errors) {
+        const errorMessages: string[] = [];
+        for (const key in error.error.errors) {
+          if (error.error.errors.hasOwnProperty(key)) {
+            const messages = error.error.errors[key];
+            if (Array.isArray(messages)) {
+              errorMessages.push(...messages);
+            }
+          }
+        }
+        if (errorMessages.length > 0) {
+          return errorMessages.join('. ');
+        }
+      }
+    }
+
+    // Default fallback with status code for debugging
+    if (error?.status) {
+      return `${defaultMessage} (Error ${error.status})`;
+    }
+
+    return defaultMessage;
   }
 }

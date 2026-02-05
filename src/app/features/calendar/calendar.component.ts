@@ -110,18 +110,14 @@ export class CalendarPageComponent implements OnInit {
   loadEvents() {
     this.eventService.loadEvents().subscribe(events => {
       this.events = events;
-      if (this.holidays.length > 0) {
-        this.updateCalendarEvents();
-      }
+      this.updateCalendarEvents();
     });
   }
 
   loadHolidays() {
     this.holidayService.getHolidays().subscribe(holidays => {
       this.holidays = holidays;
-      if (this.events.length > 0) {
-        this.updateCalendarEvents();
-      }
+      this.updateCalendarEvents();
     });
   }
 

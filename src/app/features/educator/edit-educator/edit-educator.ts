@@ -145,41 +145,153 @@ export class EditEducator implements OnInit {
   }
 
   private extractErrorMessage(error: any): string {
+    // Handle network errors (no internet, server unreachable)
+    if (error?.status === 0) {
+      return this.translate.instant('ERRORS.NETWORK_ERROR') || 'Network error. Please check your internet connection.';
+    }
+
+    // Handle timeout errors
+    if (error?.name === 'TimeoutError' || error?.message?.includes('timeout')) {
+      return this.translate.instant('ERRORS.TIMEOUT') || 'Request timed out. Please try again.';
+    }
+
+    // Handle server errors (500+)
+    if (error?.status >= 500) {
+      return this.translate.instant('ERRORS.SERVER_ERROR') || 'Server error. Please try again later.';
+    }
+
+    // Handle 403 Forbidden
+    if (error?.status === 403) {
+      return this.translate.instant('ERRORS.FORBIDDEN') || 'You do not have permission to perform this action.';
+    }
+
+    // Handle 401 Unauthorized
+    if (error?.status === 401) {
+      return this.translate.instant('ERRORS.UNAUTHORIZED') || 'Your session has expired. Please log in again.';
+    }
+
+    // Handle 404 Not Found
+    if (error?.status === 404) {
+      return this.translate.instant('ERRORS.EDUCATOR_NOT_FOUND') || 'Educator not found. They may have been deleted.';
+    }
+
     if (error?.error) {
-      // Handle .NET validation errors format
+      // Handle ASP.NET Identity errors (array of {code, description})
+      if (Array.isArray(error.error)) {
+        const errorMessages = error.error.map((e: any) => this.mapIdentityError(e)).filter(Boolean);
+        if (errorMessages.length > 0) {
+          return errorMessages.join('\n• ');
+        }
+      }
+
+      // Handle .NET validation errors format (ModelState)
       if (error.error.errors) {
         const errorMessages: string[] = [];
         for (const key in error.error.errors) {
           if (error.error.errors.hasOwnProperty(key)) {
             const messages = error.error.errors[key];
+            const fieldName = this.getFieldLabel(key);
             if (Array.isArray(messages)) {
-              errorMessages.push(...messages);
+              messages.forEach((msg: string) => {
+                errorMessages.push(`${fieldName}: ${msg}`);
+              });
             }
           }
         }
         if (errorMessages.length > 0) {
-          return errorMessages.join('\n');
+          return errorMessages.join('\n• ');
         }
       }
 
       // Handle custom error message format
       if (error.error.message) {
-        return error.error.message;
+        return this.mapCommonErrorMessage(error.error.message);
+      }
+
+      // Handle title property (some APIs use this)
+      if (error.error.title) {
+        return error.error.title;
       }
 
       // Handle string error
       if (typeof error.error === 'string') {
-        return error.error;
+        return this.mapCommonErrorMessage(error.error);
       }
     }
 
-    // Handle duplicate email
-    if (error?.status === 409 || error?.error?.message?.includes('already exists')) {
-      return this.translate.instant('MESSAGES.EMAIL_ALREADY_EXISTS');
+    // Handle duplicate email (409 Conflict)
+    if (error?.status === 409) {
+      return this.translate.instant('MESSAGES.EMAIL_ALREADY_EXISTS') || 'This email is already registered.';
     }
 
-    // Default fallback
+    // Default fallback with status code for debugging
+    if (error?.status) {
+      return `${this.translate.instant('EDIT_EDUCATOR.UPDATE_ERROR')} (Error ${error.status})`;
+    }
+
     return this.translate.instant('EDIT_EDUCATOR.UPDATE_ERROR');
+  }
+
+  /**
+   * Map ASP.NET Identity error codes to user-friendly messages
+   */
+  private mapIdentityError(error: any): string {
+    if (!error) return '';
+
+    const code = error.code || error.Code;
+    const description = error.description || error.Description || '';
+
+    // Map common Identity error codes
+    const errorMap: { [key: string]: string } = {
+      'DuplicateUserName': this.translate.instant('ERRORS.DUPLICATE_EMAIL') || 'This email is already registered.',
+      'DuplicateEmail': this.translate.instant('ERRORS.DUPLICATE_EMAIL') || 'This email is already registered.',
+      'InvalidEmail': this.translate.instant('ERRORS.INVALID_EMAIL') || 'Please enter a valid email address.',
+      'InvalidUserName': this.translate.instant('ERRORS.INVALID_EMAIL') || 'Please enter a valid email address.',
+    };
+
+    return errorMap[code] || description || code;
+  }
+
+  /**
+   * Map common error messages to translated versions
+   */
+  private mapCommonErrorMessage(message: string): string {
+    if (!message) return '';
+
+    const lowerMessage = message.toLowerCase();
+
+    if (lowerMessage.includes('already exists') || lowerMessage.includes('duplicate')) {
+      return this.translate.instant('MESSAGES.EMAIL_ALREADY_EXISTS') || message;
+    }
+
+    if (lowerMessage.includes('not found')) {
+      return this.translate.instant('ERRORS.EDUCATOR_NOT_FOUND') || message;
+    }
+
+    if (lowerMessage.includes('invalid email')) {
+      return this.translate.instant('ERRORS.INVALID_EMAIL') || message;
+    }
+
+    return message;
+  }
+
+  /**
+   * Get user-friendly field label for validation errors
+   */
+  private getFieldLabel(fieldName: string): string {
+    const fieldMap: { [key: string]: string } = {
+      'FirstName': this.translate.instant('EDUCATORS.FIRST_NAME') || 'First Name',
+      'LastName': this.translate.instant('EDUCATORS.LAST_NAME') || 'Last Name',
+      'Email': this.translate.instant('EDUCATORS.EMAIL') || 'Email',
+      'Phone': this.translate.instant('EDUCATORS.PHONE') || 'Phone',
+      'DateOfBirth': this.translate.instant('EDUCATORS.DATE_OF_BIRTH') || 'Date of Birth',
+      'HireDate': this.translate.instant('EDUCATORS.HIRE_DATE') || 'Hire Date',
+      'Salary': this.translate.instant('EDUCATORS.SALARY') || 'Salary',
+      'Address': this.translate.instant('EDUCATORS.ADDRESS') || 'Address',
+      'Specialization': this.translate.instant('EDUCATORS.SPECIALIZATION') || 'Specialization',
+    };
+
+    return fieldMap[fieldName] || fieldName;
   }
 
   cancel() {

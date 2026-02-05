@@ -324,7 +324,8 @@
     "CONFIRM_DELETE": "Confirmer la suppression",
     "DELETE_PROFILE_PICTURE_CONFIRM": "Êtes-vous sûr de vouloir supprimer cette photo de profil ?",
     "PROFILE_PICTURE_DELETED": "Photo de profil supprimée avec succès",
-    "DELETE_PROFILE_PICTURE_ERROR": "Échec de la suppression de la photo de profil. Veuillez réessayer."
+    "DELETE_PROFILE_PICTURE_ERROR": "Échec de la suppression de la photo de profil. Veuillez réessayer.",
+    "GENERIC_ERROR": "Une erreur inattendue s'est produite. Veuillez réessayer."
   },
   "CHILDREN": {
     "TITLE": "Gestion des Enfants",
@@ -1903,7 +1904,9 @@
     "NO_AVAILABLE_CHILDREN": "Aucun enfant disponible trouvé",
     "AGE": "Âge",
     "GENDER": "Genre",
-    "REMOVE_CHILD_CONFIRM": "Retirer cet enfant de l'éducateur ?"
+    "REMOVE_CHILD_CONFIRM": "Retirer cet enfant de l'éducateur ?",
+    "CHILD_ASSIGNED_SUCCESS": "L'enfant a été assigné à cet éducateur avec succès.",
+    "CHILD_REMOVED_SUCCESS": "L'enfant a été retiré de cet éducateur."
   },
   "SUPER_ADMIN": {
     "DASHBOARD_SUBTITLE": "Vue d'ensemble et gestion de la plateforme",
@@ -2477,5 +2480,79 @@
       "TERMS_OF_SERVICE": "Conditions d'utilisation",
       "COPYRIGHT": "MiniMinds. Tous droits réservés."
     }
+  },
+  "NOTIFICATIONS_PAGE": {
+    "TITLE": "Notifications",
+    "MARK_ALL_READ": "Tout marquer comme lu",
+    "NO_NOTIFICATIONS": "Aucune notification",
+    "ALL_CAUGHT_UP": "Vous êtes à jour !",
+    "LOADING": "Chargement des notifications...",
+    "TAB_ALL": "Toutes",
+    "TAB_UNREAD": "Non lues",
+    "LOAD_MORE": "Charger plus",
+    "TIME": {
+      "JUST_NOW": "À l'instant",
+      "TODAY": "Aujourd'hui",
+      "YESTERDAY": "Hier"
+    },
+    "MESSAGES": {
+      "CHILD_CHECKED_IN_TITLE": "Enfant arrivé",
+      "CHILD_CHECKED_IN": "{{childName}} est arrivé(e) à {{time}}",
+      "CHILD_CHECKED_OUT_TITLE": "Enfant parti",
+      "CHILD_CHECKED_OUT": "{{childName}} est parti(e) à {{time}}",
+      "NEW_FEE_TITLE": "Nouveau frais ajouté",
+      "NEW_FEE": "Un nouveau frais de {{amount}} a été ajouté pour {{childName}}. Date d'échéance : {{dueDate}}",
+      "FEE_PAYMENT_RECEIVED_TITLE": "Paiement reçu",
+      "FEE_PAYMENT_RECEIVED": "{{parentName}} a payé {{amount}} pour {{childName}}. Date de paiement : {{paymentDate}}",
+      "NEW_DAILY_REPORT_TITLE": "Nouveau rapport quotidien",
+      "NEW_DAILY_REPORT": "{{activityType}} pour {{childName}} : {{notes}}",
+      "NEW_EVENT_TITLE": "Nouvel événement créé",
+      "NEW_EVENT": "Un nouvel événement '{{eventName}}' a été programmé. Découvrez-le !",
+      "EVENT_REGISTRATION_REQUEST_TITLE": "Nouvelle demande d'inscription",
+      "EVENT_REGISTRATION_REQUEST": "{{childName}} a été demandé(e) pour participer à '{{eventName}}'",
+      "CHILD_ADDED_TO_EVENT_TITLE": "Enfant ajouté à l'événement",
+      "CHILD_ADDED_TO_EVENT": "{{childName}} a été ajouté(e) à '{{eventName}}'",
+      "EVENT_REGISTRATION_APPROVED_TITLE": "Inscription approuvée",
+      "EVENT_REGISTRATION_APPROVED": "L'inscription de {{childName}} à '{{eventName}}' a été approuvée",
+      "EVENT_REGISTRATION_DECLINED_TITLE": "Inscription refusée",
+      "EVENT_REGISTRATION_DECLINED": "L'inscription de {{childName}} à '{{eventName}}' a été refusée",
+      "EVENT_CANCELLATION_REQUEST_TITLE": "Demande d'annulation",
+      "EVENT_CANCELLATION_REQUEST": "Une demande d'annulation pour {{childName}} de '{{eventName}}'",
+      "CANCELLATION_APPROVED_TITLE": "Annulation approuvée",
+      "CANCELLATION_APPROVED": "L'annulation de {{childName}} de '{{eventName}}' a été approuvée",
+      "CANCELLATION_DECLINED_TITLE": "Annulation refusée",
+      "CANCELLATION_DECLINED": "L'annulation de {{childName}} de '{{eventName}}' a été refusée",
+      "NEW_MESSAGE_TITLE": "Nouveau message",
+      "NEW_MESSAGE": "{{senderName}} : {{subject}}",
+      "NEW_REPLY_TITLE": "Nouvelle réponse",
+      "NEW_REPLY": "{{senderName}} a répondu à : {{subject}}",
+      "NEW_RECLAMATION_TITLE": "Nouvelle réclamation",
+      "NEW_RECLAMATION": "{{senderName}} : {{subject}}",
+      "RECLAMATION_RESOLVED_TITLE": "Réclamation résolue",
+      "RECLAMATION_RESOLVED": "Votre réclamation '{{subject}}' a été résolue",
+      "TEST_NOTIFICATION_TITLE": "Notification de test",
+      "TEST_NOTIFICATION": "Ceci est une notification de test pour vérifier que le système fonctionne."
+    }
+  },
+  "ERRORS": {
+    "NETWORK_ERROR": "Erreur réseau. Veuillez vérifier votre connexion internet.",
+    "TIMEOUT": "La requête a expiré. Veuillez réessayer.",
+    "SERVER_ERROR": "Erreur serveur. Veuillez réessayer plus tard.",
+    "FORBIDDEN": "Vous n'avez pas la permission d'effectuer cette action.",
+    "UNAUTHORIZED": "Votre session a expiré. Veuillez vous reconnecter.",
+    "NOT_FOUND": "La ressource demandée n'a pas été trouvée.",
+    "EDUCATOR_NOT_FOUND": "Éducateur non trouvé. Il a peut-être été supprimé.",
+    "CHILD_NOT_FOUND": "Enfant non trouvé. Il a peut-être été supprimé.",
+    "PARENT_NOT_FOUND": "Parent non trouvé. Il a peut-être été supprimé.",
+    "DUPLICATE_EMAIL": "Cette adresse e-mail est déjà enregistrée.",
+    "INVALID_EMAIL": "Veuillez entrer une adresse e-mail valide.",
+    "PASSWORD_TOO_SHORT": "Le mot de passe doit contenir au moins 6 caractères.",
+    "PASSWORD_REQUIRES_DIGIT": "Le mot de passe doit contenir au moins un chiffre (0-9).",
+    "PASSWORD_REQUIRES_LOWER": "Le mot de passe doit contenir au moins une lettre minuscule.",
+    "PASSWORD_REQUIRES_UPPER": "Le mot de passe doit contenir au moins une lettre majuscule.",
+    "PASSWORD_REQUIRES_SPECIAL": "Le mot de passe doit contenir au moins un caractère spécial (!@#$%^&*).",
+    "PASSWORD_REQUIRES_UNIQUE": "Le mot de passe doit contenir plus de caractères uniques.",
+    "NO_ACTIVE_CLASSES": "Cet éducateur n'a pas de classes actives. Veuillez d'abord lui assigner une classe avant d'ajouter des enfants.",
+    "CHILD_ALREADY_ASSIGNED": "Cet enfant est déjà assigné à la classe de cet éducateur."
   }
 }

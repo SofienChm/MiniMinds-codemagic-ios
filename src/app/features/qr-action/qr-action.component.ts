@@ -8,12 +8,14 @@ import { AuthService } from '../../core/services/auth';
 import { Subscription } from 'rxjs';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import { Capacitor } from '@capacitor/core';
+import { ApiConfig } from '../../core/config/api.config';
 
 interface ChildInfo {
   id: number;
   firstName: string;
   lastName: string;
   profilePicture?: string;
+  profilePictureUrl?: string;
   isCheckedIn: boolean;
   isCheckedOut: boolean;
 }
@@ -166,7 +168,7 @@ type QrActionState =
               <div class="child-checkbox">
                 <i class="bi" [class.bi-check-square-fill]="isChildSelected(child.id)" [class.bi-square]="!isChildSelected(child.id)"></i>
               </div>
-              <img [src]="child.profilePicture || 'assets/child.png'" class="child-avatar" alt="Child">
+              <img [src]="getChildProfilePicture(child)" class="child-avatar" alt="Child">
               <div class="child-info">
                 <h6>{{ child.firstName }} {{ child.lastName }}</h6>
                 <small [class.text-success]="child.isCheckedIn && !child.isCheckedOut"
@@ -593,10 +595,15 @@ export class QrActionComponent implements OnInit, OnDestroy {
    * Load children and automatically process if only one eligible
    */
   private loadChildrenAndProcess(): void {
-    // Load children based on user role (parent or teacher)
-    const childrenObservable = this.authService.isParent()
-      ? this.qrService.getMyChildrenStatus()
-      : this.qrService.getTeacherChildrenStatus();
+    // Load children based on user role
+    let childrenObservable;
+    if (this.authService.isParent()) {
+      childrenObservable = this.qrService.getMyChildrenStatus();
+    } else if (this.authService.isAdmin()) {
+      childrenObservable = this.qrService.getAllChildrenStatus();
+    } else {
+      childrenObservable = this.qrService.getTeacherChildrenStatus();
+    }
 
     const sub = childrenObservable.subscribe({
       next: (children) => {
@@ -605,6 +612,7 @@ export class QrActionComponent implements OnInit, OnDestroy {
           firstName: c.firstName,
           lastName: c.lastName,
           profilePicture: c.profilePicture,
+          profilePictureUrl: c.profilePictureUrl,
           isCheckedIn: c.isCheckedIn,
           isCheckedOut: c.isCheckedOut
         }));
@@ -678,6 +686,22 @@ export class QrActionComponent implements OnInit, OnDestroy {
     this.selectedChildIds = this.eligibleChildren
       .filter(c => !this.isChildDisabled(c))
       .map(c => c.id);
+  }
+
+  /**
+   * Get child profile picture URL
+   */
+  getChildProfilePicture(child: ChildInfo): string {
+    // Prefer file-based URL
+    if (child.profilePictureUrl) {
+      return ApiConfig.STATIC_URL + child.profilePictureUrl;
+    }
+    // Fallback to Base64
+    if (child.profilePicture) {
+      return child.profilePicture;
+    }
+    // Default image
+    return 'assets/child.png';
   }
 
   /**

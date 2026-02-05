@@ -50,6 +50,13 @@ export class QrCheckinService {
   }
 
   /**
+   * Get all children attendance status for today (Admin role)
+   */
+  getAllChildrenStatus(): Observable<ChildAttendanceStatus[]> {
+    return this.http.get<ChildAttendanceStatus[]>(`${this.attendanceUrl}/AllChildren`);
+  }
+
+  /**
    * Validate a QR code
    */
   validateQrCode(code: string): Observable<QrValidationResponse> {

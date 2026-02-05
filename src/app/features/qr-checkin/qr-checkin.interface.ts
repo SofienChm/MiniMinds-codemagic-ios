@@ -56,6 +56,7 @@ export interface ChildAttendanceStatus {
   firstName: string;
   lastName: string;
   profilePicture?: string;
+  profilePictureUrl?: string;
   isCheckedIn: boolean;
   isCheckedOut: boolean;
   checkInTime?: string;

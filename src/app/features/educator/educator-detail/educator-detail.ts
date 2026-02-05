@@ -98,7 +98,14 @@ export class EducatorDetail implements OnInit {
       error: (error) => {
         console.error('Error loading educator:', error);
         this.loading = false;
-        this.router.navigate(['/educators']);
+        const errorMessage = this.extractErrorMessage(error);
+        Swal.fire({
+          icon: 'error',
+          title: this.translate.instant('MESSAGES.ERROR'),
+          text: errorMessage
+        }).then(() => {
+          this.router.navigate(['/educators']);
+        });
       }
     });
   }
@@ -171,10 +178,23 @@ export class EducatorDetail implements OnInit {
         this.assigningChild = false;
         this.closeAddChildModal();
         this.loadAssignedChildren();
+        Swal.fire({
+          icon: 'success',
+          title: this.translate.instant('MESSAGES.SUCCESS'),
+          text: this.translate.instant('EDUCATOR_DETAIL.CHILD_ASSIGNED_SUCCESS'),
+          timer: 2000,
+          showConfirmButton: false
+        });
       },
       error: (error) => {
         this.assigningChild = false;
         console.error('Error assigning child:', error);
+        const errorMessage = this.extractErrorMessage(error);
+        Swal.fire({
+          icon: 'error',
+          title: this.translate.instant('MESSAGES.ERROR'),
+          text: errorMessage
+        });
       }
     });
   }
@@ -192,8 +212,25 @@ export class EducatorDetail implements OnInit {
     }).then((result) => {
       if (result.isConfirmed) {
         this.http.delete(`${ApiConfig.ENDPOINTS.EDUCATORS}/${this.educatorId}/remove-child/${childId}`).subscribe({
-          next: () => this.loadAssignedChildren(),
-          error: (error) => console.error('Error removing child:', error)
+          next: () => {
+            this.loadAssignedChildren();
+            Swal.fire({
+              icon: 'success',
+              title: this.translate.instant('MESSAGES.SUCCESS'),
+              text: this.translate.instant('EDUCATOR_DETAIL.CHILD_REMOVED_SUCCESS'),
+              timer: 2000,
+              showConfirmButton: false
+            });
+          },
+          error: (error) => {
+            console.error('Error removing child:', error);
+            const errorMessage = this.extractErrorMessage(error);
+            Swal.fire({
+              icon: 'error',
+              title: this.translate.instant('MESSAGES.ERROR'),
+              text: errorMessage
+            });
+          }
         });
       }
     });
@@ -201,5 +238,161 @@ export class EducatorDetail implements OnInit {
 
   viewChildDetails(childId: number) {
     this.router.navigate(['/children/detail', childId]);
+  }
+
+  /**
+   * Extract user-friendly error message from HTTP error response
+   */
+  private extractErrorMessage(error: any): string {
+    console.log('Full error object:', error); // Debug log to see actual error
+
+    // Handle network errors (no internet, server unreachable)
+    if (error?.status === 0) {
+      return this.translate.instant('ERRORS.NETWORK_ERROR') || 'Network error. Please check your internet connection.';
+    }
+
+    // Handle timeout errors
+    if (error?.name === 'TimeoutError' || error?.message?.includes('timeout')) {
+      return this.translate.instant('ERRORS.TIMEOUT') || 'Request timed out. Please try again.';
+    }
+
+    // Handle server errors (500+)
+    if (error?.status >= 500) {
+      return this.translate.instant('ERRORS.SERVER_ERROR') || 'Server error. Please try again later.';
+    }
+
+    // Handle 403 Forbidden
+    if (error?.status === 403) {
+      return this.translate.instant('ERRORS.FORBIDDEN') || 'You do not have permission to perform this action.';
+    }
+
+    // Handle 401 Unauthorized
+    if (error?.status === 401) {
+      return this.translate.instant('ERRORS.UNAUTHORIZED') || 'Your session has expired. Please log in again.';
+    }
+
+    // Handle 404 Not Found
+    if (error?.status === 404) {
+      const errorMessage = error?.error?.message || error?.error || '';
+      if (typeof errorMessage === 'string') {
+        if (errorMessage.toLowerCase().includes('child')) {
+          return this.translate.instant('ERRORS.CHILD_NOT_FOUND') || 'Child not found.';
+        }
+        if (errorMessage.toLowerCase().includes('teacher') || errorMessage.toLowerCase().includes('educator')) {
+          return this.translate.instant('ERRORS.EDUCATOR_NOT_FOUND') || 'Educator not found.';
+        }
+      }
+      return this.translate.instant('ERRORS.NOT_FOUND') || 'The requested resource was not found.';
+    }
+
+    // Handle 400 Bad Request with specific messages
+    if (error?.status === 400) {
+      const errorBody = error?.error;
+
+      // Handle string error directly from backend
+      if (typeof errorBody === 'string') {
+        return this.mapBackendErrorMessage(errorBody);
+      }
+
+      // Handle object with message property
+      if (errorBody?.message) {
+        return this.mapBackendErrorMessage(errorBody.message);
+      }
+
+      // Handle .NET validation errors format
+      if (errorBody?.errors) {
+        const errorMessages: string[] = [];
+        for (const key in errorBody.errors) {
+          if (errorBody.errors.hasOwnProperty(key)) {
+            const messages = errorBody.errors[key];
+            if (Array.isArray(messages)) {
+              errorMessages.push(...messages);
+            }
+          }
+        }
+        if (errorMessages.length > 0) {
+          return errorMessages.join('. ');
+        }
+      }
+
+      // Handle title property (ASP.NET problem details)
+      if (errorBody?.title) {
+        return errorBody.title;
+      }
+    }
+
+    if (error?.error) {
+      // Handle custom error message format
+      if (error.error.message) {
+        return this.mapBackendErrorMessage(error.error.message);
+      }
+
+      // Handle title property
+      if (error.error.title) {
+        return error.error.title;
+      }
+
+      // Handle string error
+      if (typeof error.error === 'string') {
+        return this.mapBackendErrorMessage(error.error);
+      }
+
+      // Handle .NET validation errors format
+      if (error.error.errors) {
+        const errorMessages: string[] = [];
+        for (const key in error.error.errors) {
+          if (error.error.errors.hasOwnProperty(key)) {
+            const messages = error.error.errors[key];
+            if (Array.isArray(messages)) {
+              errorMessages.push(...messages);
+            }
+          }
+        }
+        if (errorMessages.length > 0) {
+          return errorMessages.join('. ');
+        }
+      }
+    }
+
+    // Default fallback with status code for debugging
+    if (error?.status) {
+      return `${this.translate.instant('MESSAGES.ERROR')} (Error ${error.status})`;
+    }
+
+    return this.translate.instant('MESSAGES.GENERIC_ERROR') || 'An unexpected error occurred. Please try again.';
+  }
+
+  /**
+   * Map backend error messages to user-friendly translated messages
+   */
+  private mapBackendErrorMessage(message: string): string {
+    if (!message) return '';
+
+    const lowerMessage = message.toLowerCase();
+
+    // Handle "Teacher has no active classes" error
+    if (lowerMessage.includes('no active classes')) {
+      return this.translate.instant('ERRORS.NO_ACTIVE_CLASSES') ||
+        'This educator has no active classes. Please assign them to a class first before adding children.';
+    }
+
+    // Handle "Child is already assigned" error
+    if (lowerMessage.includes('already assigned') || lowerMessage.includes('already enrolled')) {
+      return this.translate.instant('ERRORS.CHILD_ALREADY_ASSIGNED') ||
+        'This child is already assigned to this educator\'s class.';
+    }
+
+    // Handle "Child not found" error
+    if (lowerMessage.includes('child not found')) {
+      return this.translate.instant('ERRORS.CHILD_NOT_FOUND') || 'Child not found.';
+    }
+
+    // Handle "Teacher not found" error
+    if (lowerMessage.includes('teacher not found') || lowerMessage.includes('educator not found')) {
+      return this.translate.instant('ERRORS.EDUCATOR_NOT_FOUND') || 'Educator not found.';
+    }
+
+    // Return original message if no mapping found
+    return message;
   }
 }

@@ -2470,5 +2470,58 @@
       "TERMS_OF_SERVICE": "Termini di servizio",
       "COPYRIGHT": "MiniMinds. Tutti i diritti riservati."
     }
+  },
+  "NOTIFICATIONS_PAGE": {
+    "TITLE": "Notifiche",
+    "MARK_ALL_READ": "Segna tutto come letto",
+    "NO_NOTIFICATIONS": "Nessuna notifica",
+    "ALL_CAUGHT_UP": "Sei in pari!",
+    "LOADING": "Caricamento notifiche...",
+    "TAB_ALL": "Tutte",
+    "TAB_UNREAD": "Non lette",
+    "LOAD_MORE": "Carica altro",
+    "TIME": {
+      "JUST_NOW": "Adesso",
+      "TODAY": "Oggi",
+      "YESTERDAY": "Ieri"
+    },
+    "MESSAGES": {
+      "CHILD_CHECKED_IN_TITLE": "Bambino arrivato",
+      "CHILD_CHECKED_IN": "{{childName}} è arrivato/a alle {{time}}",
+      "CHILD_CHECKED_OUT_TITLE": "Bambino partito",
+      "CHILD_CHECKED_OUT": "{{childName}} è partito/a alle {{time}}",
+      "NEW_FEE_TITLE": "Nuova tariffa aggiunta",
+      "NEW_FEE": "Una nuova tariffa di {{amount}} è stata aggiunta per {{childName}}. Data di scadenza: {{dueDate}}",
+      "FEE_PAYMENT_RECEIVED_TITLE": "Pagamento ricevuto",
+      "FEE_PAYMENT_RECEIVED": "{{parentName}} ha pagato {{amount}} per {{childName}}. Data di pagamento: {{paymentDate}}",
+      "NEW_DAILY_REPORT_TITLE": "Nuovo rapporto giornaliero",
+      "NEW_DAILY_REPORT": "{{activityType}} per {{childName}}: {{notes}}",
+      "NEW_EVENT_TITLE": "Nuovo evento creato",
+      "NEW_EVENT": "Un nuovo evento '{{eventName}}' è stato programmato. Dai un'occhiata!",
+      "EVENT_REGISTRATION_REQUEST_TITLE": "Nuova richiesta di iscrizione",
+      "EVENT_REGISTRATION_REQUEST": "{{childName}} è stato richiesto per partecipare a '{{eventName}}'",
+      "CHILD_ADDED_TO_EVENT_TITLE": "Bambino aggiunto all'evento",
+      "CHILD_ADDED_TO_EVENT": "{{childName}} è stato aggiunto a '{{eventName}}'",
+      "EVENT_REGISTRATION_APPROVED_TITLE": "Iscrizione approvata",
+      "EVENT_REGISTRATION_APPROVED": "L'iscrizione di {{childName}} a '{{eventName}}' è stata approvata",
+      "EVENT_REGISTRATION_DECLINED_TITLE": "Iscrizione rifiutata",
+      "EVENT_REGISTRATION_DECLINED": "L'iscrizione di {{childName}} a '{{eventName}}' è stata rifiutata",
+      "EVENT_CANCELLATION_REQUEST_TITLE": "Richiesta di cancellazione",
+      "EVENT_CANCELLATION_REQUEST": "Una richiesta di cancellazione per {{childName}} da '{{eventName}}'",
+      "CANCELLATION_APPROVED_TITLE": "Cancellazione approvata",
+      "CANCELLATION_APPROVED": "La cancellazione di {{childName}} da '{{eventName}}' è stata approvata",
+      "CANCELLATION_DECLINED_TITLE": "Cancellazione rifiutata",
+      "CANCELLATION_DECLINED": "La cancellazione di {{childName}} da '{{eventName}}' è stata rifiutata",
+      "NEW_MESSAGE_TITLE": "Nuovo messaggio",
+      "NEW_MESSAGE": "{{senderName}}: {{subject}}",
+      "NEW_REPLY_TITLE": "Nuova risposta",
+      "NEW_REPLY": "{{senderName}} ha risposto a: {{subject}}",
+      "NEW_RECLAMATION_TITLE": "Nuovo reclamo",
+      "NEW_RECLAMATION": "{{senderName}}: {{subject}}",
+      "RECLAMATION_RESOLVED_TITLE": "Reclamo risolto",
+      "RECLAMATION_RESOLVED": "Il tuo reclamo '{{subject}}' è stato risolto",
+      "TEST_NOTIFICATION_TITLE": "Notifica di test",
+      "TEST_NOTIFICATION": "Questa è una notifica di test per verificare che il sistema funzioni."
+    }
   }
 }

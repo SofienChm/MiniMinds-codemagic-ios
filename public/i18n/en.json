@@ -394,7 +394,8 @@
     "CONFIRM_DELETE": "Confirm Delete",
     "DELETE_PROFILE_PICTURE_CONFIRM": "Are you sure you want to delete this profile picture?",
     "PROFILE_PICTURE_DELETED": "Profile picture deleted successfully",
-    "DELETE_PROFILE_PICTURE_ERROR": "Failed to delete profile picture. Please try again."
+    "DELETE_PROFILE_PICTURE_ERROR": "Failed to delete profile picture. Please try again.",
+    "GENERIC_ERROR": "An unexpected error occurred. Please try again."
   },
   "CHILDREN": {
     "TITLE": "Children Management",
@@ -2076,7 +2077,9 @@
     "NO_AVAILABLE_CHILDREN": "No available children found",
     "AGE": "Age",
     "GENDER": "Gender",
-    "REMOVE_CHILD_CONFIRM": "Remove this child from the educator?"
+    "REMOVE_CHILD_CONFIRM": "Remove this child from the educator?",
+    "CHILD_ASSIGNED_SUCCESS": "Child has been assigned to this educator successfully.",
+    "CHILD_REMOVED_SUCCESS": "Child has been removed from this educator."
   },
   "SUPER_ADMIN": {
     "DASHBOARD_SUBTITLE": "Platform overview and management",
@@ -2652,5 +2655,79 @@
       "TERMS_OF_SERVICE": "Terms of Service",
       "COPYRIGHT": "MiniMinds. All rights reserved."
     }
+  },
+  "NOTIFICATIONS_PAGE": {
+    "TITLE": "Notifications",
+    "MARK_ALL_READ": "Mark all as read",
+    "NO_NOTIFICATIONS": "No notifications",
+    "ALL_CAUGHT_UP": "You're all caught up!",
+    "LOADING": "Loading notifications...",
+    "TAB_ALL": "All",
+    "TAB_UNREAD": "Unread",
+    "LOAD_MORE": "Load More",
+    "TIME": {
+      "JUST_NOW": "Just now",
+      "TODAY": "Today",
+      "YESTERDAY": "Yesterday"
+    },
+    "MESSAGES": {
+      "CHILD_CHECKED_IN_TITLE": "Child Checked In",
+      "CHILD_CHECKED_IN": "{{childName}} has been checked in at {{time}}",
+      "CHILD_CHECKED_OUT_TITLE": "Child Checked Out",
+      "CHILD_CHECKED_OUT": "{{childName}} has been checked out at {{time}}",
+      "NEW_FEE_TITLE": "New Fee Added",
+      "NEW_FEE": "A new fee of {{amount}} has been added for {{childName}}. Due date: {{dueDate}}",
+      "FEE_PAYMENT_RECEIVED_TITLE": "Fee Payment Received",
+      "FEE_PAYMENT_RECEIVED": "{{parentName}} paid {{amount}} for {{childName}}. Payment date: {{paymentDate}}",
+      "NEW_DAILY_REPORT_TITLE": "New Daily Report",
+      "NEW_DAILY_REPORT": "{{activityType}} for {{childName}}: {{notes}}",
+      "NEW_EVENT_TITLE": "New Event Created",
+      "NEW_EVENT": "A new event '{{eventName}}' has been scheduled. Check it out!",
+      "EVENT_REGISTRATION_REQUEST_TITLE": "New Event Registration Request",
+      "EVENT_REGISTRATION_REQUEST": "{{childName}} has been requested to join '{{eventName}}'",
+      "CHILD_ADDED_TO_EVENT_TITLE": "Child Added to Event",
+      "CHILD_ADDED_TO_EVENT": "{{childName}} has been added to '{{eventName}}'",
+      "EVENT_REGISTRATION_APPROVED_TITLE": "Event Registration Approved",
+      "EVENT_REGISTRATION_APPROVED": "{{childName}}'s registration for '{{eventName}}' has been approved",
+      "EVENT_REGISTRATION_DECLINED_TITLE": "Event Registration Declined",
+      "EVENT_REGISTRATION_DECLINED": "{{childName}}'s registration for '{{eventName}}' has been declined",
+      "EVENT_CANCELLATION_REQUEST_TITLE": "Event Cancellation Request",
+      "EVENT_CANCELLATION_REQUEST": "A cancellation request for {{childName}} from '{{eventName}}'",
+      "CANCELLATION_APPROVED_TITLE": "Cancellation Approved",
+      "CANCELLATION_APPROVED": "{{childName}}'s cancellation from '{{eventName}}' has been approved",
+      "CANCELLATION_DECLINED_TITLE": "Cancellation Declined",
+      "CANCELLATION_DECLINED": "{{childName}}'s cancellation from '{{eventName}}' has been declined",
+      "NEW_MESSAGE_TITLE": "New Message",
+      "NEW_MESSAGE": "{{senderName}}: {{subject}}",
+      "NEW_REPLY_TITLE": "New Reply",
+      "NEW_REPLY": "{{senderName}} replied to: {{subject}}",
+      "NEW_RECLAMATION_TITLE": "New Reclamation",
+      "NEW_RECLAMATION": "{{senderName}}: {{subject}}",
+      "RECLAMATION_RESOLVED_TITLE": "Reclamation Resolved",
+      "RECLAMATION_RESOLVED": "Your reclamation '{{subject}}' has been resolved",
+      "TEST_NOTIFICATION_TITLE": "Test Notification",
+      "TEST_NOTIFICATION": "This is a test notification to verify the system works."
+    }
+  },
+  "ERRORS": {
+    "NETWORK_ERROR": "Network error. Please check your internet connection.",
+    "TIMEOUT": "Request timed out. Please try again.",
+    "SERVER_ERROR": "Server error. Please try again later.",
+    "FORBIDDEN": "You do not have permission to perform this action.",
+    "UNAUTHORIZED": "Your session has expired. Please log in again.",
+    "NOT_FOUND": "The requested resource was not found.",
+    "EDUCATOR_NOT_FOUND": "Educator not found. They may have been deleted.",
+    "CHILD_NOT_FOUND": "Child not found. They may have been removed.",
+    "PARENT_NOT_FOUND": "Parent not found. They may have been deleted.",
+    "DUPLICATE_EMAIL": "This email address is already registered.",
+    "INVALID_EMAIL": "Please enter a valid email address.",
+    "PASSWORD_TOO_SHORT": "Password must be at least 6 characters.",
+    "PASSWORD_REQUIRES_DIGIT": "Password must contain at least one digit (0-9).",
+    "PASSWORD_REQUIRES_LOWER": "Password must contain at least one lowercase letter.",
+    "PASSWORD_REQUIRES_UPPER": "Password must contain at least one uppercase letter.",
+    "PASSWORD_REQUIRES_SPECIAL": "Password must contain at least one special character (!@#$%^&*).",
+    "PASSWORD_REQUIRES_UNIQUE": "Password must contain more unique characters.",
+    "NO_ACTIVE_CLASSES": "This educator has no active classes. Please assign them to a class first before adding children.",
+    "CHILD_ALREADY_ASSIGNED": "This child is already assigned to this educator's class."
   }
 }
