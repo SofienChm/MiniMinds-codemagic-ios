@@ -19,6 +19,7 @@ import { Capacitor } from '@capacitor/core';
 import { PullToRefreshComponent } from '../../shared/components/pull-to-refresh/pull-to-refresh.component';
 import { ImageDownloadService } from '../../core/services/image-download.service';
 import { SkeletonPhotoGridComponent } from '../../shared/components/skeleton/skeleton-photo-grid.component';
+import { SimpleToastService } from '../../core/services/simple-toast.service';
 
 // Image compression settings - reduces storage by ~70%
 const IMAGE_MAX_WIDTH = 1920;
@@ -110,7 +111,8 @@ export class Gallery implements OnInit, OnDestroy {
     public permissions: PermissionService,
     private translate: TranslateService,
     private pageTitleService: PageTitleService,
-    private imageDownloadService: ImageDownloadService
+    private imageDownloadService: ImageDownloadService,
+    private simpleToastService: SimpleToastService
   ) {}
 
   ngOnInit() {
@@ -759,17 +761,12 @@ export class Gallery implements OnInit, OnDestroy {
       const result = await this.imageDownloadService.downloadImage(downloadData, fileName);
 
       if (result.success) {
-        Swal.fire({
-          icon: 'success',
-          title: this.translate.instant('GALLERY.SUCCESS'),
-          text: this.imageDownloadService.isNativePlatform()
+        // Use SimpleToastService for better mobile visibility
+        this.simpleToastService.success(
+          this.imageDownloadService.isNativePlatform()
             ? this.translate.instant('GALLERY.IMAGE_SAVED_TO_GALLERY')
-            : this.translate.instant('GALLERY.IMAGE_DOWNLOADED'),
-          timer: 3000,
-          timerProgressBar: true,
-          showConfirmButton: true,
-          confirmButtonText: 'OK'
-        });
+            : this.translate.instant('GALLERY.IMAGE_DOWNLOADED')
+        );
       } else {
         Swal.fire({
           icon: 'error',
