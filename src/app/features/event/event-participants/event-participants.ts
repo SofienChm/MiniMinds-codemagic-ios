@@ -96,7 +96,7 @@ export class EventParticipants implements OnInit, OnDestroy {
         label: this.translate.instant('EVENT_PARTICIPANTS.BACK_TO_EVENT'),
         icon: 'bi bi-arrow-left',
         class: 'btn-outline-primary',
-        action: () => this.router.navigate(['/events', this.eventId])
+        action: () => this.router.navigate(['/events/detail', this.eventId])
       }
     ];
   }
@@ -266,9 +266,121 @@ export class EventParticipants implements OnInit, OnDestroy {
         return this.translate.instant('EVENT_PARTICIPANTS.STATUS_PENDING');
       case 'Rejected':
         return this.translate.instant('EVENT_PARTICIPANTS.STATUS_REJECTED');
+      case 'CancellationPending':
+        return this.translate.instant('EVENT_PARTICIPANTS.STATUS_CANCELLATION_PENDING');
       default:
         return status || '';
     }
+  }
+
+  canRequestCancellation(participant: EventParticipant): boolean {
+    if (!this.authService.isParent()) return false;
+    if (participant.status !== 'Registered') return false;
+
+    const parentId = this.authService.getParentId();
+    return !!(participant.child?.parent?.id && parentId === participant.child.parent.id);
+  }
+
+  requestCancellation(participantId: number) {
+    Swal.fire({
+      title: this.translate.instant('EVENT_PARTICIPANTS.CANCEL_REQUEST_TITLE'),
+      text: this.translate.instant('EVENT_PARTICIPANTS.CANCEL_REQUEST_TEXT'),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: this.translate.instant('EVENT_PARTICIPANTS.YES_REQUEST_CANCEL'),
+      cancelButtonText: this.translate.instant('MESSAGES.CANCEL')
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.participantsService.requestCancellation(participantId).subscribe({
+          next: () => {
+            this.loadParticipants();
+            Swal.fire({
+              icon: 'success',
+              title: this.translate.instant('MESSAGES.SUCCESS'),
+              text: this.translate.instant('EVENT_PARTICIPANTS.CANCEL_REQUEST_SUCCESS')
+            });
+          },
+          error: (error) => {
+            console.error('Error requesting cancellation:', error);
+            Swal.fire({
+              icon: 'error',
+              title: this.translate.instant('MESSAGES.ERROR'),
+              text: this.translate.instant('EVENT_PARTICIPANTS.CANCEL_REQUEST_ERROR')
+            });
+          }
+        });
+      }
+    });
+  }
+
+  approveCancellation(participantId: number) {
+    Swal.fire({
+      title: this.translate.instant('EVENT_PARTICIPANTS.APPROVE_CANCEL_TITLE'),
+      text: this.translate.instant('EVENT_PARTICIPANTS.APPROVE_CANCEL_TEXT'),
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#28a745',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: this.translate.instant('EVENT_PARTICIPANTS.YES_APPROVE_CANCEL'),
+      cancelButtonText: this.translate.instant('MESSAGES.CANCEL')
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.participantsService.approveCancellation(participantId).subscribe({
+          next: () => {
+            this.loadParticipants();
+            Swal.fire({
+              icon: 'success',
+              title: this.translate.instant('MESSAGES.SUCCESS'),
+              text: this.translate.instant('EVENT_PARTICIPANTS.APPROVE_CANCEL_SUCCESS')
+            });
+          },
+          error: (error) => {
+            console.error('Error approving cancellation:', error);
+            Swal.fire({
+              icon: 'error',
+              title: this.translate.instant('MESSAGES.ERROR'),
+              text: this.translate.instant('EVENT_PARTICIPANTS.APPROVE_CANCEL_ERROR')
+            });
+          }
+        });
+      }
+    });
+  }
+
+  rejectCancellation(participantId: number) {
+    Swal.fire({
+      title: this.translate.instant('EVENT_PARTICIPANTS.REJECT_CANCEL_TITLE'),
+      text: this.translate.instant('EVENT_PARTICIPANTS.REJECT_CANCEL_TEXT'),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: this.translate.instant('EVENT_PARTICIPANTS.YES_REJECT_CANCEL'),
+      cancelButtonText: this.translate.instant('MESSAGES.CANCEL')
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.participantsService.rejectCancellation(participantId).subscribe({
+          next: () => {
+            this.loadParticipants();
+            Swal.fire({
+              icon: 'success',
+              title: this.translate.instant('MESSAGES.SUCCESS'),
+              text: this.translate.instant('EVENT_PARTICIPANTS.REJECT_CANCEL_SUCCESS')
+            });
+          },
+          error: (error) => {
+            console.error('Error rejecting cancellation:', error);
+            Swal.fire({
+              icon: 'error',
+              title: this.translate.instant('MESSAGES.ERROR'),
+              text: this.translate.instant('EVENT_PARTICIPANTS.REJECT_CANCEL_ERROR')
+            });
+          }
+        });
+      }
+    });
   }
 
   goBack() {

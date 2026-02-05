@@ -15,13 +15,12 @@ import { PageTitleService } from '../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
 import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
-import { PullToRefreshComponent } from '../../shared/components/pull-to-refresh/pull-to-refresh.component';
 import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-event',
   standalone: true,
-  imports: [CommonModule, FormsModule, TitlePage, ParentChildHeaderSimpleComponent, TranslateModule, NgSelectModule, AppCurrencyPipe, SkeletonComponent, PullToRefreshComponent, IonContent, IonRefresher, IonRefresherContent],
+  imports: [CommonModule, FormsModule, TitlePage, ParentChildHeaderSimpleComponent, TranslateModule, NgSelectModule, AppCurrencyPipe, SkeletonComponent, IonContent, IonRefresher, IonRefresherContent],
   templateUrl: './event.html',
   styleUrl: './event.scss'
 })

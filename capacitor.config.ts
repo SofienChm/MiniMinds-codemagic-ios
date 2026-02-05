@@ -29,6 +29,10 @@ const config: CapacitorConfig = {
   },
 
   plugins: {
+    // Enable native HTTP to bypass CORS on mobile
+    CapacitorHttp: {
+      enabled: true
+    },
     PushNotifications: {
       presentationOptions: ['badge', 'sound', 'alert']
     },

@@ -1,0 +1,278 @@
+// Avatar placeholder large
+.avatar-placeholder-lg {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1.5rem;
+}
+
+// Plan badges
+.plan-badge {
+  font-weight: 500;
+  padding: 0.35em 0.65em;
+
+  &.plan-free {
+    background-color: #e9ecef;
+    color: #495057;
+  }
+
+  &.plan-basic {
+    background-color: rgba(125, 185, 255, 0.2);
+    color: #0d6efd;
+  }
+
+  &.plan-premium {
+    background-color: rgba(125, 211, 192, 0.2);
+    color: #198754;
+  }
+
+  &.plan-enterprise {
+    background-color: rgba(255, 159, 67, 0.2);
+    color: #fd7e14;
+  }
+}
+
+// Info sections
+.info-section {
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--color-border);
+
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+}
+
+.section-title {
+  color: var(--title-color);
+  font-weight: 600;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+
+  i {
+    color: var(--primary-color);
+  }
+}
+
+.info-item {
+  margin-bottom: 1rem;
+
+  label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--color-gray);
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  p {
+    margin: 0;
+    color: var(--title-color);
+    font-weight: 500;
+
+    a {
+      color: var(--primary-color);
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+// Stats
+.stat-item {
+  display: flex;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--color-border);
+
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  &:first-child {
+    padding-top: 0;
+  }
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1rem;
+
+  i {
+    font-size: 1.25rem;
+  }
+
+  &.bg-primary-light {
+    background-color: rgba(125, 211, 192, 0.15);
+    color: var(--primary-color);
+  }
+
+  &.bg-success-light {
+    background-color: rgba(25, 135, 84, 0.15);
+    color: #198754;
+  }
+
+  &.bg-warning-light {
+    background-color: rgba(255, 193, 7, 0.15);
+    color: #ffc107;
+  }
+
+  &.bg-info-light {
+    background-color: rgba(13, 202, 240, 0.15);
+    color: #0dcaf0;
+  }
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--title-color);
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: var(--color-gray);
+  margin-top: 0.25rem;
+}
+
+// Card header improvements
+.card-header {
+  background-color: transparent;
+  border-bottom: 1px solid var(--color-border);
+  padding: 1rem 1.25rem;
+
+  h6 {
+    color: var(--title-color);
+    font-weight: 600;
+  }
+}
+
+.card-body {
+  padding: 1.25rem;
+}
+
+// Tenant avatar in header
+.tenant-avatar {
+  img {
+    object-fit: cover;
+  }
+}
+.mobile-view {
+  padding-bottom: 110px;
+}
+.mobile-view-superadmin {
+  .header-info {
+    background: var(--secondary-color);
+    padding: 40px 20px 23px;
+    border-radius: 0 0 15px 15px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    justify-content: center;
+    h5 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #fff;
+    }
+    .page-back {
+      i {
+        background: rgba(255, 255, 255, 0.2117647059);
+        padding: 4px 8px;
+        border-radius: 12px;
+        position: absolute;
+        left: 20px;
+        bottom: 19px;
+        font-size: 15px;
+        color: #fff;
+      }
+    }
+  }
+
+  // Action Icons Section
+  .action-icons-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 16px 20px;
+    background: #fff;
+    border-bottom: 1px solid #e5e7eb;
+
+    .action-icon-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      background: transparent;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+
+      i {
+        font-size: 22px;
+      }
+
+      span {
+        font-size: 12px;
+        font-weight: 500;
+      }
+
+      &.edit {
+        color: #3b82f6;
+
+        &:hover {
+          background: rgba(59, 130, 246, 0.1);
+        }
+      }
+
+      &.delete {
+        color: #ef4444;
+
+        &:hover {
+          background: rgba(239, 68, 68, 0.1);
+        }
+      }
+
+      &.activate {
+        color: #22c55e;
+
+        &:hover {
+          background: rgba(34, 197, 94, 0.1);
+        }
+      }
+
+      &.manage {
+        color: #f97316;
+
+        &:hover {
+          background: rgba(249, 115, 22, 0.1);
+        }
+      }
+    }
+  }
+}

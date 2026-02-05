@@ -98,23 +98,80 @@
                 <span class="badge" [ngClass]="{
                   'bg-success': participant.status === 'Registered',
                   'bg-warning': participant.status === 'Pending',
-                  'bg-danger': participant.status === 'Rejected'
+                  'bg-danger': participant.status === 'Rejected',
+                  'bg-info': participant.status === 'CancellationPending'
                 }">{{ getStatusLabel(participant.status) }}</span>
               </td>
               <td>
-                <div class="btn-group" *ngIf="authService.isAdmin() && participant.status === 'Pending'">
-                  <button class="btn btn-sm btn-success" (click)="approveParticipant(participant.id!)">
-                    <i class="bi bi-check"></i> {{ 'EVENT_PARTICIPANTS.APPROVE' | translate }}
+                <div class="d-flex gap-1">
+                  <!-- Admin: Approve/Reject registration (Pending status) -->
+                  <button *ngIf="authService.isAdmin() && participant.status === 'Pending'"
+                          type="button"
+                          class="btn btn-sm btn-active"
+                          (click)="approveParticipant(participant.id!)"
+                          data-bs-toggle="tooltip"
+                          data-bs-placement="top"
+                          data-bs-trigger="hover"
+                          [title]="'EVENT_PARTICIPANTS.APPROVE' | translate">
+                    <i class="bi bi-check"></i>
                   </button>
-                  <button class="btn btn-sm btn-danger" (click)="rejectParticipant(participant.id!)">
-                    <i class="bi bi-x"></i> {{ 'EVENT_PARTICIPANTS.REJECT' | translate }}
+                  <button *ngIf="authService.isAdmin() && participant.status === 'Pending'"
+                          type="button"
+                          class="btn btn-sm btn-remove"
+                          (click)="rejectParticipant(participant.id!)"
+                          data-bs-toggle="tooltip"
+                          data-bs-placement="top"
+                          data-bs-trigger="hover"
+                          [title]="'EVENT_PARTICIPANTS.REJECT' | translate">
+                    <i class="bi bi-x"></i>
+                  </button>
+
+                  <!-- Admin: Approve/Reject cancellation request (CancellationPending status) -->
+                  <button *ngIf="authService.isAdmin() && participant.status === 'CancellationPending'"
+                          type="button"
+                          class="btn btn-sm btn-active"
+                          (click)="approveCancellation(participant.id!)"
+                          data-bs-toggle="tooltip"
+                          data-bs-placement="top"
+                          data-bs-trigger="hover"
+                          [title]="'EVENT_PARTICIPANTS.APPROVE_CANCELLATION' | translate">
+                    <i class="bi bi-check"></i>
+                  </button>
+                  <button *ngIf="authService.isAdmin() && participant.status === 'CancellationPending'"
+                          type="button"
+                          class="btn btn-sm btn-remove"
+                          (click)="rejectCancellation(participant.id!)"
+                          data-bs-toggle="tooltip"
+                          data-bs-placement="top"
+                          data-bs-trigger="hover"
+                          [title]="'EVENT_PARTICIPANTS.REJECT_CANCELLATION' | translate">
+                    <i class="bi bi-x"></i>
+                  </button>
+
+                  <!-- Parent: Request cancellation (Registered status) -->
+                  <button *ngIf="canRequestCancellation(participant)"
+                          type="button"
+                          class="btn btn-sm btn-remove"
+                          (click)="requestCancellation(participant.id!)"
+                          data-bs-toggle="tooltip"
+                          data-bs-placement="top"
+                          data-bs-trigger="hover"
+                          [title]="'EVENT_PARTICIPANTS.REQUEST_CANCELLATION' | translate">
+                    <i class="bi bi-x-circle"></i>
+                  </button>
+
+                  <!-- Admin/Teacher: Remove participant -->
+                  <button *ngIf="canRemoveParticipant(participant) && participant.status !== 'CancellationPending'"
+                          type="button"
+                          class="btn btn-sm btn-remove"
+                          (click)="removeParticipant(participant.id!)"
+                          data-bs-toggle="tooltip"
+                          data-bs-placement="top"
+                          data-bs-trigger="hover"
+                          [title]="'EVENT_PARTICIPANTS.REMOVE' | translate">
+                    <i class="bi bi-trash"></i>
                   </button>
                 </div>
-                <button *ngIf="canRemoveParticipant(participant)"
-                        class="btn btn-sm btn-outline-danger"
-                        (click)="removeParticipant(participant.id!)">
-                  <i class="bi bi-trash"></i> {{ 'EVENT_PARTICIPANTS.REMOVE' | translate }}
-                </button>
               </td>
             </tr>
           </tbody>

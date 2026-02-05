@@ -135,8 +135,10 @@ export class QrManagement implements OnInit, AfterViewInit, OnDestroy {
       const canvas = type === 'checkIn' ? this.checkInCanvas : this.checkOutCanvas;
       if (!canvas?.nativeElement) return;
 
-      // Generate URL-based QR code for deep linking
-      const qrUrl = `${environment.webUrl}/qr-action/${code}`;
+      // Use custom URL scheme for reliable native app handling on mobile
+      // This works more reliably than https:// URLs which require App Links verification
+      // Format: miniminds://qr-action/CODE
+      const qrUrl = `miniminds://qr-action/${code}`;
 
       try {
         await QRCode.toCanvas(canvas.nativeElement, qrUrl, {

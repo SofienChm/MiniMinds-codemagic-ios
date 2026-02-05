@@ -107,7 +107,7 @@
           <div class="bg-light rounded-2 p-3 mb-3">
             <div class="d-flex align-items-center">
               <a href="#" class="avatar avatar-lg flex-shrink-0" (click)="viewDetails(parent); $event.preventDefault()">
-                <img loading="lazy" [src]="parent.profilePicture || 'assets/default-avatar.svg'" class="img-fluid rounded-circle" alt="Parent" width="80" height="80">
+                <img loading="lazy" [src]="getProfilePictureUrl(parent) || 'assets/default-avatar.svg'" class="img-fluid rounded-circle" alt="Parent" width="80" height="80">
               </a>
               <div class="ms-2">
                 <h6 class="text-dark text-truncate mb-0 title-card__name">
@@ -130,15 +130,24 @@
         </div>
         <div class="card-footer d-flex align-items-center justify-content-between">
           <div class="d-flex align-items-center">
-            <span class="text-muted me-1">Children :  </span>
-            <img *ngIf="parent.children && parent.children.length > 0"
-                 loading="lazy" [src]="parent.children[0].profilePicture || 'assets/child.png'"
-                 class="rounded-circle me-2"
-                 width="30"
-                 height="30"
-                 alt="Child"
-                 style="cursor: pointer;"
-                 (click)="viewChildDetails(parent.children[0].id); $event.stopPropagation()">
+            <span class="text-muted me-1">Children : </span>
+            <div class="d-flex align-items-center" style="margin-left: -5px;">
+              <ng-container *ngIf="parent.children && parent.children.length > 0; else noChildren">
+                <img *ngFor="let child of parent.children"
+                     loading="lazy"
+                     [src]="getProfilePictureUrl(child) || 'assets/child.png'"
+                     class="rounded-circle child-avatar"
+                     width="30"
+                     height="30"
+                     [alt]="child.firstName"
+                     [title]="child.firstName + ' ' + child.lastName"
+                     style="cursor: pointer; margin-left: 5px; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1);"
+                     (click)="viewChildDetails(child.id); $event.stopPropagation()">
+              </ng-container>
+              <ng-template #noChildren>
+                <span class="text-muted">None</span>
+              </ng-template>
+            </div>
           </div>
           <button class="btn btn-light btn-sm btn-footer" (click)="viewDetails(parent)">View Details</button>
         </div>
@@ -175,7 +184,7 @@
             <tbody>
               <tr *ngFor="let parent of displayedParents; trackBy: trackById" (click)="viewDetails(parent)" style="cursor: pointer;">
                 <td>
-                  <img loading="lazy" [src]="parent.profilePicture || (parent.gender?.toLowerCase() === 'female' ? 'assets/mother.png' : 'assets/father.png')" 
+                  <img loading="lazy" [src]="getProfilePictureUrl(parent) || (parent.gender?.toLowerCase() === 'female' ? 'assets/mother.png' : 'assets/father.png')"
                        class="rounded-circle" width="40" height="40" alt="Parent">
                 </td>
                 <td class="name-last">

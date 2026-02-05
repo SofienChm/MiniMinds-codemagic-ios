@@ -14,8 +14,8 @@
     </div>
     <div *ngIf="showImages" class="d-flex image-name row_direction">
       <div class="d-flex image-active">
-        <img [src]="children[currentChildIndex]?.profilePicture || 'assets/child.png'" 
-             [alt]="children[currentChildIndex]?.firstName" 
+        <img [src]="getProfilePictureUrl(children[currentChildIndex]) || 'assets/child.png'"
+             [alt]="children[currentChildIndex]?.firstName"
              class="img-fluid">
       </div>
       <div class="overflow-hidden">

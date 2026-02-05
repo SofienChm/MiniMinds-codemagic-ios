@@ -12,6 +12,7 @@ import { TitlePage } from '../../shared/layouts/title-page/title-page';
 import { TitleAction } from '../../shared/layouts/title-page/title-page';
 import Swal from 'sweetalert2';
 import { PageTitleService } from '../../core/services/page-title.service';
+import { SimpleToastService } from '../../core/services/simple-toast.service';
 
 @Component({
   selector: 'app-holiday',
@@ -39,7 +40,8 @@ export class HolidayComponent implements OnInit {
     private fb: FormBuilder,
     private http: HttpClient,
     private translateService: TranslateService,
-    private pageTitleService: PageTitleService
+    private pageTitleService: PageTitleService,
+    private simpleToast: SimpleToastService
   ) {
     this.holidayForm = this.fb.group({
       name: ['', [Validators.required, Validators.maxLength(100)]],
@@ -97,11 +99,7 @@ export class HolidayComponent implements OnInit {
     // Check if holidays have already been imported for this country/year
     const existingImport = localStorage.getItem(key);
     if (existingImport) {
-      Swal.fire(
-        this.translateService.instant('HOLIDAYS_PAGE.ALREADY_IMPORTED_TITLE'),
-        this.translateService.instant('HOLIDAYS_PAGE.ALREADY_IMPORTED_TEXT', { country, year }),
-        'info'
-      );
+      this.simpleToast.warning(this.translateService.instant('HOLIDAYS_PAGE.ALREADY_IMPORTED_TEXT', { country, year }));
       return;
     }
 
@@ -109,11 +107,7 @@ export class HolidayComponent implements OnInit {
     this.http.get<any[]>(apiUrl).subscribe({
       next: (data) => {
         if (!data || !data.length) {
-          Swal.fire(
-            this.translateService.instant('HOLIDAYS_PAGE.NO_HOLIDAYS_TITLE'),
-            this.translateService.instant('HOLIDAYS_PAGE.NO_HOLIDAYS_TEXT'),
-            'info'
-          );
+          this.simpleToast.warning(this.translateService.instant('HOLIDAYS_PAGE.NO_HOLIDAYS_TEXT'));
           return;
         }
         const createdIds: number[] = [];
@@ -134,21 +128,13 @@ export class HolidayComponent implements OnInit {
             this.holidayService.refreshHolidays();
             // ensure component view is refreshed
             this.loadHolidays();
-            Swal.fire(
-              this.translateService.instant('HOLIDAYS_PAGE.IMPORTED_TITLE'),
-              this.translateService.instant('HOLIDAYS_PAGE.IMPORTED_TEXT', { count: createdIds.length }),
-              'success'
-            );
+            this.simpleToast.success(this.translateService.instant('HOLIDAYS_PAGE.IMPORTED_TEXT', { count: createdIds.length }));
           })
         ).subscribe();
       },
       error: (err) => {
         console.error('Error fetching external holidays', err);
-        Swal.fire(
-          this.translateService.instant('HOLIDAYS_PAGE.IMPORT_ERROR_TITLE'),
-          this.translateService.instant('HOLIDAYS_PAGE.IMPORT_ERROR_TEXT'),
-          'error'
-        );
+        this.simpleToast.error(this.translateService.instant('HOLIDAYS_PAGE.IMPORT_ERROR_TEXT'));
       }
     });
   }
@@ -160,11 +146,7 @@ export class HolidayComponent implements OnInit {
     // collect ids from currently loaded holidays (clear entire loaded list)
     const ids: number[] = this.holidays.map(h => h.id!).filter(id => !!id);
     if (!ids.length) {
-      Swal.fire(
-        this.translateService.instant('HOLIDAYS_PAGE.NOTHING_TO_CLEAR_TITLE'),
-        this.translateService.instant('HOLIDAYS_PAGE.NOTHING_TO_CLEAR_TEXT'),
-        'info'
-      );
+      this.simpleToast.warning(this.translateService.instant('HOLIDAYS_PAGE.NOTHING_TO_CLEAR_TEXT'));
       return;
     }
 
@@ -191,19 +173,11 @@ export class HolidayComponent implements OnInit {
           this.displayedHolidays = [];
           this.currentPage = 1;
           this.holidayService.refreshHolidays();
-          Swal.fire(
-            this.translateService.instant('HOLIDAYS_PAGE.CLEARED_TITLE'),
-            this.translateService.instant('HOLIDAYS_PAGE.CLEARED_TEXT'),
-            'success'
-          );
+          this.simpleToast.success(this.translateService.instant('HOLIDAYS_PAGE.CLEARED_TEXT'));
         },
         error: (err) => {
           console.error('Error clearing holidays', err);
-          Swal.fire(
-            this.translateService.instant('HOLIDAYS_PAGE.CLEAR_ERROR_TITLE'),
-            this.translateService.instant('HOLIDAYS_PAGE.CLEAR_ERROR_TEXT'),
-            'error'
-          );
+          this.simpleToast.error(this.translateService.instant('HOLIDAYS_PAGE.CLEAR_ERROR_TEXT'));
           this.holidayService.refreshHolidays();
         }
       });
@@ -271,21 +245,11 @@ export class HolidayComponent implements OnInit {
         next: () => {
           this.closeEditModal();
           this.loadHolidays();
-          Swal.fire({
-            icon: 'success',
-            title: this.translateService.instant('HOLIDAYS_PAGE.SUCCESS'),
-            text: this.translateService.instant('HOLIDAYS_PAGE.UPDATE_SUCCESS'),
-            timer: 2000,
-            showConfirmButton: false
-          });
+          this.simpleToast.success(this.translateService.instant('HOLIDAYS_PAGE.UPDATE_SUCCESS'));
         },
         error: (error) => {
           console.error('Error updating holiday:', error);
-          Swal.fire({
-            icon: 'error',
-            title: this.translateService.instant('HOLIDAYS_PAGE.ERROR'),
-            text: this.translateService.instant('HOLIDAYS_PAGE.UPDATE_ERROR')
-          });
+          this.simpleToast.error(this.translateService.instant('HOLIDAYS_PAGE.UPDATE_ERROR'));
         }
       });
     }
@@ -306,20 +270,10 @@ export class HolidayComponent implements OnInit {
         this.holidayService.deleteHoliday(id).subscribe({
           next: () => {
             this.loadHolidays();
-            Swal.fire({
-              icon: 'success',
-              title: this.translateService.instant('HOLIDAYS_PAGE.SUCCESS'),
-              text: this.translateService.instant('HOLIDAYS_PAGE.DELETE_SUCCESS'),
-              timer: 2000,
-              showConfirmButton: false
-            });
+            this.simpleToast.success(this.translateService.instant('HOLIDAYS_PAGE.DELETE_SUCCESS'));
           },
           error: () => {
-            Swal.fire({
-              icon: 'error',
-              title: this.translateService.instant('HOLIDAYS_PAGE.ERROR'),
-              text: this.translateService.instant('HOLIDAYS_PAGE.DELETE_ERROR')
-            });
+            this.simpleToast.error(this.translateService.instant('HOLIDAYS_PAGE.DELETE_ERROR'));
           }
         });
       }

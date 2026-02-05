@@ -10,6 +10,7 @@ import { EducatorService } from './educator.service';
 import { TitlePage, TitleAction, Breadcrumb } from '../../shared/layouts/title-page/title-page';
 import { ExportUtil } from '../../shared/utils/export.util';
 import Swal from 'sweetalert2';
+import { SimpleToastService } from '../../core/services/simple-toast.service';
 
 @Component({
   selector: 'app-educator',
@@ -40,7 +41,8 @@ export class Educator implements OnInit, OnDestroy {
   constructor(
     private educatorService: EducatorService,
     private router: Router,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private simpleToast: SimpleToastService
   ) {}
 
   ngOnInit() {
@@ -122,7 +124,7 @@ export class Educator implements OnInit, OnDestroy {
         console.error('Error loading educators:', error);
         this.loading = false;
         const errorMessage = error?.error?.message || this.translate.instant('EDUCATORS.LOAD_ERROR');
-        Swal.fire(this.translate.instant('MESSAGES.ERROR'), errorMessage, 'error');
+        this.simpleToast.error(errorMessage);
       }
     });
   }
@@ -156,16 +158,12 @@ export class Educator implements OnInit, OnDestroy {
       if (result.isConfirmed) {
         this.educatorService.deleteEducator(id).subscribe({
           next: () => {
-            Swal.fire(
-              this.translate.instant('EDUCATORS.DELETE_SUCCESS_TITLE'),
-              this.translate.instant('EDUCATORS.DELETE_SUCCESS_TEXT'),
-              'success'
-            );
+            this.simpleToast.success(this.translate.instant('EDUCATORS.DELETE_SUCCESS_TEXT'));
             this.loadEducators();
           },
           error: (error) => {
             const errorMessage = error?.error?.message || this.translate.instant('EDUCATORS.DELETE_ERROR');
-            Swal.fire(this.translate.instant('MESSAGES.ERROR'), errorMessage, 'error');
+            this.simpleToast.error(errorMessage);
           }
         });
       }
@@ -252,7 +250,7 @@ export class Educator implements OnInit, OnDestroy {
     }));
 
     if (data.length === 0) {
-      Swal.fire(this.translate.instant('MESSAGES.WARNING'), this.translate.instant('EDUCATORS.NO_DATA_EXPORT'), 'warning');
+      this.simpleToast.warning(this.translate.instant('EDUCATORS.NO_DATA_EXPORT'));
       return;
     }
 
@@ -270,7 +268,7 @@ export class Educator implements OnInit, OnDestroy {
     }));
 
     if (data.length === 0) {
-      Swal.fire(this.translate.instant('MESSAGES.WARNING'), this.translate.instant('EDUCATORS.NO_DATA_EXPORT'), 'warning');
+      this.simpleToast.warning(this.translate.instant('EDUCATORS.NO_DATA_EXPORT'));
       return;
     }
 

@@ -1,0 +1,99 @@
+<div class="container-fluid mobile-view mt-4">
+  <app-header-superadmin></app-header-superadmin>
+  <app-title-page
+    [title]="('SUPER_ADMIN.FEATURE_SETTINGS' | translate) + (tenantName ? ' - ' + tenantName : '')"
+    [subtitle]="'SUPER_ADMIN.FEATURE_SETTINGS_SUBTITLE' | translate"
+    icon="bi bi-toggles"
+    [breadcrumbs]="breadcrumbs"
+    [actions]="getActions()">
+  </app-title-page>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+  <!-- Features Configuration -->
+  <div *ngIf="!loading && !error" class="row">
+    <!-- Info Card -->
+    <div class="col-12 mb-4">
+      <div class="alert alert-info d-flex align-items-center">
+        <i class="bi bi-info-circle me-2 fs-5"></i>
+        <div>
+          <strong>{{ 'SUPER_ADMIN.FEATURE_INFO_TITLE' | translate }}</strong>
+          <p class="mb-0 small">{{ 'SUPER_ADMIN.FEATURE_INFO_MESSAGE' | translate }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature Categories -->
+    <div class="col-12">
+      <div *ngFor="let category of groupedFeatures | keyvalue" class="card card-general shadow-sm mb-4">
+          <div class="card-header border-0 d-flex">
+              <h5 class="mb-0"><i [class]="getCategoryIcon(category.key)"></i>{{ category.key }}</h5>
+              <span class="badge bg-secondary ms-auto">{{ category.value.length }} {{ 'SUPER_ADMIN.FEATURES' | translate }}</span>
+          </div>
+        <div class="card-body p-0">
+          <div class="table-responsive custom-table">
+            <table class="table table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th style="width: 50px;"></th>
+                  <th>{{ 'SUPER_ADMIN.FEATURE_NAME' | translate }}</th>
+                  <th>{{ 'SUPER_ADMIN.DESCRIPTION' | translate }}</th>
+                  <th style="width: 100px;" class="text-center">{{ 'SUPER_ADMIN.STATUS' | translate }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let feature of category.value" [class.table-secondary]="feature.isCore">
+                  <td class="text-center">
+                    <i *ngIf="feature.isCore" class="bi bi-star-fill text-warning" title="Core Feature"></i>
+                  </td>
+                  <td>
+                    <strong>{{ feature.featureName }}</strong>
+                    <span *ngIf="feature.isCore" class="badge bg-warning text-dark ms-2 small">Core</span>
+                  </td>
+                  <td class="text-muted">{{ feature.description }}</td>
+                  <td class="text-center">
+                    <div class="form-check form-switch d-flex justify-content-center">
+                      <input
+                        class="form-check-input feature-toggle"
+                        type="checkbox"
+                        role="switch"
+                        [id]="'feature-' + feature.featureCode"
+                        [checked]="feature.isEnabled"
+                        [disabled]="feature.isCore || saving"
+                        (change)="onFeatureToggle(feature)">
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Save Button (Fixed at bottom for mobile) -->
+    <div *ngIf="hasChanges" class="col-12 mb-4">
+      <div class="save-bar d-flex justify-content-between align-items-center p-3 bg-light rounded shadow-sm">
+        <span class="text-muted">
+          <i class="bi bi-exclamation-circle me-2"></i>
+          {{ 'SUPER_ADMIN.UNSAVED_CHANGES_COUNT' | translate: { count: pendingChanges.size } }}
+        </span>
+        <button class="action-btn custom-btn-2 btn-add-global-2" (click)="saveChanges()" [disabled]="saving">
+          <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
+          <i *ngIf="!saving" class="bi bi-check-lg me-2"></i>
+          {{ 'COMMON.SAVE_CHANGES' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

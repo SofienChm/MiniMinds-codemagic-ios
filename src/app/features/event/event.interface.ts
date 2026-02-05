@@ -10,6 +10,7 @@ export interface EventModel {
   time: string;
   place?: string;
   image?: string;
+  includeAllChildren?: boolean;
   createdAt?: string;
   participants?: {
     id: number;

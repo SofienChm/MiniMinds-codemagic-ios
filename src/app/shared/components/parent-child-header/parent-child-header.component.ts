@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Location } from '@angular/common';
+import { ApiConfig } from '../../../core/config/api.config';
 
 @Component({
   selector: 'app-parent-child-header',
@@ -43,7 +44,7 @@ export class ParentChildHeaderComponent {
     private location: Location
   ) {}
 
-    calculateAge(dateOfBirth: string): { years: number, months: number } {
+  calculateAge(dateOfBirth: string): { years: number, months: number } {
     const today = new Date();
     const birthDate = new Date(dateOfBirth);
     let years = today.getFullYear() - birthDate.getFullYear();
@@ -56,5 +57,37 @@ export class ParentChildHeaderComponent {
       months += 12;
     }
     return { years: years < 0 ? 0 : years, months: months < 0 ? 0 : months };
+  }
+
+  /**
+   * Get profile picture URL, handling both file-based and Base64 formats
+   */
+  getProfilePictureUrl(entity: any): string | null {
+    if (!entity) return null;
+
+    // Priority 1: File-based URL (new format)
+    if (entity.profilePictureUrl) {
+      return this.getFullUrl(entity.profilePictureUrl);
+    }
+
+    // Priority 2: Base64 (backward compatibility)
+    if (entity.profilePicture) {
+      // If it's already a data URL or full URL, return as-is
+      if (entity.profilePicture.startsWith('data:') || entity.profilePicture.startsWith('http')) {
+        return entity.profilePicture;
+      }
+      // If it's a relative path, construct full URL
+      return this.getFullUrl(entity.profilePicture);
+    }
+
+    return null;
+  }
+
+  private getFullUrl(path: string): string {
+    if (!path) return '';
+    if (path.startsWith('http') || path.startsWith('data:')) {
+      return path;
+    }
+    return `${ApiConfig.HUB_URL}${path.startsWith('/') ? '' : '/'}${path}`;
   }
 }

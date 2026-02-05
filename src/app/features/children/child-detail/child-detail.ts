@@ -239,6 +239,47 @@ export class ChildDetail implements OnInit, OnDestroy {
     return picture && picture.trim() !== '' ? picture : defaultPicture;
   }
 
+  /**
+   * Get the profile picture URL for a child, preferring file-based URL over Base64
+   */
+  getChildProfilePictureUrl(child: ChildModel | null | undefined, defaultPicture: string = 'assets/child.png'): string {
+    if (!child) return defaultPicture;
+    if (child.profilePictureUrl && child.profilePictureUrl.trim() !== '') {
+      return this.getFullUrl(child.profilePictureUrl);
+    }
+    if (child.profilePicture && child.profilePicture.trim() !== '') {
+      return child.profilePicture;
+    }
+    return defaultPicture;
+  }
+
+  /**
+   * Get the profile picture URL for a parent, preferring file-based URL over Base64
+   */
+  getParentProfilePictureUrl(parent: any | null | undefined, defaultPicture: string = 'assets/default-avatar.svg'): string {
+    if (!parent) return defaultPicture;
+    if (parent.profilePictureUrl && parent.profilePictureUrl.trim() !== '') {
+      return this.getFullUrl(parent.profilePictureUrl);
+    }
+    if (parent.profilePicture && parent.profilePicture.trim() !== '') {
+      return parent.profilePicture;
+    }
+    return defaultPicture;
+  }
+
+  /**
+   * Convert a relative path to a full URL with the API base
+   */
+  private getFullUrl(path: string): string {
+    if (!path) return '';
+    // If it's already an absolute URL or data URI, return as-is
+    if (path.startsWith('http') || path.startsWith('data:')) {
+      return path;
+    }
+    // Prepend the API base URL
+    return `${ApiConfig.HUB_URL}${path.startsWith('/') ? '' : '/'}${path}`;
+  }
+
   goBack() {
     this.router.navigate(['/children']);
   }
@@ -765,5 +806,19 @@ export class ChildDetail implements OnInit, OnDestroy {
         event.target.complete();
       }
     }, 500);
+  }
+    calculateAge(dateOfBirth: string): { years: number, months: number } {
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+    let years = today.getFullYear() - birthDate.getFullYear();
+    let months = today.getMonth() - birthDate.getMonth();
+    if (today.getDate() < birthDate.getDate()) {
+      months--;
+    }
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+    return { years: years < 0 ? 0 : years, months: months < 0 ? 0 : months };
   }
 }

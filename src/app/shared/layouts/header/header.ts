@@ -245,6 +245,11 @@ export class Header implements OnInit, OnDestroy {
   handleClickOutside(event: MouseEvent): void {
     const target = event.target as HTMLElement;
 
+    // Close quick links if clicked outside
+    if (this.showQuickLinks && !target.closest('.quick-links-dropdown') && !target.closest('.position-relative-mobile')) {
+      this.showQuickLinks = false;
+    }
+
     // Close notifications if clicked outside
     if (this.showNotifications && !target.closest('.notification-dropdown') && !target.closest('.btn-header') && !target.closest('.nav-link')) {
       this.showNotifications = false;

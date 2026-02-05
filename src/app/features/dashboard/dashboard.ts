@@ -23,6 +23,7 @@ import { DashboardService, AdminDashboardData, ParentDashboardData } from '../..
 import type { ChartConfiguration } from 'chart.js';
 import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 import { SkeletonActivityTimelineComponent } from '../../shared/components/skeleton/skeleton-activity-timeline.component';
+import { ApiConfig } from '../../core/config/api.config';
 import { IonContent } from '@ionic/angular/standalone';
 
 @Component({
@@ -413,8 +414,12 @@ export class Dashboard implements OnInit, OnDestroy {
       next: (data: ParentDashboardData | null) => {
         if (!data) return;
 
-        // Parent profile
-        if (data.parent?.profilePicture) {
+        // Parent profile - prefer file-based URL over Base64
+        if (data.parent?.profilePictureUrl) {
+          const fullUrl = this.getFullUrl(data.parent.profilePictureUrl);
+          this.authService.updateProfilePicture(fullUrl);
+          this.userProfilePicture = fullUrl;
+        } else if (data.parent?.profilePicture) {
           this.authService.updateProfilePicture(data.parent.profilePicture);
           this.userProfilePicture = data.parent.profilePicture;
         }
@@ -467,7 +472,12 @@ export class Dashboard implements OnInit, OnDestroy {
     if (parentId) {
       this.parentService.getParentWithChildren(parentId).pipe(catchError(() => of(null))).subscribe({
         next: (parent) => {
-          if (parent?.profilePicture) {
+          // Prefer file-based URL over Base64
+          if (parent?.profilePictureUrl) {
+            const fullUrl = this.getFullUrl(parent.profilePictureUrl);
+            this.authService.updateProfilePicture(fullUrl);
+            this.userProfilePicture = fullUrl;
+          } else if (parent?.profilePicture) {
             this.authService.updateProfilePicture(parent.profilePicture);
             this.userProfilePicture = parent.profilePicture;
           }
@@ -621,6 +631,7 @@ export class Dashboard implements OnInit, OnDestroy {
         this.stats.children = data.stats.totalChildren;
         this.stats.activeChildren = data.stats.activeChildren;
         this.stats.parents = data.stats.totalParents;
+        this.stats.teachers = data.stats.totalTeachers;
         this.stats.events = data.stats.totalEvents;
 
         // Gender stats
@@ -631,6 +642,30 @@ export class Dashboard implements OnInit, OnDestroy {
           this.boysPercentage = Math.round((this.boysCount / total) * 100);
           this.girlsPercentage = Math.round((this.girlsCount / total) * 100);
           this.genderChartData.datasets[0].data = [this.boysCount, this.girlsCount];
+        } else {
+          // Show 50/50 chart when no gender data
+          this.boysCount = 0;
+          this.girlsCount = 0;
+          this.boysPercentage = 50;
+          this.girlsPercentage = 50;
+          this.genderChartData.datasets[0].data = [1, 1];
+        }
+
+        // Today's attendance stats (real data from API)
+        this.presentCount = data.stats.todayPresentCount;
+        this.absentCount = data.stats.todayAbsentCount;
+        const attendanceTotal = this.presentCount + this.absentCount;
+        if (attendanceTotal > 0) {
+          this.presentPercentage = Math.round((this.presentCount / attendanceTotal) * 100);
+          this.absentPercentage = Math.round((this.absentCount / attendanceTotal) * 100);
+          this.attendanceChartData.datasets[0].data = [this.presentCount, this.absentCount];
+        } else {
+          // Show 50/50 chart when no attendance data
+          this.presentCount = 0;
+          this.absentCount = 0;
+          this.presentPercentage = 50;
+          this.absentPercentage = 50;
+          this.attendanceChartData.datasets[0].data = [1, 1];
         }
 
         // Recent children
@@ -652,8 +687,7 @@ export class Dashboard implements OnInit, OnDestroy {
         // Unpaid fees
         this.unpaidChildren = data.unpaidFees as any;
 
-        // Calculate other stats
-        this.calculateAttendanceStats();
+        // Calculate payment stats
         this.calculatePaymentStats(data.stats.totalChildren);
 
         // Monthly changes
@@ -778,16 +812,8 @@ export class Dashboard implements OnInit, OnDestroy {
   }
 
   setDefaultAttendanceData() {
-    const totalChildren = this.stats.children || 20;
-    this.attendanceBarChartData.datasets[0].data = [
-      Math.round(totalChildren * 0.90),
-      Math.round(totalChildren * 1.00),
-      Math.round(totalChildren * 0.98),
-      Math.round(totalChildren * 0.95),
-      Math.round(totalChildren * 0.92),
-      Math.round(totalChildren * 0.85),
-      Math.round(totalChildren * 0.80)
-    ];
+    // Show zeros when there's no real attendance data
+    this.attendanceBarChartData.datasets[0].data = [0, 0, 0, 0, 0, 0, 0];
   }
 
   calculateAttendanceStats() {
@@ -839,14 +865,21 @@ export class Dashboard implements OnInit, OnDestroy {
   }
 
   getCheckInStatus(child: any): string {
-    if (child.checkOutTime) {
-      const time = new Date(child.checkOutTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+    const checkInTime = child.checkInTime ? new Date(child.checkInTime) : null;
+    const checkOutTime = child.checkOutTime ? new Date(child.checkOutTime) : null;
+
+    // If child has checked in
+    if (checkInTime) {
+      // If checked in more recently than checked out (or never checked out), they're currently checked in
+      if (!checkOutTime || checkInTime > checkOutTime) {
+        const time = checkInTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+        return `${this.translateService.instant('DASHBOARD.CHECKED_IN_AT')} ${time} 😊`;
+      }
+      // Checked out after checking in
+      const time = checkOutTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
       return `${this.translateService.instant('DASHBOARD.CHECKED_OUT_AT')} ${time} 👋`;
     }
-    if (child.checkInTime) {
-      const time = new Date(child.checkInTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-      return `${this.translateService.instant('DASHBOARD.CHECKED_IN_AT')} ${time} 😊`;
-    }
+
     return this.translateService.instant('DASHBOARD.NOT_CHECKED_IN_YET');
   }
 
@@ -997,5 +1030,49 @@ export class Dashboard implements OnInit, OnDestroy {
 
   trackByIndex(index: number): number {
     return index;
+  }
+
+  /**
+   * Get the profile picture URL for a child, preferring file-based URL over Base64
+   */
+  getChildProfilePictureUrl(child: any | null | undefined, defaultPicture: string = 'assets/child.png'): string {
+    if (!child) return defaultPicture;
+    if (child.profilePictureUrl && child.profilePictureUrl.trim() !== '') {
+      return this.getFullUrl(child.profilePictureUrl);
+    }
+    if (child.profilePicture && child.profilePicture.trim() !== '') {
+      return child.profilePicture;
+    }
+    return defaultPicture;
+  }
+
+  /**
+   * Get the thumbnail URL for a photo, preferring file-based URL over Base64
+   */
+  getPhotoThumbnailUrl(photo: any, defaultPicture: string = 'assets/placeholder.jpg'): string {
+    if (!photo) return defaultPicture;
+    if (photo.thumbnailUrl && photo.thumbnailUrl.trim() !== '') {
+      return this.getFullUrl(photo.thumbnailUrl);
+    }
+    if (photo.thumbnailData && photo.thumbnailData.trim() !== '') {
+      return photo.thumbnailData;
+    }
+    if (photo.imageData && photo.imageData.trim() !== '') {
+      return photo.imageData;
+    }
+    return defaultPicture;
+  }
+
+  /**
+   * Convert a relative path to a full URL with the API base
+   */
+  private getFullUrl(path: string): string {
+    if (!path) return '';
+    // If it's already an absolute URL or data URI, return as-is
+    if (path.startsWith('http') || path.startsWith('data:')) {
+      return path;
+    }
+    // Prepend the API base URL
+    return `${ApiConfig.HUB_URL}${path.startsWith('/') ? '' : '/'}${path}`;
   }
 }

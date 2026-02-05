@@ -15,8 +15,10 @@ import Swal from 'sweetalert2';
 import { AuthService } from '../../../core/services/auth';
 import { Location } from '@angular/common';
 import { ParentChildHeaderComponent } from '../../../shared/components/parent-child-header/parent-child-header.component';
+import { ApiConfig } from '../../../core/config/api.config';
 import { PageTitleService } from '../../../core/services/page-title.service';
 import { SkeletonComponent } from '../../../shared/components/skeleton/skeleton.component';
+import { SimpleToastService } from '../../../core/services/simple-toast.service';
 
 @Component({
   selector: 'app-parent-detail',
@@ -65,7 +67,8 @@ export class ParentDetail implements OnInit, OnDestroy {
     private authService: AuthService,
     private location: Location,
     private translate: TranslateService,
-    private pageTitleService: PageTitleService
+    private pageTitleService: PageTitleService,
+    private simpleToastService: SimpleToastService
   ) {}
 
   ngOnInit(): void {
@@ -238,7 +241,7 @@ export class ParentDetail implements OnInit, OnDestroy {
         this.filteredChildren = [...this.availableChildren];
       },
       error: () => {
-        Swal.fire(this.translate.instant('MESSAGES.ERROR'), this.translate.instant('PARENTS.FAILED_LOAD_CHILDREN'), 'error');
+        this.simpleToastService.error(this.translate.instant('PARENTS.FAILED_LOAD_CHILDREN'));
       }
     });
   }
@@ -262,17 +265,17 @@ export class ParentDetail implements OnInit, OnDestroy {
             this.linkingChild = false;
             this.showSelectChildModal = false;
             this.loadParentDetails(this.parent!.id!);
-            Swal.fire(this.translate.instant('MESSAGES.SUCCESS'), this.translate.instant('PARENTS.CHILD_LINKED_SUCCESS'), 'success');
+            this.simpleToastService.success(this.translate.instant('PARENTS.CHILD_LINKED_SUCCESS'));
           },
           error: () => {
             this.linkingChild = false;
-            Swal.fire(this.translate.instant('MESSAGES.ERROR'), this.translate.instant('PARENTS.FAILED_LINK_CHILD'), 'error');
+            this.simpleToastService.error(this.translate.instant('PARENTS.FAILED_LINK_CHILD'));
           }
         });
       },
       error: () => {
         this.linkingChild = false;
-        Swal.fire(this.translate.instant('MESSAGES.ERROR'), this.translate.instant('PARENTS.FAILED_LOAD_CHILD_DETAILS'), 'error');
+        this.simpleToastService.error(this.translate.instant('PARENTS.FAILED_LOAD_CHILD_DETAILS'));
       }
     });
   }
@@ -305,11 +308,11 @@ export class ParentDetail implements OnInit, OnDestroy {
       next: () => {
         this.savingFee = false;
         this.showAddFee = false;
-        Swal.fire(this.translate.instant('MESSAGES.SUCCESS'), this.translate.instant('PARENTS.FEE_ADDED_SUCCESS'), 'success');
+        this.simpleToastService.success(this.translate.instant('PARENTS.FEE_ADDED_SUCCESS'));
       },
       error: () => {
         this.savingFee = false;
-        Swal.fire(this.translate.instant('MESSAGES.ERROR'), this.translate.instant('PARENTS.FEE_ADD_ERROR'), 'error');
+        this.simpleToastService.error(this.translate.instant('PARENTS.FEE_ADD_ERROR'));
       }
     });
   }
@@ -342,10 +345,10 @@ export class ParentDetail implements OnInit, OnDestroy {
         this.parentService.unlinkChildFromParent(this.parent!.id!, childId).subscribe({
           next: () => {
             this.loadParentDetails(this.parent!.id!);
-            Swal.fire(this.translate.instant('COMMON.REMOVED'), this.translate.instant('PARENTS.CHILD_REMOVED_SUCCESS'), 'success');
+            this.simpleToastService.success(this.translate.instant('PARENTS.CHILD_REMOVED_SUCCESS'));
           },
           error: () => {
-            Swal.fire(this.translate.instant('MESSAGES.ERROR'), this.translate.instant('PARENTS.FAILED_REMOVE_CHILD'), 'error');
+            this.simpleToastService.error(this.translate.instant('PARENTS.FAILED_REMOVE_CHILD'));
           }
         });
       }
@@ -387,13 +390,13 @@ export class ParentDetail implements OnInit, OnDestroy {
             const successMsg = isActive
               ? this.translate.instant('PARENTS.PARENT_DEACTIVATED_SUCCESS')
               : this.translate.instant('PARENTS.PARENT_ACTIVATED_SUCCESS');
-            Swal.fire(this.translate.instant('MESSAGES.SUCCESS'), successMsg, 'success');
+            this.simpleToastService.success(successMsg);
           },
           error: () => {
             const errorMsg = isActive
               ? this.translate.instant('PARENTS.FAILED_DEACTIVATE_PARENT')
               : this.translate.instant('PARENTS.FAILED_ACTIVATE_PARENT');
-            Swal.fire(this.translate.instant('MESSAGES.ERROR'), errorMsg, 'error');
+            this.simpleToastService.error(errorMsg);
           }
         });
       }
@@ -452,5 +455,37 @@ export class ParentDetail implements OnInit, OnDestroy {
     }
 
     return actions;
+  }
+
+  /**
+   * Get profile picture URL, handling both file-based and Base64 formats
+   */
+  getProfilePictureUrl(entity: any): string | null {
+    if (!entity) return null;
+
+    // Priority 1: File-based URL (new format)
+    if (entity.profilePictureUrl) {
+      return this.getFullUrl(entity.profilePictureUrl);
+    }
+
+    // Priority 2: Base64 (backward compatibility)
+    if (entity.profilePicture) {
+      // If it's already a data URL or full URL, return as-is
+      if (entity.profilePicture.startsWith('data:') || entity.profilePicture.startsWith('http')) {
+        return entity.profilePicture;
+      }
+      // If it's a relative path, construct full URL
+      return this.getFullUrl(entity.profilePicture);
+    }
+
+    return null;
+  }
+
+  private getFullUrl(path: string): string {
+    if (!path) return '';
+    if (path.startsWith('http') || path.startsWith('data:')) {
+      return path;
+    }
+    return `${ApiConfig.HUB_URL}${path.startsWith('/') ? '' : '/'}${path}`;
   }
 }

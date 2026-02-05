@@ -127,6 +127,7 @@
       font-size: 22px;
       color: #ffffff;
     }
+    
   }
   
   .stat-number {
@@ -163,6 +164,14 @@
         padding-left: 2px;
       }
     }
+    .stat-icon-wrapper {
+      width: 30px !important;
+      height: 30px !important;
+      i {
+        font-size: 14px !important;
+        padding: 10px !important;
+      }
+    }
 }
 
 @media (max-width: 768px) {
@@ -170,4 +179,8 @@
     padding: 16px;
     padding-bottom: 0 !important;
   }
+  .modal-dialog {
+    margin: 80px auto;
+  }
 }
+

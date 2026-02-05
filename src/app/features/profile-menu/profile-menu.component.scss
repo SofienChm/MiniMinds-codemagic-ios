@@ -81,7 +81,7 @@ h5.name.simple {
     
     .email {
       color: #888;
-      font-size: 14px;
+      font-size: 12px;
       margin: 0 0 2px 0;
     }
     
@@ -180,6 +180,14 @@ h5.name.simple {
 
     &.gallery  {
       background: linear-gradient(135deg, #ff8fd5 0%, #fa059f 100%);
+    }
+
+    &.appointments {
+      background: linear-gradient(135deg, #69db7c 0%, #37b24d 100%);
+    }
+
+    &.notification-settings {
+      background: linear-gradient(135deg, #748ffc 0%, #5c7cfa 100%);
     }
   }
   

@@ -1,0 +1,80 @@
+.section-description {
+  color: var(--color-gray);
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  margin-top: -0.5rem;
+}
+
+.alert {
+  border-radius: 8px;
+
+  &.alert-danger {
+    background-color: rgba(220, 53, 69, 0.1);
+    border-color: rgba(220, 53, 69, 0.2);
+    color: #dc3545;
+  }
+}
+
+.form-hint {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--color-gray);
+  margin-top: 0.25rem;
+}
+
+// Fix ng-select inside input-with-icon
+.input-with-icon {
+  .input-icon {
+    pointer-events: none;
+  }
+
+  ng-select.form-input {
+    width: 100%;
+
+    .ng-select-container {
+      padding-left: 40px;
+      min-height: 44px;
+      border-radius: 8px;
+    }
+  }
+}
+@media (max-width: 380px) {
+  .card-add-pages .add-form .form-grid {
+    grid-template-columns: repeat(auto-fit, minmax(208px, 1fr));
+  }
+  .card-add-pages .add-form .form-grid .form-input {
+    font-size: 14px;
+    padding: 10px 10px 10px 40px;
+  }
+}
+.mobile-view {
+  padding-bottom: 110px;
+}
+.mobile-view-superadmin {
+  .header-info {
+    background: var(--secondary-color);
+    padding: 40px 20px 23px;
+    border-radius: 0 0 15px 15px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    justify-content: center;
+    h5 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #fff;
+    }
+    .page-back {
+      i {
+        background: rgba(255, 255, 255, 0.2117647059);
+        padding: 4px 8px;
+        border-radius: 12px;
+        position: absolute;
+        left: 20px;
+        bottom: 19px;
+        font-size: 15px;
+      }
+    }
+  }
+}

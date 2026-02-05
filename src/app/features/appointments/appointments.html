@@ -1,0 +1,173 @@
+<app-parent-child-header-simple *ngIf="isParent"
+  [title]="'APPOINTMENTS_PAGE.TITLE' | translate"
+>
+</app-parent-child-header-simple>
+<div class="container-fluid mt-4">
+  <app-title-page *ngIf="!isParent"
+    [title]="'APPOINTMENTS_PAGE.TITLE' | translate"
+    [subtitle]="'APPOINTMENTS_PAGE.SUBTITLE' | translate"
+    [icon]="'bi bi-calendar-check'"
+    [breadcrumbs]="breadcrumbs"
+    [actions]="titleActions">
+  </app-title-page>
+
+  <!-- Filter Section -->
+  <div class="bg-white p-3 border d-flex align-items-center justify-content-between flex-wrap mb-4 rounded-1">
+    <h4 class="title-filter mb-0">{{ 'APPOINTMENTS_PAGE.APPOINTMENTS_LIST' | translate }}</h4>
+    <div class="d-flex align-items-center flex-wrap gap-2">
+      <!-- Status Filter -->
+      <ng-select
+        class="filter-select"
+        [(ngModel)]="selectedStatus"
+        [items]="statusOptions"
+        bindLabel="label"
+        bindValue="value"
+        [placeholder]="'APPOINTMENTS_PAGE.FILTER_BY_STATUS' | translate"
+        [clearable]="false"
+        [searchable]="false"
+        (change)="loadAppointments()">
+        <ng-template ng-option-tmp let-item="item">
+          <div class="option-with-image">
+            <i class="bi {{item.icon}}" style="font-size: 16px; color: #7dd3c0;"></i>
+            <span class="option-title">{{ item.label }}</span>
+          </div>
+        </ng-template>
+      </ng-select>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">{{ 'APPOINTMENTS_PAGE.LOADING' | translate }}</span>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage && !loading" class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle me-2"></i>{{ errorMessage }}
+  </div>
+
+  <!-- Appointments Table -->
+  <div *ngIf="!loading" class="card card-general card-appointments">
+    <div class="card-body">
+      <div *ngIf="appointments && appointments.length > 0; else noAppointments" class="table-responsive custom-table">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>{{ 'APPOINTMENTS_PAGE.TITLE_LABEL' | translate }}</th>
+              <th *ngIf="!isParent">{{ 'APPOINTMENTS_PAGE.PARENT' | translate }}</th>
+              <th>{{ 'APPOINTMENTS_PAGE.CHILD' | translate }}</th>
+              <th>{{ 'APPOINTMENTS_PAGE.TEACHER' | translate }}</th>
+              <th>{{ 'APPOINTMENTS_PAGE.TYPE' | translate }}</th>
+              <th>{{ 'APPOINTMENTS_PAGE.DATE' | translate }}</th>
+              <th>{{ 'APPOINTMENTS_PAGE.TIME' | translate }}</th>
+              <th>{{ 'APPOINTMENTS_PAGE.STATUS' | translate }}</th>
+              <th>{{ 'APPOINTMENTS_PAGE.ACTIONS' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let apt of displayedAppointments; trackBy: trackById">
+              <td>
+                <span class="fw-medium">{{ apt.title }}</span>
+              </td>
+              <td *ngIf="!isParent">
+                <span class="text-muted">{{ apt.parentName || '-' }}</span>
+              </td>
+              <td>
+                <span class="text-muted">{{ apt.childName || ('APPOINTMENTS_PAGE.NOT_SPECIFIED' | translate) }}</span>
+              </td>
+              <td>
+                <span class="text-muted">{{ apt.teacherName || ('APPOINTMENTS_PAGE.ANY_AVAILABLE' | translate) }}</span>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="getTypeBadgeClass(apt.type)">
+                  {{ apt.type }}
+                </span>
+              </td>
+              <td>{{ apt.appointmentDate | date:'mediumDate' }}</td>
+              <td>{{ apt.startTime }} - {{ apt.endTime }}</td>
+              <td>
+                <span class="badge" [ngClass]="getStatusBadgeClass(apt.status)">
+                  {{ apt.status }}
+                </span>
+              </td>
+              <td>
+                <div class="d-flex gap-1">
+                  <!-- View Details -->
+                  <button class="btn btn-sm btn-view"
+                          (click)="viewDetails(apt)"
+                          [title]="'APPOINTMENTS_PAGE.VIEW_DETAILS' | translate">
+                    <i class="bi bi-eye"></i>
+                  </button>
+
+                  <!-- Parent Actions -->
+                  <ng-container *ngIf="isParent">
+                    <!-- Edit (only pending) -->
+                    <button *ngIf="apt.status === 'Pending'"
+                            class="btn btn-sm btn-edit"
+                            (click)="editAppointment(apt)"
+                            [title]="'APPOINTMENTS_PAGE.EDIT' | translate">
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                    <!-- Cancel (pending or approved) -->
+                    <button *ngIf="apt.status === 'Pending' || apt.status === 'Approved'"
+                            class="btn btn-sm btn-remove"
+                            (click)="cancelAppointment(apt)"
+                            [title]="'APPOINTMENTS_PAGE.CANCEL_APPOINTMENT' | translate">
+                      <i class="bi bi-x-lg"></i>
+                    </button>
+                  </ng-container>
+
+                  <!-- Admin/Teacher Actions -->
+                  <ng-container *ngIf="isAdmin || isTeacher">
+                    <!-- Approve (only pending) -->
+                    <button *ngIf="apt.status === 'Pending'"
+                            class="btn btn-sm btn-success"
+                            (click)="approve(apt)"
+                            [title]="'APPOINTMENTS_PAGE.APPROVE' | translate">
+                      <i class="bi bi-check-lg"></i>
+                    </button>
+                    <!-- Reject (only pending) -->
+                    <button *ngIf="apt.status === 'Pending'"
+                            class="btn btn-sm btn-danger"
+                            (click)="reject(apt)"
+                            [title]="'APPOINTMENTS_PAGE.REJECT' | translate">
+                      <i class="bi bi-x-lg"></i>
+                    </button>
+                    <!-- Complete (only approved) -->
+                    <button *ngIf="apt.status === 'Approved'"
+                            class="btn btn-sm btn-info"
+                            (click)="complete(apt)"
+                            [title]="'APPOINTMENTS_PAGE.MARK_COMPLETED' | translate">
+                      <i class="bi bi-check-all"></i>
+                    </button>
+                  </ng-container>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <ng-template #noAppointments>
+        <div class="text-center py-5">
+          <i class="bi bi-calendar-x fs-1 text-muted mb-3 d-block"></i>
+          <p class="text-muted mb-0">{{ 'APPOINTMENTS_PAGE.NO_APPOINTMENTS' | translate }}</p>
+          <button *ngIf="isParent" class="action-btn custom-btn-2 btn-add-global-2 mt-4 mx-auto" (click)="navigateToAddAppointment()">
+            <i class="bi bi-plus-circle me-2"></i>{{ 'APPOINTMENTS_PAGE.BOOK_FIRST_APPOINTMENT' | translate }}
+          </button>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+  <!-- Add Appointments -->
+  <button *ngIf="isParent" class="action-btn btn-add-global-2 custom-btn-2 mx-auto" (click)="navigateToAdd()">
+    <i class="bi bi-plus-lg me-2"></i>{{ 'STATIC_FEES_PAGE.ADD_FIRST_FEE' | translate }}
+  </button>
+  <!-- Load More Button -->
+  <div *ngIf="hasMore()" class="text-center d-flex justify-content-center mt-3">
+    <button class="custom-btn-2 btn-add-border mb-4" (click)="loadMore()">
+      <i class="bi bi-plus-circle me-2"></i>{{ 'APPOINTMENTS_PAGE.LOAD_MORE' | translate }}
+    </button>
+  </div>
+</div>

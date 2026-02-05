@@ -143,6 +143,18 @@ $accent-color: #cdeaf0;
   transition: all 0.3s ease;
   border: 1px solid rgba(32, 44, 75, 0.1);
 }
+@media (max-width: 420px) {
+  .card {
+    padding: 10px !important;
+    .participants-card {
+      .card-header {
+        h5{
+          font-size: 18px;
+        }
+      }
+    }
+  }
+}
 
 .hover-shadow:hover {
   box-shadow: 0 4px 12px rgba(32, 44, 75, 0.15);

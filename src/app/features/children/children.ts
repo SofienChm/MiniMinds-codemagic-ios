@@ -11,6 +11,8 @@ import { AuthService } from '../../core/services/auth';
 import { PermissionService } from '../../core/services/permission.service';
 import { TitlePage, TitleAction, Breadcrumb } from '../../shared/layouts/title-page/title-page';
 import { ExportUtil } from '../../shared/utils/export.util';
+import { SimpleToastService } from '../../core/services/simple-toast.service';
+import { ApiConfig } from '../../core/config/api.config';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -66,8 +68,9 @@ export class Children implements OnInit, OnDestroy {
     private authService: AuthService,
     private router: Router,
     public permissions: PermissionService,
-    private translate: TranslateService
-  ) {}
+    private translate: TranslateService,
+    private simpleToastService: SimpleToastService
+  ) { }
 
   ngOnInit() {
     this.userRole = this.authService.getUserRole();
@@ -118,7 +121,7 @@ export class Children implements OnInit, OnDestroy {
       {
         label: this.translate.instant('CHILDREN.EXPORT'),
         class: 'btn btn-light me-2',
-        action: () => {},
+        action: () => { },
         dropdown: {
           items: [
             {
@@ -157,11 +160,9 @@ export class Children implements OnInit, OnDestroy {
       error: (error) => {
         console.error('Error loading children:', error);
         this.loading = false;
-        Swal.fire({
-          icon: 'error',
-          title: this.translate.instant('MESSAGES.ERROR'),
-          text: this.translate.instant('CHILDREN.LOAD_ERROR')
-        });
+        this.simpleToastService.error(
+          this.translate.instant('CHILDREN.LOAD_ERROR')
+        );
       }
     });
   }
@@ -184,20 +185,17 @@ export class Children implements OnInit, OnDestroy {
       if (result.isConfirmed) {
         this.childrenService.deleteChild(id).subscribe({
           next: () => {
-            Swal.fire({
-              icon: 'success',
-              title: this.translate.instant('MESSAGES.SUCCESS'),
-              text: this.translate.instant('CHILDREN.DELETE_SUCCESS')
-            });
+            this.simpleToastService.success(
+              this.translate.instant('CHILDREN.DELETE_SUCCESS')
+            );
             this.loadChildren();
           },
           error: (error) => {
             console.error('Error deleting child:', error);
-            Swal.fire({
-              icon: 'error',
-              title: this.translate.instant('MESSAGES.ERROR'),
-              text: this.translate.instant('CHILDREN.DELETE_ERROR')
-            });
+            this.simpleToastService.error(
+              this.translate.instant('CHILDREN.DELETE_ERROR')
+            );
+
           }
         });
       }
@@ -383,20 +381,16 @@ export class Children implements OnInit, OnDestroy {
   toggleChildStatus(id: number) {
     this.childrenService.toggleChildStatus(id).subscribe({
       next: () => {
-        Swal.fire({
-          icon: 'success',
-          title: this.translate.instant('MESSAGES.SUCCESS'),
-          text: this.translate.instant('CHILDREN.STATUS_UPDATED')
-        });
+        this.simpleToastService.success(
+          this.translate.instant('CHILDREN.STATUS_UPDATED')
+        );
         this.loadChildren();
       },
       error: (error) => {
         console.error('Error toggling child status:', error);
-        Swal.fire({
-          icon: 'error',
-          title: this.translate.instant('MESSAGES.ERROR'),
-          text: this.translate.instant('CHILDREN.STATUS_ERROR')
-        });
+        this.simpleToastService.error(
+          this.translate.instant('CHILDREN.STATUS_ERROR')
+        );
       }
     });
   }
@@ -404,5 +398,46 @@ export class Children implements OnInit, OnDestroy {
   // TrackBy function for ngFor performance optimization
   trackById(index: number, item: ChildModel): number | undefined {
     return item.id;
+  }
+  calculateAge(dateOfBirth: string): { years: number, months: number } {
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+    let years = today.getFullYear() - birthDate.getFullYear();
+    let months = today.getMonth() - birthDate.getMonth();
+    if (today.getDate() < birthDate.getDate()) {
+      months--;
+    }
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+    return { years: years < 0 ? 0 : years, months: months < 0 ? 0 : months };
+  }
+
+  /**
+   * Get the profile picture URL for a child, preferring file-based URL over Base64
+   */
+  getProfilePictureUrl(child: ChildModel | null | undefined, defaultPicture: string = 'assets/child.png'): string {
+    if (!child) return defaultPicture;
+    if (child.profilePictureUrl && child.profilePictureUrl.trim() !== '') {
+      return this.getFullUrl(child.profilePictureUrl);
+    }
+    if (child.profilePicture && child.profilePicture.trim() !== '') {
+      return child.profilePicture;
+    }
+    return defaultPicture;
+  }
+
+  /**
+   * Convert a relative path to a full URL with the API base
+   */
+  private getFullUrl(path: string): string {
+    if (!path) return '';
+    // If it's already an absolute URL or data URI, return as-is
+    if (path.startsWith('http') || path.startsWith('data:')) {
+      return path;
+    }
+    // Prepend the API base URL
+    return `${ApiConfig.HUB_URL}${path.startsWith('/') ? '' : '/'}${path}`;
   }
 }

@@ -5,8 +5,10 @@
     [imageFile]="selectedImageFile"
     [roundCropper]="true"
     [aspectRatio]="1"
-    [resizeToWidth]="300"
-    [resizeToHeight]="300"
+    [resizeToWidth]="200"
+    [resizeToHeight]="200"
+    [format]="'jpeg'"
+    [quality]="70"
     (imageCropped)="onImageCropped($event)"
     (cancelled)="onCropCancelled()">
   </app-image-cropper-modal>
@@ -108,6 +110,7 @@
                   bindLabel="firstName"
                   bindValue="id"
                   [placeholder]="'ADD_CHILD.SELECT_PARENT' | translate"
+                  [searchFn]="searchParentsFullName"
                   [clearable]="true"
                   [searchable]="true">
                   <!-- Custom option template with image -->

@@ -71,6 +71,18 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
           case 401:
             // Unauthorized
+            // Check if this is an auth endpoint (login, register, password reset)
+            // These should handle their own 401 errors (wrong credentials)
+            const isAuthEndpoint = cleanReq.url.includes('/api/auth/login') ||
+                                   cleanReq.url.includes('/api/auth/register') ||
+                                   cleanReq.url.includes('/api/passwordreset');
+
+            if (isAuthEndpoint) {
+              // Let the component handle the error (wrong email/password)
+              return throwError(() => error);
+            }
+
+            // For other endpoints, this is a session expiry
             errorMessage = 'Your session has expired. Please login again.';
             Swal.fire({
               icon: 'warning',

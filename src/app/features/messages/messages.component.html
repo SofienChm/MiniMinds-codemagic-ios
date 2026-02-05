@@ -151,7 +151,12 @@
       <div class="nd-reply-input-container">
         <textarea class="nd-reply-textarea"
                   [placeholder]="'MESSAGES_PAGE.WRITE_REPLY' | translate"
-                  [(ngModel)]="replyText"></textarea>
+                  [ngModel]="replyText"
+                  (ngModelChange)="replyText = $event"
+                  (input)="replyText = $any($event.target).value"
+                  autocapitalize="off"
+                  autocorrect="off"
+                  spellcheck="false"></textarea>
         <button class="nd-send-btn" (click)="sendReply()" [disabled]="!replyText.trim()">
           <i class="bi bi-send"></i>
         </button>
@@ -178,19 +183,30 @@
         <div class="nd-field-icon">
           <i class="bi bi-chat-text"></i>
         </div>
-        <input type="text" class="nd-field-input" [placeholder]="'MESSAGES_PAGE.ENTER_SUBJECT' | translate" [(ngModel)]="composeForm.subject">
+        <input type="text" class="nd-field-input" [placeholder]="'MESSAGES_PAGE.ENTER_SUBJECT' | translate"
+               [ngModel]="composeForm.subject"
+               (ngModelChange)="composeForm.subject = $event"
+               (input)="composeForm.subject = $any($event.target).value"
+               autocapitalize="off"
+               autocorrect="off"
+               spellcheck="false">
       </div>
       <div class="nd-compose-textarea-container">
         <textarea class="nd-compose-textarea"
                   [placeholder]="'MESSAGES_PAGE.ENTER_MESSAGE' | translate"
-                  [(ngModel)]="composeForm.content"></textarea>
+                  [ngModel]="composeForm.content"
+                  (ngModelChange)="composeForm.content = $event"
+                  (input)="composeForm.content = $any($event.target).value"
+                  autocapitalize="off"
+                  autocorrect="off"
+                  spellcheck="false"></textarea>
       </div>
     </div>
     <div class="nd-compose-actions">
       <button class="nd-cancel-btn" (click)="closeNewMessageModal()">
         {{ 'MESSAGES_PAGE.CANCEL' | translate }}
       </button>
-      <button class="nd-submit-btn" (click)="sendMessage()" [disabled]="!composeForm.subject.trim() || !composeForm.content.trim()">
+      <button class="nd-submit-btn" (click)="sendMessage()" [disabled]="!composeForm.content.trim()">
         {{ 'MESSAGES_PAGE.SEND_MESSAGE' | translate }}
       </button>
     </div>
@@ -349,7 +365,13 @@
             </div>
             <div class="detail-response-section">
               <h5 class="section-title">{{ 'MESSAGES_PAGE.REPLY' | translate }}</h5>
-              <textarea class="response-textarea" [placeholder]="'MESSAGES_PAGE.WRITE_REPLY' | translate" [(ngModel)]="replyText"></textarea>
+              <textarea class="response-textarea" [placeholder]="'MESSAGES_PAGE.WRITE_REPLY' | translate"
+                        [ngModel]="replyText"
+                        (ngModelChange)="replyText = $event"
+                        (input)="replyText = $any($event.target).value"
+                        autocapitalize="off"
+                        autocorrect="off"
+                        spellcheck="false"></textarea>
               <div class="response-actions">
                 <div class="response-actions-left">
                   <button class="custom-btn-2 btn-add-global-2" (click)="sendReply()" [disabled]="!replyText.trim()">
@@ -387,14 +409,27 @@
             </div>
             <div class="form-group">
               <label class="form-label">{{ 'MESSAGES_PAGE.SUBJECT' | translate }}</label>
-              <input type="text" class="form-input" [placeholder]="'MESSAGES_PAGE.ENTER_SUBJECT' | translate" [(ngModel)]="composeForm.subject" required>
+              <input type="text" class="form-input" [placeholder]="'MESSAGES_PAGE.ENTER_SUBJECT' | translate"
+                     [ngModel]="composeForm.subject"
+                     (ngModelChange)="composeForm.subject = $event"
+                     (input)="composeForm.subject = $any($event.target).value"
+                     autocapitalize="off"
+                     autocorrect="off"
+                     spellcheck="false">
             </div>
             <div class="form-group">
               <label class="form-label">{{ 'MESSAGES_PAGE.CONTENT' | translate }}</label>
-              <textarea class="form-textarea" [placeholder]="'MESSAGES_PAGE.ENTER_MESSAGE' | translate" [(ngModel)]="composeForm.content" required></textarea>
+              <textarea class="form-textarea" [placeholder]="'MESSAGES_PAGE.ENTER_MESSAGE' | translate"
+                        [ngModel]="composeForm.content"
+                        (ngModelChange)="composeForm.content = $event"
+                        (input)="composeForm.content = $any($event.target).value"
+                        autocapitalize="off"
+                        autocorrect="off"
+                        spellcheck="false"
+                        required></textarea>
             </div>
             <div class="form-actions">
-              <button class="btn-send" (click)="sendMessage()" [disabled]="(composeForm.recipientType === 'individual' && !composeForm.recipientId) || !composeForm.subject.trim() || !composeForm.content.trim()">
+              <button class="btn-send" (click)="sendMessage()" [disabled]="(composeForm.recipientType === 'individual' && !composeForm.recipientId) || !composeForm.content.trim()">
                 <i class="bi bi-send"></i> {{ 'MESSAGES_PAGE.SEND_MESSAGE' | translate }}
               </button>
               <button class="btn-cancel" (click)="closeNewMessageModal()">

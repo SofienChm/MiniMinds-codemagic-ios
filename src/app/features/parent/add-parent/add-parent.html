@@ -103,7 +103,7 @@
               <label class="form-label">{{ 'ADD_PARENT.PHONE' | translate }} {{ 'ADD_PARENT.REQUIRED' | translate }}</label>
               <div class="input-with-icon">
                 <i class="bi bi-phone input-icon"></i>
-                <input type="text" class="form-input" [class.is-invalid]="isFieldInvalid('phoneNumber')" formControlName="phoneNumber" [placeholder]="'ADD_PARENT.PHONE_PLACEHOLDER' | translate">
+                <input type="tel" class="form-input" [class.is-invalid]="isFieldInvalid('phoneNumber')" formControlName="phoneNumber" [placeholder]="'ADD_PARENT.PHONE_PLACEHOLDER' | translate">
               </div>
               <div *ngIf="isFieldInvalid('phoneNumber')" class="error-message">
                 {{ getFieldError('phoneNumber') }}

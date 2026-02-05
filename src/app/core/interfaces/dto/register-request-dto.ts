@@ -5,4 +5,9 @@ export interface RegisterRequest {
   password: string;
   confirmPassword: string;
   role: string;
+  // COPPA Compliance Fields
+  isOver18: boolean;
+  acceptedTermsOfService: boolean;
+  acceptedPrivacyPolicy: boolean;
+  parentalConsentAcknowledged: boolean;
 }

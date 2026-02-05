@@ -10,7 +10,7 @@ import { PageTitleService } from '../../../core/services/page-title.service';
 import { EducatorService } from '../../educator/educator.service';
 import { EducatorModel } from '../../educator/educator.interface';
 import { Subscription } from 'rxjs';
-import Swal from 'sweetalert2';
+import { SimpleToastService } from '../../../core/services/simple-toast.service';
 
 @Component({
   selector: 'app-add-class',
@@ -40,7 +40,8 @@ export class AddClassComponent implements OnInit, OnDestroy {
     private educatorService: EducatorService,
     private router: Router,
     private translate: TranslateService,
-    private pageTitleService: PageTitleService
+    private pageTitleService: PageTitleService,
+    private simpleToastService: SimpleToastService,
   ) {}
 
   ngOnInit(): void {
@@ -77,23 +78,15 @@ export class AddClassComponent implements OnInit, OnDestroy {
     this.saving = true;
     this.classesService.createClass(this.classData).subscribe({
       next: () => {
-        Swal.fire({
-          icon: 'success',
-          title: 'Success!',
-          text: 'Class created successfully',
-          timer: 2000,
-          showConfirmButton: false
-        });
-        this.router.navigate(['/classes']);
+        this.simpleToastService.success(this.translate.instant('Class created successfully'));
+        setTimeout(() => {
+          this.router.navigate(['/classes']);
+        }, 200);
       },
       error: (error) => {
         console.error('Error creating class:', error);
         this.saving = false;
-        Swal.fire({
-          icon: 'error',
-          title: 'Error!',
-          text: 'Failed to create class'
-        });
+        this.simpleToastService.error(this.translate.instant('Failed to create class'));
       }
     });
   }

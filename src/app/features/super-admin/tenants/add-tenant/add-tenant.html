@@ -1,0 +1,276 @@
+<app-header-superadmin></app-header-superadmin>
+<div *ngIf="isMobile()" class="mobile-view-superadmin">
+  <div class="header-info">
+    <div class="title-icons">
+      <div class="page-back" (click)="back()">
+        <i class="bi bi-arrow-left"></i>
+      </div>
+    </div>
+    <div class="d-flex">
+      <div class="overflow-hidden">
+        <h5 class="name simple"> Daycare</h5>
+      </div>
+    </div>
+  </div>
+</div>
+<div [class]="isMobile() ? 'mobileview mobile-view container-fluid mt-4' : 'container-fluid mt-4'">
+  <app-title-page *ngIf=" !isMobile()"
+    [title]="isEditMode ? ('SUPER_ADMIN.EDIT_DAYCARE' | translate) : ('SUPER_ADMIN.ADD_DAYCARE' | translate)"
+    [subtitle]="isEditMode ? ('SUPER_ADMIN.EDIT_DAYCARE_SUBTITLE' | translate) : ('SUPER_ADMIN.ADD_DAYCARE_SUBTITLE' | translate)"
+    [icon]="isEditMode ? 'bi bi-pencil-square' : 'bi bi-plus-circle'"
+    [breadcrumbs]="breadcrumbs">
+  </app-title-page>
+
+  <!-- Loading Data -->
+  <div *ngIf="loadingData" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <div class="card-add-pages mb-4" *ngIf="!loadingData">
+    <form [formGroup]="tenantForm" (ngSubmit)="onSubmit()" class="add-form">
+      <!-- Error Message -->
+      <div *ngIf="errorMessage" class="alert alert-danger mb-4">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        {{ errorMessage }}
+      </div>
+
+      <!-- Daycare Information Section -->
+      <div class="form-section">
+        <div class="section-header">
+          <i class="bi bi-building"></i>
+          <h4>{{ 'SUPER_ADMIN.DAYCARE_INFO' | translate }}</h4>
+        </div>
+        <div class="form-grid">
+          <!-- Name -->
+          <div class="form-group">
+            <label class="form-label">{{ 'SUPER_ADMIN.DAYCARE_NAME' | translate }} *</label>
+            <div class="input-with-icon">
+              <i class="bi bi-building input-icon"></i>
+              <input
+                type="text"
+                class="form-input"
+                [class.is-invalid]="isFieldInvalid('name')"
+                formControlName="name"
+                [placeholder]="'SUPER_ADMIN.DAYCARE_NAME_PLACEHOLDER' | translate">
+            </div>
+            <div *ngIf="isFieldInvalid('name')" class="error-message">
+              {{ getFieldError('name') | translate }}
+            </div>
+          </div>
+
+          <!-- Subdomain -->
+          <div class="form-group">
+            <label class="form-label">{{ 'SUPER_ADMIN.SUBDOMAIN' | translate }}</label>
+            <div class="input-with-icon">
+              <i class="bi bi-globe input-icon"></i>
+              <input
+                type="text"
+                class="form-input"
+                [class.is-invalid]="isFieldInvalid('subdomain')"
+                formControlName="subdomain"
+                placeholder="my-daycare">
+            </div>
+            <small class="form-hint">{{ 'SUPER_ADMIN.SUBDOMAIN_HINT' | translate }}</small>
+            <div *ngIf="isFieldInvalid('subdomain')" class="error-message">
+              {{ getFieldError('subdomain') | translate }}
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="form-group">
+            <label class="form-label">{{ 'SUPER_ADMIN.DAYCARE_EMAIL' | translate }}</label>
+            <div class="input-with-icon">
+              <i class="bi bi-envelope input-icon"></i>
+              <input
+                type="email"
+                class="form-input"
+                [class.is-invalid]="isFieldInvalid('email')"
+                formControlName="email"
+                placeholder="contact@daycare.com">
+            </div>
+            <div *ngIf="isFieldInvalid('email')" class="error-message">
+              {{ getFieldError('email') | translate }}
+            </div>
+          </div>
+
+          <!-- Phone -->
+          <div class="form-group">
+            <label class="form-label">{{ 'SUPER_ADMIN.PHONE' | translate }}</label>
+            <div class="input-with-icon">
+              <i class="bi bi-telephone input-icon"></i>
+              <input
+                type="text"
+                class="form-input"
+                formControlName="phone"
+                placeholder="+1 234 567 8900">
+            </div>
+          </div>
+
+          <!-- Address -->
+          <div class="form-group full-width">
+            <label class="form-label">{{ 'SUPER_ADMIN.ADDRESS' | translate }}</label>
+            <div class="input-with-icon">
+              <i class="bi bi-geo-alt input-icon"></i>
+              <textarea
+                class="form-input"
+                formControlName="address"
+                rows="2"
+                [placeholder]="'SUPER_ADMIN.ADDRESS_PLACEHOLDER' | translate"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Regional Settings Section -->
+      <div class="form-section">
+        <div class="section-header">
+          <i class="bi bi-globe2"></i>
+          <h4>{{ 'SUPER_ADMIN.REGIONAL_SETTINGS' | translate }}</h4>
+        </div>
+        <div class="form-grid">
+          <!-- Timezone -->
+          <div class="form-group">
+            <label class="form-label">{{ 'SUPER_ADMIN.TIMEZONE' | translate }}</label>
+            <div class="input-with-icon">
+              <i class="bi bi-clock input-icon"></i>
+              <ng-select
+                class="form-input"
+                formControlName="timezone"
+                [items]="timezones"
+                bindLabel="label"
+                bindValue="value"
+                [clearable]="false">
+              </ng-select>
+            </div>
+          </div>
+
+          <!-- Currency -->
+          <div class="form-group">
+            <label class="form-label">{{ 'SUPER_ADMIN.CURRENCY' | translate }}</label>
+            <div class="input-with-icon">
+              <i class="bi bi-currency-dollar input-icon"></i>
+              <ng-select
+                class="form-input"
+                formControlName="currency"
+                [items]="currencies"
+                bindLabel="label"
+                bindValue="value"
+                [clearable]="false">
+              </ng-select>
+            </div>
+          </div>
+
+          <!-- Language -->
+          <div class="form-group">
+            <label class="form-label">{{ 'SUPER_ADMIN.LANGUAGE' | translate }}</label>
+            <div class="input-with-icon">
+              <i class="bi bi-translate input-icon"></i>
+              <ng-select
+                class="form-input"
+                formControlName="language"
+                [items]="languages"
+                bindLabel="label"
+                bindValue="value"
+                [clearable]="false">
+              </ng-select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin User Section - Only show in create mode -->
+      <div class="form-section" *ngIf="!isEditMode">
+        <div class="section-header">
+          <i class="bi bi-person-badge"></i>
+          <h4>{{ 'SUPER_ADMIN.ADMIN_USER' | translate }}</h4>
+        </div>
+        <p class="section-description">{{ 'SUPER_ADMIN.ADMIN_USER_DESC' | translate }}</p>
+        <div class="form-grid">
+          <!-- First Name -->
+          <div class="form-group">
+            <label class="form-label">{{ 'SUPER_ADMIN.ADMIN_FIRST_NAME' | translate }} *</label>
+            <div class="input-with-icon">
+              <i class="bi bi-person input-icon"></i>
+              <input
+                type="text"
+                class="form-input"
+                [class.is-invalid]="isFieldInvalid('adminFirstName')"
+                formControlName="adminFirstName"
+                [placeholder]="'SUPER_ADMIN.FIRST_NAME_PLACEHOLDER' | translate">
+            </div>
+            <div *ngIf="isFieldInvalid('adminFirstName')" class="error-message">
+              {{ getFieldError('adminFirstName') | translate }}
+            </div>
+          </div>
+
+          <!-- Last Name -->
+          <div class="form-group">
+            <label class="form-label">{{ 'SUPER_ADMIN.ADMIN_LAST_NAME' | translate }} *</label>
+            <div class="input-with-icon">
+              <i class="bi bi-person input-icon"></i>
+              <input
+                type="text"
+                class="form-input"
+                [class.is-invalid]="isFieldInvalid('adminLastName')"
+                formControlName="adminLastName"
+                [placeholder]="'SUPER_ADMIN.LAST_NAME_PLACEHOLDER' | translate">
+            </div>
+            <div *ngIf="isFieldInvalid('adminLastName')" class="error-message">
+              {{ getFieldError('adminLastName') | translate }}
+            </div>
+          </div>
+
+          <!-- Admin Email -->
+          <div class="form-group">
+            <label class="form-label">{{ 'SUPER_ADMIN.ADMIN_EMAIL' | translate }} *</label>
+            <div class="input-with-icon">
+              <i class="bi bi-envelope input-icon"></i>
+              <input
+                type="email"
+                class="form-input"
+                [class.is-invalid]="isFieldInvalid('adminEmail')"
+                formControlName="adminEmail"
+                placeholder="admin@daycare.com">
+            </div>
+            <div *ngIf="isFieldInvalid('adminEmail')" class="error-message">
+              {{ getFieldError('adminEmail') | translate }}
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div class="form-group">
+            <label class="form-label">{{ 'SUPER_ADMIN.ADMIN_PASSWORD' | translate }} *</label>
+            <div class="input-with-icon">
+              <i class="bi bi-lock input-icon"></i>
+              <input
+                type="password"
+                class="form-input"
+                [class.is-invalid]="isFieldInvalid('adminPassword')"
+                formControlName="adminPassword"
+                [placeholder]="'SUPER_ADMIN.PASSWORD_PLACEHOLDER' | translate">
+            </div>
+            <small class="form-hint">{{ 'SUPER_ADMIN.PASSWORD_REQUIREMENTS' | translate }}</small>
+            <div *ngIf="isFieldInvalid('adminPassword')" class="error-message">
+              {{ getFieldError('adminPassword') | translate }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button type="button" class="custom-btn-2 btn-cancel-2" (click)="onCancel()">
+          <i class="bi bi-x-circle"></i>
+          {{ 'SUPER_ADMIN.CANCEL' | translate }}
+        </button>
+        <button type="submit" class="custom-btn-2 btn-add-global-2" [disabled]="loading">
+          <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+          <i *ngIf="!loading" class="bi bi-check-circle"></i>
+          {{ isEditMode ? ('SUPER_ADMIN.UPDATE_DAYCARE' | translate) : ('SUPER_ADMIN.CREATE_DAYCARE' | translate) }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -39,6 +39,12 @@ export class Login {
     this.showWelcomeScreen = false;
   }
 
+  // Fix for Samsung keyboard composing mode issue
+  onInputChange(event: Event, field: 'email' | 'password'): void {
+    const input = event.target as HTMLInputElement;
+    this.credentials[field] = input.value;
+  }
+
 
   onSubmit(): void {
     this.errorMessage = '';
@@ -46,7 +52,12 @@ export class Login {
 
     this.authService.login(this.credentials).subscribe({
       next: () => {
-        this.router.navigate(['/dashboard']);
+        // Redirect based on user role
+        if (this.authService.isSuperAdmin()) {
+          this.router.navigate(['/super-admin/dashboard']);
+        } else {
+          this.router.navigate(['/dashboard']);
+        }
       },
       error: (error) => {
         this.errorMessage = error.error?.message || 'Login failed. Please check your credentials.';

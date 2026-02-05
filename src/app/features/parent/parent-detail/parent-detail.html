@@ -168,7 +168,7 @@
         <div *ngFor="let child of parent.children" class="profile-info-card_parent mb-3">
           <div class="d-flex gap-3 align-items-center" (click)="viewChildDetails(child.id)">
             <div class="info-image">
-              <img [src]="child.profilePicture || 'assets/child.png'" class="img-fluid" alt="Child Photo">
+              <img [src]="getProfilePictureUrl(child) || 'assets/child.png'" class="img-fluid" alt="Child Photo">
             </div>
             <div class="info">
               <div class="info-title">{{ child.firstName }} {{ child.lastName }}</div>
@@ -220,7 +220,7 @@
           <div class="d-flex align-items-center flex-wrap row-gap-2 row_direction">
             <div
               class="d-flex align-items-center justify-content-center avatar avatar-xxl border border-dashed me-2 flex-shrink-0 text-dark frames">
-              <img loading="lazy" [src]="parent.profilePicture || 'assets/default-avatar.svg'" class="img-fluid"
+              <img loading="lazy" [src]="getProfilePictureUrl(parent) || 'assets/default-avatar.svg'" class="img-fluid"
                 alt="Parent Photo">
               <span *ngIf="parent.isActive" class="badge badge-active d-inline-flex align-items-center mb-2"><i
                   class="ti ti-circle-filled fs-5 me-1"></i>Active</span>
@@ -301,7 +301,7 @@
                   <div class="d-flex align-items-start flex-wrap row-gap-2 row_direction">
                     <div
                       class="d-flex align-items-center justify-content-center avatar avatar-xxl border border-dashed me-2 flex-shrink-0 text-dark frames">
-                      <img loading="lazy" [src]="currentChild?.profilePicture || 'assets/child.png'" class="img-fluid"
+                      <img loading="lazy" [src]="getProfilePictureUrl(currentChild) || 'assets/child.png'" class="img-fluid"
                         alt="Child Photo">
                       <span class="badge badge-age d-inline-flex align-items-center mb-2">
                         @if( calculateAge(currentChild!.dateOfBirth).years  > 0){
@@ -348,7 +348,7 @@
                   <div class="d-flex align-items-start flex-wrap row-gap-2 row_direction">
                     <div
                       class="d-flex align-items-center justify-content-center avatar avatar-xxl border border-dashed me-2 flex-shrink-0 text-dark frames">
-                      <img loading="lazy" [src]="child.profilePicture || 'assets/child.png'" class="img-fluid"
+                      <img loading="lazy" [src]="getProfilePictureUrl(child) || 'assets/child.png'" class="img-fluid"
                         alt="Child Photo">
                       <span class="badge badge-age d-inline-flex align-items-center mb-2">
                         @if( calculateAge(child.dateOfBirth).years  > 0){
@@ -445,7 +445,7 @@
               (click)="linkChildToParent(child.id!)" [disabled]="linkingChild">
               <div class="d-flex align-items-center">
                 <img loading="lazy"
-                  [src]="child.profilePicture || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4NCiAgPGNpcmNsZSBjeD0iMTAwIiBjeT0iMTAwIiByPSI4MCIgZmlsbD0iI0YwRTY4QyIvPg0KICA8Y2lyY2xlIGN4PSIxMDAiIGN5PSI4NSIgcj0iMjUiIGZpbGw9IndoaXRlIiBvcGFjaXR5PSIwLjkiLz4NCiAgPGVsbGlwc2UgY3g9IjEwMCIgY3k9IjEzNSIgcng9IjQ1IiByeT0iMzUiIGZpbGw9IndoaXRlIiBvcGFjaXR5PSIwLjkiLz4NCiAgPGNpcmNsZSBjeD0iODUiIGN5PSI4MCIgcj0iNSIgZmlsbD0iIzMzMyIvPg0KICA8Y2lyY2xlIGN4PSIxMTUiIGN5PSI4MCIgcj0iNSIgZmlsbD0iIzMzMyIvPg0KICA8cGF0aCBkPSJNIDg1IDk1IFEgMTAwIDEwNSAxMTUgOTUiIHN0cm9rZT0iIzMzMyIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+DQo8L3N2Zz4='"
+                  [src]="getProfilePictureUrl(child) || 'assets/child.png'"
                   class="rounded-circle me-3" style="width: 50px; height: 50px;" alt="Child Photo">
                 <div class="flex-grow-1">
                   <h6 class="mb-0">{{ child.firstName }} {{ child.lastName }}</h6>

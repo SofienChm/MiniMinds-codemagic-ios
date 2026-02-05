@@ -1,0 +1,138 @@
+<div class="about-page">
+  <!-- Navigation -->
+  <nav class="about-nav">
+    <div class="nav-container">
+      <a routerLink="/" class="logo">
+        <img src="/assets/images/icon.png" alt="MiniMinds Logo" class="logo-img">
+        <span class="logo-text">MiniMinds</span>
+      </a>
+      <div class="nav-links">
+        <a routerLink="/">Home</a>
+        <a routerLink="/request-demo" class="btn-demo">Request a Demo</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-container">
+      <span class="hero-badge">Time-Saving Features</span>
+      <h1>10 Ways MiniMinds Saves You Time Every Day</h1>
+      <p class="hero-subtitle">
+        Discover how our powerful daycare management platform helps educators spend less time on paperwork
+        and more time nurturing children's growth.
+      </p>
+      <div class="hero-stats">
+        <div class="stat">
+          <span class="stat-number">10+</span>
+          <span class="stat-label">Hours Saved Weekly</span>
+        </div>
+        <div class="stat">
+          <span class="stat-number">100%</span>
+          <span class="stat-label">Digital Records</span>
+        </div>
+        <div class="stat">
+          <span class="stat-number">Real-Time</span>
+          <span class="stat-label">Parent Updates</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Introduction -->
+  <section class="intro-section">
+    <div class="intro-container">
+      <div class="intro-content">
+        <h2>Streamline Your Daycare Operations</h2>
+        <p>
+          Running a daycare is rewarding, but the administrative workload can be overwhelming.
+          Paper sign-in sheets, handwritten daily reports, tracking payments, and keeping parents
+          informed — it all adds up.
+        </p>
+        <p>
+          MiniMinds was built to change that. Our all-in-one platform automates the tedious tasks
+          so you can focus on what you do best: caring for children and supporting their development.
+        </p>
+        <p>
+          Here are <strong>10 time-saving features</strong> that make MiniMinds the smart choice
+          for modern daycare centers.
+        </p>
+      </div>
+      <div class="intro-image">
+        <img src="/assets/mockup.png" alt="MiniMinds App" class="app-preview">
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features-section">
+    <div class="features-container">
+      <div class="feature-card" *ngFor="let feature of features">
+        <div class="feature-header">
+          <div class="feature-number">{{ feature.number }}</div>
+          <div class="feature-icon">
+            <i [class]="'bi ' + feature.icon"></i>
+          </div>
+        </div>
+        <div class="feature-content">
+          <h3>{{ feature.title }}</h3>
+          <p>{{ feature.description }}</p>
+          <span class="feature-highlight" *ngIf="feature.highlight">
+            <i class="bi bi-lightning-charge-fill"></i>
+            {{ feature.highlight }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Benefits Section -->
+  <section class="benefits-section">
+    <div class="benefits-container">
+      <h2>Why Daycares Love MiniMinds</h2>
+      <div class="benefits-grid">
+        <div class="benefit-card" *ngFor="let benefit of benefits">
+          <div class="benefit-icon">
+            <i [class]="'bi ' + benefit.icon"></i>
+          </div>
+          <h3>{{ benefit.title }}</h3>
+          <p>{{ benefit.description }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="cta-container">
+      <h2>Ready to Save Time & Delight Parents?</h2>
+      <p>Join hundreds of daycares already using MiniMinds to streamline their operations.</p>
+      <div class="cta-buttons">
+        <a routerLink="/request-demo" class="btn-primary">
+          Request a Demo
+          <i class="bi bi-arrow-right"></i>
+        </a>
+        <a routerLink="/" class="btn-secondary">
+          Learn More
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="about-footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <img src="/assets/images/icon.png" alt="MiniMinds Logo" class="footer-logo">
+        <span class="footer-brand-name">MiniMinds</span>
+      </div>
+      <div class="footer-links">
+        <a routerLink="/privacy-policy">Privacy Policy</a>
+        <a routerLink="/terms-of-service">Terms of Service</a>
+      </div>
+      <div class="footer-copyright">
+        &copy; {{ currentYear }} MiniMinds. All rights reserved.
+      </div>
+    </div>
+  </footer>
+</div>

@@ -4,15 +4,17 @@ export interface ParentInfo {
   lastName: string;
   email: string;
   phoneNumber: string;
-  profilePicture: string;
+  profilePicture?: string; // Base64 (deprecated, for backward compatibility)
+  profilePictureUrl?: string; // File-based URL path
+  hasProfilePicture?: boolean;
   address?: string;
   parentType?: string;
   createdAt?:string;
   dateOfBirth?:string;
-  zipCode?:string; 
+  zipCode?:string;
   emergencyContact?:string;
   work?:string;
-  relationshipType?:string; 
+  relationshipType?:string;
 }
 
 export interface ChildParent {
@@ -33,7 +35,8 @@ export interface ChildModel {
   gender: string;
   allergies?: string;
   medicalNotes?: string;
-  profilePicture?: string;
+  profilePicture?: string; // Base64 (deprecated, for backward compatibility)
+  profilePictureUrl?: string; // File-based URL path
   hasProfilePicture?: boolean;
   parentId?: number; // Keep for backward compatibility
   enrollmentDate?: string;

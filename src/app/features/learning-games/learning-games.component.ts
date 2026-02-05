@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import Swal from 'sweetalert2';
+import { SimpleToastService } from '../../core/services/simple-toast.service';
 
 interface Game {
   id: string;
@@ -31,6 +31,7 @@ interface GameProgress {
   styleUrls: ['./learning-games.component.scss']
 })
 export class LearningGamesComponent implements OnInit {
+  constructor(private simpleToast: SimpleToastService) {}
   
   games: Game[] = [
     {
@@ -171,13 +172,7 @@ export class LearningGamesComponent implements OnInit {
         this.startStoryGame();
         break;
       default:
-        Swal.fire({
-          icon: 'info',
-          title: 'Game Starting',
-          text: `Starting ${game.title}!`,
-          timer: 1500,
-          showConfirmButton: false
-        });
+        this.simpleToast.success(`Starting ${game.title}!`);
     }
   }
 
@@ -232,21 +227,9 @@ export class LearningGamesComponent implements OnInit {
   submitAnswer(): void {
     if (this.userAnswer === this.mathQuestion.answer) {
       this.score += 10;
-      Swal.fire({
-        icon: 'success',
-        title: 'Correct! 🎉',
-        text: 'Well done!',
-        timer: 1500,
-        showConfirmButton: false
-      });
+      this.simpleToast.success('Correct! 🎉 Well done!');
     } else {
-      Swal.fire({
-        icon: 'info',
-        title: 'Not quite! 💪',
-        text: `The answer is ${this.mathQuestion.answer}. Try the next one!`,
-        timer: 2000,
-        showConfirmButton: false
-      });
+      this.simpleToast.warning(`The answer is ${this.mathQuestion.answer}. Try the next one!`);
     }
 
     this.generateMathQuestion();
@@ -255,12 +238,7 @@ export class LearningGamesComponent implements OnInit {
   endGame(): void {
     this.gameStarted = false;
     this.currentGame = null;
-    Swal.fire({
-      icon: 'success',
-      title: 'Game Finished! 🏆',
-      text: `Your final score: ${this.score} points!`,
-      confirmButtonColor: '#7dd3c0'
-    });
+    this.simpleToast.success(`Game Finished! 🏆 Final score: ${this.score}`);
   }
   
   generateLetterQuestion(): void {
@@ -283,21 +261,9 @@ export class LearningGamesComponent implements OnInit {
     this.selectedLetter = letter;
     if (letter === this.currentLetter) {
       this.score += 10;
-      Swal.fire({
-        icon: 'success',
-        title: 'Correct! 🎉',
-        text: 'Great job!',
-        timer: 1500,
-        showConfirmButton: false
-      });
+      this.simpleToast.success('Correct! 🎉 Great job!');
     } else {
-      Swal.fire({
-        icon: 'info',
-        title: 'Not quite! 💪',
-        text: `The correct letter is ${this.currentLetter}. Try again!`,
-        timer: 2000,
-        showConfirmButton: false
-      });
+      this.simpleToast.warning(`The correct letter is ${this.currentLetter}. Try again!`);
     }
     setTimeout(() => this.generateLetterQuestion(), 1000);
   }
@@ -320,13 +286,7 @@ export class LearningGamesComponent implements OnInit {
   
   mixColors(): void {
     this.score += 15;
-    Swal.fire({
-      icon: 'success',
-      title: 'Great! 🎨',
-      text: `${this.color1} + ${this.color2} = ${this.mixedColor}!`,
-      timer: 2000,
-      showConfirmButton: false
-    });
+    this.simpleToast.success(`${this.color1} + ${this.color2} = ${this.mixedColor}!`);
     setTimeout(() => this.generateColorMix(), 1000);
   }
   
@@ -345,13 +305,7 @@ export class LearningGamesComponent implements OnInit {
   }
   
   playMelody(): void {
-    Swal.fire({
-      icon: 'info',
-      title: 'Playing Melody 🎵',
-      text: this.melody.join(' - '),
-      timer: 2000,
-      showConfirmButton: false
-    });
+    this.simpleToast.success(`Playing Melody 🎵 ${this.melody.join(' - ')}`);
     this.score += 20;
   }
   

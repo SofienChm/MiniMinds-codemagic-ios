@@ -4,14 +4,71 @@
 <app-pull-to-refresh #pullToRefresh (refresh)="onRefresh()" *ngIf="isParent">
 </app-pull-to-refresh>
 
-<div *ngIf="!loading && isParent" class="">
-  <app-parent-child-header-simple
-    [title]="'Photo Gallery'" >
-  </app-parent-child-header-simple>
+<!-- ==================== PARENT VIEW - iPhone Style Gallery ==================== -->
+<div *ngIf="isParent" class="ios-gallery-container">
+  <!-- Header -->
+  <div class="ios-gallery-header mb-4">
+    <app-parent-child-header-simple [title]="'GALLERY.TITLE' | translate">
+    </app-parent-child-header-simple>
+  </div>
+
+  <!-- Child Filter Pills -->
+  <div class="ios-filter-section" *ngIf="children.length > 1">
+    <div class="ios-filter-scroll">
+      <button class="ios-filter-pill" [class.active]="selectedChildId === null" (click)="selectedChildId = null; onFilterChange()">
+        {{ 'GALLERY.ALL' | translate }}
+      </button>
+      <button *ngFor="let child of children" class="ios-filter-pill" [class.active]="selectedChildId === child.id" (click)="selectedChildId = child.id ?? null; onFilterChange()">
+        {{ child.firstName }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="ios-gallery-loading">
+    <div class="ios-skeleton-grid">
+      <div *ngFor="let i of [1,2,3,4,5,6,7,8,9]" class="ios-skeleton-item"></div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && photos.length === 0" class="ios-empty-state">
+    <div class="ios-empty-icon">
+      <i class="bi bi-photo"></i>
+    </div>
+    <h3>{{ 'GALLERY.NO_PHOTOS' | translate }}</h3>
+    <p>{{ 'GALLERY.NO_PHOTOS_DESC' | translate }}</p>
+  </div>
+
+  <!-- Photo Grid - iPhone Style -->
+  <div *ngIf="!loading && photos.length > 0" class="ios-photo-grid">
+    <div *ngFor="let photo of photos; let i = index"
+         class="ios-photo-item"
+         (click)="openPreview(photo)"
+         [style.animation-delay]="(i * 30) + 'ms'">
+      <img [src]="getPhotoUrl(photo)" [alt]="photo.title || 'Photo'" loading="lazy">
+      <div class="ios-photo-overlay">
+        <i class="bi bi-heart-fill" *ngIf="photo.category === 'Memory'"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load More -->
+  <div *ngIf="!loading && currentPage < totalPages" class="ios-load-more">
+    <button class="ios-load-more-btn" (click)="nextPage()">
+      {{ 'GALLERY.LOAD_MORE' | translate }}
+    </button>
+  </div>
+
+  <!-- Photo Count -->
+  <div *ngIf="!loading && photos.length > 0" class="ios-photo-count">
+    {{ totalCount }} {{ totalCount === 1 ? ('GALLERY.PHOTO' | translate) : ('GALLERY.PHOTOS' | translate) }}
+  </div>
 </div>
 
-<div class="container mt-4">
-  <app-title-page *ngIf="!isParent"
+<!-- ==================== ADMIN/TEACHER VIEW - Original Design ==================== -->
+<div class="container mt-4" *ngIf="!isParent">
+  <app-title-page
     title="Photo Gallery"
     subtitle="View and manage children's photos and memories"
     icon="bi bi-images"
@@ -181,6 +238,36 @@
         </li>
       </ul>
     </nav>
+  </div>
+</div>
+
+<!-- ==================== iOS-Style Full Screen Photo Viewer (Parent Only) ==================== -->
+<div *ngIf="isParent && showPreviewModal && selectedPhoto" class="ios-fullscreen-viewer" (click)="closePreview()">
+  <div class="ios-viewer-header" (click)="$event.stopPropagation()">
+    <button class="ios-viewer-close" (click)="closePreview()">
+      <i class="bi bi-x-lg"></i>
+    </button>
+    <div class="ios-viewer-title">
+      <span class="ios-viewer-date">{{ formatDate(selectedPhoto.createdAt) }}</span>
+      <span class="ios-viewer-child">{{ selectedPhoto.childName }}</span>
+    </div>
+    <button class="ios-viewer-action" (click)="downloadPhoto(); $event.stopPropagation()" [disabled]="downloadingImage">
+      <i class="bi" [class.bi-arrow-down-circle]="!downloadingImage" [class.bi-hourglass-split]="downloadingImage"></i>
+    </button>
+  </div>
+
+  <div class="ios-viewer-content" (click)="$event.stopPropagation()">
+    <div *ngIf="loadingFullImage" class="ios-viewer-loading">
+      <div class="ios-spinner"></div>
+    </div>
+    <img [src]="getFullImageUrl(selectedPhoto)" [alt]="selectedPhoto.title || 'Photo'" [class.loading]="loadingFullImage">
+  </div>
+
+  <div class="ios-viewer-footer" (click)="$event.stopPropagation()">
+    <button class="ios-footer-btn" (click)="downloadPhoto()" [disabled]="downloadingImage || loadingFullImage">
+      <i class="bi bi-download"></i>
+      <span>{{ 'GALLERY.SAVE' | translate }}</span>
+    </button>
   </div>
 </div>
 

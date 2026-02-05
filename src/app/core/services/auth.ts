@@ -12,6 +12,7 @@ import { ApiConfig } from '../../core/config/api.config';
 })
 export class AuthService {
   private apiUrl = ApiConfig.ENDPOINTS.AUTH;
+  private mailApiUrl = ApiConfig.ENDPOINTS.MAIL;
   private currentUserSubject = new BehaviorSubject<AuthResponse | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
@@ -26,12 +27,15 @@ export class AuthService {
     }
   }
 
+    sendPasswordResetEmail(email: string): Observable<any> {
+      return this.http.post(`${this.mailApiUrl}/send-password-reset`, { email });
+    }
   login(credentials: LoginRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials).pipe(
-      tap(response => {
+      tap(async response => {
         localStorage.setItem('currentUser', JSON.stringify(response));
         localStorage.setItem('token', response.token);
-        
+
         // Extract and store userId from JWT token
         try {
           const payload = JSON.parse(atob(response.token.split('.')[1]));
@@ -43,8 +47,23 @@ export class AuthService {
         } catch (e) {
           console.error('Failed to extract userId from token', e);
         }
-        
+
         this.currentUserSubject.next(response);
+
+        // Pre-load tenant features for non-SuperAdmin users
+        // This ensures features are loaded before navigation and sidebar rendering
+        if (response.role !== 'SuperAdmin') {
+          try {
+            const { TenantFeatureService } = await import('./tenant-feature.service');
+            const featureService = this.injector.get(TenantFeatureService);
+            featureService.getMyFeatures().subscribe({
+              next: () => console.log('Tenant features loaded successfully'),
+              error: (err) => console.error('Failed to load tenant features:', err)
+            });
+          } catch (error) {
+            console.error('Error loading tenant features:', error);
+          }
+        }
       })
     );
   }
@@ -64,6 +83,15 @@ export class AuthService {
       }
     } catch (error) {
       console.error('Error unregistering push notifications:', error);
+    }
+
+    // Clear tenant feature cache on logout
+    try {
+      const { TenantFeatureService } = await import('./tenant-feature.service');
+      const featureService = this.injector.get(TenantFeatureService);
+      featureService.clearCache();
+    } catch (error) {
+      console.error('Error clearing feature cache:', error);
     }
 
     localStorage.removeItem('currentUser');
@@ -146,6 +174,20 @@ export class AuthService {
     return this.getUserRole() === 'Teacher';
   }
 
+  isSuperAdmin(): boolean {
+    return this.getUserRole() === 'SuperAdmin';
+  }
+
+  getTenantId(): number | null {
+    const user = this.getCurrentUser();
+    return user?.tenantId || null;
+  }
+
+  getTenantName(): string | null {
+    const user = this.getCurrentUser();
+    return user?.tenantName || null;
+  }
+
   getUserId(): string | null {
     return localStorage.getItem('userId');
   }
@@ -169,5 +211,33 @@ export class AuthService {
       const updated: AuthResponse = { ...user, profilePicture };
       this.updateCurrentUser(updated);
     }
+  }
+
+  /**
+   * Delete user account and all associated data (Google Play Store requirement)
+   */
+  deleteAccount(): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/delete-account`).pipe(
+      tap(async () => {
+        // Unregister FCM push notifications
+        try {
+          const { FcmPushNotificationService } = await import('./fcm-push-notification.service');
+          const fcmService = this.injector.get(FcmPushNotificationService);
+          if (fcmService.isSupported()) {
+            await fcmService.unregister();
+          }
+        } catch (error) {
+          console.error('Error unregistering push notifications:', error);
+        }
+
+        // Clear all local data
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('token');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('lang');
+        this.currentUserSubject.next(null);
+        this.router.navigate(['/login']);
+      })
+    );
   }
 }

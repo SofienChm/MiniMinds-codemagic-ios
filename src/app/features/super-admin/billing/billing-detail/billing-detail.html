@@ -1,0 +1,188 @@
+<app-header-superadmin></app-header-superadmin>
+<div *ngIf="isMobile()" class="mobile-view-superadmin">
+  <div class="header-info">
+    <div class="title-icons">
+      <div class="page-back" (click)="back()">
+        <i class="bi bi-arrow-left"></i>
+      </div>
+    </div>
+    <div class="d-flex">
+      <div class="overflow-hidden">
+        <h5 class="name simple"> Billing detail</h5>
+      </div>
+    </div>
+  </div>
+</div>
+<div [class]="isMobile() ? 'mobileview mobile-view container-fluid mt-4' : 'container-fluid mt-4'">
+  <app-title-page *ngIf=" !isMobile()"
+    [title]="billingHistory?.tenant?.name || ('BILLING.BILLING_HISTORY' | translate)"
+    [subtitle]="'BILLING.BILLING_HISTORY_SUBTITLE' | translate"
+    icon="bi bi-receipt"
+    [breadcrumbs]="breadcrumbs">
+  </app-title-page>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="billingHistory && !loading" class="row">
+    <!-- Tenant Info & Summary -->
+    <div class="col-lg-4">
+      <div class="card card-general shadow-sm mb-3">
+        <div class="card-header">
+          <h6 class="mb-0">
+            <i class="bi bi-building me-2"></i>
+            {{ 'BILLING.TENANT_INFO' | translate }}
+          </h6>
+        </div>
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-3">
+            <div class="tenant-avatar me-3">
+              <img *ngIf="billingHistory.tenant.logo" [src]="billingHistory.tenant.logo"
+                [alt]="billingHistory.tenant.name" class="rounded-circle" width="60" height="60">
+              <div *ngIf="!billingHistory.tenant.logo" class="avatar-placeholder-lg">
+                {{ billingHistory.tenant.name.charAt(0).toUpperCase() }}
+              </div>
+            </div>
+            <div>
+              <h5 class="mb-1">{{ billingHistory.tenant.name }}</h5>
+              <span class="badge" [ngClass]="billingHistory.tenant.isActive ? 'bg-success' : 'bg-danger'">
+                {{ billingHistory.tenant.isActive ? ('BILLING.ACTIVE' | translate) : ('BILLING.INACTIVE' | translate) }}
+              </span>
+              <span class="badge plan-badge ms-1" [ngClass]="'plan-' + billingHistory.tenant.subscriptionPlan.toLowerCase()">
+                {{ billingHistory.tenant.subscriptionPlan }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary Card -->
+      <div class="card card-general shadow-sm mb-3">
+        <div class="card-header">
+          <h6 class="mb-0">
+            <i class="bi bi-graph-up me-2"></i>
+            {{ 'BILLING.PAYMENT_SUMMARY' | translate }}
+          </h6>
+        </div>
+        <div class="card-body">
+          <div class="summary-item d-flex justify-content-between mb-2">
+            <span class="text-muted">{{ 'BILLING.TOTAL_PAID' | translate }}</span>
+            <span class="fw-bold text-success">{{ formatCurrency(billingHistory.totalPaid) }}</span>
+          </div>
+          <div class="summary-item d-flex justify-content-between mb-2">
+            <span class="text-muted">{{ 'BILLING.TOTAL_PENDING' | translate }}</span>
+            <span class="fw-bold text-warning">{{ formatCurrency(billingHistory.totalPending) }}</span>
+          </div>
+          <hr>
+          <div class="summary-item d-flex justify-content-between">
+            <span class="text-muted">{{ 'BILLING.TOTAL_TRANSACTIONS' | translate }}</span>
+            <span class="fw-bold">{{ billingHistory.billings.length }}</span>
+          </div>
+        </div>
+      </div>
+
+      <a [routerLink]="['/super-admin/billing']" class="btn btn-outline-secondary w-100">
+        <i class="bi bi-arrow-left me-2"></i>
+        {{ 'BILLING.BACK_TO_LIST' | translate }}
+      </a>
+    </div>
+
+    <!-- Billing History -->
+    <div class="col-lg-8">
+      <div class="card card-general shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h6 class="mb-0">
+            <i class="bi bi-list-ul me-2"></i>
+            {{ 'BILLING.PAYMENT_HISTORY' | translate }}
+          </h6>
+        </div>
+        <div class="card-body">
+          <div *ngIf="billingHistory.billings.length === 0" class="text-center text-muted py-4">
+            <i class="bi bi-inbox" style="font-size: 3rem; opacity: 0.3;"></i>
+            <p class="mt-3 mb-0">{{ 'BILLING.NO_PAYMENTS' | translate }}</p>
+          </div>
+
+          <div class="table-responsive custom-table" *ngIf="billingHistory.billings.length > 0">
+            <table class="table table-hover mb-0">
+              <thead>
+                <tr>
+                  <th>{{ 'BILLING.TABLE_DATE' | translate }}</th>
+                  <th>{{ 'BILLING.TABLE_AMOUNT' | translate }}</th>
+                  <th>{{ 'BILLING.TABLE_METHOD' | translate }}</th>
+                  <th>{{ 'BILLING.TABLE_INVOICE' | translate }}</th>
+                  <th>{{ 'BILLING.TABLE_STATUS' | translate }}</th>
+                  <th>{{ 'BILLING.TABLE_ACTIONS' | translate }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let billing of billingHistory.billings; trackBy: trackById">
+                  <td>
+                    <div>
+                      <strong>{{ formatDate(billing.paymentDate) }}</strong>
+                      <small class="d-block text-muted" *ngIf="billing.periodStart && billing.periodEnd">
+                        {{ formatDate(billing.periodStart) }} - {{ formatDate(billing.periodEnd) }}
+                      </small>
+                    </div>
+                  </td>
+                  <td class="fw-bold">{{ formatCurrency(billing.amount, billing.currency) }}</td>
+                  <td>{{ billing.paymentMethod || '-' }}</td>
+                  <td>{{ billing.invoiceNumber || '-' }}</td>
+                  <td>
+                    <span class="badge" [ngClass]="getStatusClass(billing.status)">
+                      {{ billing.status }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="dropdown">
+                      <button class="btn btn-sm btn-light dropdown-toggle" type="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-three-dots-vertical"></i>
+                      </button>
+                      <ul class="dropdown-menu dropdown-menu-end">
+                        <li *ngIf="billing.status !== 'Paid'">
+                          <a class="dropdown-item" href="javascript:void(0)" (click)="updateStatus(billing, 'Paid')">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            {{ 'BILLING.MARK_PAID' | translate }}
+                          </a>
+                        </li>
+                        <li *ngIf="billing.status !== 'Pending'">
+                          <a class="dropdown-item" href="javascript:void(0)" (click)="updateStatus(billing, 'Pending')">
+                            <i class="bi bi-hourglass text-warning me-2"></i>
+                            {{ 'BILLING.MARK_PENDING' | translate }}
+                          </a>
+                        </li>
+                        <li *ngIf="billing.status === 'Paid'">
+                          <a class="dropdown-item" href="javascript:void(0)" (click)="updateStatus(billing, 'Refunded')">
+                            <i class="bi bi-arrow-counterclockwise text-info me-2"></i>
+                            {{ 'BILLING.MARK_REFUNDED' | translate }}
+                          </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                          <a class="dropdown-item text-danger" href="javascript:void(0)" (click)="deleteBilling(billing)">
+                            <i class="bi bi-trash me-2"></i>
+                            {{ 'BILLING.DELETE' | translate }}
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

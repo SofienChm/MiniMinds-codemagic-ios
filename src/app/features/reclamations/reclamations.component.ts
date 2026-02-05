@@ -5,12 +5,12 @@ import { ActivatedRoute } from '@angular/router';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { ReclamationsService, Reclamation, ReclamationUser } from './reclamations.service';
 import { AuthService } from '../../core/services/auth';
-import { TitlePage } from "../../shared/layouts/title-page/title-page";
 import { ParentChildHeaderSimpleComponent } from '../../shared/components/parent-child-header-simple/parent-child-header-simple.component';
 import Swal from 'sweetalert2';
 import { PageTitleService } from '../../core/services/page-title.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
+import { SimpleToastService } from '../../core/services/simple-toast.service';
 
 @Component({
   selector: 'app-reclamations',
@@ -43,7 +43,8 @@ export class ReclamationsComponent implements OnInit, OnDestroy {
     public authService: AuthService,
     private pageTitleService: PageTitleService,
     private translateService: TranslateService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private simpleToastService: SimpleToastService
   ) {}
 
   ngOnInit(): void {
@@ -242,21 +243,15 @@ export class ReclamationsComponent implements OnInit, OnDestroy {
         this.loadReclamations();
         this.closeNewReclamationModal();
 
-        Swal.fire({
-          icon: 'success',
-          title: this.translateService.instant('RECLAMATIONS_PAGE.SUCCESS'),
-          text: this.translateService.instant('RECLAMATIONS_PAGE.RECLAMATION_SENT_SUCCESS'),
-          confirmButtonColor: '#0E567D'
-        });
+        this.simpleToastService.success(
+          this.translateService.instant('RECLAMATIONS_PAGE.RECLAMATION_SENT_SUCCESS')
+        );
       },
       error: (err) => {
         console.error('Error sending reclamation:', err);
-        Swal.fire({
-          icon: 'error',
-          title: this.translateService.instant('RECLAMATIONS_PAGE.ERROR'),
-          text: this.translateService.instant('RECLAMATIONS_PAGE.RECLAMATION_SEND_FAILED'),
-          confirmButtonColor: '#0E567D'
-        });
+        this.simpleToastService.error(
+          this.translateService.instant('RECLAMATIONS_PAGE.RECLAMATION_SEND_FAILED')
+        );
       }
     });
   }

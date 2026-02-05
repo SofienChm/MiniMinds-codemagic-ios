@@ -3,7 +3,7 @@
   <app-sidebar [class.mobile-open]="isMobileMenuOpen" (linkClicked)="closeMobileMenu()"></app-sidebar>
   
   <div class="main-content" [class.parentrole]="isParentRole">
-    <app-header (mobileMenuToggle)="toggleMobileMenu()"></app-header>
+    <app-header *ngIf="!shouldHideHeader()" (mobileMenuToggle)="toggleMobileMenu()"></app-header>
     <main class="content-area ">
       <router-outlet></router-outlet>
     </main>

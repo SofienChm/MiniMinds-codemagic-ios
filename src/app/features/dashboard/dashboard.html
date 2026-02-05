@@ -134,12 +134,12 @@
                           <p>{{ 'DASHBOARD.NO_CHILDREN' | translate }}</p>
                         </div>
                         <tr *ngFor="let child of recentChildren; trackBy: trackById">
-                          <td><img loading="lazy" [src]="child.profilePicture || 'assets/child.png'"
+                          <td><img loading="lazy" [src]="getChildProfilePictureUrl(child)"
                               alt="student" class="img-fluid img-student"></td>
                           <td class="text-nowrap name-last">{{ child.firstName }} {{child.lastName }}</td>
                           <td class="text-nowrap">{{ child.gender }}</td>
-                          <td class="text-nowrap">{{ child.parent?.firstName }} {{ child.parent?.lastName }}</td>
-                          <td>{{ child.parent?.phoneNumber || '-' }}</td>
+                          <td class="text-nowrap">{{ child.parentName || '-' }}</td>
+                          <td>{{ child.parentPhoneNumber || '-' }}</td>
                           <td class="action-recenttly">
                             <!-- <a href="#" class="waves-effect waves-light btn btn-sm btn-primary-light btn-circle mx-5"><i class="bi bi-link"></i></a> -->
                             <button class="btn btn-sm btn-view" [routerLink]="['/children/detail', child.id]">
@@ -427,7 +427,7 @@
             </button>
           </div>
           <div class="child-info" [routerLink]="['/children/detail', getSelectedChild()?.id]" style="cursor: pointer;">
-            <img [src]="getSelectedChild()?.profilePicture || 'assets/child.png'"
+            <img [src]="getChildProfilePictureUrl(getSelectedChild())"
               [alt]="getSelectedChild()?.firstName" class="child-avatar">
             <div class="child-details">
               <h3 class="child-name">{{ getSelectedChild()?.firstName }} {{ getSelectedChild()?.lastName }}</h3>
@@ -584,7 +584,7 @@
             </div>
             <div class="photos-grid" *ngIf="recentPhotos.length > 0">
               <div class="photo-item" *ngFor="let photo of recentPhotos; trackBy: trackById" [routerLink]="['/gallery']">
-                <img [src]="photo.thumbnailData || photo.imageData || 'assets/placeholder.jpg'"
+                <img [src]="getPhotoThumbnailUrl(photo)"
                      [alt]="photo.title || 'Child photo'"
                      class="photo-img">
                 <div class="photo-overlay">

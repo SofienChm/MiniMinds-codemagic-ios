@@ -6,13 +6,16 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { Subscription } from 'rxjs';
 import { ParentService } from '../parent.service';
+import { ApiConfig } from '../../../core/config/api.config';
 import { ChildrenService } from '../../children/children.service';
+import { AuthService } from '../../../core/services/auth';
 import { ParentModel, ChildInfo } from '../parent.interface';
 import { ChildModel } from '../../children/children.interface';
 import { Breadcrumb, TitleAction, TitlePage } from '../../../shared/layouts/title-page/title-page';
 import { ImageCropperModalComponent } from '../../../shared/components/image-cropper-modal/image-cropper-modal.component';
 import { PageTitleService } from '../../../core/services/page-title.service';
 import Swal from 'sweetalert2';
+import { SimpleToastService } from '../../../core/services/simple-toast.service';
 
 @Component({
   selector: 'app-edit-parent',
@@ -29,6 +32,7 @@ export class EditParent implements OnInit, OnDestroy {
 
   loading = true;
   saving = false;
+  deleting = false;
   showAddChild = false;
   imagePreview: string | null = null;
   childImagePreview: string | null = null;
@@ -64,8 +68,10 @@ export class EditParent implements OnInit, OnDestroy {
     private router: Router,
     private parentService: ParentService,
     private childrenService: ChildrenService,
+    private authService: AuthService,
     private translate: TranslateService,
-    private pageTitleService: PageTitleService
+    private pageTitleService: PageTitleService,
+    private simpleToast: SimpleToastService
   ) {}
 
   ngOnInit(): void {
@@ -184,7 +190,14 @@ export class EditParent implements OnInit, OnDestroy {
           isActive: parent.isActive
         });
 
-        this.imagePreview = parent.profilePicture || null;
+        // Handle both file-based URL and Base64 for backward compatibility
+        if (parent.profilePictureUrl) {
+          this.imagePreview = this.getFullImageUrl(parent.profilePictureUrl);
+        } else if (parent.profilePicture) {
+          this.imagePreview = parent.profilePicture;
+        } else {
+          this.imagePreview = null;
+        }
 
         // Calculate age for each child
         if (parent.children) {
@@ -201,13 +214,8 @@ export class EditParent implements OnInit, OnDestroy {
         const sanitizedMessage = this.sanitizeLogMessage(error?.message);
         console.error(`Error loading parent: ${sanitizedMessage}`);
         this.loading = false;
-        Swal.fire({
-          icon: 'error',
-          title: this.translate.instant('MESSAGES.ERROR'),
-          text: this.translate.instant('EDIT_PARENT.LOAD_ERROR')
-        }).then(() => {
-          this.router.navigate(['/parents']);
-        });
+        this.simpleToast.error(this.translate.instant('EDIT_PARENT.LOAD_ERROR'));
+        this.router.navigate(['/parents']);
       }
     });
   }
@@ -222,16 +230,30 @@ export class EditParent implements OnInit, OnDestroy {
     this.saving = true;
     const parentData: ParentModel = this.parentForm.value;
 
+    // If a new image was selected, upload it separately
+    if (this.selectedImageFile && this.parentId) {
+      this.parentService.uploadParentProfilePicture(this.parentId, this.selectedImageFile).subscribe({
+        next: () => {
+          // Clear the profilePicture from the form since it's now file-based
+          parentData.profilePicture = undefined;
+          this.saveParentData(parentData);
+        },
+        error: () => {
+          // Continue with update even if image upload fails
+          this.saveParentData(parentData);
+        }
+      });
+    } else {
+      this.saveParentData(parentData);
+    }
+  }
+
+  private saveParentData(parentData: ParentModel): void {
     this.parentService.updateParent(parentData).subscribe({
       next: () => {
         this.saving = false;
-        Swal.fire({
-          icon: 'success',
-          title: this.translate.instant('MESSAGES.SUCCESS'),
-          text: this.translate.instant('EDIT_PARENT.UPDATE_SUCCESS')
-        }).then(() => {
-          this.router.navigate(['/parents/detail', this.parentId]);
-        });
+        this.simpleToast.success(this.translate.instant('EDIT_PARENT.UPDATE_SUCCESS'));
+        this.router.navigate(['/parents/detail', this.parentId]);
       },
       error: (error) => {
         this.saving = false;
@@ -239,12 +261,7 @@ export class EditParent implements OnInit, OnDestroy {
         const sanitizedStatus = typeof error?.status === 'number' ? error.status : 0;
         const sanitizedStatusText = this.sanitizeLogMessage(error?.statusText);
         console.error(`Failed to update parent: status=${sanitizedStatus}, statusText=${sanitizedStatusText}, message=${sanitizedMessage}`);
-
-        Swal.fire({
-          icon: 'error',
-          title: this.translate.instant('MESSAGES.ERROR'),
-          text: this.translate.instant('EDIT_PARENT.UPDATE_ERROR')
-        });
+        this.simpleToast.error(this.translate.instant('EDIT_PARENT.UPDATE_ERROR'));
       }
     });
   }
@@ -263,23 +280,14 @@ export class EditParent implements OnInit, OnDestroy {
         this.saving = false;
         this.showAddChild = false;
         this.resetChildForm();
-        Swal.fire({
-          icon: 'success',
-          title: this.translate.instant('MESSAGES.SUCCESS'),
-          text: this.translate.instant('MESSAGES.CHILD_CREATED')
-        });
+        this.simpleToast.success(this.translate.instant('MESSAGES.CHILD_CREATED'));
         this.loadParent();
       },
       error: (error) => {
         this.saving = false;
         const sanitizedMessage = this.sanitizeLogMessage(error?.message);
         console.error(`Failed to add child: ${sanitizedMessage}`);
-
-        Swal.fire({
-          icon: 'error',
-          title: this.translate.instant('MESSAGES.ERROR'),
-          text: this.translate.instant('MESSAGES.CHILD_CREATE_ERROR')
-        });
+        this.simpleToast.error(this.translate.instant('MESSAGES.CHILD_CREATE_ERROR'));
       }
     });
   }
@@ -347,22 +355,14 @@ export class EditParent implements OnInit, OnDestroy {
 
     // Validate file type
     if (!this.ALLOWED_IMAGE_TYPES.includes(file.type)) {
-      Swal.fire({
-        icon: 'error',
-        title: this.translate.instant('MESSAGES.INVALID_FILE_TYPE'),
-        text: this.translate.instant('MESSAGES.ALLOWED_IMAGE_TYPES')
-      });
+      this.simpleToast.error(this.translate.instant('MESSAGES.ALLOWED_IMAGE_TYPES'));
       this.resetFileInput();
       return;
     }
 
     // Validate file size
     if (file.size > this.MAX_FILE_SIZE) {
-      Swal.fire({
-        icon: 'error',
-        title: this.translate.instant('MESSAGES.FILE_TOO_LARGE'),
-        text: this.translate.instant('MESSAGES.MAX_FILE_SIZE', { size: this.getReadableFileSize() })
-      });
+      this.simpleToast.error(this.translate.instant('MESSAGES.MAX_FILE_SIZE', { size: this.getReadableFileSize() }));
       this.resetFileInput();
       return;
     }
@@ -376,8 +376,22 @@ export class EditParent implements OnInit, OnDestroy {
 
   onImageCropped(croppedImage: string): void {
     this.imagePreview = croppedImage;
-    this.parentForm.patchValue({ profilePicture: croppedImage });
-    this.selectedImageFile = null;
+    // Don't store Base64 in form - we'll upload the file separately
+    this.parentForm.patchValue({ profilePicture: '' });
+    // Convert Base64 to File for upload
+    this.selectedImageFile = this.base64ToFile(croppedImage, 'profile.jpg');
+  }
+
+  private base64ToFile(base64: string, filename: string): File {
+    const arr = base64.split(',');
+    const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/jpeg';
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
   }
 
   onCropCancelled(): void {
@@ -393,11 +407,7 @@ export class EditParent implements OnInit, OnDestroy {
 
     // Validate file type
     if (!this.ALLOWED_IMAGE_TYPES.includes(file.type)) {
-      Swal.fire({
-        icon: 'error',
-        title: this.translate.instant('MESSAGES.INVALID_FILE_TYPE'),
-        text: this.translate.instant('MESSAGES.ALLOWED_IMAGE_TYPES')
-      });
+      this.simpleToast.error(this.translate.instant('MESSAGES.ALLOWED_IMAGE_TYPES'));
       if (this.childFileInput?.nativeElement) {
         this.childFileInput.nativeElement.value = '';
       }
@@ -406,11 +416,7 @@ export class EditParent implements OnInit, OnDestroy {
 
     // Validate file size
     if (file.size > this.MAX_FILE_SIZE) {
-      Swal.fire({
-        icon: 'error',
-        title: this.translate.instant('MESSAGES.FILE_TOO_LARGE'),
-        text: this.translate.instant('MESSAGES.MAX_FILE_SIZE', { size: this.getReadableFileSize() })
-      });
+      this.simpleToast.error(this.translate.instant('MESSAGES.MAX_FILE_SIZE', { size: this.getReadableFileSize() }));
       if (this.childFileInput?.nativeElement) {
         this.childFileInput.nativeElement.value = '';
       }
@@ -438,7 +444,46 @@ export class EditParent implements OnInit, OnDestroy {
   }
 
   removeImage(): void {
-    this.resetFileInput();
+    // If editing an existing parent with a saved profile picture, call API to delete it
+    if (this.parentId && this.imagePreview) {
+      Swal.fire({
+        title: this.translate.instant('MESSAGES.CONFIRM_DELETE'),
+        text: this.translate.instant('MESSAGES.DELETE_PROFILE_PICTURE_CONFIRM'),
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: this.translate.instant('COMMON.YES_DELETE'),
+        cancelButtonText: this.translate.instant('COMMON.CANCEL')
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.parentService.deleteParentProfilePicture(this.parentId).subscribe({
+            next: () => {
+              this.resetFileInput();
+              Swal.fire({
+                icon: 'success',
+                title: this.translate.instant('MESSAGES.SUCCESS'),
+                text: this.translate.instant('MESSAGES.PROFILE_PICTURE_DELETED'),
+                timer: 2000,
+                showConfirmButton: false
+              });
+            },
+            error: (error) => {
+              const sanitizedMessage = this.sanitizeLogMessage(error?.message);
+              console.error(`Failed to delete profile picture: ${sanitizedMessage}`);
+              Swal.fire({
+                icon: 'error',
+                title: this.translate.instant('MESSAGES.ERROR'),
+                text: this.translate.instant('MESSAGES.DELETE_PROFILE_PICTURE_ERROR')
+              });
+            }
+          });
+        }
+      });
+    } else {
+      // No saved picture, just clear local state
+      this.resetFileInput();
+    }
   }
 
   removeChildImage(): void {
@@ -451,6 +496,7 @@ export class EditParent implements OnInit, OnDestroy {
 
   private resetFileInput(): void {
     this.imagePreview = null;
+    this.selectedImageFile = null;
     this.parentForm.patchValue({ profilePicture: '' });
     if (this.fileInput?.nativeElement) {
       this.fileInput.nativeElement.value = '';
@@ -544,5 +590,76 @@ export class EditParent implements OnInit, OnDestroy {
       months += 12;
     }
     return { years: years < 0 ? 0 : years, months: months < 0 ? 0 : months };
+  }
+
+  private getFullImageUrl(path: string): string {
+    if (!path) return '';
+    // If already a full URL or data URL, return as-is
+    if (path.startsWith('http') || path.startsWith('data:')) {
+      return path;
+    }
+    // Get API base URL and construct full path
+    const baseUrl = ApiConfig.HUB_URL;
+    return `${baseUrl}${path.startsWith('/') ? '' : '/'}${path}`;
+  }
+
+  deleteAccount(): void {
+    Swal.fire({
+      title: this.translate.instant('SETTINGS.DELETE_ACCOUNT_CONFIRM_TITLE'),
+      html: `
+        <div class="text-start">
+          <p class="text-danger fw-bold mb-3">${this.translate.instant('SETTINGS.DELETE_ACCOUNT_WARNING')}</p>
+          <ul class="text-muted small">
+            <li>${this.translate.instant('SETTINGS.DELETE_WARNING_1')}</li>
+            <li>${this.translate.instant('SETTINGS.DELETE_WARNING_2')}</li>
+            <li>${this.translate.instant('SETTINGS.DELETE_WARNING_3')}</li>
+            <li>${this.translate.instant('SETTINGS.DELETE_WARNING_4')}</li>
+          </ul>
+          <p class="mt-3 mb-2">${this.translate.instant('SETTINGS.DELETE_ACCOUNT_TYPE_CONFIRM')}</p>
+        </div>
+      `,
+      input: 'text',
+      inputPlaceholder: 'DELETE',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#dc3545',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: this.translate.instant('SETTINGS.DELETE_ACCOUNT_BTN'),
+      cancelButtonText: this.translate.instant('COMMON.CANCEL'),
+      preConfirm: (inputValue) => {
+        if (inputValue !== 'DELETE') {
+          Swal.showValidationMessage(this.translate.instant('SETTINGS.DELETE_ACCOUNT_TYPE_ERROR'));
+          return false;
+        }
+        return true;
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.deleting = true;
+        this.authService.deleteAccount().subscribe({
+          next: () => {
+            this.deleting = false;
+            Swal.fire({
+              icon: 'success',
+              title: this.translate.instant('SETTINGS.ACCOUNT_DELETED'),
+              text: this.translate.instant('SETTINGS.ACCOUNT_DELETED_DESC'),
+              allowOutsideClick: false
+            }).then(() => {
+              this.router.navigate(['/login']);
+            });
+          },
+          error: (error) => {
+            this.deleting = false;
+            const sanitizedMessage = this.sanitizeLogMessage(error?.message);
+            console.error(`Failed to delete account: ${sanitizedMessage}`);
+            Swal.fire({
+              icon: 'error',
+              title: this.translate.instant('MESSAGES.ERROR'),
+              text: this.translate.instant('SETTINGS.DELETE_ACCOUNT_ERROR')
+            });
+          }
+        });
+      }
+    });
   }
 }

@@ -1,0 +1,313 @@
+<app-header-superadmin></app-header-superadmin>
+<div *ngIf="isMobile()" class="mobile-view">
+  <div class="header-info">
+    <div class="title-icons">
+      <div class="page-back" (click)="back()">
+        <i class="bi bi-arrow-left"></i>
+      </div>
+    </div>
+    <div class="d-flex">
+      <div class="overflow-hidden">
+        <h5 class="name simple"> Daycare</h5>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search and Add Section -->
+  <div class="search-add-section">
+    <div class="search-container">
+      <input type="text"
+             class="search-input"
+             [placeholder]="'SUPER_ADMIN.SEARCH_PLACEHOLDER' | translate"
+             [(ngModel)]="searchTerm"
+             (input)="onSearch()">
+      <button class="search-btn">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+    <button class="add-btn" [routerLink]="['/super-admin/tenants/add']">
+      <i class="bi bi-plus"></i>
+    </button>
+  </div>
+
+  <div class="container-fluid superadmin-content mt-4">
+    <!-- Loading -->
+    <div *ngIf="loading" class="p-4">
+      <div class="skeleton-card" *ngFor="let i of [1,2,3]"></div>
+    </div>
+
+    <!-- No results -->
+    <div *ngIf="!loading && displayedTenants.length === 0" class="text-center py-5">
+      <i class="bi bi-inbox" style="font-size: 3rem; opacity: 0.25;"></i>
+      <p class="mt-3 mb-0 text-muted">{{ 'SUPER_ADMIN.NO_DAYCARES_FOUND' | translate }}</p>
+    </div>
+
+    <!-- Daycare Cards -->
+    <div class="card daycare-card mb-3"
+         *ngFor="let tenant of displayedTenants; trackBy: trackById"
+         [routerLink]="['/super-admin/tenants/detail', tenant.id]">
+
+      <!-- Progress Circle -->
+      <div class="progress-container">
+        <svg class="progress-ring" viewBox="0 0 60 60">
+          <circle class="progress-ring-bg" cx="30" cy="30" r="26" />
+          <circle class="progress-ring-fill"
+                  cx="30" cy="30" r="26"
+                  [style.strokeDasharray]="163.36"
+                  [style.strokeDashoffset]="163.36 - (163.36 * (tenant.childCount || 0) / 100)" />
+        </svg>
+        <span class="progress-text">{{ tenant.childCount || 0 }}</span>
+      </div>
+
+      <!-- Title Section -->
+      <div class="title-section">
+        <span class="status-badge" [ngClass]="tenant.isActive ? 'active' : 'inactive'">
+          {{ tenant.isActive ? 'Active' : 'Inactive' }}
+        </span>
+        <h3 class="daycare-name">{{ tenant.name }}</h3>
+        <p class="daycare-address">{{ tenant.address || tenant.email || tenant.subdomain }}</p>
+      </div>
+
+      <!-- Bottom Section -->
+      <div class="bottom-section">
+        <div class="team-section">
+          <span class="team-label">Users</span>
+          <div class="team-avatars">
+            <div class="avatar-stack">
+              <div class="avatar">
+                <i class="bi bi-person-fill"></i>
+              </div>
+            </div>
+            <span class="user-count">{{ tenant.userCount }}</span>
+          </div>
+        </div>
+        <div class="date-section">
+          <span class="date-label">Created</span>
+          <div class="date-value">
+            <i class="bi bi-calendar3"></i>
+            <span>{{ tenant.createdAt | date:'MMM d, yyyy' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="container-fluid mt-4 mb-4" [class]="isMobile() ? 'mobileview' : 'container-fluid mt-4'">
+  <app-title-page  *ngIf=" !isMobile()"
+    title="{{ 'SUPER_ADMIN.DAYCARES_MANAGEMENT' | translate }}"
+    subtitle="{{ 'SUPER_ADMIN.DAYCARES_SUBTITLE' | translate }}"
+    icon="bi bi-building"
+    [breadcrumbs]="breadcrumbs"
+    [actions]="titleActions">
+  </app-title-page>
+
+  <!-- View Controls -->
+  <div class="bg-white p-3 border d-flex align-items-center justify-content-between flex-wrap mb-4 rounded-1">
+    <h4 class="title-filter">{{ 'SUPER_ADMIN.DAYCARES_GRID' | translate }}</h4>
+    <div class="d-flex align-items-center flex-wrap gap-2">
+      <!-- Search Input -->
+      <div class="search-box">
+        <i class="bi bi-search search-icon"></i>
+        <input
+          type="text"
+          class="form-control search-input"
+          [(ngModel)]="searchTerm"
+          (input)="onSearch()"
+          [placeholder]="'SUPER_ADMIN.SEARCH_PLACEHOLDER' | translate">
+      </div>
+
+      <!-- Status Filter -->
+      <ng-select
+        class="filter-select"
+        [(ngModel)]="statusFilter"
+        [items]="statusOptions"
+        bindLabel="label"
+        bindValue="value"
+        [placeholder]="'SUPER_ADMIN.STATUS' | translate"
+        [clearable]="true"
+        [searchable]="false"
+        (change)="onStatusChange()">
+        <ng-template ng-option-tmp let-item="item">
+          <div class="option-with-image">
+            <i class="bi {{item.icon}}" style="font-size: 16px; color: #7dd3c0;"></i>
+            <span class="option-title">{{ item.label }}</span>
+          </div>
+        </ng-template>
+      </ng-select>
+
+      <!-- Sort Select -->
+      <ng-select
+        class="filter-select"
+        [(ngModel)]="sortBy"
+        [items]="sortOptions"
+        bindLabel="label"
+        bindValue="value"
+        [placeholder]="'SUPER_ADMIN.SORT_BY' | translate"
+        [clearable]="false"
+        [searchable]="false"
+        (change)="onSortChange()">
+        <ng-template ng-option-tmp let-item="item">
+          <div class="option-with-image">
+            <i class="bi {{item.icon}}" style="font-size: 16px; color: #7dd3c0;"></i>
+            <span class="option-title">{{ item.label }}</span>
+          </div>
+        </ng-template>
+      </ng-select>
+
+      <!-- Clear Filters -->
+      <button *ngIf="searchTerm || statusFilter !== 'all'" class="btn btn-outline-secondary btn-sm"
+        (click)="clearFilters()">
+        <i class="bi bi-x-circle me-1"></i>{{ 'SUPER_ADMIN.CLEAR_FILTERS' | translate }}
+      </button>
+
+      <!-- Results count -->
+      <span class="text-muted ms-2">
+        {{ filteredTenants.length }} {{ 'SUPER_ADMIN.RESULTS' | translate }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Tenants Table -->
+  <div class="card card-general shadow-sm">
+    <div class="card-body p-0">
+      <!-- Loading -->
+      <div *ngIf="loading" class="p-4">
+        <div class="skeleton-row" *ngFor="let i of [1,2,3,4,5]"></div>
+      </div>
+
+      <!-- Table -->
+      <div *ngIf="!loading" class="table-responsive custom-table ">
+        <table class="table table-hover mb-0 tenants-table">
+          <thead>
+            <tr>
+              <th>{{ 'SUPER_ADMIN.TABLE_DAYCARE' | translate }}</th>
+              <th>{{ 'SUPER_ADMIN.TABLE_CONTACT' | translate }}</th>
+              <th class="text-center">{{ 'SUPER_ADMIN.TABLE_USERS' | translate }}</th>
+              <th class="text-center">{{ 'SUPER_ADMIN.TABLE_CHILDREN' | translate }}</th>
+              <th>{{ 'SUPER_ADMIN.TABLE_PLAN' | translate }}</th>
+              <th>{{ 'SUPER_ADMIN.TABLE_STATUS' | translate }}</th>
+              <th>{{ 'SUPER_ADMIN.TABLE_CREATED' | translate }}</th>
+              <th class="text-center">{{ 'SUPER_ADMIN.TABLE_ACTIONS' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="displayedTenants.length === 0">
+              <td colspan="8" class="text-center py-5">
+                <i class="bi bi-inbox" style="font-size: 3rem; opacity: 0.25;"></i>
+                <p class="mt-3 mb-0 text-muted">{{ 'SUPER_ADMIN.NO_DAYCARES_FOUND' | translate }}</p>
+              </td>
+            </tr>
+            <tr *ngFor="let tenant of displayedTenants; trackBy: trackById"
+                [routerLink]="['/super-admin/tenants/detail', tenant.id]"
+                style="cursor: pointer;">
+              <td>
+                <div class="d-flex align-items-center">
+                  <div class="tenant-avatar me-3">
+                    <img *ngIf="tenant.logo" [src]="tenant.logo" [alt]="tenant.name" class="rounded-circle" width="40" height="40">
+                    <div *ngIf="!tenant.logo" class="avatar-placeholder">
+                      {{ tenant.name.charAt(0).toUpperCase() }}
+                    </div>
+                  </div>
+                  <div>
+                    <strong class="d-block">{{ tenant.name }}</strong>
+                    <small class="text-muted" *ngIf="tenant.subdomain">{{ tenant.subdomain }}</small>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="contact-info">
+                  <small class="d-block">
+                    <i class="bi bi-envelope me-1 text-muted"></i>
+                    {{ tenant.email || '-' }}
+                  </small>
+                  <small class="d-block" *ngIf="tenant.phone">
+                    <i class="bi bi-telephone me-1 text-muted"></i>
+                    {{ tenant.phone }}
+                  </small>
+                </div>
+              </td>
+              <td class="text-center">
+                <span class="badge bg-light text-dark">{{ tenant.userCount }}</span>
+              </td>
+              <td class="text-center">
+                <span class="badge bg-light text-dark">{{ tenant.childCount }}</span>
+              </td>
+              <td>
+                <span class="badge plan-badge" [ngClass]="'plan-' + tenant.subscriptionPlan.toLowerCase()">
+                  {{ tenant.subscriptionPlan }}
+                </span>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="tenant.isActive ? 'bg-success' : 'bg-danger'">
+                  {{ tenant.isActive ? ('SUPER_ADMIN.ACTIVE' | translate) : ('SUPER_ADMIN.INACTIVE' | translate) }}
+                </span>
+              </td>
+              <td>
+                <small class="text-muted">{{ tenant.createdAt | date:'MMM d, yyyy' }}</small>
+              </td>
+              <td class="text-center" (click)="$event.stopPropagation()">
+                <div class="dropdown">
+                  <button class="btn btn-sm btn-light" data-bs-toggle="dropdown">
+                    <i class="bi bi-three-dots-vertical"></i>
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                      <a class="dropdown-item" [routerLink]="['/super-admin/tenants/detail', tenant.id]">
+                        <i class="bi bi-eye me-2"></i>{{ 'SUPER_ADMIN.VIEW' | translate }}
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" [routerLink]="['/super-admin/tenants/edit', tenant.id]">
+                        <i class="bi bi-pencil-square me-2"></i>{{ 'SUPER_ADMIN.EDIT' | translate }}
+                      </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                      <a class="dropdown-item" (click)="toggleStatus(tenant, $event)">
+                        <i class="bi me-2" [ngClass]="tenant.isActive ? 'bi-pause-circle' : 'bi-play-circle'"></i>
+                        {{ tenant.isActive ? ('SUPER_ADMIN.DEACTIVATE' | translate) : ('SUPER_ADMIN.ACTIVATE' | translate) }}
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item text-danger" (click)="deleteTenant(tenant, $event)">
+                        <i class="bi bi-trash me-2"></i>{{ 'SUPER_ADMIN.DELETE' | translate }}
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div *ngIf="!loading && totalPages > 1" class="d-flex justify-content-between align-items-center p-3 border-top">
+        <div class="text-muted">
+          {{ 'SUPER_ADMIN.SHOWING' | translate }} {{ (currentPage - 1) * itemsPerPage + 1 }} -
+          {{ currentPage * itemsPerPage > filteredTenants.length ? filteredTenants.length : currentPage * itemsPerPage }}
+          {{ 'SUPER_ADMIN.OF' | translate }} {{ filteredTenants.length }}
+        </div>
+        <nav>
+          <ul class="pagination pagination-sm mb-0">
+            <li class="page-item" [class.disabled]="currentPage === 1">
+              <a class="page-link" (click)="goToPage(currentPage - 1)">
+                <i class="bi bi-chevron-left"></i>
+              </a>
+            </li>
+            <li *ngFor="let page of getPageNumbers()"
+                class="page-item"
+                [class.active]="page === currentPage">
+              <a class="page-link" (click)="goToPage(page)">{{ page }}</a>
+            </li>
+            <li class="page-item" [class.disabled]="currentPage === totalPages">
+              <a class="page-link" (click)="goToPage(currentPage + 1)">
+                <i class="bi bi-chevron-right"></i>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+</div>

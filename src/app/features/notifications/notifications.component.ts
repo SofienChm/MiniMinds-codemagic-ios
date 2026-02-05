@@ -6,19 +6,17 @@ import { Notification } from '../../core/interfaces/notification.interface';
 import { AuthService } from '../../core/services/auth';
 import { ParentChildHeaderSimpleComponent } from '../../shared/components/parent-child-header-simple/parent-child-header-simple.component';
 import { TitlePage } from '../../shared/layouts/title-page/title-page';
-import { PullToRefreshComponent } from '../../shared/components/pull-to-refresh/pull-to-refresh.component';
 import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-notifications',
   standalone: true,
-  imports: [CommonModule, ParentChildHeaderSimpleComponent, TitlePage, PullToRefreshComponent, SkeletonComponent, IonContent, IonRefresher, IonRefresherContent],
+  imports: [CommonModule, ParentChildHeaderSimpleComponent, TitlePage, SkeletonComponent, IonContent, IonRefresher, IonRefresherContent],
   templateUrl: './notifications.component.html',
   styleUrl: './notifications.component.scss'
 })
 export class NotificationsComponent implements OnInit {
-  @ViewChild('pullToRefresh') pullToRefresh!: PullToRefreshComponent;
   notifications: Notification[] = [];
   filteredNotifications: Notification[] = [];
   displayedNotifications: Notification[] = [];
@@ -173,8 +171,6 @@ export class NotificationsComponent implements OnInit {
       if (event?.target) {
         event.target.complete();
       }
-      // Fallback for custom pull-to-refresh (if still used elsewhere)
-      this.pullToRefresh?.completeRefresh();
     }, 500);
   }
 }

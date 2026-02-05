@@ -1,0 +1,518 @@
+<div *ngIf="isMobile()" class="mobile-view">
+  <app-header-superadmin></app-header-superadmin>
+  <div class="welcome-section pt-4 pb-4 mb-3">
+    <div class="container-fluid">
+      <div class="img-dash d-flex align-items-center justify-content-between">
+        <div class="d-flex">
+          <img *ngIf="currentUser?.profilePicture" [src]="currentUser!.profilePicture" [alt]="currentUser!.firstName" class="profile-avatar">
+          <div *ngIf="!currentUser?.profilePicture" class="avatar-placeholder">
+            {{ currentUser?.firstName?.charAt(0)?.toUpperCase() || 'A' }}
+          </div>
+          <div class="ps-3">
+            <p class="welcome-title">
+            {{ getGreeting() }}</p>
+            <h2 class="welcome-subtitle"> {{ userName }}!</h2>
+          </div>
+        </div>
+        <div class="notifications">
+          <i class="bi bi-bell"></i>
+        </div>
+      </div>
+       <div class="search-box mt-3">
+        <i class="bi bi-search search-icon"></i>
+        <input type="text" class="form-control search-input"
+          [placeholder]="'SUPER_ADMIN.SEARCH_DAYCARE' | translate"
+          [(ngModel)]="searchTerm"
+          (input)="onSearchInput()"
+          (focus)="showSearchResults = true"
+          (blur)="hideSearchResults()">
+
+        <!-- Search Results Dropdown -->
+        <div class="search-results" *ngIf="showSearchResults && searchTerm.length > 0">
+          <div class="search-result-item"
+               *ngFor="let tenant of searchResults"
+               (mousedown)="goToTenantDetail(tenant.id)">
+            <div class="result-avatar">
+              <img *ngIf="tenant.logo" [src]="tenant.logo" [alt]="tenant.name">
+              <span *ngIf="!tenant.logo">{{ tenant.name.charAt(0).toUpperCase() }}</span>
+            </div>
+            <div class="result-info">
+              <span class="result-name">{{ tenant.name }}</span>
+              <span class="result-email">{{ tenant.email || tenant.subdomain }}</span>
+            </div>
+            <span class="badge" [ngClass]="tenant.isActive ? 'bg-success' : 'bg-danger'">
+              {{ tenant.isActive ? 'Active' : 'Inactive' }}
+            </span>
+          </div>
+          <div class="no-results" *ngIf="searchResults.length === 0">
+            <i class="bi bi-search"></i>
+            <span>{{ 'SUPER_ADMIN.NO_DAYCARES_FOUND' | translate }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    <!-- Stats Scroll Section -->
+    <div class="stats-scroll-section">
+      <div class="stats-scroll-container">
+        <!-- Total Daycares -->
+        <div class="mini-stat-card daycares">
+          <div class="mini-stat-icon">
+            <i class="bi bi-building"></i>
+          </div>
+          <div class="mini-stat-info">
+            <span class="mini-stat-value" *ngIf="!loadingStates.stats">{{ stats.totalTenants }}</span>
+            <div *ngIf="loadingStates.stats" class="skeleton-mini"></div>
+            <span class="mini-stat-label">Daycares</span>
+          </div>
+        </div>
+
+        <!-- Active -->
+        <div class="mini-stat-card active">
+          <div class="mini-stat-icon">
+            <i class="bi bi-check-circle-fill"></i>
+          </div>
+          <div class="mini-stat-info">
+            <span class="mini-stat-value" *ngIf="!loadingStates.stats">{{ stats.activeTenants }}</span>
+            <div *ngIf="loadingStates.stats" class="skeleton-mini"></div>
+            <span class="mini-stat-label">Active</span>
+          </div>
+        </div>
+
+        <!-- Parents -->
+        <div class="mini-stat-card parents">
+          <div class="mini-stat-icon">
+            <i class="bi bi-people-fill"></i>
+          </div>
+          <div class="mini-stat-info">
+            <span class="mini-stat-value" *ngIf="!loadingStates.stats">{{ stats.totalParents }}</span>
+            <div *ngIf="loadingStates.stats" class="skeleton-mini"></div>
+            <span class="mini-stat-label">Parents</span>
+          </div>
+        </div>
+
+        <!-- Teachers -->
+        <div class="mini-stat-card teachers">
+          <div class="mini-stat-icon">
+            <i class="bi bi-person-badge-fill"></i>
+          </div>
+          <div class="mini-stat-info">
+            <span class="mini-stat-value" *ngIf="!loadingStates.stats">{{ stats.totalTeachers }}</span>
+            <div *ngIf="loadingStates.stats" class="skeleton-mini"></div>
+            <span class="mini-stat-label">Teachers</span>
+          </div>
+        </div>
+
+        <!-- Children -->
+        <div class="mini-stat-card children">
+          <div class="mini-stat-icon">
+            <i class="bi bi-emoji-smile-fill"></i>
+          </div>
+          <div class="mini-stat-info">
+            <span class="mini-stat-value" *ngIf="!loadingStates.stats">{{ stats.totalChildren }}</span>
+            <div *ngIf="loadingStates.stats" class="skeleton-mini"></div>
+            <span class="mini-stat-label">Children</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section daycare -->
+     <div class="daycares-list mt-4">
+      <div class="title-all">
+        <h5>Recently Added</h5>
+        <a [routerLink]="['/super-admin/tenants']" class="view-all btn btn-sm btn-outline-primary">
+          {{ 'SUPER_ADMIN.VIEW_ALL' | translate }}
+        </a>
+      </div>
+      <div class="tenants-list">
+        <!-- Loading -->
+        <div *ngIf="loadingStates.tenants" class="p-2">
+          <div class="skeleton-tenant-card" *ngFor="let i of [1,2,3]"></div>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="!loadingStates.tenants && recentTenants.length === 0" class="text-center py-4">
+          <i class="bi bi-inbox" style="font-size: 2rem; opacity: 0.25;"></i>
+          <p class="mt-2 mb-0 text-muted">{{ 'SUPER_ADMIN.NO_DAYCARES' | translate }}</p>
+        </div>
+
+        <!-- Tenant Cards -->
+        <div class="tenant-card" *ngFor="let tenant of recentTenants; trackBy: trackById">
+          <div class="tenant-card-left">
+            <div class="tenant-avatar-lg">
+              <img *ngIf="tenant.logo" [src]="tenant.logo" [alt]="tenant.name">
+              <span *ngIf="!tenant.logo">{{ tenant.name.substring(0, 2).toUpperCase() }}</span>
+            </div>
+          </div>
+          <div class="tenant-card-center">
+            <h4 class="tenant-name">{{ tenant.name }}</h4>
+            <p class="tenant-address">{{ tenant.address || tenant.subdomain || '-' }}</p>
+            <p class="tenant-email">{{ tenant.email || '-' }}</p>
+          </div>
+          <div class="tenant-card-right">
+            <div class="dropdown-wrapper">
+              <button class="btn-dots" (click)="toggleDropdown(tenant.id, $event)">
+                <i class="bi bi-three-dots"></i>
+              </button>
+              <div class="custom-dropdown" *ngIf="openDropdownId === tenant.id">
+                <a class="dropdown-item" [routerLink]="['/super-admin/tenants/detail', tenant.id]" (click)="closeDropdown()">
+                  <i class="bi bi-eye me-2"></i>View
+                </a>
+                <a class="dropdown-item" [routerLink]="['/super-admin/tenants/edit', tenant.id]" (click)="closeDropdown()">
+                  <i class="bi bi-pencil-square me-2"></i>Edit
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+     </div>
+  
+
+    <!-- Quick Actions -->
+    <div class="card card-general quick-actions-container bg-white mb-3 shadow-sm">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">{{ 'SUPER_ADMIN.QUICK_ACTIONS' | translate }}</h5>
+      </div>
+      <div class="card-body">  
+        <div class="row g-2">
+          <div class="col-6 items">
+            <div class="card quick-action-card text-center p-3" [routerLink]="['/super-admin/tenants/add']" style="cursor: pointer;">
+              <i class="bi bi-plus-circle"></i>
+              <small>{{ 'SUPER_ADMIN.ADD_DAYCARE' | translate }}</small>
+            </div>
+          </div>
+          <div class="col-6 items">
+            <div class="card quick-action-card text-center p-3" [routerLink]="['/super-admin/tenants']" style="cursor: pointer;">
+              <i class="bi bi-building"></i>
+              <small>{{ 'SUPER_ADMIN.ALL_DAYCARES' | translate }}</small>
+            </div>
+          </div>
+          <div class="col-6 items">
+            <div class="card quick-action-card text-center p-3" [routerLink]="['/super-admin/billing']" style="cursor: pointer;">
+              <i class="bi bi-credit-card"></i>
+              <small>Billing</small>
+            </div>
+          </div>
+          <div class="col-6 items">
+            <div class="card quick-action-card text-center p-3" [routerLink]="['/super-admin/demo-requests']" style="cursor: pointer;">
+              <i class="bi bi-calendar-check"></i>
+              <small>Demo Requests</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div *ngIf="!isMobile()" class="container-fluid mt-4">
+  <!-- Welcome Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="welcome-section">
+        <h2 class="welcome-title">
+          {{ getGreeting() }}, {{ userName }}!</h2>
+        <p class="welcome-subtitle">{{ 'SUPER_ADMIN.DASHBOARD_SUBTITLE' | translate }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Cards Row -->
+  <div class="row g-3 mb-4">
+    <!-- Total Daycares -->
+    <div class="col-xl-3 col-md-6">
+      <div class="card stat-card shadow-sm">
+        <div class="card-body d-flex align-items-center p-3">
+          <div class="stat-icon-wrapper me-3 bg-primary-light">
+            <i class="bi bi-building"></i>
+          </div>
+          <div class="stat-content">
+            <h3 class="stat-number" *ngIf="!loadingStates.stats">{{ stats.totalTenants }}</h3>
+            <div *ngIf="loadingStates.stats" class="skeleton-number"></div>
+            <p class="stat-label mb-0">{{ 'SUPER_ADMIN.TOTAL_DAYCARES' | translate }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Daycares -->
+    <div class="col-xl-3 col-md-6">
+      <div class="card stat-card shadow-sm">
+        <div class="card-body d-flex align-items-center p-3">
+          <div class="stat-icon-wrapper me-3 bg-success-light">
+            <i class="bi bi-check-circle"></i>
+          </div>
+          <div class="stat-content">
+            <h3 class="stat-number" *ngIf="!loadingStates.stats">{{ stats.activeTenants }}</h3>
+            <div *ngIf="loadingStates.stats" class="skeleton-number"></div>
+            <p class="stat-label mb-0">{{ 'SUPER_ADMIN.ACTIVE_DAYCARES' | translate }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Total Parents -->
+    <div class="col-xl-3 col-md-6">
+      <div class="card stat-card shadow-sm">
+        <div class="card-body d-flex align-items-center p-3">
+          <div class="stat-icon-wrapper me-3 bg-info-light">
+            <i class="bi bi-people"></i>
+          </div>
+          <div class="stat-content">
+            <h3 class="stat-number" *ngIf="!loadingStates.stats">{{ stats.totalParents }}</h3>
+            <div *ngIf="loadingStates.stats" class="skeleton-number"></div>
+            <p class="stat-label mb-0">{{ 'SUPER_ADMIN.TOTAL_PARENTS' | translate }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Total Teachers -->
+    <div class="col-xl-3 col-md-6">
+      <div class="card stat-card shadow-sm">
+        <div class="card-body d-flex align-items-center p-3">
+          <div class="stat-icon-wrapper me-3 bg-warning-light">
+            <i class="bi bi-person-badge"></i>
+          </div>
+          <div class="stat-content">
+            <h3 class="stat-number" *ngIf="!loadingStates.stats">{{ stats.totalTeachers }}</h3>
+            <div *ngIf="loadingStates.stats" class="skeleton-number"></div>
+            <p class="stat-label mb-0">{{ 'SUPER_ADMIN.TOTAL_TEACHERS' | translate }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Main Content Area -->
+    <div class="col-xl-8">
+
+      <!-- Recent Daycares Table -->
+      <div class="card card-general card-recently shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>{{ 'SUPER_ADMIN.RECENT_DAYCARES' | translate }}</h5>
+          <a [routerLink]="['/super-admin/tenants']" class="view-all btn btn-sm btn-outline-primary">
+            {{ 'SUPER_ADMIN.VIEW_ALL' | translate }}
+          </a>
+        </div>
+        <div class="card-body">
+          <div *ngIf="loadingStates.tenants" class="skeleton-table">
+            <div class="skeleton-row" *ngFor="let i of [1,2,3,4,5]"></div>
+          </div>
+          <div *ngIf="!loadingStates.tenants" class="table-responsive custom-table">
+            <table class="table table-hover mb-0">
+              <thead>
+                <tr>
+                  <th>{{ 'SUPER_ADMIN.TABLE_NAME' | translate }}</th>
+                  <th>{{ 'SUPER_ADMIN.TABLE_EMAIL' | translate }}</th>
+                  <th>{{ 'SUPER_ADMIN.TABLE_USERS' | translate }}</th>
+                  <th>{{ 'SUPER_ADMIN.TABLE_CHILDREN' | translate }}</th>
+                  <th>{{ 'SUPER_ADMIN.TABLE_STATUS' | translate }}</th>
+                  <th>{{ 'SUPER_ADMIN.TABLE_ACTIONS' | translate }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="recentTenants.length === 0">
+                  <td colspan="6" class="text-center text-muted py-4">
+                    <i class="bi bi-inbox" style="font-size: 2rem; opacity: 0.3;"></i>
+                    <p class="mt-2 mb-0">{{ 'SUPER_ADMIN.NO_DAYCARES' | translate }}</p>
+                  </td>
+                </tr>
+                <tr *ngFor="let tenant of recentTenants; trackBy: trackById">
+                  <td class="text-nowrap">
+                    <div class="d-flex align-items-center">
+                      <div class="tenant-avatar me-2">
+                        <img *ngIf="tenant.logo" [src]="tenant.logo" [alt]="tenant.name" class="rounded-circle" width="36" height="36">
+                        <div *ngIf="!tenant.logo" class="avatar-placeholder">
+                          {{ tenant.name.charAt(0).toUpperCase() }}
+                        </div>
+                      </div>
+                      <div>
+                        <strong>{{ tenant.name }}</strong>
+                        <small class="d-block text-muted" *ngIf="tenant.subdomain">{{ tenant.subdomain }}</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="text-nowrap">{{ tenant.email || '-' }}</td>
+                  <td class="text-nowrap">{{ tenant.userCount }}</td>
+                  <td class="text-nowrap">{{ tenant.childCount }}</td>
+                  <td>
+                    <span class="badge" [ngClass]="tenant.isActive ? 'bg-success' : 'bg-danger'">
+                      {{ tenant.isActive ? ('SUPER_ADMIN.ACTIVE' | translate) : ('SUPER_ADMIN.INACTIVE' | translate) }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="d-flex gap-1">
+                      <button class="btn btn-sm btn-view" [routerLink]="['/super-admin/tenants/detail', tenant.id]" title="View">
+                        <i class="bi bi-eye"></i>
+                      </button>
+                      <button class="btn btn-sm btn-edit" [routerLink]="['/super-admin/tenants/edit', tenant.id]" title="Edit">
+                        <i class="bi bi-pencil-square"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      
+      <!-- Subscription Breakdown -->
+      <div class="card card-general shadow-sm mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>{{ 'SUPER_ADMIN.SUBSCRIPTION_BREAKDOWN' | translate }}</h5>
+        </div>
+        <div class="card-body">
+          <div *ngIf="loadingStates.stats" class="text-center py-4">
+            <div class="skeleton-chart"></div>
+          </div>
+          <div *ngIf="!loadingStates.stats" class="subscription-grid">
+            <div *ngFor="let item of stats.subscriptionBreakdown" class="subscription-item">
+              <div class="subscription-card" [ngClass]="'plan-' + item.plan.toLowerCase()">
+                <div class="plan-icon">
+                  <i class="bi" [ngClass]="{
+                    'bi-star': item.plan === 'Free',
+                    'bi-star-fill': item.plan === 'Basic',
+                    'bi-gem': item.plan === 'Premium',
+                    'bi-trophy': item.plan === 'Enterprise'
+                  }"></i>
+                </div>
+                <div class="plan-info">
+                  <h4 class="plan-name">{{ item.plan }}</h4>
+                  <p class="plan-count">{{ item.count }} {{ 'SUPER_ADMIN.DAYCARES' | translate }}</p>
+                </div>
+              </div>
+            </div>
+            <div *ngIf="stats.subscriptionBreakdown.length === 0" class="text-center text-muted py-4">
+              <i class="bi bi-inbox" style="font-size: 2rem; opacity: 0.3;"></i>
+              <p class="mt-2 mb-0">{{ 'SUPER_ADMIN.NO_SUBSCRIPTIONS' | translate }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-xl-4">
+      <!-- Quick Actions -->
+      <div class="card card-general quick-actions-container bg-white mb-3 shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">{{ 'SUPER_ADMIN.QUICK_ACTIONS' | translate }}</h5>
+        </div>
+        <div class="card-body">  
+          <div class="row g-2">
+            <div class="col-6 items">
+              <div class="card quick-action-card text-center p-3" [routerLink]="['/super-admin/tenants/add']" style="cursor: pointer;">
+                <i class="bi bi-plus-circle"></i>
+                <small>{{ 'SUPER_ADMIN.ADD_DAYCARE' | translate }}</small>
+              </div>
+            </div>
+            <div class="col-6 items">
+              <div class="card quick-action-card text-center p-3" [routerLink]="['/super-admin/tenants']" style="cursor: pointer;">
+                <i class="bi bi-building"></i>
+                <small>{{ 'SUPER_ADMIN.ALL_DAYCARES' | translate }}</small>
+              </div>
+            </div>
+            <div class="col-6 items">
+              <div class="card quick-action-card text-center p-3" [routerLink]="['/super-admin/demo-requests']" style="cursor: pointer;">
+                <i class="bi bi-calendar-check"></i>
+                <small>Demo Requests</small>
+              </div>
+            </div>
+            <div class="col-6 items">
+              <div class="card quick-action-card text-center p-3" [routerLink]="['/super-admin/billing']" style="cursor: pointer;">
+                <i class="bi bi-credit-card"></i>
+                <small>Billing</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inactive Daycares Alert -->
+      <div class="card card-general shadow-sm mb-3" *ngIf="stats.inactiveTenants > 0">
+        <div class="card-header bg-warning-subtle">
+          <h5 class="mb-0 text-warning">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            {{ 'SUPER_ADMIN.INACTIVE_ALERT' | translate }}
+          </h5>
+        </div>
+        <div class="card-body">
+          <p class="mb-2">
+            {{ stats.inactiveTenants }} {{ 'SUPER_ADMIN.INACTIVE_DAYCARES_MSG' | translate }}
+          </p>
+          <a [routerLink]="['/super-admin/tenants']" [queryParams]="{status: 'inactive'}" class="btn btn-sm btn-outline-warning">
+            {{ 'SUPER_ADMIN.VIEW_INACTIVE' | translate }}
+          </a>
+        </div>
+      </div>
+
+      <!-- Platform Summary -->
+      <div class="card card-general shadow-sm">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>{{ 'SUPER_ADMIN.PLATFORM_SUMMARY' | translate }}</h5>
+        </div>
+        <div class="card-body">
+          <div *ngIf="loadingStates.stats" class="py-3">
+            <div class="skeleton-row mb-2"></div>
+            <div class="skeleton-row mb-2"></div>
+            <div class="skeleton-row"></div>
+          </div>
+          <div *ngIf="!loadingStates.stats" class="summary-list">
+            <div class="summary-item d-flex justify-content-between align-items-center mb-2">
+              <span class="summary-label">
+                <i class="bi bi-building me-2 text-primary"></i>
+                {{ 'SUPER_ADMIN.TOTAL_DAYCARES' | translate }}
+              </span>
+              <span class="summary-value fw-bold">{{ stats.totalTenants }}</span>
+            </div>
+            <div class="summary-item d-flex justify-content-between align-items-center mb-2">
+              <span class="summary-label">
+                <i class="bi bi-check-circle me-2 text-success"></i>
+                {{ 'SUPER_ADMIN.ACTIVE_DAYCARES' | translate }}
+              </span>
+              <span class="summary-value fw-bold text-success">{{ stats.activeTenants }}</span>
+            </div>
+            <div class="summary-item d-flex justify-content-between align-items-center mb-2">
+              <span class="summary-label">
+                <i class="bi bi-x-circle me-2 text-danger"></i>
+                {{ 'SUPER_ADMIN.INACTIVE_DAYCARES' | translate }}
+              </span>
+              <span class="summary-value fw-bold text-danger">{{ stats.inactiveTenants }}</span>
+            </div>
+            <hr>
+            <div class="summary-item d-flex justify-content-between align-items-center mb-2">
+              <span class="summary-label">
+                <i class="bi bi-people me-2 text-info"></i>
+                {{ 'SUPER_ADMIN.TOTAL_PARENTS' | translate }}
+              </span>
+              <span class="summary-value fw-bold">{{ stats.totalParents }}</span>
+            </div>
+            <div class="summary-item d-flex justify-content-between align-items-center mb-2">
+              <span class="summary-label">
+                <i class="bi bi-person-badge me-2 text-warning"></i>
+                {{ 'SUPER_ADMIN.TOTAL_TEACHERS' | translate }}
+              </span>
+              <span class="summary-value fw-bold">{{ stats.totalTeachers }}</span>
+            </div>
+            <div class="summary-item d-flex justify-content-between align-items-center">
+              <span class="summary-label">
+                <i class="bi bi-person-hearts me-2 text-success"></i>
+                {{ 'SUPER_ADMIN.TOTAL_CHILDREN' | translate }}
+              </span>
+              <span class="summary-value fw-bold">{{ stats.totalChildren }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

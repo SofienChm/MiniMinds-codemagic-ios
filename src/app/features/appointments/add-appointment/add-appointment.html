@@ -1,0 +1,204 @@
+
+<app-parent-child-header-simple *ngIf="isParent"
+  [title]="'APPOINTMENTS_PAGE.BOOK_APPOINTMENT' | translate"
+>
+</app-parent-child-header-simple>
+<div class="container-fluid mt-4">
+  <app-title-page *ngIf="!isParent"
+    [title]="'APPOINTMENTS_PAGE.BOOK_APPOINTMENT' | translate"
+    [subtitle]="'APPOINTMENTS_PAGE.BOOK_APPOINTMENT_SUBTITLE' | translate"
+    [icon]="'bi bi-calendar-plus'"
+    [breadcrumbs]="breadcrumbs"
+    [actions]="actions">
+  </app-title-page>
+
+  <div class="card card-general">
+    <div class="card-header">
+      <h5 class="mb-0">
+        <i class="bi bi-calendar-plus me-2"></i>
+        {{ 'APPOINTMENTS_PAGE.APPOINTMENT_DETAILS' | translate }}
+      </h5>
+    </div>
+    <div class="card-body">
+      <form [formGroup]="appointmentForm" (ngSubmit)="submitAppointment()">
+        <div class="row">
+          <!-- Title -->
+          <div class="col-md-8 mb-3">
+            <label class="form-label">
+              {{ 'APPOINTMENTS_PAGE.TITLE_LABEL' | translate }}
+              <span class="text-danger">*</span>
+            </label>
+            <input
+              type="text"
+              class="form-control"
+              formControlName="title"
+              [placeholder]="'APPOINTMENTS_PAGE.TITLE_PLACEHOLDER' | translate"
+              [class.is-invalid]="isFieldInvalid('title')">
+            <div class="invalid-feedback" *ngIf="isFieldInvalid('title')">
+              {{ getFieldError('title') }}
+            </div>
+          </div>
+
+          <!-- Type -->
+          <div class="col-md-4 mb-3">
+            <label class="form-label">
+              {{ 'APPOINTMENTS_PAGE.TYPE' | translate }}
+              <span class="text-danger">*</span>
+            </label>
+            <ng-select
+              formControlName="type"
+              [items]="appointmentTypes"
+              bindLabel="label"
+              bindValue="value"
+              [clearable]="false"
+              [searchable]="false"
+              [placeholder]="'APPOINTMENTS_PAGE.SELECT_TYPE' | translate">
+            </ng-select>
+          </div>
+        </div>
+
+        <div class="row">
+          <!-- Child (Optional) -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label">
+              {{ 'APPOINTMENTS_PAGE.REGARDING_CHILD' | translate }}
+              <span class="text-muted">({{ 'APPOINTMENTS_PAGE.OPTIONAL' | translate }})</span>
+            </label>
+            <ng-select
+              formControlName="childId"
+              [items]="children"
+              bindLabel="fullName"
+              bindValue="id"
+              [clearable]="true"
+              [placeholder]="'APPOINTMENTS_PAGE.SELECT_CHILD' | translate">
+              <ng-template ng-option-tmp let-item="item">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-person-fill me-2"></i>
+                  <span>{{ item.fullName }}</span>
+                </div>
+              </ng-template>
+            </ng-select>
+            <small class="text-muted">{{ 'APPOINTMENTS_PAGE.CHILD_HINT' | translate }}</small>
+          </div>
+
+          <!-- Teacher (Optional) -->
+          <div class="col-md-6 mb-3">
+            <label class="form-label">
+              {{ 'APPOINTMENTS_PAGE.PREFERRED_TEACHER' | translate }}
+              <span class="text-muted">({{ 'APPOINTMENTS_PAGE.OPTIONAL' | translate }})</span>
+            </label>
+            <ng-select
+              formControlName="teacherId"
+              [items]="teachers"
+              bindLabel="fullName"
+              bindValue="id"
+              [clearable]="true"
+              [placeholder]="'APPOINTMENTS_PAGE.SELECT_TEACHER' | translate">
+              <ng-template ng-option-tmp let-item="item">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-person-badge me-2"></i>
+                  <span>{{ item.fullName }}</span>
+                </div>
+              </ng-template>
+            </ng-select>
+            <small class="text-muted">{{ 'APPOINTMENTS_PAGE.TEACHER_HINT' | translate }}</small>
+          </div>
+        </div>
+
+        <div class="row">
+          <!-- Date -->
+          <div class="col-md-4 mb-3">
+            <label class="form-label">
+              {{ 'APPOINTMENTS_PAGE.DATE' | translate }}
+              <span class="text-danger">*</span>
+            </label>
+            <input
+              type="date"
+              class="form-control"
+              formControlName="appointmentDate"
+              [min]="minDate"
+              [class.is-invalid]="isFieldInvalid('appointmentDate')">
+            <div class="invalid-feedback" *ngIf="isFieldInvalid('appointmentDate')">
+              {{ getFieldError('appointmentDate') }}
+            </div>
+          </div>
+
+          <!-- Start Time -->
+          <div class="col-md-4 mb-3">
+            <label class="form-label">
+              {{ 'APPOINTMENTS_PAGE.START_TIME' | translate }}
+              <span class="text-danger">*</span>
+            </label>
+            <ng-select
+              formControlName="startTime"
+              [items]="timeSlots"
+              [clearable]="false"
+              [searchable]="false"
+              [placeholder]="'APPOINTMENTS_PAGE.SELECT_TIME' | translate"
+              (change)="onStartTimeChange()">
+            </ng-select>
+            <div class="invalid-feedback d-block" *ngIf="isFieldInvalid('startTime')">
+              {{ getFieldError('startTime') }}
+            </div>
+          </div>
+
+          <!-- End Time -->
+          <div class="col-md-4 mb-3">
+            <label class="form-label">
+              {{ 'APPOINTMENTS_PAGE.END_TIME' | translate }}
+              <span class="text-danger">*</span>
+            </label>
+            <ng-select
+              formControlName="endTime"
+              [items]="timeSlots"
+              [clearable]="false"
+              [searchable]="false"
+              [placeholder]="'APPOINTMENTS_PAGE.SELECT_TIME' | translate">
+            </ng-select>
+            <div class="invalid-feedback d-block" *ngIf="isFieldInvalid('endTime')">
+              {{ getFieldError('endTime') }}
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <!-- Description -->
+          <div class="col-12 mb-3">
+            <label class="form-label">
+              {{ 'APPOINTMENTS_PAGE.DESCRIPTION' | translate }}
+              <span class="text-muted">({{ 'APPOINTMENTS_PAGE.OPTIONAL' | translate }})</span>
+            </label>
+            <textarea
+              class="form-control"
+              formControlName="description"
+              rows="4"
+              [placeholder]="'APPOINTMENTS_PAGE.DESCRIPTION_PLACEHOLDER' | translate"
+              [class.is-invalid]="isFieldInvalid('description')">
+            </textarea>
+            <div class="invalid-feedback" *ngIf="isFieldInvalid('description')">
+              {{ getFieldError('description') }}
+            </div>
+            <small class="text-muted">{{ 'APPOINTMENTS_PAGE.DESCRIPTION_HINT' | translate }}</small>
+          </div>
+        </div>
+
+        <!-- Error Message -->
+        <div *ngIf="errorMessage" class="alert alert-danger mb-3">
+          <i class="bi bi-exclamation-triangle me-2"></i>{{ errorMessage }}
+        </div>
+
+        <!-- Form Actions -->
+        <div class="d-flex justify-content-end gap-2">
+          <button type="button" class="action-btn custom-btn-2 btn-cancel-2" (click)="cancel()">
+            <i class="bi bi-x-lg me-2"></i>{{ 'APPOINTMENTS_PAGE.CANCEL' | translate }}
+          </button>
+          <button type="submit" class="action-btn custom-btn-2 btn-add-global-2" [disabled]="submitting">
+            <span *ngIf="submitting" class="spinner-border spinner-border-sm me-2"></span>
+            <i *ngIf="!submitting" class="bi bi-calendar-check me-2"></i>
+            {{ submitting ? ('APPOINTMENTS_PAGE.SUBMITTING' | translate) : ('APPOINTMENTS_PAGE.BOOK_APPOINTMENT' | translate) }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

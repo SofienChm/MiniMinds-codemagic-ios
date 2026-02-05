@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, effect, inject, signal } from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
+import { Component, ElementRef, HostListener, inject, signal } from '@angular/core';
 import { LanguageService } from '../../../core/services/langauge-service';
 
 @Component({
@@ -12,6 +11,7 @@ import { LanguageService } from '../../../core/services/langauge-service';
 })
 export class LanguageSelector {
   private readonly languageService = inject(LanguageService);
+  private readonly elementRef = inject(ElementRef);
 
   availableLanguages = ['en', 'fr', 'it'];
   showMenu = signal(false);
@@ -19,6 +19,14 @@ export class LanguageSelector {
   toggleMenu() {
     this.showMenu.update(v => !v);
   }
+
+  @HostListener('document:click', ['$event'])
+  handleClickOutside(event: MouseEvent): void {
+    if (this.showMenu() && !this.elementRef.nativeElement.contains(event.target)) {
+      this.showMenu.set(false);
+    }
+  }
+
   changeLanguage(lang: string) {
     this.languageService.use(lang);
     this.showMenu.set(false);

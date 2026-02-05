@@ -21,14 +21,6 @@ textarea.form-input {
 }
 
 
-
-
-
-
-
-
-
-
 // Responsive
 @media (max-width: 768px) {
   .child-form {
@@ -41,12 +33,22 @@ textarea.form-input {
   }
 
   .form-actions {
-    flex-direction: column;
+    flex-direction: row;
 
     .btn-cancel,
     .btn-submit {
       width: 100%;
       justify-content: center;
     }
+  }
+}
+
+@media (max-width: 380px) {
+  .card-add-pages .add-form .form-grid {
+    grid-template-columns: repeat(auto-fit, minmax(208px, 1fr));
+  }
+  .card-add-pages .add-form .form-grid .form-input {
+    font-size: 14px;
+    padding: 10px 10px 10px 40px;
   }
 }

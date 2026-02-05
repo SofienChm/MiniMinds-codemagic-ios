@@ -1,4 +1,4 @@
-<header class="bg-white py-2 px-4" *ngIf="!isParent">
+<header class="bg-white py-2 px-4 main-header" *ngIf="!isParent">
   <div class="d-flex justify-content-between align-items-center">
     <div class="d-flex align-items-center gap-3">
       <button class="btn btn-link d-lg-none p-0" (click)="toggleMobileMenu()">
@@ -104,7 +104,7 @@
       <div class="d-flex align-items-center gap-2">
        
         <ng-template #initials>
-          <div class=" bg-primary text-white d-flex align-items-center justify-content-center profilePicture">
+          <div class="text-white d-flex align-items-center justify-content-center profilePicture">
             <strong>{{ getInitials() }}</strong>
           </div>
         </ng-template>

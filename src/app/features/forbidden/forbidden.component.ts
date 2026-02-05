@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
+import { AuthService } from '../../core/services/auth';
 
 @Component({
   selector: 'app-forbidden',
@@ -11,5 +12,13 @@ import { TranslateModule } from '@ngx-translate/core';
   styleUrl: './forbidden.component.scss'
 })
 export class ForbiddenComponent {
+  constructor(private authService: AuthService) {}
 
+  get isSuperAdmin(): boolean {
+    return this.authService.isSuperAdmin();
+  }
+
+  get dashboardRoute(): string {
+    return this.isSuperAdmin ? '/super-admin/dashboard' : '/dashboard';
+  }
 }

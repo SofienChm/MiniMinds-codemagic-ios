@@ -64,7 +64,7 @@
                   <a href="#" class="child-avatar flex-shrink-0">
                     <img
                       loading="lazy"
-                      [src]="item.child.profilePicture || 'assets/child.png'"
+                      [src]="getChildProfilePictureUrl(item.child)"
                       class="img-fluid rounded-circle"
                       alt="Child"
                       width="40"

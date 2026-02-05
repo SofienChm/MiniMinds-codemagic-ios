@@ -1,0 +1,321 @@
+<app-header-superadmin></app-header-superadmin>
+<div *ngIf="isMobile()" class="mobile-view-superadmin">
+  <div class="header-info">
+    <div class="title-icons">
+      <div class="page-back" (click)="back()">
+        <i class="bi bi-arrow-left"></i>
+      </div>
+    </div>
+    <div class="d-flex">
+      <div class="overflow-hidden">
+        <h5 class="name simple"> Billing</h5>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search and Add Section -->
+  <div class="search-add-section">
+    <div class="search-container">
+      <input type="text"
+             class="search-input"
+             [placeholder]="'BILLING.SEARCH_PLACEHOLDER' | translate"
+             [(ngModel)]="searchTerm"
+             (ngModelChange)="onSearch()">
+      <button class="search-btn">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+    <button class="add-btn" (click)="openAddModal()">
+      <i class="bi bi-plus"></i>
+    </button>
+  </div>
+</div>
+<div [class]="isMobile() ? 'mobileview mobile-view container-fluid mt-4' : 'container-fluid mt-4'">
+  <app-title-page *ngIf=" !isMobile()"
+    [title]="'BILLING.TITLE' | translate"
+    [subtitle]="'BILLING.SUBTITLE' | translate"
+    icon="bi bi-cash-stack"
+    [breadcrumbs]="breadcrumbs">
+  </app-title-page>
+
+  <!-- Stats Cards -->
+  <div class="row g-3 mb-4" *ngIf="!loading && summary">
+    <div class="col-xl-3 col-md-6">
+      <div class="card stat-card shadow-sm">
+        <div class="card-body d-flex align-items-center p-3">
+          <div class="stat-icon-wrapper me-3 bg-success-light">
+            <i class="bi bi-cash-coin"></i>
+          </div>
+          <div class="stat-content">
+            <h3 class="stat-number">{{ formatCurrency(summary.totalRevenue) }}</h3>
+            <p class="stat-label mb-0">{{ 'BILLING.TOTAL_REVENUE' | translate }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+      <div class="card stat-card shadow-sm">
+        <div class="card-body d-flex align-items-center p-3">
+          <div class="stat-icon-wrapper me-3 bg-warning-light">
+            <i class="bi bi-hourglass-split"></i>
+          </div>
+          <div class="stat-content">
+            <h3 class="stat-number">{{ formatCurrency(summary.totalPending) }}</h3>
+            <p class="stat-label mb-0">{{ 'BILLING.TOTAL_PENDING' | translate }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+      <div class="card stat-card shadow-sm">
+        <div class="card-body d-flex align-items-center p-3">
+          <div class="stat-icon-wrapper me-3 bg-primary-light">
+            <i class="bi bi-check-circle"></i>
+          </div>
+          <div class="stat-content">
+            <h3 class="stat-number">{{ summary.paidTenantsCount }}</h3>
+            <p class="stat-label mb-0">{{ 'BILLING.PAID_DAYCARES' | translate }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+      <div class="card stat-card shadow-sm">
+        <div class="card-body d-flex align-items-center p-3">
+          <div class="stat-icon-wrapper me-3 bg-danger-light">
+            <i class="bi bi-x-circle"></i>
+          </div>
+          <div class="stat-content">
+            <h3 class="stat-number">{{ summary.unpaidTenantsCount }}</h3>
+            <p class="stat-label mb-0">{{ 'BILLING.UNPAID_DAYCARES' | translate }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Billing Table -->
+  <div class="card card-general shadow-sm" *ngIf="!loading">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <h5 class="mb-0">
+        <i class="bi bi-building me-2"></i>
+        {{ 'BILLING.DAYCARES_BILLING' | translate }}
+      </h5>
+      <button class="custom-btn-2 btn-add-global-2" (click)="openAddModal()">
+        <i class="bi bi-plus-circle"></i>
+        {{ 'BILLING.ADD_PAYMENT' | translate }}
+      </button>
+    </div>
+
+    <!-- Filters -->
+    <div class="card-body border-bottom">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="search-box">
+            <i class="bi bi-search search-icon"></i>
+            <input
+              type="text"
+              class="form-control search-input"
+              [(ngModel)]="searchTerm"
+              (ngModelChange)="onSearch()"
+              [placeholder]="'BILLING.SEARCH_PLACEHOLDER' | translate">
+          </div>
+        </div>
+        <div class="col-md-3">
+          <select class="form-select" [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilterChange()">
+            <option value="">{{ 'BILLING.ALL_STATUS' | translate }}</option>
+            <option value="paid">{{ 'BILLING.FILTER_PAID' | translate }}</option>
+            <option value="unpaid">{{ 'BILLING.FILTER_UNPAID' | translate }}</option>
+            <option value="pending">{{ 'BILLING.FILTER_PENDING' | translate }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <div class="table-responsive custom-table">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th>{{ 'BILLING.TABLE_DAYCARE' | translate }}</th>
+              <th>{{ 'BILLING.TABLE_PLAN' | translate }}</th>
+              <th>{{ 'BILLING.TABLE_TOTAL_PAID' | translate }}</th>
+              <th>{{ 'BILLING.TABLE_PENDING' | translate }}</th>
+              <th>{{ 'BILLING.TABLE_LAST_PAYMENT' | translate }}</th>
+              <th>{{ 'BILLING.TABLE_STATUS' | translate }}</th>
+              <th>{{ 'BILLING.TABLE_ACTIONS' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="filteredTenants.length === 0">
+              <td colspan="7" class="text-center text-muted py-4">
+                <i class="bi bi-inbox" style="font-size: 2rem; opacity: 0.3;"></i>
+                <p class="mt-2 mb-0">{{ 'BILLING.NO_DATA' | translate }}</p>
+              </td>
+            </tr>
+            <tr *ngFor="let tenant of filteredTenants; trackBy: trackById">
+              <td>
+                <div class="d-flex align-items-center">
+                  <div class="tenant-avatar me-2">
+                    <img *ngIf="tenant.logo" [src]="tenant.logo" [alt]="tenant.name" class="rounded-circle" width="36" height="36">
+                    <div *ngIf="!tenant.logo" class="avatar-placeholder">
+                      {{ tenant.name.charAt(0).toUpperCase() }}
+                    </div>
+                  </div>
+                  <div>
+                    <strong>{{ tenant.name }}</strong>
+                    <small class="d-block text-muted">
+                      <span [ngClass]="tenant.isActive ? 'text-success' : 'text-danger'">
+                        {{ tenant.isActive ? ('BILLING.ACTIVE' | translate) : ('BILLING.INACTIVE' | translate) }}
+                      </span>
+                    </small>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="badge plan-badge" [ngClass]="'plan-' + tenant.subscriptionPlan.toLowerCase()">
+                  {{ tenant.subscriptionPlan }}
+                </span>
+              </td>
+              <td class="text-success fw-bold">{{ formatCurrency(tenant.totalPaid) }}</td>
+              <td [class.text-warning]="tenant.totalPending > 0">
+                {{ tenant.totalPending > 0 ? formatCurrency(tenant.totalPending) : '-' }}
+              </td>
+              <td>{{ formatDateDisplay(tenant.lastPaymentDate) }}</td>
+              <td>
+                <span class="badge" [ngClass]="getStatusClass(tenant)">
+                  {{ getStatusLabel(tenant) | translate }}
+                </span>
+              </td>
+              <td>
+                <div class="d-flex gap-1">
+                  <a [routerLink]="['/super-admin/billing', tenant.id]" class="btn btn-sm btn-view" title="View History">
+                    <i class="bi bi-eye"></i>
+                  </a>
+                  <button class="btn btn-sm btn-add" (click)="billingForm.patchValue({tenantId: tenant.id}); openAddModal()" title="Add Payment">
+                    <i class="bi bi-plus"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Payment Modal -->
+<div class="modal-backdrop" *ngIf="showAddModal" (click)="closeAddModal()"></div>
+<div class="modal-dialog-custom" *ngIf="showAddModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title">
+        <i class="bi bi-plus-circle me-2"></i>
+        {{ 'BILLING.ADD_PAYMENT' | translate }}
+      </h5>
+      <button type="button" class="btn-close" (click)="closeAddModal()"></button>
+    </div>
+    <form [formGroup]="billingForm" (ngSubmit)="onSubmit()">
+      <div class="modal-body">
+        <div class="row g-3">
+          <!-- Daycare -->
+          <div class="col-12">
+            <label class="form-label">{{ 'BILLING.SELECT_DAYCARE' | translate }} *</label>
+            <ng-select
+              formControlName="tenantId"
+              [items]="tenants"
+              bindLabel="name"
+              bindValue="id"
+              [placeholder]="'BILLING.SELECT_DAYCARE_PLACEHOLDER' | translate"
+              [class.is-invalid]="isFieldInvalid('tenantId')">
+            </ng-select>
+          </div>
+
+          <!-- Amount & Currency -->
+          <div class="col-md-8">
+            <label class="form-label">{{ 'BILLING.AMOUNT' | translate }} *</label>
+            <input type="number" class="form-control" formControlName="amount"
+              [class.is-invalid]="isFieldInvalid('amount')" step="0.01" min="0">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">{{ 'BILLING.CURRENCY' | translate }}</label>
+            <select class="form-select" formControlName="currency">
+              <option value="EUR">EUR (€)</option>
+              <option value="USD">USD ($)</option>
+              <option value="GBP">GBP (£)</option>
+            </select>
+          </div>
+
+          <!-- Payment Date -->
+          <div class="col-md-6">
+            <label class="form-label">{{ 'BILLING.PAYMENT_DATE' | translate }} *</label>
+            <input type="date" class="form-control" formControlName="paymentDate"
+              [class.is-invalid]="isFieldInvalid('paymentDate')">
+          </div>
+
+          <!-- Status -->
+          <div class="col-md-6">
+            <label class="form-label">{{ 'BILLING.STATUS' | translate }}</label>
+            <select class="form-select" formControlName="status">
+              <option *ngFor="let s of statuses" [value]="s.value">{{ s.label }}</option>
+            </select>
+          </div>
+
+          <!-- Period -->
+          <div class="col-md-6">
+            <label class="form-label">{{ 'BILLING.PERIOD_START' | translate }}</label>
+            <input type="date" class="form-control" formControlName="periodStart">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">{{ 'BILLING.PERIOD_END' | translate }}</label>
+            <input type="date" class="form-control" formControlName="periodEnd">
+          </div>
+
+          <!-- Payment Method -->
+          <div class="col-md-6">
+            <label class="form-label">{{ 'BILLING.PAYMENT_METHOD' | translate }}</label>
+            <select class="form-select" formControlName="paymentMethod">
+              <option *ngFor="let m of paymentMethods" [value]="m.value">{{ m.label }}</option>
+            </select>
+          </div>
+
+          <!-- Invoice Number -->
+          <div class="col-md-6">
+            <label class="form-label">{{ 'BILLING.INVOICE_NUMBER' | translate }}</label>
+            <input type="text" class="form-control" formControlName="invoiceNumber"
+              placeholder="INV-2024-001">
+          </div>
+
+          <!-- Notes -->
+          <div class="col-12">
+            <label class="form-label">{{ 'BILLING.NOTES' | translate }}</label>
+            <textarea class="form-control" formControlName="notes" rows="2"
+              [placeholder]="'BILLING.NOTES_PLACEHOLDER' | translate"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="custom-btn-2 btn-cancel-2" (click)="closeAddModal()">
+          <i class="bi bi-x-circle"></i>
+          {{ 'BILLING.CANCEL' | translate }}
+        </button>
+        <button type="submit" class="custom-btn-2 btn-add-global-2" [disabled]="submitting">
+          <span *ngIf="submitting" class="spinner-border spinner-border-sm me-2"></span>
+          <i *ngIf="!submitting" class="bi bi-check-circle"></i>
+          {{ 'BILLING.SAVE_PAYMENT' | translate }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

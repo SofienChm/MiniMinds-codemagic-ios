@@ -10,6 +10,7 @@ import { ParentService } from '../parent.service';
 import { TitlePage, Breadcrumb, TitleAction } from '../../../shared/layouts/title-page/title-page';
 import { ImageCropperModalComponent } from '../../../shared/components/image-cropper-modal/image-cropper-modal.component';
 import { PageTitleService } from '../../../core/services/page-title.service';
+import { SimpleToastService } from '../../../core/services/simple-toast.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -52,7 +53,8 @@ export class AddParentComponent implements OnInit, OnDestroy {
     private parentService: ParentService,
     private router: Router,
     private translate: TranslateService,
-    private pageTitleService: PageTitleService
+    private pageTitleService: PageTitleService,
+    private simpleToastService: SimpleToastService
   ) {}
 
   ngOnInit(): void {
@@ -139,43 +141,96 @@ export class AddParentComponent implements OnInit, OnDestroy {
     const parentData: ParentModel = this.parentForm.value;
 
     this.parentService.addParent(parentData).subscribe({
-      next: () => {
-        this.saving = false;
-        Swal.fire({
-          icon: 'success',
-          title: this.translate.instant('MESSAGES.SUCCESS'),
-          text: this.translate.instant('MESSAGES.PARENT_CREATED')
-        }).then(() => {
-          this.router.navigate(['/parents']);
-        });
+      next: (createdParent) => {
+        // If we have a selected image file, upload it separately using the new endpoint
+        if (this.selectedImageFile && createdParent?.id) {
+          this.parentService.uploadParentProfilePicture(createdParent.id, this.selectedImageFile).subscribe({
+            next: () => {
+              this.saving = false;
+              Swal.fire({
+                icon: 'success',
+                title: this.translate.instant('MESSAGES.SUCCESS'),
+                text: this.translate.instant('MESSAGES.PARENT_CREATED')
+              }).then(() => {
+                this.router.navigate(['/parents']);
+              });
+            },
+            error: () => {
+              // Parent created but profile picture upload failed
+              this.saving = false;
+              Swal.fire({
+                icon: 'success',
+                title: this.translate.instant('MESSAGES.SUCCESS'),
+                text: this.translate.instant('MESSAGES.PARENT_CREATED')
+              }).then(() => {
+                this.router.navigate(['/parents']);
+              });
+            }
+          });
+        } else {
+          this.saving = false;
+          Swal.fire({
+            icon: 'success',
+            title: this.translate.instant('MESSAGES.SUCCESS'),
+            text: this.translate.instant('MESSAGES.PARENT_CREATED')
+          }).then(() => {
+            this.router.navigate(['/parents']);
+          });
+        }
       },
       error: (error) => {
         this.saving = false;
-        // Sanitize error for logging - remove control characters and newlines
-        const sanitizedMessage = this.sanitizeLogMessage(error?.message);
-        const sanitizedStatus = typeof error?.status === 'number' ? error.status : 0;
-        const sanitizedStatusText = this.sanitizeLogMessage(error?.statusText);
-        console.error(`Failed to create parent: status=${sanitizedStatus}, statusText=${sanitizedStatusText}, message=${sanitizedMessage}`);
+        console.error('Failed to create parent:', error);
 
-        // Always use predefined error message - never display raw backend errors
+        // Extract meaningful error message
+        const errorMessage = this.extractErrorMessage(error);
+
         Swal.fire({
           icon: 'error',
           title: this.translate.instant('MESSAGES.ERROR'),
-          text: this.translate.instant('MESSAGES.PARENT_CREATE_ERROR')
+          text: errorMessage
         });
       }
     });
   }
 
-  private sanitizeLogMessage(input: unknown): string {
-    if (typeof input !== 'string') {
-      return 'Unknown';
+  private extractErrorMessage(error: any): string {
+    // Check for specific error messages from the API
+    if (error?.error) {
+      // Handle .NET validation errors format
+      if (error.error.errors) {
+        const errorMessages: string[] = [];
+        for (const key in error.error.errors) {
+          if (error.error.errors.hasOwnProperty(key)) {
+            const messages = error.error.errors[key];
+            if (Array.isArray(messages)) {
+              errorMessages.push(...messages);
+            }
+          }
+        }
+        if (errorMessages.length > 0) {
+          return errorMessages.join('\n');
+        }
+      }
+
+      // Handle custom error message format
+      if (error.error.message) {
+        return error.error.message;
+      }
+
+      // Handle string error
+      if (typeof error.error === 'string') {
+        return error.error;
+      }
     }
-    // Remove newlines, carriage returns, and other control characters
-    return input
-      .substring(0, 200)
-      .replace(/[\r\n\t]/g, ' ')
-      .replace(/[^\x20-\x7E]/g, '');
+
+    // Handle HTTP status-based messages
+    if (error?.status === 409 || error?.error?.message?.includes('already exists')) {
+      return this.translate.instant('MESSAGES.EMAIL_ALREADY_EXISTS');
+    }
+
+    // Default fallback
+    return this.translate.instant('MESSAGES.PARENT_CREATE_ERROR');
   }
 
   cancel(): void {
@@ -207,22 +262,18 @@ export class AddParentComponent implements OnInit, OnDestroy {
 
     // Validate file type
     if (!this.ALLOWED_IMAGE_TYPES.includes(file.type)) {
-      Swal.fire({
-        icon: 'error',
-        title: this.translate.instant('MESSAGES.INVALID_FILE_TYPE'),
-        text: this.translate.instant('MESSAGES.ALLOWED_IMAGE_TYPES')
-      });
+        this.simpleToastService.error(
+          this.translate.instant('MESSAGES_PAGE.ALLOWED_IMAGE_TYPES')
+        );
       this.resetFileInput();
       return;
     }
 
     // Validate file size
     if (file.size > this.MAX_FILE_SIZE) {
-      Swal.fire({
-        icon: 'error',
-        title: this.translate.instant('MESSAGES.FILE_TOO_LARGE'),
-        text: this.translate.instant('MESSAGES.MAX_FILE_SIZE', { size: this.getReadableFileSize() })
-      });
+        this.simpleToastService.error(
+          this.translate.instant('MESSAGES.MAX_FILE_SIZE', { size: this.getReadableFileSize() })
+        );
       this.resetFileInput();
       return;
     }
@@ -236,8 +287,22 @@ export class AddParentComponent implements OnInit, OnDestroy {
 
   onImageCropped(croppedImage: string): void {
     this.imagePreview = croppedImage;
-    this.parentForm.patchValue({ profilePicture: croppedImage });
-    this.selectedImageFile = null;
+    // Don't store Base64 in form - we'll upload the file separately
+    this.parentForm.patchValue({ profilePicture: '' });
+    // Convert Base64 to File for upload
+    this.selectedImageFile = this.base64ToFile(croppedImage, 'profile.jpg');
+  }
+
+  private base64ToFile(base64: string, filename: string): File {
+    const arr = base64.split(',');
+    const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/jpeg';
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
   }
 
   onCropCancelled(): void {
@@ -251,6 +316,7 @@ export class AddParentComponent implements OnInit, OnDestroy {
 
   private resetFileInput(): void {
     this.imagePreview = null;
+    this.selectedImageFile = null;
     this.parentForm.patchValue({ profilePicture: '' });
     if (this.fileInput?.nativeElement) {
       this.fileInput.nativeElement.value = '';

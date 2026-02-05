@@ -42,6 +42,9 @@ export class App implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Handle initial navigation for mobile apps
+    this.handleMobileStartup();
+
     this.userSubscription = this.authService.currentUser$.subscribe(user => {
       if (user?.preferredLanguage) {
         this.translate.use(user.preferredLanguage);
@@ -58,6 +61,32 @@ export class App implements OnInit, OnDestroy {
     if (this.authService.isAuthenticated() && this.fcmService.isSupported()) {
       this.initializePushNotifications();
     }
+  }
+
+  /**
+   * Handle mobile app startup - redirect to appropriate page based on auth status
+   * Mobile apps should skip the landing page and go directly to login or dashboard
+   */
+  private handleMobileStartup(): void {
+    // Only handle for native mobile platforms
+    if (!Capacitor.isNativePlatform()) {
+      return;
+    }
+
+    // Only redirect if we're on the root path (landing page)
+    const currentPath = window.location.pathname;
+    if (currentPath !== '/' && currentPath !== '') {
+      return;
+    }
+
+    // Redirect based on authentication status
+    this.zone.run(() => {
+      if (this.authService.isAuthenticated()) {
+        this.router.navigate(['/dashboard'], { replaceUrl: true });
+      } else {
+        this.router.navigate(['/login'], { replaceUrl: true });
+      }
+    });
   }
 
   ngOnDestroy(): void {

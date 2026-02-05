@@ -15,6 +15,7 @@ import { QrCheckinService } from '../../qr-checkin/qr-checkin.service';
 import { GeolocationService, GeolocationPosition } from '../../../core/services/geolocation.service';
 import { SchoolSettings } from '../../qr-checkin/qr-checkin.interface';
 import { QrScannerService } from '../../../core/services/qr-scanner.service';
+import { ApiConfig } from '../../../core/config/api.config';
 
 interface ChildAttendanceStatus {
   child: ChildModel;
@@ -400,5 +401,32 @@ export class AttendanceList implements OnInit, OnDestroy {
         });
       }
     });
+  }
+
+  /**
+   * Get the profile picture URL for a child, preferring file-based URL over Base64
+   */
+  getChildProfilePictureUrl(child: ChildModel | any | null | undefined, defaultPicture: string = 'assets/child.png'): string {
+    if (!child) return defaultPicture;
+    if (child.profilePictureUrl && child.profilePictureUrl.trim() !== '') {
+      return this.getFullUrl(child.profilePictureUrl);
+    }
+    if (child.profilePicture && child.profilePicture.trim() !== '') {
+      return child.profilePicture;
+    }
+    return defaultPicture;
+  }
+
+  /**
+   * Convert a relative path to a full URL with the API base
+   */
+  private getFullUrl(path: string): string {
+    if (!path) return '';
+    // If it's already an absolute URL or data URI, return as-is
+    if (path.startsWith('http') || path.startsWith('data:')) {
+      return path;
+    }
+    // Prepend the API base URL
+    return `${ApiConfig.HUB_URL}${path.startsWith('/') ? '' : '/'}${path}`;
   }
 }

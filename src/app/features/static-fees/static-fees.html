@@ -1,0 +1,275 @@
+<div class="container-fluid mt-4">
+  <app-title-page
+    [title]="'STATIC_FEES_PAGE.TITLE' | translate"
+    [subtitle]="'STATIC_FEES_PAGE.SUBTITLE' | translate"
+    icon="bi bi-cash-coin"
+    [breadcrumbs]="breadcrumbs"
+    [actions]="titleActions">
+  </app-title-page>
+
+  <!-- Summary Cards -->
+  <div class="row mb-4" *ngIf="summary">
+    <div class="col-xl-3 col-md-6 col-6 mb-3">
+      <div class="card stat-card shadow-sm">
+        <div class="card-body d-flex justify-content-between align-items-center p-3">
+          <div class="stat-content">
+            <p class="mb-0">{{ 'STATIC_FEES_PAGE.TOTAL_FEES' | translate }}</p>
+            <h5 class="stat-number">{{ summary.totalAmount | appCurrency }}</h5>
+            <small class="text-muted">{{ summary.totalFees }} {{ 'STATIC_FEES_PAGE.FEES' | translate }}</small>
+          </div>
+          <div class="stat-icon-wrapper total">
+            <i class="bi bi-cash-coin"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6 col-6 mb-3">
+      <div class="card stat-card shadow-sm">
+        <div class="card-body d-flex justify-content-between align-items-center p-3">
+          <div class="stat-content">
+            <p class="mb-0">{{ 'STATIC_FEES_PAGE.PAID' | translate }}</p>
+            <h5 class="stat-number">{{ summary.paidAmount | appCurrency }}</h5>
+            <small class="text-muted">{{ summary.paidFees }} {{ 'STATIC_FEES_PAGE.FEES' | translate }}</small>
+          </div>
+          <div class="stat-icon-wrapper paid">
+            <i class="bi bi-check-circle"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6 col-6 mb-3">
+      <div class="card stat-card shadow-sm">
+        <div class="card-body d-flex justify-content-between align-items-center p-3">
+          <div class="stat-content">
+            <p class="mb-0">{{ 'STATIC_FEES_PAGE.PENDING' | translate }}</p>
+            <h5 class="stat-number">{{ summary.pendingAmount | appCurrency }}</h5>
+            <small class="text-muted">{{ summary.pendingFees }} {{ 'STATIC_FEES_PAGE.FEES' | translate }}</small>
+          </div>
+          <div class="stat-icon-wrapper pending">
+            <i class="bi bi-hourglass-split"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6 col-6 mb-3">
+      <div class="card stat-card shadow-sm">
+        <div class="card-body d-flex justify-content-between align-items-center p-3">
+          <div class="stat-content">
+            <p class="mb-0">{{ 'STATIC_FEES_PAGE.COLLECTION_RATE' | translate }}</p>
+            <h5 class="stat-number">{{ summary.totalFees > 0 ? ((summary.paidFees / summary.totalFees) * 100).toFixed(0) : 0 }}%</h5>
+            <small class="text-muted">{{ summary.paidFees }}/{{ summary.totalFees }}</small>
+          </div>
+          <div class="stat-icon-wrapper rate">
+            <i class="bi bi-graph-up-arrow"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-white p-3 border d-flex align-items-center justify-content-between flex-wrap mb-4 rounded-1">
+    <h4 class="title-filter">{{ 'STATIC_FEES_PAGE.TITLE' | translate }}</h4>
+    <div class="d-flex align-items-center flex-wrap gap-2">
+      <!-- Search Input -->
+      <div class="search-box">
+        <i class="bi bi-search search-icon"></i>
+        <input
+          type="text"
+          class="form-control search-input"
+          [placeholder]="'STATIC_FEES_PAGE.SEARCH_PLACEHOLDER' | translate"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearchChange()">
+      </div>
+
+      <!-- Status Filter -->
+      <ng-select
+        class="filter-select"
+        [(ngModel)]="filterStatus"
+        [items]="statusOptions"
+        bindLabel="label"
+        bindValue="value"
+        [placeholder]="'STATIC_FEES_PAGE.FILTER_BY_STATUS' | translate"
+        [clearable]="false"
+        [searchable]="false"
+        (change)="onFilterChange()">
+        <ng-template ng-option-tmp let-item="item">
+          <div class="option-with-image">
+            <i class="bi {{item.icon}}" style="font-size: 16px; color: #7dd3c0;"></i>
+            <span class="option-title">{{ item.label }}</span>
+          </div>
+        </ng-template>
+      </ng-select>
+
+      <!-- Category Filter -->
+      <ng-select
+        class="filter-select"
+        [(ngModel)]="filterCategory"
+        [items]="categoryOptions"
+        bindLabel="label"
+        bindValue="value"
+        [placeholder]="'STATIC_FEES_PAGE.FILTER_BY_CATEGORY' | translate"
+        [clearable]="false"
+        [searchable]="false"
+        (change)="onFilterChange()">
+      </ng-select>
+
+      <!-- Payment Method Filter -->
+      <ng-select
+        class="filter-select"
+        [(ngModel)]="filterPaymentMethod"
+        [items]="paymentMethodOptions"
+        bindLabel="label"
+        bindValue="value"
+        [placeholder]="'STATIC_FEES_PAGE.FILTER_BY_METHOD' | translate"
+        [clearable]="false"
+        [searchable]="false"
+        (change)="onFilterChange()">
+      </ng-select>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">{{ 'STATIC_FEES_PAGE.LOADING' | translate }}</span>
+    </div>
+  </div>
+
+  <!-- Fees Table -->
+  <div class="card" *ngIf="!loading">
+    <div class="card-body">
+      <div *ngIf="filteredFees.length === 0" class="text-center p-4">
+        <i class="bi bi-cash-coin fs-1 text-muted"></i>
+        <h4 class="mt-3">{{ 'STATIC_FEES_PAGE.NO_FEES_FOUND' | translate }}</h4>
+        <p class="text-muted">{{ fees.length === 0 ? ('STATIC_FEES_PAGE.NO_FEES_MESSAGE' | translate) : ('STATIC_FEES_PAGE.ADJUST_FILTERS' | translate) }}</p>
+        <button class="action-btn btn-add-global-2 custom-btn-2 mx-auto" (click)="navigateToAdd()">
+          <i class="bi bi-plus-lg me-2"></i>{{ 'STATIC_FEES_PAGE.ADD_FIRST_FEE' | translate }}
+        </button>
+      </div>
+
+      <div *ngIf="filteredFees.length > 0" class="table-responsive custom-table">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>{{ 'STATIC_FEES_PAGE.TITLE_COLUMN' | translate }}</th>
+              <th>{{ 'STATIC_FEES_PAGE.PAYER' | translate }}</th>
+              <th>{{ 'STATIC_FEES_PAGE.AMOUNT' | translate }}</th>
+              <th>{{ 'STATIC_FEES_PAGE.FEE_DATE' | translate }}</th>
+              <th>{{ 'STATIC_FEES_PAGE.PAYMENT_METHOD' | translate }}</th>
+              <th>{{ 'STATIC_FEES_PAGE.STATUS' | translate }}</th>
+              <th>{{ 'STATIC_FEES_PAGE.ACTIONS' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let fee of displayedFees">
+              <td>
+                <div class="d-flex flex-column">
+                  <span class="fw-semibold">{{ fee.title }}</span>
+                  <small *ngIf="fee.category" [class]="getCategoryClass(fee.category)">{{ fee.category }}</small>
+                </div>
+              </td>
+              <td>
+                <div class="d-flex flex-column">
+                  <span *ngIf="fee.payerName">{{ fee.payerName }}</span>
+                  <span *ngIf="!fee.payerName && fee.parentName">{{ fee.parentName }}</span>
+                  <span *ngIf="!fee.payerName && !fee.parentName" class="text-muted">-</span>
+                  <small *ngIf="fee.childName" class="text-muted">
+                    <i class="bi bi-person-fill me-1"></i>{{ fee.childName }}
+                  </small>
+                </div>
+              </td>
+              <td>
+                <span class="fw-bold">{{ fee.amount | appCurrency }}</span>
+              </td>
+              <td>
+                <div>{{ fee.feeDate | date:'mediumDate' }}</div>
+                <small *ngIf="fee.paidDate" class="text-success">
+                  <i class="bi bi-check-circle me-1"></i>{{ 'STATIC_FEES_PAGE.PAID_ON' | translate }}: {{ fee.paidDate | date:'shortDate' }}
+                </small>
+              </td>
+              <td>
+                <span class="d-flex align-items-center">
+                  <i class="bi {{ getPaymentMethodIcon(fee.paymentMethod) }} me-2"></i>
+                  {{ fee.paymentMethod }}
+                </span>
+                <small *ngIf="fee.referenceNumber" class="text-muted d-block">
+                  {{ 'STATIC_FEES_PAGE.REF' | translate }}: {{ fee.referenceNumber }}
+                </small>
+              </td>
+              <td>
+                <span [class]="getStatusClass(fee.status)">{{ fee.status }}</span>
+              </td>
+              <td>
+                <div class="d-flex gap-1">
+                  <!-- <button type="button" class="btn btn-sm btn-view" (click)="navigateToDetail(fee.id)" [title]="'STATIC_FEES_PAGE.VIEW_DETAILS' | translate">
+                    <i class="bi bi-eye"></i>
+                  </button> -->
+                  <!-- <button *ngIf="canEdit()" type="button" class="btn btn-sm btn-edit" (click)="navigateToEdit(fee.id)" [title]="'STATIC_FEES_PAGE.EDIT' | translate">
+                    <i class="bi bi-pencil-square"></i>
+                  </button> -->
+                  <button *ngIf="fee.status === 'Pending' && canEdit()" type="button" class="btn btn-sm btn-active" (click)="openPaymentModal(fee)" [title]="'STATIC_FEES_PAGE.MARK_AS_PAID' | translate">
+                    <i class="bi bi-check-lg"></i>
+                  </button>
+                  <button *ngIf="fee.status === 'Paid' && canEdit()" type="button" class="btn btn-sm btn-warning-custom" (click)="markAsPending(fee)" [title]="'STATIC_FEES_PAGE.MARK_AS_PENDING' | translate">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                  </button>
+                  <button *ngIf="canDelete()" type="button" class="btn btn-sm btn-remove" (click)="deleteFee(fee)" [title]="'STATIC_FEES_PAGE.DELETE' | translate">
+                    <i class="bi bi-trash3"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Load More Button -->
+    <div *ngIf="hasMoreFees()" class="text-center d-flex justify-content-center mt-3">
+      <button class="custom-btn-2 btn-add-border mb-4" (click)="loadMoreFees()">
+        <i class="bi bi-plus-circle me-2"></i>{{ 'STATIC_FEES_PAGE.LOAD_MORE' | translate }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Mark as Paid Modal -->
+<div class="modal fade" [class.show]="showPaymentModal" [style.display]="showPaymentModal ? 'block' : 'none'" *ngIf="showPaymentModal && selectedFee">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ 'STATIC_FEES_PAGE.MARK_FEE_PAID' | translate }}</h5>
+        <button type="button" class="btn-close" (click)="showPaymentModal = false"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3 p-3 bg-light rounded">
+          <strong>{{ 'STATIC_FEES_PAGE.FEE_TITLE' | translate }}:</strong> {{ selectedFee.title }}<br>
+          <strong>{{ 'STATIC_FEES_PAGE.AMOUNT' | translate }}:</strong> {{ selectedFee.amount | appCurrency }}<br>
+          <strong>{{ 'STATIC_FEES_PAGE.PAYMENT_METHOD' | translate }}:</strong> {{ selectedFee.paymentMethod }}
+          <span *ngIf="selectedFee.referenceNumber"> ({{ 'STATIC_FEES_PAGE.REF' | translate }}: {{ selectedFee.referenceNumber }})</span>
+        </div>
+        <hr>
+        <form>
+          <div class="mb-3">
+            <label class="form-label">{{ 'STATIC_FEES_PAGE.PAYMENT_DATE' | translate }}</label>
+            <input type="date" class="form-control" [(ngModel)]="paymentData.paidDate" name="paidDate">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">{{ 'STATIC_FEES_PAGE.PAYMENT_NOTES' | translate }}</label>
+            <textarea class="form-control" [(ngModel)]="paymentData.notes" name="notes" rows="3" [placeholder]="'STATIC_FEES_PAGE.PAYMENT_NOTES_PLACEHOLDER' | translate"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="action-btn custom-btn-2 btn-cancel-2" (click)="showPaymentModal = false">{{ 'STATIC_FEES_PAGE.CANCEL' | translate }}</button>
+        <button type="button" class="action-btn custom-btn-2 btn-add-global-2" (click)="markAsPaid()">
+          <i class="bi bi-check-lg me-2"></i>{{ 'STATIC_FEES_PAGE.CONFIRM_PAID' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Backdrop -->
+<div class="modal-backdrop fade show" *ngIf="showPaymentModal"></div>

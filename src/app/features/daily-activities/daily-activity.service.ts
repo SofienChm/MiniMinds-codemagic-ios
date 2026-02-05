@@ -40,6 +40,10 @@ export class DailyActivityService {
     return this.http.post<DailyActivity>(this.apiUrl, activity);
   }
 
+  addBulkActivity(activity: DailyActivity): Observable<{ message: string; count: number }> {
+    return this.http.post<{ message: string; count: number }>(`${this.apiUrl}/Bulk`, activity);
+  }
+
   updateActivity(activity: DailyActivity): Observable<DailyActivity> {
     return this.http.put<DailyActivity>(`${this.apiUrl}/${activity.id}`, activity);
   }

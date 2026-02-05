@@ -1,0 +1,147 @@
+.card-appointments {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.filter-select {
+  min-width: 200px;
+}
+
+.title-filter {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+// Status badges
+.badge-pending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.badge-approved {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.badge-rejected {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.badge-completed {
+  background-color: #cce5ff;
+  color: #004085;
+}
+
+.badge-cancelled {
+  background-color: #e2e3e5;
+  color: #383d41;
+}
+
+// Type badges
+.badge-general {
+  background-color: #e7f1ff;
+  color: #0056b3;
+}
+
+.badge-academic {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.badge-behavioral {
+  background-color: #fff8e1;
+  color: #f57c00;
+}
+
+.badge-medical {
+  background-color: #fce4ec;
+  color: #c2185b;
+}
+
+.badge-other {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
+
+// Action buttons
+.btn-view {
+  background-color: #e7f1ff;
+  color: #0056b3;
+  border: none;
+
+  &:hover {
+    background-color: #cce5ff;
+  }
+}
+
+.btn-edit {
+  background-color: #fff3cd;
+  color: #856404;
+  border: none;
+
+  &:hover {
+    background-color: #ffeeba;
+  }
+}
+
+.btn-remove {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: none;
+
+  &:hover {
+    background-color: #f5c6cb;
+  }
+}
+
+.custom-table {
+  .table {
+    th {
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #6c757d;
+      border-bottom: 2px solid #dee2e6;
+    }
+
+    td {
+      vertical-align: middle;
+      padding: 1rem 0.75rem;
+    }
+
+    tbody tr:hover {
+      background-color: #f8f9fa;
+    }
+  }
+}
+
+.option-with-image {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .option-title {
+    font-size: 14px;
+  }
+}
+
+.custom-btn-2 {
+  padding: 0.5rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+
+  &.btn-add-border {
+    border: 1px solid #7dd3c0;
+    color: #7dd3c0;
+    background: transparent;
+
+    &:hover {
+      background-color: #7dd3c0;
+      color: white;
+    }
+  }
+}

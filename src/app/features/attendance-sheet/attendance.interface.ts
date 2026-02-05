@@ -12,7 +12,8 @@ export interface Attendance {
     id: number;
     firstName: string;
     lastName: string;
-    profilePicture?: string | null;
+    profilePictureUrl?: string | null; // File-based URL (preferred)
+    profilePicture?: string | null;     // Base64 fallback
     parent?: {
       firstName: string;
       lastName: string;

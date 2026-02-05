@@ -10,21 +10,21 @@ import { ParentChildHeaderSimpleComponent } from '../../shared/components/parent
 import { PageTitleService } from '../../core/services/page-title.service';
 import { NotificationService } from '../../core/services/notification-service';
 import { Subject, takeUntil } from 'rxjs';
+import { SimpleToastService } from '../../core/services/simple-toast.service';
 import Swal from 'sweetalert2';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { PullToRefreshComponent } from '../../shared/components/pull-to-refresh/pull-to-refresh.component';
 import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-messages',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgSelectModule, ParentChildHeaderSimpleComponent, TranslateModule, PullToRefreshComponent, SkeletonComponent, IonContent, IonRefresher, IonRefresherContent],
+  imports: [CommonModule, FormsModule, NgSelectModule, ParentChildHeaderSimpleComponent, TranslateModule, SkeletonComponent, IonContent, IonRefresher, IonRefresherContent],
   templateUrl: './messages.component.html',
   styleUrl: './messages.component.scss'
 })
 export class MessagesComponent implements OnInit, OnDestroy {
-  @ViewChild('pullToRefresh') pullToRefresh!: PullToRefreshComponent;
+
   private destroy$ = new Subject<void>();
   activeTab: 'received' | 'sent' | 'important' | 'trash' = 'received';
   inbox: MailMessage[] = [];
@@ -75,7 +75,8 @@ export class MessagesComponent implements OnInit, OnDestroy {
     private pageTitleService: PageTitleService,
     private notificationService: NotificationService,
     private route: ActivatedRoute,
-    private translateService: TranslateService
+    private translateService: TranslateService,
+    private simpleToastService: SimpleToastService
   ) {}
 
   ngOnInit(): void {
@@ -111,6 +112,12 @@ export class MessagesComponent implements OnInit, OnDestroy {
         this.selectedMessage = data;
         this.showModal = true;
         this.showNewMessageModal = false;
+
+        // Update the local inbox array to reflect read status
+        const inboxMessage = this.inbox.find(m => m.id === messageId);
+        if (inboxMessage) {
+          inboxMessage.isRead = true;
+        }
       },
       error: (err) => console.error('Error loading message:', err)
     });
@@ -243,7 +250,12 @@ export class MessagesComponent implements OnInit, OnDestroy {
         this.selectedMessage = data;
         this.showModal = true;
         this.showNewMessageModal = false;
-        this.activeTab = this.activeTab;
+
+        // Update the local inbox array to reflect read status
+        const inboxMessage = this.inbox.find(m => m.id === message.id);
+        if (inboxMessage) {
+          inboxMessage.isRead = true;
+        }
       },
       error: (err) => console.error('Error loading message:', err)
     });
@@ -263,7 +275,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
   }
 
   sendMessage(): void {
-    if (!this.composeForm.subject || !this.composeForm.content) return;
+    if (!this.composeForm.content) return;
 
     this.messagesService.sendMessage(this.composeForm).subscribe({
       next: () => {
@@ -271,21 +283,15 @@ export class MessagesComponent implements OnInit, OnDestroy {
         this.closeNewMessageModal();
         this.loadSent();
         this.activeTab = 'sent';
-        Swal.fire({
-          icon: 'success',
-          title: this.translateService.instant('MESSAGES_PAGE.SUCCESS'),
-          text: this.translateService.instant('MESSAGES_PAGE.MESSAGE_SENT_SUCCESS'),
-          confirmButtonColor: '#0E567D'
-        });
+        this.simpleToastService.success(
+          this.translateService.instant('MESSAGES_PAGE.MESSAGE_SENT_SUCCESS')
+        );
       },
       error: (err) => {
         console.error('Error sending message:', err);
-        Swal.fire({
-          icon: 'error',
-          title: this.translateService.instant('MESSAGES_PAGE.ERROR'),
-          text: this.translateService.instant('MESSAGES_PAGE.MESSAGE_SEND_FAILED'),
-          confirmButtonColor: '#0E567D'
-        });
+        this.simpleToastService.error(
+          this.translateService.instant('MESSAGES_PAGE.MESSAGE_SEND_FAILED')
+        );
       }
     });
   }
@@ -313,21 +319,16 @@ export class MessagesComponent implements OnInit, OnDestroy {
             error: (err) => console.error('Error reloading message:', err)
           });
         }
-        Swal.fire({
-          icon: 'success',
-          title: this.translateService.instant('MESSAGES_PAGE.SUCCESS'),
-          text: this.translateService.instant('MESSAGES_PAGE.REPLY_SENT_SUCCESS'),
-          confirmButtonColor: '#0E567D'
-        });
+        this.simpleToastService.success(
+          this.translateService.instant('MESSAGES_PAGE.REPLY_SENT_SUCCESS')
+        );
+
       },
       error: (err) => {
         console.error('Error sending reply:', err);
-        Swal.fire({
-          icon: 'error',
-          title: this.translateService.instant('MESSAGES_PAGE.ERROR'),
-          text: this.translateService.instant('MESSAGES_PAGE.REPLY_SEND_FAILED'),
-          confirmButtonColor: '#0E567D'
-        });
+        this.simpleToastService.error(
+          this.translateService.instant('MESSAGES_PAGE.reply_send_failed')
+        );
       }
     });
   }
@@ -497,8 +498,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
       if (event?.target) {
         event.target.complete();
       }
-      // Fallback for custom pull-to-refresh (if still used elsewhere)
-      this.pullToRefresh?.completeRefresh();
+
     }, 500);
   }
 }

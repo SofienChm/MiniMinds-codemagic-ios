@@ -1,3 +1,37 @@
 .frames {
   background-color: #f8f9fa;
 }
+.badge-active {
+  background: rgba(26, 190, 23, 0.1);
+  color: #1ABE17;
+}
+.badge.bg-primary {
+  background-color: #e9ecef !important;
+  color: var(--text-color) !important;
+}
+.card-detail_pages .card-header {
+  border: 1px solid #E9EDF4 !important;
+}
+
+// Modal ng-select styles
+.modal {
+  .modal-content {
+    overflow: visible;
+  }
+
+  .modal-body {
+    overflow: visible;
+  }
+
+  ng-select {
+    .ng-dropdown-panel {
+      z-index: 1060 !important;
+    }
+  }
+}
+
+::ng-deep {
+  .ng-dropdown-panel {
+    z-index: 1060 !important;
+  }
+}

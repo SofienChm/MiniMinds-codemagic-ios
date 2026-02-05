@@ -1,6 +1,6 @@
 <div class="container-fluid mt-4">
-  <app-title-page 
-    title="QR Code Management">
+  <app-title-page
+    [title]="'QR_MANAGEMENT.TITLE' | translate">
   </app-title-page>
   <!-- Messages -->
   <div class="alert alert-success" *ngIf="successMessage">
@@ -15,10 +15,10 @@
   <!-- QR Codes Section -->
   <div class="section qr-codes-section card card-general">
     <div class="section-header card-header">
-      <h5><i class="bi bi-qr-code"></i> QR Codes</h5>
+      <h5><i class="bi bi-qr-code"></i> {{ 'QR_MANAGEMENT.QR_CODES' | translate }}</h5>
       <button class="custom-btn-2 btn-add-global-2" (click)="regenerateQrCodes()" [disabled]="regenerating">
         <i class="bi" [class.bi-arrow-clockwise]="!regenerating" [class.bi-hourglass-split]="regenerating"></i>
-        {{ regenerating ? 'Regenerating...' : 'Regenerate All' }}
+        {{ regenerating ? ('QR_MANAGEMENT.REGENERATING' | translate) : ('QR_MANAGEMENT.REGENERATE_ALL_BTN' | translate) }}
       </button>
     </div>
 
@@ -27,17 +27,17 @@
       <div class="qr-card check-in">
         <div class="qr-header">
           <i class="bi bi-box-arrow-in-right"></i>
-          <h3>Check-In QR Code</h3>
+          <h3>{{ 'QR_MANAGEMENT.CHECK_IN_QR_CODE' | translate }}</h3>
         </div>
         <div class="qr-body">
           <canvas #checkInCanvas></canvas>
         </div>
         <div class="qr-footer">
           <span class="qr-date" *ngIf="checkInQrCode">
-            Created: {{ formatDate(checkInQrCode.createdAt) }}
+            {{ 'QR_MANAGEMENT.CREATED' | translate }}: {{ formatDate(checkInQrCode.createdAt) }}
           </span>
           <button class="btn-print" (click)="printQrCode('checkIn')">
-            <i class="bi bi-printer"></i> Print
+            <i class="bi bi-printer"></i> {{ 'QR_MANAGEMENT.PRINT' | translate }}
           </button>
         </div>
       </div>
@@ -46,17 +46,17 @@
       <div class="qr-card check-out">
         <div class="qr-header">
           <i class="bi bi-box-arrow-right"></i>
-          <h3>Check-Out QR Code</h3>
+          <h3>{{ 'QR_MANAGEMENT.CHECK_OUT_QR_CODE' | translate }}</h3>
         </div>
         <div class="qr-body">
           <canvas #checkOutCanvas></canvas>
         </div>
         <div class="qr-footer">
           <span class="qr-date" *ngIf="checkOutQrCode">
-            Created: {{ formatDate(checkOutQrCode.createdAt) }}
+            {{ 'QR_MANAGEMENT.CREATED' | translate }}: {{ formatDate(checkOutQrCode.createdAt) }}
           </span>
           <button class="btn-print" (click)="printQrCode('checkOut')">
-            <i class="bi bi-printer"></i> Print
+            <i class="bi bi-printer"></i> {{ 'QR_MANAGEMENT.PRINT' | translate }}
           </button>
         </div>
       </div>
@@ -64,42 +64,42 @@
 
     <div class="loading" *ngIf="loadingQrCodes">
       <div class="spinner"></div>
-      <p>Loading QR codes...</p>
+      <p>{{ 'QR_MANAGEMENT.LOADING_QR_CODES' | translate }}</p>
     </div>
   </div>
 
   <!-- School Settings Section -->
   <div class="card card-general">
     <div class="card-header">
-      <h5><i class="bi bi-geo-alt"></i> School Location & Geofence</h5>
+      <h5><i class="bi bi-geo-alt"></i> {{ 'QR_MANAGEMENT.SCHOOL_LOCATION_GEOFENCE' | translate }}</h5>
     </div>
 
     <div class="settings-form card-body">
       <div class="form-group">
-        <label for="schoolName">School Name</label>
+        <label for="schoolName">{{ 'QR_MANAGEMENT.SCHOOL_NAME' | translate }}</label>
         <input type="text" id="schoolName" [(ngModel)]="settings.schoolName"
-               placeholder="Enter school name">
+               [placeholder]="'QR_MANAGEMENT.SCHOOL_NAME_PLACEHOLDER' | translate">
       </div>
 
       <div class="form-row">
         <div class="form-group">
-          <label for="latitude">Latitude</label>
+          <label for="latitude">{{ 'QR_MANAGEMENT.LATITUDE' | translate }}</label>
           <input type="number" id="latitude" [(ngModel)]="settings.latitude"
                  step="0.000001" placeholder="e.g., 40.7128">
         </div>
         <div class="form-group">
-          <label for="longitude">Longitude</label>
+          <label for="longitude">{{ 'QR_MANAGEMENT.LONGITUDE' | translate }}</label>
           <input type="number" id="longitude" [(ngModel)]="settings.longitude"
                  step="0.000001" placeholder="e.g., -74.0060">
         </div>
-        <button class="btn-location" (click)="getCurrentLocation()" title="Use current location">
+        <button class="btn-location" (click)="getCurrentLocation()" [title]="'QR_MANAGEMENT.USE_CURRENT_LOCATION' | translate">
           <i class="bi bi-crosshairs"></i>
         </button>
       </div>
 
       <div class="form-row">
         <div class="form-group">
-          <label for="radius">Geofence Radius (meters)</label>
+          <label for="radius">{{ 'QR_MANAGEMENT.GEOFENCE_RADIUS' | translate }}</label>
           <input type="number" id="radius" [(ngModel)]="settings.geofenceRadiusMeters"
                  min="10" max="1000" placeholder="100">
         </div>
@@ -107,19 +107,19 @@
           <label class="checkbox-label">
             <input type="checkbox" [(ngModel)]="settings.geofenceEnabled">
             <span class="checkmark"></span>
-            Enable Geofencing
+            {{ 'QR_MANAGEMENT.ENABLE_GEOFENCING' | translate }}
           </label>
-          <small>When enabled, parents must be within the radius to check in/out</small>
+          <small>{{ 'QR_MANAGEMENT.GEOFENCE_HINT' | translate }}</small>
         </div>
       </div>
 
       <div class="form-actions">
         <button class="custom-btn-2 btn-add-global-2" (click)="saveSettings()" [disabled]="savingSettings">
           <i class="bi" [class.bi-check-lg]="!savingSettings" [class.bi-hourglass-split]="savingSettings"></i>
-          {{ savingSettings ? 'Saving...' : 'Save Settings' }}
+          {{ savingSettings ? ('QR_MANAGEMENT.SAVING' | translate) : ('QR_MANAGEMENT.SAVE_SETTINGS' | translate) }}
         </button>
         <span class="save-success" *ngIf="settingsSaved">
-          <i class="bi bi-check-circle-fill"></i> Saved!
+          <i class="bi bi-check-circle-fill"></i> {{ 'QR_MANAGEMENT.SAVED' | translate }}
         </span>
       </div>
     </div>
@@ -128,39 +128,39 @@
   <!-- Instructions Section -->
   <div class="section instructions-section card card-general">
     <div class="card-header section-header">
-      <h5><i class="bi bi-info-circle"></i> How It Works</h5>
+      <h5><i class="bi bi-info-circle"></i> {{ 'QR_MANAGEMENT.HOW_IT_WORKS' | translate }}</h5>
     </div>
 
     <div class="instructions-content">
       <div class="instruction-item">
         <div class="step-number">1</div>
         <div class="step-content">
-          <h4>Print QR Codes</h4>
-          <p>Print the Check-In and Check-Out QR codes and place them at the school entrance and exit.</p>
+          <h4>{{ 'QR_MANAGEMENT.STEP_1_TITLE' | translate }}</h4>
+          <p>{{ 'QR_MANAGEMENT.STEP_1_DESC' | translate }}</p>
         </div>
       </div>
 
       <div class="instruction-item">
         <div class="step-number">2</div>
         <div class="step-content">
-          <h4>Set School Location</h4>
-          <p>Configure the school's GPS coordinates and geofence radius for location verification.</p>
+          <h4>{{ 'QR_MANAGEMENT.STEP_2_TITLE' | translate }}</h4>
+          <p>{{ 'QR_MANAGEMENT.STEP_2_DESC' | translate }}</p>
         </div>
       </div>
 
       <div class="instruction-item">
         <div class="step-number">3</div>
         <div class="step-content">
-          <h4>Parents Scan</h4>
-          <p>Parents use the QR Check-in feature in the app to scan codes when dropping off or picking up their children.</p>
+          <h4>{{ 'QR_MANAGEMENT.STEP_3_TITLE' | translate }}</h4>
+          <p>{{ 'QR_MANAGEMENT.STEP_3_DESC' | translate }}</p>
         </div>
       </div>
 
       <div class="instruction-item">
         <div class="step-number">4</div>
         <div class="step-content">
-          <h4>Automatic Recording</h4>
-          <p>Attendance is automatically recorded with timestamp and location verification.</p>
+          <h4>{{ 'QR_MANAGEMENT.STEP_4_TITLE' | translate }}</h4>
+          <p>{{ 'QR_MANAGEMENT.STEP_4_DESC' | translate }}</p>
         </div>
       </div>
     </div>

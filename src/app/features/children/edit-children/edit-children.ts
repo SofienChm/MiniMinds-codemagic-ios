@@ -13,6 +13,7 @@ import { Breadcrumb, TitleAction, TitlePage } from '../../../shared/layouts/titl
 import { ParentChildHeaderComponent } from '../../../shared/components/parent-child-header/parent-child-header.component';
 import { ImageCropperModalComponent } from '../../../shared/components/image-cropper-modal/image-cropper-modal.component';
 import Swal from 'sweetalert2';
+import { SimpleToastService } from '../../../core/services/simple-toast.service';
 
 @Component({
   selector: 'app-edit-children',
@@ -63,7 +64,8 @@ export class EditChildren implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private location: Location,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private simpleToastService: SimpleToastService,
   ) {}
 
   ngOnInit(): void {
@@ -134,11 +136,9 @@ export class EditChildren implements OnInit {
         error: (error) => {
           const sanitizedMessage = this.sanitizeLogMessage(error?.message);
           console.error(`Error loading parents: ${sanitizedMessage}`);
-          Swal.fire({
-            icon: 'error',
-            title: this.translate.instant('MESSAGES.ERROR'),
-            text: this.translate.instant('MESSAGES.LOAD_PARENTS_ERROR')
-          });
+          this.simpleToastService.error(
+            this.translate.instant('MESSAGES.LOAD_PARENTS_ERROR')
+          );
         }
       });
     }
@@ -176,20 +176,20 @@ export class EditChildren implements OnInit {
           medicalNotes: childData.medicalNotes || ''
         };
 
-        this.imagePreview = childData.profilePicture || null;
+        // Prefer file-based URL for preview, fallback to Base64
+        this.imagePreview = childData.profilePictureUrl || childData.profilePicture || null;
         this.loading = false;
       },
       error: (error) => {
         const sanitizedMessage = this.sanitizeLogMessage(error?.message);
         console.error(`Error loading child: ${sanitizedMessage}`);
         this.loading = false;
-        Swal.fire({
-          icon: 'error',
-          title: this.translate.instant('MESSAGES.ERROR'),
-          text: this.translate.instant('EDIT_CHILD.LOAD_ERROR')
-        }).then(() => {
+        this.simpleToastService.error(
+          this.translate.instant('EDIT_CHILD.LOAD_ERROR')
+        );
+        setTimeout(() => {
           this.router.navigate(['/children']);
-        });
+        }, 200);
       }
     });
   }
@@ -198,15 +198,47 @@ export class EditChildren implements OnInit {
     // For parent mobile version, use child object directly
     if (this.isParent()) {
       this.saving = true;
-      this.childrenService.updateChild(this.child).subscribe({
-        next: () => {
-          this.saving = false;
-          this.router.navigate(['/children']);
-        },
-        error: () => {
-          this.saving = false;
-        }
-      });
+
+      // If a new image was selected, upload it separately
+      if (this.selectedImageFile && this.child.id) {
+        this.childrenService.uploadChildProfilePicture(this.child.id, this.selectedImageFile).subscribe({
+          next: () => {
+            // Clear the profilePicture from the child object since it's now file-based
+            this.child.profilePicture = undefined;
+            this.childrenService.updateChild(this.child).subscribe({
+              next: () => {
+                this.saving = false;
+                this.router.navigate(['/children']);
+              },
+              error: () => {
+                this.saving = false;
+              }
+            });
+          },
+          error: () => {
+            // Continue with update even if image upload fails
+            this.childrenService.updateChild(this.child).subscribe({
+              next: () => {
+                this.saving = false;
+                this.router.navigate(['/children']);
+              },
+              error: () => {
+                this.saving = false;
+              }
+            });
+          }
+        });
+      } else {
+        this.childrenService.updateChild(this.child).subscribe({
+          next: () => {
+            this.saving = false;
+            this.router.navigate(['/children']);
+          },
+          error: () => {
+            this.saving = false;
+          }
+        });
+      }
       return;
     }
 
@@ -219,16 +251,32 @@ export class EditChildren implements OnInit {
     this.saving = true;
     const childData: ChildModel = this.childForm.value;
 
+    // If a new image was selected, upload it separately
+    if (this.selectedImageFile && this.childId) {
+      this.childrenService.uploadChildProfilePicture(this.childId, this.selectedImageFile).subscribe({
+        next: () => {
+          // Clear the profilePicture from the form since it's now file-based
+          childData.profilePicture = undefined;
+          this.saveChildData(childData);
+        },
+        error: () => {
+          // Continue with update even if image upload fails
+          this.saveChildData(childData);
+        }
+      });
+    } else {
+      this.saveChildData(childData);
+    }
+  }
+
+  private saveChildData(childData: ChildModel): void {
     this.childrenService.updateChild(childData).subscribe({
       next: () => {
         this.saving = false;
-        Swal.fire({
-          icon: 'success',
-          title: this.translate.instant('MESSAGES.SUCCESS'),
-          text: this.translate.instant('EDIT_CHILD.UPDATE_SUCCESS')
-        }).then(() => {
+        this.simpleToastService.success(this.translate.instant('EDIT_CHILD.UPDATE_SUCCESS'));
+        setTimeout(() => {
           this.router.navigate(['/children']);
-        });
+        }, 200);
       },
       error: (error) => {
         this.saving = false;
@@ -236,12 +284,9 @@ export class EditChildren implements OnInit {
         const sanitizedStatus = typeof error?.status === 'number' ? error.status : 0;
         const sanitizedStatusText = this.sanitizeLogMessage(error?.statusText);
         console.error(`Failed to update child: status=${sanitizedStatus}, statusText=${sanitizedStatusText}, message=${sanitizedMessage}`);
-
-        Swal.fire({
-          icon: 'error',
-          title: this.translate.instant('MESSAGES.ERROR'),
-          text: this.translate.instant('EDIT_CHILD.UPDATE_ERROR')
-        });
+        this.simpleToastService.error(
+          this.translate.instant('EDIT_CHILD.UPDATE_ERROR')
+        );
       }
     });
   }
@@ -302,22 +347,18 @@ export class EditChildren implements OnInit {
     // For admin/teacher version, validate and open cropper
     // Validate file type
     if (!this.ALLOWED_IMAGE_TYPES.includes(file.type)) {
-      Swal.fire({
-        icon: 'error',
-        title: this.translate.instant('MESSAGES.INVALID_FILE_TYPE'),
-        text: this.translate.instant('MESSAGES.ALLOWED_IMAGE_TYPES')
-      });
+        this.simpleToastService.error(
+          this.translate.instant('MESSAGES.ALLOWED_IMAGE_TYPES')
+        );
       this.resetFileInput();
       return;
     }
 
     // Validate file size
     if (file.size > this.MAX_FILE_SIZE) {
-      Swal.fire({
-        icon: 'error',
-        title: this.translate.instant('MESSAGES.FILE_TOO_LARGE'),
-        text: this.translate.instant('MESSAGES.MAX_FILE_SIZE', { size: this.getReadableFileSize() })
-      });
+        this.simpleToastService.error(
+          this.translate.instant('MESSAGES.MAX_FILE_SIZE', { size: this.getReadableFileSize() })
+        );
       this.resetFileInput();
       return;
     }
@@ -331,8 +372,22 @@ export class EditChildren implements OnInit {
 
   onImageCropped(croppedImage: string): void {
     this.imagePreview = croppedImage;
-    this.childForm.patchValue({ profilePicture: croppedImage });
-    this.selectedImageFile = null;
+    // Don't store Base64 in form - we'll upload the file separately
+    this.childForm.patchValue({ profilePicture: '' });
+    // Convert Base64 to File for upload
+    this.selectedImageFile = this.base64ToFile(croppedImage, 'profile.jpg');
+  }
+
+  private base64ToFile(base64: string, filename: string): File {
+    const arr = base64.split(',');
+    const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/jpeg';
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
   }
 
   onCropCancelled(): void {
@@ -346,6 +401,7 @@ export class EditChildren implements OnInit {
 
   private resetFileInput(): void {
     this.imagePreview = null;
+    this.selectedImageFile = null;
     this.childForm.patchValue({ profilePicture: '' });
     if (this.fileInput?.nativeElement) {
       this.fileInput.nativeElement.value = '';

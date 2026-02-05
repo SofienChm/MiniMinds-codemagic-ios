@@ -111,11 +111,11 @@ header {
     right: -10px;
   }
 
-  @media (max-width: 480px) {
+  @media (max-width: 380px) {
     width: calc(100vw - 20px);
-    left: 50%;
+    left: 15%;
     top: 70px;
-    transform: translate(-50%, 0);
+    transform: translate(-55%, 0);
     max-height: 70vh;
   }
 }
@@ -390,6 +390,7 @@ header {
   border: 1px solid #E9EDF4 !important;
   border-radius: 5px;
   padding: 0.5rem 0.85rem;
+  background-color: var(--primary-color);
 }
 .profile-header{
   button{

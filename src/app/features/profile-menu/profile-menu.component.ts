@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 import { AuthService } from '../../core/services/auth';
 import { AuthResponse } from '../../core/interfaces/dto/auth-response-dto';
 import { NotificationService } from '../../core/services/notification-service';
@@ -10,7 +11,7 @@ import { Subject, takeUntil } from 'rxjs';
 @Component({
   selector: 'app-profile-menu',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, TranslateModule],
   templateUrl: './profile-menu.component.html',
   styleUrl: './profile-menu.component.scss'
 })

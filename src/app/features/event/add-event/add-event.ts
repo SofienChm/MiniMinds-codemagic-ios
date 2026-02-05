@@ -6,14 +6,14 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { EventModel } from '../event.interface';
 import { EventService } from '../event.service';
-import { Breadcrumb } from '../../../shared/layouts/title-page/title-page';
+import { TitlePage, Breadcrumb, TitleAction } from '../../../shared/layouts/title-page/title-page';
 import { PageTitleService } from '../../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-add-event',
-  imports: [CommonModule, ReactiveFormsModule, TranslateModule, NgSelectModule],
+  imports: [CommonModule, ReactiveFormsModule, TranslateModule, NgSelectModule, TitlePage],
   standalone: true,
   templateUrl: './add-event.html',
   styleUrl: './add-event.scss'
@@ -31,6 +31,7 @@ export class AddEvent implements OnInit, OnDestroy {
   readonly ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
   breadcrumbs: Breadcrumb[] = [];
+  titleActions: TitleAction[] = [];
 
   // Options for ng-select
   eventTypes: Array<{ value: string; label: string; icon: string }> = [];
@@ -61,6 +62,22 @@ export class AddEvent implements OnInit, OnDestroy {
   private updateTranslatedContent(): void {
     this.initBreadcrumbs();
     this.initEventTypes();
+    this.initTitleActions();
+  }
+
+  private initTitleActions(): void {
+    this.titleActions = [
+      {
+        label: this.translate.instant('COMMON.BACK'),
+        icon: 'bi bi-arrow-left',
+        class: 'btn-cancel-2',
+        action: () => this.back()
+      }
+    ];
+  }
+
+  back(): void {
+    this.router.navigate(['/events']);
   }
 
   private initEventTypes(): void {
@@ -89,6 +106,7 @@ export class AddEvent implements OnInit, OnDestroy {
       name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
       type: ['', [Validators.required]],
       description: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(1000)]],
+      includeAllChildren: [false],
       price: [0, [Validators.required, Validators.min(0)]],
       capacity: [1, [Validators.required, Validators.min(1)]],
       ageFrom: [0, [Validators.required, Validators.min(0), Validators.max(18)]],
@@ -100,6 +118,34 @@ export class AddEvent implements OnInit, OnDestroy {
     });
   }
 
+  onIncludeAllChildrenChange(): void {
+    const includeAll = this.eventForm.get('includeAllChildren')?.value;
+    const capacityControl = this.eventForm.get('capacity');
+    const ageFromControl = this.eventForm.get('ageFrom');
+    const ageToControl = this.eventForm.get('ageTo');
+
+    if (includeAll) {
+      capacityControl?.disable();
+      ageFromControl?.disable();
+      ageToControl?.disable();
+      // Clear validators when disabled
+      capacityControl?.clearValidators();
+      ageFromControl?.clearValidators();
+      ageToControl?.clearValidators();
+    } else {
+      capacityControl?.enable();
+      ageFromControl?.enable();
+      ageToControl?.enable();
+      // Restore validators when enabled
+      capacityControl?.setValidators([Validators.required, Validators.min(1)]);
+      ageFromControl?.setValidators([Validators.required, Validators.min(0), Validators.max(18)]);
+      ageToControl?.setValidators([Validators.required, Validators.min(0), Validators.max(18)]);
+    }
+    capacityControl?.updateValueAndValidity();
+    ageFromControl?.updateValueAndValidity();
+    ageToControl?.updateValueAndValidity();
+  }
+
   saveEvent(): void {
     if (this.eventForm.invalid) {
       this.markFormGroupTouched();
@@ -107,7 +153,7 @@ export class AddEvent implements OnInit, OnDestroy {
     }
 
     this.saving = true;
-    const formValue = this.eventForm.value;
+    const formValue = this.eventForm.getRawValue(); // getRawValue to include disabled fields
 
     // Combine date and time into ISO string
     const combinedDateTime = `${formValue.eventDate}T${formValue.eventTime}:00`;
@@ -117,12 +163,13 @@ export class AddEvent implements OnInit, OnDestroy {
       type: formValue.type,
       description: formValue.description,
       price: formValue.price,
-      capacity: formValue.capacity,
-      ageFrom: formValue.ageFrom,
-      ageTo: formValue.ageTo,
+      capacity: formValue.includeAllChildren ? 0 : formValue.capacity,
+      ageFrom: formValue.includeAllChildren ? 0 : formValue.ageFrom,
+      ageTo: formValue.includeAllChildren ? 99 : formValue.ageTo,
       time: combinedDateTime,
       place: formValue.place,
-      image: formValue.image
+      image: formValue.image,
+      includeAllChildren: formValue.includeAllChildren
     };
 
     this.eventService.addEvent(eventData).subscribe({

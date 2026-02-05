@@ -1,0 +1,91 @@
+.card-general {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+  .card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+
+    h5 {
+      font-weight: 600;
+      color: #333;
+    }
+  }
+}
+
+.form-label {
+  font-weight: 500;
+  color: #495057;
+  margin-bottom: 0.5rem;
+
+  .text-muted {
+    font-weight: 400;
+    font-size: 0.85rem;
+  }
+}
+
+.form-control,
+.ng-select {
+  border-radius: 6px;
+
+  &:focus {
+    border-color: #7dd3c0;
+    box-shadow: 0 0 0 0.2rem rgba(125, 211, 192, 0.25);
+  }
+}
+
+.btn-primary {
+  background-color: #7dd3c0;
+  border-color: #7dd3c0;
+
+  &:hover {
+    background-color: #6bc4b0;
+    border-color: #6bc4b0;
+  }
+
+  &:disabled {
+    background-color: #a8e0d3;
+    border-color: #a8e0d3;
+  }
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
+
+.invalid-feedback {
+  font-size: 0.85rem;
+}
+
+small.text-muted {
+  font-size: 0.8rem;
+  display: block;
+  margin-top: 0.25rem;
+}
+
+.ng-select {
+  ::ng-deep {
+    .ng-select-container {
+      border-radius: 6px;
+      min-height: 38px;
+    }
+
+    .ng-dropdown-panel {
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .ng-option {
+      padding: 8px 12px;
+
+      &.ng-option-selected {
+        background-color: #e7f7f4;
+      }
+
+      &.ng-option-marked {
+        background-color: #f0faf8;
+      }
+    }
+  }
+}

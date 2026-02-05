@@ -128,7 +128,19 @@
         </div>
         <div class="card-footer d-flex align-items-center justify-content-between">
           <div class="d-flex align-items-center">
-            <a href="#" class="btn btn-outline-light bg-white btn-icon d-flex align-items-center justify-content-center rounded-circle p-0 me-2 footer-icon-action"><i class="bi bi-telephone"></i></a>
+            <a *ngIf="educator.phone"
+              [href]="'tel:' + educator.phone"
+              [title]="educator.firstName + ' ' + educator.lastName + ': ' + educator.phone"
+              class="btn btn-outline-light bg-white btn-icon d-flex align-items-center justify-content-center rounded-circle p-0 me-2 footer-icon-action"
+              (click)="$event.stopPropagation()">
+              <i class="bi bi-telephone"></i>
+            </a>
+            <span *ngIf="!educator.phone"
+              class="btn btn-outline-light bg-white btn-icon d-flex align-items-center justify-content-center rounded-circle p-0 me-2 footer-icon-action disabled"
+              style="opacity: 0.5; cursor: not-allowed;"
+              [title]="'COMMON.NO_PHONE' | translate">
+              <i class="bi bi-telephone"></i>
+            </span>
           </div>
           <button class="btn btn-light btn-sm btn-footer" (click)="viewDetails(educator)">{{ 'EDUCATORS.VIEW_DETAILS' | translate }}</button>
         </div>

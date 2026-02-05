@@ -8,6 +8,7 @@ import { EducatorModel } from '../educator.interface';
 import { EducatorService } from '../educator.service';
 import { Breadcrumb, TitleAction, TitlePage } from '../../../shared/layouts/title-page/title-page';
 import { ImageCropperModalComponent } from '../../../shared/components/image-cropper-modal/image-cropper-modal.component';
+import { SimpleToastService } from '../../../core/services/simple-toast.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -51,7 +52,8 @@ export class AddEducator implements OnInit {
     private fb: FormBuilder,
     private educatorService: EducatorService,
     private router: Router,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private simpleToastService: SimpleToastService,
   ) {}
 
   ngOnInit(): void {
@@ -108,38 +110,62 @@ export class AddEducator implements OnInit {
     this.educatorService.addEducator(educatorData).subscribe({
       next: () => {
         this.saving = false;
-        Swal.fire({
-          icon: 'success',
-          title: this.translate.instant('MESSAGES.SUCCESS'),
-          text: this.translate.instant('MESSAGES.EDUCATOR_CREATED')
-        }).then(() => {
+        this.simpleToastService.success(this.translate.instant('MESSAGES.EDUCATOR_CREATED'));
+        setTimeout(() => {
           this.router.navigate(['/educators']);
-        });
+        }, 200);
       },
       error: (error) => {
         this.saving = false;
-        const sanitizedMessage = this.sanitizeLogMessage(error?.message);
-        const sanitizedStatus = typeof error?.status === 'number' ? error.status : 0;
-        const sanitizedStatusText = this.sanitizeLogMessage(error?.statusText);
-        console.error(`Failed to create educator: status=${sanitizedStatus}, statusText=${sanitizedStatusText}, message=${sanitizedMessage}`);
+        console.error('Failed to create educator:', error);
+
+        const errorMessage = this.extractErrorMessage(error);
 
         Swal.fire({
           icon: 'error',
           title: this.translate.instant('MESSAGES.ERROR'),
-          text: this.translate.instant('MESSAGES.EDUCATOR_CREATE_ERROR')
+          text: errorMessage
         });
       }
     });
   }
 
-  private sanitizeLogMessage(input: unknown): string {
-    if (typeof input !== 'string') {
-      return 'Unknown';
+  private extractErrorMessage(error: any): string {
+    if (error?.error) {
+      // Handle .NET validation errors format
+      if (error.error.errors) {
+        const errorMessages: string[] = [];
+        for (const key in error.error.errors) {
+          if (error.error.errors.hasOwnProperty(key)) {
+            const messages = error.error.errors[key];
+            if (Array.isArray(messages)) {
+              errorMessages.push(...messages);
+            }
+          }
+        }
+        if (errorMessages.length > 0) {
+          return errorMessages.join('\n');
+        }
+      }
+
+      // Handle custom error message format
+      if (error.error.message) {
+        return error.error.message;
+      }
+
+      // Handle string error
+      if (typeof error.error === 'string') {
+        return error.error;
+      }
     }
-    return input
-      .substring(0, 200)
-      .replace(/[\r\n\t]/g, ' ')
-      .replace(/[^\x20-\x7E]/g, '');
+
+    // Handle duplicate email
+    if (error?.status === 409 || error?.error?.message?.includes('already exists')) {
+      return this.translate.instant('MESSAGES.EMAIL_ALREADY_EXISTS');
+    }
+
+    // Default fallback
+    return this.translate.instant('MESSAGES.EDUCATOR_CREATE_ERROR');
   }
 
   cancel(): void {
@@ -171,22 +197,19 @@ export class AddEducator implements OnInit {
 
     // Validate file type
     if (!this.ALLOWED_IMAGE_TYPES.includes(file.type)) {
-      Swal.fire({
-        icon: 'error',
-        title: this.translate.instant('MESSAGES.INVALID_FILE_TYPE'),
-        text: this.translate.instant('MESSAGES.ALLOWED_IMAGE_TYPES')
-      });
+        this.simpleToastService.error(
+          this.translate.instant('MESSAGES.ALLOWED_IMAGE_TYPES')
+        );
+      
       this.resetFileInput();
       return;
     }
 
     // Validate file size
     if (file.size > this.MAX_FILE_SIZE) {
-      Swal.fire({
-        icon: 'error',
-        title: this.translate.instant('MESSAGES.FILE_TOO_LARGE'),
-        text: this.translate.instant('MESSAGES.MAX_FILE_SIZE', { size: this.getReadableFileSize() })
-      });
+        this.simpleToastService.error(
+          this.translate.instant('MESSAGES.MAX_FILE_SIZE', { size: this.getReadableFileSize() })
+        );
       this.resetFileInput();
       return;
     }

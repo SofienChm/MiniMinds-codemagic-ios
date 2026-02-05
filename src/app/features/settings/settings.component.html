@@ -120,7 +120,57 @@
       </div>
     </div>
 
-    <div *ngIf="isAdmin" class="col-12">
+    <!-- Notification Preferences Section -->
+    <div class="col-12 mb-4">
+      <div class="card card-general shadow-sm">
+        <div class="card-header py-3">
+          <h5 class="mb-0">
+            <i class="bi bi-bell me-2"></i>
+            {{ 'SETTINGS.NOTIFICATION_PREFERENCES' | translate }}
+          </h5>
+        </div>
+        <div class="card-body">
+          <p class="text-muted mb-4">{{ 'SETTINGS.NOTIFICATION_PREFERENCES_DESC' | translate }}</p>
+          <div class="row">
+            <div *ngFor="let pref of notificationPreferences" class="col-md-6 mb-3">
+              <div class="form-check form-switch d-flex align-items-start">
+                <input class="form-check-input me-3 mt-1" type="checkbox"
+                       [id]="'notif-' + pref.notificationType"
+                       [(ngModel)]="pref.isEnabled"
+                       [disabled]="pref.isCore">
+                <label class="form-check-label" [for]="'notif-' + pref.notificationType">
+                  <strong>{{ getNotificationTypeLabel(pref.notificationType) }}</strong>
+                  <small class="d-block text-muted">
+                    {{ getNotificationTypeDescription(pref.notificationType) }}
+                  </small>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="notificationPreferences.length === 0" class="text-center py-3">
+            <div class="spinner-border spinner-border-sm text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <span class="ms-2 text-muted">{{ 'GLOBAL.LOADING' | translate }}</span>
+          </div>
+        </div>
+        <div class="card-footer bg-white border-0 py-3 d-flex justify-content-end">
+          <button class="action-btn custom-btn-2 btn-add-global-2"
+                  (click)="saveNotificationPreferences()"
+                  [disabled]="savingPreferences || notificationPreferences.length === 0">
+            <span *ngIf="!savingPreferences">
+              <i class="bi bi-floppy me-2"></i>{{ 'SETTINGS.SAVE_NOTIFICATION_PREFERENCES' | translate }}
+            </span>
+            <span *ngIf="savingPreferences">
+              <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+              {{ 'SETTINGS.SAVING' | translate }}
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="isAdmin" class="col-12 mb-4">
       <div class="card card-general border-0 shadow-sm">
         <div class="card-header py-3">
           <h5 class="mb-0">
@@ -157,6 +207,34 @@
           <button class="action-btn custom-btn-2 btn-add-global-2" (click)="saveSettings()">
             <i class="bi bi-floppy me-2"></i>{{ 'SETTINGS.SAVE' | translate }}
           </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Account Section -->
+    <div class="col-12">
+      <div class="card card-general border-0 shadow-sm border-danger">
+        <div class="card-header py-3 bg-danger bg-opacity-10">
+          <h5 class="mb-0 text-danger">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            {{ 'SETTINGS.DANGER_ZONE' | translate }}
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between">
+            <div class="mb-3 mb-md-0">
+              <h6 class="fw-bold text-danger mb-1">{{ 'SETTINGS.DELETE_ACCOUNT' | translate }}</h6>
+              <p class="text-muted mb-0 small">{{ 'SETTINGS.DELETE_ACCOUNT_DESC' | translate }}</p>
+            </div>
+            <button class="btn btn-outline-danger" (click)="confirmDeleteAccount()" [disabled]="deletingAccount">
+              <i class="bi bi-trash me-2"></i>
+              <span *ngIf="!deletingAccount">{{ 'SETTINGS.DELETE_ACCOUNT_BTN' | translate }}</span>
+              <span *ngIf="deletingAccount">
+                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                {{ 'SETTINGS.DELETING' | translate }}
+              </span>
+            </button>
+          </div>
         </div>
       </div>
     </div>

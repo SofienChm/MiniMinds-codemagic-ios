@@ -1,0 +1,352 @@
+<div class="container-fluid mt-4">
+  <app-title-page
+    [title]="'STATIC_FEES_PAGE.ADD_STATIC_FEE' | translate"
+    [subtitle]="'STATIC_FEES_PAGE.ADD_SUBTITLE' | translate"
+    [icon]="'bi bi-plus-circle'"
+    [breadcrumbs]="breadcrumbs"
+    [actions]="actions">
+  </app-title-page>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">{{ 'STATIC_FEES_PAGE.LOADING' | translate }}</span>
+    </div>
+  </div>
+
+  <div *ngIf="!loading" class="row">
+    <div class="col-lg-8">
+      <div class="card card-general">
+        <div class="card-header">
+          <h5 class="mb-0">
+            <i class="bi bi-cash-coin me-2"></i>
+            {{ 'STATIC_FEES_PAGE.FEE_DETAILS' | translate }}
+          </h5>
+        </div>
+        <div class="card-body">
+          <form [formGroup]="staticFeeForm" (ngSubmit)="createStaticFee()">
+            <!-- Basic Info Section -->
+            <h6 class="section-title mb-3">
+              <i class="bi bi-info-circle me-2"></i>{{ 'STATIC_FEES_PAGE.BASIC_INFO' | translate }}
+            </h6>
+
+            <div class="row">
+              <!-- Title -->
+              <div class="col-md-8 mb-3">
+                <label class="form-label">
+                  {{ 'STATIC_FEES_PAGE.FEE_TITLE' | translate }}
+                  <span class="text-danger">*</span>
+                </label>
+                <input
+                  type="text"
+                  class="form-control"
+                  formControlName="title"
+                  [placeholder]="'STATIC_FEES_PAGE.TITLE_PLACEHOLDER' | translate"
+                  [class.is-invalid]="isFieldInvalid('title')">
+                <div class="invalid-feedback" *ngIf="isFieldInvalid('title')">
+                  {{ getFieldError('title') }}
+                </div>
+              </div>
+
+              <!-- Amount -->
+              <div class="col-md-4 mb-3">
+                <label class="form-label">
+                  {{ 'STATIC_FEES_PAGE.AMOUNT' | translate }}
+                  <span class="text-danger">*</span>
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text">$</span>
+                  <input
+                    type="number"
+                    class="form-control"
+                    formControlName="amount"
+                    step="0.01"
+                    min="0"
+                    [placeholder]="'0.00'"
+                    [class.is-invalid]="isFieldInvalid('amount')">
+                </div>
+                <div class="invalid-feedback d-block" *ngIf="isFieldInvalid('amount')">
+                  {{ getFieldError('amount') }}
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <!-- Category -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">
+                  {{ 'STATIC_FEES_PAGE.CATEGORY' | translate }}
+                </label>
+                <ng-select
+                  formControlName="category"
+                  [items]="categories"
+                  [clearable]="true"
+                  [placeholder]="'STATIC_FEES_PAGE.SELECT_CATEGORY' | translate">
+                </ng-select>
+              </div>
+
+              <!-- Fee Date -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">
+                  {{ 'STATIC_FEES_PAGE.FEE_DATE' | translate }}
+                  <span class="text-danger">*</span>
+                </label>
+                <input
+                  type="date"
+                  class="form-control"
+                  formControlName="feeDate"
+                  [class.is-invalid]="isFieldInvalid('feeDate')">
+                <div class="invalid-feedback" *ngIf="isFieldInvalid('feeDate')">
+                  {{ getFieldError('feeDate') }}
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <!-- Description -->
+              <div class="col-12 mb-3">
+                <label class="form-label">
+                  {{ 'STATIC_FEES_PAGE.DESCRIPTION' | translate }}
+                </label>
+                <textarea
+                  class="form-control"
+                  formControlName="description"
+                  rows="2"
+                  [placeholder]="'STATIC_FEES_PAGE.DESCRIPTION_PLACEHOLDER' | translate"
+                  [class.is-invalid]="isFieldInvalid('description')">
+                </textarea>
+                <div class="invalid-feedback" *ngIf="isFieldInvalid('description')">
+                  {{ getFieldError('description') }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Payer Info Section -->
+            <hr class="my-4">
+            <h6 class="section-title mb-3">
+              <i class="bi bi-person me-2"></i>{{ 'STATIC_FEES_PAGE.PAYER_INFO' | translate }}
+            </h6>
+
+            <div class="row">
+              <!-- Link to Parent -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">
+                  {{ 'STATIC_FEES_PAGE.LINK_TO_PARENT' | translate }}
+                  <span class="text-muted">({{ 'STATIC_FEES_PAGE.OPTIONAL' | translate }})</span>
+                </label>
+                <ng-select
+                  formControlName="parentId"
+                  [items]="parents"
+                  bindLabel="fullName"
+                  bindValue="id"
+                  [clearable]="true"
+                  [placeholder]="'STATIC_FEES_PAGE.SELECT_PARENT' | translate"
+                  (change)="onParentChange($event?.id)">
+                  <ng-template ng-option-tmp let-item="item">
+                    <div class="d-flex align-items-center">
+                      <i class="bi bi-person-fill me-2"></i>
+                      <div>
+                        <span>{{ item.fullName }}</span>
+                        <small *ngIf="item.email" class="text-muted d-block">{{ item.email }}</small>
+                      </div>
+                    </div>
+                  </ng-template>
+                </ng-select>
+              </div>
+
+              <!-- Link to Child -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">
+                  {{ 'STATIC_FEES_PAGE.LINK_TO_CHILD' | translate }}
+                  <span class="text-muted">({{ 'STATIC_FEES_PAGE.OPTIONAL' | translate }})</span>
+                </label>
+                <ng-select
+                  formControlName="childId"
+                  [items]="children"
+                  bindLabel="fullName"
+                  bindValue="id"
+                  [clearable]="true"
+                  [placeholder]="'STATIC_FEES_PAGE.SELECT_CHILD' | translate">
+                  <ng-template ng-option-tmp let-item="item">
+                    <div class="d-flex align-items-center">
+                      <i class="bi bi-person-fill me-2"></i>
+                      <span>{{ item.fullName }}</span>
+                    </div>
+                  </ng-template>
+                </ng-select>
+              </div>
+            </div>
+
+            <div class="row">
+              <!-- Payer Name -->
+              <div class="col-md-4 mb-3">
+                <label class="form-label">
+                  {{ 'STATIC_FEES_PAGE.PAYER_NAME' | translate }}
+                </label>
+                <input
+                  type="text"
+                  class="form-control"
+                  formControlName="payerName"
+                  [placeholder]="'STATIC_FEES_PAGE.PAYER_NAME_PLACEHOLDER' | translate">
+              </div>
+
+              <!-- Payer Email -->
+              <div class="col-md-4 mb-3">
+                <label class="form-label">
+                  {{ 'STATIC_FEES_PAGE.PAYER_EMAIL' | translate }}
+                </label>
+                <input
+                  type="email"
+                  class="form-control"
+                  formControlName="payerEmail"
+                  [placeholder]="'STATIC_FEES_PAGE.PAYER_EMAIL_PLACEHOLDER' | translate"
+                  [class.is-invalid]="isFieldInvalid('payerEmail')">
+                <div class="invalid-feedback" *ngIf="isFieldInvalid('payerEmail')">
+                  {{ getFieldError('payerEmail') }}
+                </div>
+              </div>
+
+              <!-- Payer Phone -->
+              <div class="col-md-4 mb-3">
+                <label class="form-label">
+                  {{ 'STATIC_FEES_PAGE.PAYER_PHONE' | translate }}
+                </label>
+                <input
+                  type="tel"
+                  class="form-control"
+                  formControlName="payerPhone"
+                  [placeholder]="'STATIC_FEES_PAGE.PAYER_PHONE_PLACEHOLDER' | translate">
+              </div>
+            </div>
+
+            <!-- Payment Info Section -->
+            <hr class="my-4">
+            <h6 class="section-title mb-3">
+              <i class="bi bi-credit-card me-2"></i>{{ 'STATIC_FEES_PAGE.PAYMENT_INFO' | translate }}
+            </h6>
+
+            <div class="row">
+              <!-- Status -->
+              <div class="col-md-4 mb-3">
+                <label class="form-label">
+                  {{ 'STATIC_FEES_PAGE.STATUS' | translate }}
+                  <span class="text-danger">*</span>
+                </label>
+                <ng-select
+                  formControlName="status"
+                  [items]="statusOptions"
+                  bindLabel="label"
+                  bindValue="value"
+                  [clearable]="false"
+                  [searchable]="false">
+                </ng-select>
+              </div>
+
+              <!-- Payment Method -->
+              <div class="col-md-4 mb-3">
+                <label class="form-label">
+                  {{ 'STATIC_FEES_PAGE.PAYMENT_METHOD' | translate }}
+                  <span class="text-danger">*</span>
+                </label>
+                <ng-select
+                  formControlName="paymentMethod"
+                  [items]="paymentMethods"
+                  [clearable]="false"
+                  [searchable]="false">
+                </ng-select>
+              </div>
+
+              <!-- Reference Number -->
+              <div class="col-md-4 mb-3">
+                <label class="form-label">
+                  {{ 'STATIC_FEES_PAGE.REFERENCE_NUMBER' | translate }}
+                </label>
+                <input
+                  type="text"
+                  class="form-control"
+                  formControlName="referenceNumber"
+                  [placeholder]="'STATIC_FEES_PAGE.REFERENCE_PLACEHOLDER' | translate">
+                <small class="text-muted">{{ 'STATIC_FEES_PAGE.REFERENCE_HINT' | translate }}</small>
+              </div>
+            </div>
+
+            <div class="row" *ngIf="staticFeeForm.get('status')?.value === 'Paid'">
+              <!-- Paid Date -->
+              <div class="col-md-4 mb-3">
+                <label class="form-label">
+                  {{ 'STATIC_FEES_PAGE.PAID_DATE' | translate }}
+                </label>
+                <input
+                  type="date"
+                  class="form-control"
+                  formControlName="paidDate">
+              </div>
+            </div>
+
+            <div class="row">
+              <!-- Notes -->
+              <div class="col-12 mb-3">
+                <label class="form-label">
+                  {{ 'STATIC_FEES_PAGE.NOTES' | translate }}
+                </label>
+                <textarea
+                  class="form-control"
+                  formControlName="notes"
+                  rows="3"
+                  [placeholder]="'STATIC_FEES_PAGE.NOTES_PLACEHOLDER' | translate">
+                </textarea>
+              </div>
+            </div>
+
+            <!-- Error Message -->
+            <div *ngIf="errorMessage" class="alert alert-danger mb-3">
+              <i class="bi bi-exclamation-triangle me-2"></i>{{ errorMessage }}
+            </div>
+
+            <!-- Form Actions -->
+            <div class="d-flex justify-content-end gap-2">
+              <button type="button" class="btn btn-secondary" (click)="cancel()">
+                <i class="bi bi-x-lg me-2"></i>{{ 'STATIC_FEES_PAGE.CANCEL' | translate }}
+              </button>
+              <button type="submit" class="btn btn-primary" [disabled]="submitting">
+                <span *ngIf="submitting" class="spinner-border spinner-border-sm me-2"></span>
+                <i *ngIf="!submitting" class="bi bi-check-lg me-2"></i>
+                {{ submitting ? ('STATIC_FEES_PAGE.CREATING' | translate) : ('STATIC_FEES_PAGE.CREATE_FEE' | translate) }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Help Sidebar -->
+    <div class="col-lg-4">
+      <div class="card card-general">
+        <div class="card-header">
+          <h5 class="mb-0">
+            <i class="bi bi-lightbulb me-2"></i>
+            {{ 'STATIC_FEES_PAGE.HELP_TITLE' | translate }}
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="help-item mb-3">
+            <h6><i class="bi bi-question-circle me-2 text-primary"></i>{{ 'STATIC_FEES_PAGE.WHAT_IS_STATIC_FEE' | translate }}</h6>
+            <p class="text-muted small mb-0">{{ 'STATIC_FEES_PAGE.STATIC_FEE_EXPLANATION' | translate }}</p>
+          </div>
+          <div class="help-item mb-3">
+            <h6><i class="bi bi-cash-stack me-2 text-success"></i>{{ 'STATIC_FEES_PAGE.PAYMENT_METHODS_TITLE' | translate }}</h6>
+            <ul class="text-muted small mb-0 ps-3">
+              <li>{{ 'STATIC_FEES_PAGE.METHOD_CASH_DESC' | translate }}</li>
+              <li>{{ 'STATIC_FEES_PAGE.METHOD_CHECK_DESC' | translate }}</li>
+              <li>{{ 'STATIC_FEES_PAGE.METHOD_BANK_DESC' | translate }}</li>
+            </ul>
+          </div>
+          <div class="help-item">
+            <h6><i class="bi bi-link-45deg me-2 text-info"></i>{{ 'STATIC_FEES_PAGE.LINKING_TITLE' | translate }}</h6>
+            <p class="text-muted small mb-0">{{ 'STATIC_FEES_PAGE.LINKING_EXPLANATION' | translate }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -10,6 +10,7 @@ import { ParentService } from './parent.service';
 import { TitlePage, TitleAction, Breadcrumb, DropdownItem } from '../../shared/layouts/title-page/title-page';
 import { ExportUtil } from '../../shared/utils/export.util';
 import { PageTitleService } from '../../core/services/page-title.service';
+import { ApiConfig } from '../../core/config/api.config';
 
 @Component({
   selector: 'app-parent',
@@ -357,5 +358,37 @@ export class Parent implements OnInit, OnDestroy {
   // TrackBy function for ngFor performance optimization
   trackById(index: number, item: ParentModel): number | undefined {
     return item.id;
+  }
+
+  /**
+   * Get profile picture URL, handling both file-based and Base64 formats
+   */
+  getProfilePictureUrl(entity: any): string | null {
+    if (!entity) return null;
+
+    // Priority 1: File-based URL (new format)
+    if (entity.profilePictureUrl) {
+      return this.getFullUrl(entity.profilePictureUrl);
+    }
+
+    // Priority 2: Base64 (backward compatibility)
+    if (entity.profilePicture) {
+      // If it's already a data URL or full URL, return as-is
+      if (entity.profilePicture.startsWith('data:') || entity.profilePicture.startsWith('http')) {
+        return entity.profilePicture;
+      }
+      // If it's a relative path, construct full URL
+      return this.getFullUrl(entity.profilePicture);
+    }
+
+    return null;
+  }
+
+  private getFullUrl(path: string): string {
+    if (!path) return '';
+    if (path.startsWith('http') || path.startsWith('data:')) {
+      return path;
+    }
+    return `${ApiConfig.HUB_URL}${path.startsWith('/') ? '' : '/'}${path}`;
   }
 }

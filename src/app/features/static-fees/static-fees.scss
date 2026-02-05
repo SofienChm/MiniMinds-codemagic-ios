@@ -1,0 +1,270 @@
+.modal {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.card {
+  border: none;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.badge {
+  font-size: 0.75em;
+}
+
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #86b7fe;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.stat-card {
+  transition: none;
+  box-shadow: none;
+  border-radius: 12px;
+
+  &:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .stat-icon-wrapper {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background-color: var(--secondary-color);
+    i {
+      font-size: 22px;
+      color: #ffffff;
+    }
+  }
+
+  .stat-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    line-height: 1;
+    margin-bottom: 0;
+  }
+
+  .stat-content {
+    p {
+      color: #6c757d;
+      font-size: 14px;
+      font-weight: 500;
+    }
+  }
+}
+
+// Category badges
+.bg-purple {
+  background-color: #6f42c1 !important;
+  color: white;
+}
+
+.bg-orange {
+  background-color: #fd7e14 !important;
+  color: white;
+}
+
+.bg-teal {
+  background-color: #20c997 !important;
+  color: white;
+}
+
+.bg-indigo {
+  background-color: #6610f2 !important;
+  color: white;
+}
+
+// Button styles
+.btn-warning-custom {
+  background-color: #fff3cd;
+  border-color: #ffc107;
+  color: #856404;
+
+  &:hover {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #000;
+  }
+}
+
+.btn-view {
+  background-color: #e7f1ff;
+  border-color: #e7f1ff;
+  color: #0d6efd;
+
+  &:hover {
+    background-color: #0d6efd;
+    color: white;
+  }
+}
+
+.btn-edit {
+  background-color: #fff3cd;
+  border-color: #fff3cd;
+  color: #856404;
+
+  &:hover {
+    background-color: #ffc107;
+    color: #000;
+  }
+}
+
+.btn-active {
+  background-color: #d1e7dd;
+  border-color: #d1e7dd;
+  color: #0f5132;
+
+  &:hover {
+    background-color: #198754;
+    color: white;
+  }
+}
+
+.btn-remove {
+  background-color: #f8d7da;
+  border-color: #f8d7da;
+  color: #842029;
+
+  &:hover {
+    background-color: #dc3545;
+    color: white;
+  }
+}
+
+// Filter section
+.title-filter {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0;
+  color: #333;
+}
+
+.search-box {
+  position: relative;
+
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+  }
+
+  .search-input {
+    padding-left: 38px;
+    border-radius: 8px;
+    min-width: 200px;
+  }
+}
+
+.filter-select {
+  min-width: 150px;
+}
+
+// Table styles
+.custom-table {
+  .table {
+    th {
+      font-weight: 600;
+      color: #495057;
+      border-bottom: 2px solid #dee2e6;
+      padding: 12px 8px;
+    }
+
+    td {
+      vertical-align: middle;
+      padding: 12px 8px;
+    }
+
+    tr:hover {
+      background-color: #f8f9fa;
+    }
+  }
+}
+
+// Status badges
+.bg-success-2 {
+  background-color: #d1e7dd;
+  color: #0f5132;
+}
+
+.bg-warning-2 {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+// Modal improvements
+.modal-content {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+  border-bottom: 1px solid #dee2e6;
+  padding: 1rem 1.5rem;
+
+  .modal-title {
+    font-weight: 600;
+  }
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.modal-footer {
+  border-top: 1px solid #dee2e6;
+  padding: 1rem 1.5rem;
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .table-responsive {
+    font-size: 0.875rem;
+  }
+
+  .card-body {
+    padding: 1rem;
+  }
+
+  .stat-card .stat-number {
+    font-size: 1.2rem;
+  }
+
+  .filter-select {
+    min-width: 120px;
+  }
+
+  .search-box .search-input {
+    min-width: 150px;
+  }
+}
+
+@media (max-width: 576px) {
+  .stat-card .stat-number {
+    font-size: 1rem;
+  }
+
+  .d-flex.gap-2 {
+    gap: 0.5rem !important;
+  }
+  
+  .stat-icon-wrapper {
+    width: 30px !important;
+    height: 30px !important;
+    i {
+      font-size: 14px !important;
+      padding: 10px !important;
+    }
+  }
+}

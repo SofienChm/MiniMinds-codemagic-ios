@@ -4,6 +4,14 @@ import { Router } from '@angular/router';
 import { AIAssistantService } from '../../../core/services/ai-assistant.service';
 import { AuthService } from '../../../core/services/auth';
 
+/**
+ * AI Quick Insights Widget
+ *
+ * GDPR & EU AI Act Compliant
+ * - Shows AI disclosure
+ * - Only provides safe, pre-verified queries
+ * - No individual child data access
+ */
 @Component({
   selector: 'app-ai-quick-insights',
   standalone: true,
@@ -11,24 +19,41 @@ import { AuthService } from '../../../core/services/auth';
   template: `
     <div *ngIf="showWidget" class="ai-insights-widget">
       <div class="widget-header">
-        <i class="bi bi-robot"></i>
-        <h5>AI Quick Insights</h5>
+        <div class="header-left">
+          <i class="bi bi-robot"></i>
+          <h5>Assistente AI</h5>
+        </div>
+        <span class="ai-badge">
+          <i class="bi bi-shield-check"></i>
+          GDPR
+        </span>
       </div>
+
+      <!-- AI Disclosure (EU AI Act) -->
+      <div class="ai-disclosure">
+        <i class="bi bi-info-circle"></i>
+        <span>Assistente AI - Non accede a dati individuali dei bambini</span>
+      </div>
+
       <div class="widget-body">
         <p class="widget-description">
-          Get instant answers about your daycare operations
+          Risposte rapide sulle operazioni dell'asilo
         </p>
         <div class="quick-actions">
-          <button 
-            *ngFor="let query of quickQueries" 
+          <button
+            *ngFor="let query of quickQueries"
             class="quick-action-btn"
             (click)="askQuestion(query)">
+            <i class="bi bi-chat-dots"></i>
             {{ query }}
           </button>
         </div>
         <div class="widget-footer">
           <button class="btn btn-primary btn-sm" (click)="openFullChat()">
-            <i class="bi bi-chat"></i> Open AI Chat
+            <i class="bi bi-chat"></i> Apri Chat AI
+          </button>
+          <button class="btn btn-outline-secondary btn-sm" (click)="contactHuman()">
+            <i class="bi bi-person"></i> Assistenza Umana
           </button>
         </div>
       </div>
@@ -46,7 +71,13 @@ import { AuthService } from '../../../core/services/auth';
     .widget-header {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
-      padding: 1rem;
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-left {
       display: flex;
       align-items: center;
       gap: 0.5rem;
@@ -62,13 +93,43 @@ import { AuthService } from '../../../core/services/auth';
       font-weight: 600;
     }
 
+    .ai-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 0.15rem 0.5rem;
+      border-radius: 10px;
+      font-size: 0.65rem;
+      font-weight: 600;
+    }
+
+    .ai-badge i {
+      font-size: 0.7rem;
+    }
+
+    .ai-disclosure {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: #f0f9ff;
+      border-bottom: 1px solid #e0f2fe;
+      font-size: 0.75rem;
+      color: #0369a1;
+    }
+
+    .ai-disclosure i {
+      font-size: 0.85rem;
+    }
+
     .widget-body {
       padding: 1rem;
     }
 
     .widget-description {
       color: #6c757d;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       margin-bottom: 1rem;
     }
 
@@ -89,6 +150,13 @@ import { AuthService } from '../../../core/services/auth';
       cursor: pointer;
       transition: all 0.2s ease;
       text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .quick-action-btn i {
+      color: #667eea;
     }
 
     .quick-action-btn:hover {
@@ -97,22 +165,28 @@ import { AuthService } from '../../../core/services/auth';
     }
 
     .widget-footer {
-      text-align: center;
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
     }
 
     .btn {
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
+      font-size: 0.8rem;
     }
   `]
 })
 export class AIQuickInsightsComponent implements OnInit {
   showWidget = false;
+
+  // GDPR-safe queries only (no individual child data)
   quickQueries = [
-    "What did children eat today?",
-    "Who is present today?",
-    "Show today's activities"
+    "Quali sono gli orari dell'asilo?",
+    "Cosa c'è nel menu di oggi?",
+    "Mostra i prossimi eventi"
   ];
 
   constructor(
@@ -122,9 +196,9 @@ export class AIQuickInsightsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Only show for admin users
+    // Show for admin and teacher users
     this.authService.currentUser$.subscribe(() => {
-      this.showWidget = this.authService.isAdmin();
+      this.showWidget = this.authService.isAdmin() || this.authService.isTeacher();
     });
   }
 
@@ -136,5 +210,11 @@ export class AIQuickInsightsComponent implements OnInit {
 
   openFullChat(): void {
     this.router.navigate(['/ai-assistant']);
+  }
+
+  contactHuman(): void {
+    // Open email client with support address
+    const contactInfo = this.aiService.getHumanContactInfo();
+    window.location.href = `mailto:${contactInfo.email}?subject=Richiesta%20Assistenza%20MiniMinds`;
   }
 }

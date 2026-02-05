@@ -1,0 +1,25 @@
+  <div class="nav-superadmin">
+    <a routerLink="/super-admin/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item">
+      <i class="bi bi-house-fill"></i>
+      <span>Home</span>
+    </a>
+    <a routerLink="/super-admin/tenants" routerLinkActive="active" class="nav-item">
+      <i class="bi bi-building"></i>
+      <span>Daycares</span>
+    </a>
+    <a routerLink="/super-admin/billing" routerLinkActive="active" class="nav-item">
+      <i class="bi bi-currency-dollar"></i>
+      <span>Billing</span>
+    </a>
+    <a routerLink="/super-admin/demo-requests" routerLinkActive="active" class="nav-item">
+      <div class="icon-wrapper">
+        <i class="bi bi-send-fill"></i>
+        <span class="badge-notification" *ngIf="pendingRequestsCount > 0">{{ pendingRequestsCount }}</span>
+      </div>
+      <span>Requests</span>
+    </a>
+    <a routerLink="/profile" routerLinkActive="active" class="nav-item">
+      <i class="bi bi-person-fill"></i>
+      <span>Profile</span>
+    </a>
+  </div>

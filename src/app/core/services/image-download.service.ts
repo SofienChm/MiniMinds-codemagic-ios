@@ -2,14 +2,15 @@ import { Injectable } from '@angular/core';
 import { Capacitor, registerPlugin } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
+import { Media } from '@capacitor-community/media';
 import { saveAs } from 'file-saver';
 
-// Define the SaveToGallery plugin interface
+// Define the SaveToGallery plugin interface (Android custom plugin)
 export interface SaveToGalleryPlugin {
   saveImage(options: { base64Data: string; fileName: string }): Promise<{ success: boolean; message: string; uri: string }>;
 }
 
-// Register the custom plugin
+// Register the custom plugin for Android
 const SaveToGallery = registerPlugin<SaveToGalleryPlugin>('SaveToGallery');
 
 export interface DownloadResult {
@@ -136,22 +137,38 @@ export class ImageDownloadService {
       }
     }
 
-    // For iOS, use Filesystem with Documents directory
+    // For iOS, use Media plugin to save directly to Photos library
     try {
-      const savedFile = await Filesystem.writeFile({
-        path: `MiniMinds/${finalFileName}`,
+      // First save to a temp file, then use Media plugin to save to Photos
+      const tempFile = await Filesystem.writeFile({
+        path: finalFileName,
         data: base64Data,
-        directory: Directory.Documents,
-        recursive: true
+        directory: Directory.Cache
       });
+
+      // Save to Photos library using Media plugin
+      await Media.savePhoto({
+        path: tempFile.uri,
+        albumIdentifier: undefined // Saves to default Photos album
+      });
+
+      // Clean up temp file
+      try {
+        await Filesystem.deleteFile({
+          path: finalFileName,
+          directory: Directory.Cache
+        });
+      } catch {
+        // Ignore cleanup errors
+      }
 
       return {
         success: true,
-        message: `Image saved to Files/MiniMinds/${finalFileName}`,
-        filePath: savedFile.uri
+        message: 'Image saved to Photos',
+        filePath: tempFile.uri
       };
     } catch (error: any) {
-      console.error('Error saving to iOS Documents:', error);
+      console.error('Error saving to iOS Photos:', error);
 
       // Fallback to share functionality
       return this.shareImage(imageData, fileName, 'Save Image');

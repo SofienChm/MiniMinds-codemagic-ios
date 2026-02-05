@@ -1,116 +1,130 @@
 <div *ngIf="isParent()" [class]="isParent() ? '' : ' mt-4'">
-    <div *ngIf="isParent() && !loading" class="parent-detailchild font-inter">
-      <div class="header-info">
-        <div class="title-icons mb-3">
-          <div class="page-back">
-            <i class="bi bi-arrow-left"></i>
-          </div>
-          <div class="title-page">
-
-          </div>
-          <div class="page-setting">
-            <i class="bi bi-gear"></i>
-          </div>
+  <div *ngIf="isParent() && !loading" class="parent-detailchild font-inter">
+    <div class="header-info">
+      <div class="title-icons mb-3">
+        <div class="page-back">
+          <i class="bi bi-arrow-left"></i>
         </div>
-          <div class="d-flex image-name row_direction">
-            <div class="d-flex image-active">
-              <img  loading="lazy"
-                  src="assets/child.png"
-                class="img-fluid" alt="Parent Photo">
-            </div>
-            <div class="overflow-hidden">
-              <h5 class="name">{{ 'CHILDREN.MY_CHILDREN' | translate }}</h5>
-            </div>
-          </div>
+        <div class="title-page">
 
+        </div>
+        <div class="page-setting">
+          <i class="bi bi-gear"></i>
+        </div>
       </div>
-      <div class="body container-fluid">
-        <div class="main-information">
-          <div class="row" *ngIf="viewMode === 'grid' && !loading">
-            <div *ngFor="let child of displayedChildren; trackBy: trackById" class="col-xl-4 col-md-6 d-flex">
-              <div class="card flex-fill card-general rounded-1">
-                <div class="card-header d-flex align-items-center justify-content-between">
-                  <span class="badge" [class.bg-success]="child.isActive" [class.bg-danger]="!child.isActive">
-                    {{ child.isActive ? ('CHILDREN.ACTIVE' | translate) : ('CHILDREN.INACTIVE' | translate) }}
-                  </span>
-                  <div class="d-flex align-items-center" *ngIf="permissions.canEdit() || permissions.canDelete()">
-                    <div class="dropdown">
-                      <span  class="btn btn-white btn-icon btn-sm d-flex align-items-center justify-content-center rounded-circle p-0" data-bs-toggle="dropdown">
-                        <i class="bi bi-three-dots-vertical"></i>
-                      </span>
-                      <ul class="dropdown-menu dropdown-menu-end p-3">
-                        <li *ngIf="permissions.canEdit()" class="dropdown-item_list">
-                          <a class="dropdown-item rounded-1" href="javascript:void(0);" (click)="viewDetails(child)">
-                                <i class="bi bi-eye me-2"></i>{{ 'CHILDREN.VIEW_DETAILS' | translate }}
-                              </a>
-                        <li *ngIf="permissions.canEdit()" class="dropdown-item_list">
-                          <a class="dropdown-item rounded-1" href="javascript:void(0);" (click)="editChild(child)">
-                            <i class="bi bi-pencil-square me-2"></i>{{ 'CHILDREN.EDIT' | translate }}
-                          </a>
-                        </li>
-                        <li *ngIf="permissions.canEdit()" class="dropdown-item_list">
-                          <a class="dropdown-item rounded-1" href="javascript:void(0);" (click)="toggleChildStatus(child.id!)">
-                            <i class="bi bi-toggle-{{ child.isActive ? 'on' : 'off' }} me-2"></i>{{ child.isActive ? ('CHILDREN.DEACTIVATE' | translate) : ('CHILDREN.ACTIVATE' | translate) }}
-                          </a>
-                        </li>
-                        <li *ngIf="permissions.canDelete()" class="dropdown-item_list">
-                          <a class="dropdown-item rounded-1" href="javascript:void(0);" (click)="deleteChild(child.id!)">
-                            <i class="bi bi-trash3 me-2"></i>{{ 'CHILDREN.DELETE' | translate }}
-                          </a>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-                <div class="card-body">
-                  <div class="bg-light rounded-2 p-3 mb-3">
-                    <div class="d-flex align-items-center">
-                      <a href="#" class="avatar avatar-lg flex-shrink-0" (click)="viewDetails(child); $event.preventDefault()">
-                        <img loading="lazy" [src]="child.profilePicture || 'assets/child.png'" class="img-fluid rounded-circle" alt="Child" width="80" height="80">
-                      </a>
-                      <div class="ms-2">
-                        <h6 class="text-dark text-truncate mb-0 title-card__name">
-                          <a href="#" (click)="viewDetails(child); $event.preventDefault()">{{ child.firstName }} {{ child.lastName }}</a>
-                        </h6>
-                        <p class="mb-0 card-age">{{ 'CHILDREN.AGE' | translate }}: {{ getAgeDisplay(child.dateOfBirth) }}</p>
+      <div class="d-flex image-name row_direction">
+        <div class="d-flex image-active">
+          <img loading="lazy" src="assets/child.png" class="img-fluid" alt="Parent Photo">
+        </div>
+        <div class="overflow-hidden">
+          <h5 class="name">{{ 'CHILDREN.MY_CHILDREN' | translate }}</h5>
+        </div>
+      </div>
 
-                      </div>
-                    </div>
+    </div>
+    <div class="body container-fluid">
+      <div class="main-information">
+        <div class="row" *ngIf="viewMode === 'grid' && !loading">
+          <div *ngFor="let child of displayedChildren; trackBy: trackById" class="col-xl-4 col-md-6 d-flex">
+            <div class="card flex-fill card-general rounded-1">
+              <div class="card-header d-flex align-items-center justify-content-between">
+                <span class="badge" [class.bg-success]="child.isActive" [class.bg-danger]="!child.isActive">
+                  {{ child.isActive ? ('CHILDREN.ACTIVE' | translate) : ('CHILDREN.INACTIVE' | translate) }}
+                </span>
+                <div class="d-flex align-items-center" *ngIf="permissions.canEdit() || permissions.canDelete()">
+                  <div class="dropdown">
+                    <span
+                      class="btn btn-white btn-icon btn-sm d-flex align-items-center justify-content-center rounded-circle p-0"
+                      data-bs-toggle="dropdown">
+                      <i class="bi bi-three-dots-vertical"></i>
+                    </span>
+                    <ul class="dropdown-menu dropdown-menu-end p-3">
+                      <li *ngIf="permissions.canEdit()" class="dropdown-item_list">
+                        <a class="dropdown-item rounded-1" href="javascript:void(0);" (click)="viewDetails(child)">
+                          <i class="bi bi-eye me-2"></i>{{ 'CHILDREN.VIEW_DETAILS' | translate }}
+                        </a>
+                      <li *ngIf="permissions.canEdit()" class="dropdown-item_list">
+                        <a class="dropdown-item rounded-1" href="javascript:void(0);" (click)="editChild(child)">
+                          <i class="bi bi-pencil-square me-2"></i>{{ 'CHILDREN.EDIT' | translate }}
+                        </a>
+                      </li>
+                      <li *ngIf="permissions.canEdit()" class="dropdown-item_list">
+                        <a class="dropdown-item rounded-1" href="javascript:void(0);"
+                          (click)="toggleChildStatus(child.id!)">
+                          <i class="bi bi-toggle-{{ child.isActive ? 'on' : 'off' }} me-2"></i>{{ child.isActive ?
+                          ('CHILDREN.DEACTIVATE' | translate) : ('CHILDREN.ACTIVATE' | translate) }}
+                        </a>
+                      </li>
+                      <li *ngIf="permissions.canDelete()" class="dropdown-item_list">
+                        <a class="dropdown-item rounded-1" href="javascript:void(0);" (click)="deleteChild(child.id!)">
+                          <i class="bi bi-trash3 me-2"></i>{{ 'CHILDREN.DELETE' | translate }}
+                        </a>
+                      </li>
+                    </ul>
                   </div>
-                  <div class="d-flex  justify-content-between body-information">
-                    <div>
-                      <p class="mb-0 information-title">{{ 'CHILDREN.PARENT' | translate }}</p>
-                      <p class="text-dark information-description">{{ child.parent?.firstName }} {{ child.parent?.lastName }}</p>
-                    </div>
-                    <div>
-                      <p class="mb-0 information-title">{{ 'CHILDREN.GENDER' | translate }}</p>
-                      <p class="mb-0 information-description">{{ child.gender }}</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                  <div class="d-flex align-items-center">
-                    <a href="#" class="btn btn-outline-light bg-white btn-icon d-flex align-items-center justify-content-center rounded-circle p-0 me-2 footer-icon-action"><i class="bi bi-telephone"></i></a>
-                  </div>
-                  <button class="btn btn-light btn-sm btn-footer" (click)="viewDetails(child)">{{ 'CHILDREN.VIEW_DETAILS' | translate }}</button>
                 </div>
               </div>
-            </div>
+              <div class="card-body">
+                <div class="bg-light rounded-2 p-3 mb-3">
+                  <div class="d-flex align-items-center">
+                    <a href="#" class="avatar avatar-lg flex-shrink-0"
+                      (click)="viewDetails(child); $event.preventDefault()">
+                      <img loading="lazy" [src]="getProfilePictureUrl(child)"
+                        class="img-fluid rounded-circle" alt="Child" width="80" height="80">
+                    </a>
+                    <div class="ms-2">
+                      <h6 class="text-dark text-truncate mb-0 title-card__name">
+                        <a href="#" (click)="viewDetails(child); $event.preventDefault()">{{ child.firstName }} {{
+                          child.lastName }}</a>
+                      </h6>
+                      <p class="mb-0 card-age">{{ 'CHILDREN.AGE' | translate }}:
+                        @if( calculateAge(child.dateOfBirth).years > 0){
+                        {{ calculateAge(child.dateOfBirth).years}} {{ 'CHILDREN.YEARS' | translate }}
+                        }
+                        @if( calculateAge(child.dateOfBirth).years <= 0){ {{ calculateAge(child.dateOfBirth).months}}
+                          {{ 'CHILDREN.MONTHS' | translate }} } 
+                        </p>
 
-            <div *ngIf="filteredChildren.length === 0 && !loading" class="col-12 text-center">
-              <p>{{ userRole === 'Parent' ? ('CHILDREN.NO_CHILDREN_FOUND' | translate) : ('CHILDREN.NO_CHILDREN_REGISTERED' | translate) }}</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="d-flex  justify-content-between body-information">
+                  <div>
+                    <p class="mb-0 information-title">{{ 'CHILDREN.PARENT' | translate }}</p>
+                    <p class="text-dark information-description">{{ child.parent?.firstName }} {{ child.parent?.lastName
+                      }}</p>
+                  </div>
+                  <div>
+                    <p class="mb-0 information-title">{{ 'CHILDREN.GENDER' | translate }}</p>
+                    <p class="mb-0 information-description">{{ child.gender }}</p>
+                  </div>
+                </div>
+              </div>
+              <div class="card-footer d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                  <a href="#"
+                    class="btn btn-outline-light bg-white btn-icon d-flex align-items-center justify-content-center rounded-circle p-0 me-2 footer-icon-action"><i
+                      class="bi bi-telephone"></i></a>
+                </div>
+                <button class="btn btn-light btn-sm btn-footer" (click)="viewDetails(child)">{{ 'CHILDREN.VIEW_DETAILS'
+                  | translate }}</button>
+              </div>
             </div>
+          </div>
+
+          <div *ngIf="filteredChildren.length === 0 && !loading" class="col-12 text-center">
+            <p>{{ userRole === 'Parent' ? ('CHILDREN.NO_CHILDREN_FOUND' | translate) :
+              ('CHILDREN.NO_CHILDREN_REGISTERED' | translate) }}</p>
           </div>
         </div>
       </div>
     </div>
+  </div>
 </div>
 <div class="container-fluid mt-4" *ngIf="!isParent()">
   <app-title-page *ngIf="!isParent()"
     [title]="userRole === 'Parent' ? ('CHILDREN.MY_CHILDREN' | translate) : ('CHILDREN.TITLE' | translate)"
-    [subtitle]="'CHILDREN.SUBTITLE' | translate"
-    icon="bi bi-person-fill"
-    [breadcrumbs]="breadcrumbs"
+    [subtitle]="'CHILDREN.SUBTITLE' | translate" icon="bi bi-person-fill" [breadcrumbs]="breadcrumbs"
     [actions]="titleActions">
   </app-title-page>
 
@@ -121,45 +135,27 @@
       <!-- Search Input -->
       <div class="search-box">
         <i class="bi bi-search search-icon"></i>
-        <input
-          type="text"
-          class="form-control search-input"
-          [placeholder]="'CHILDREN.SEARCH_PLACEHOLDER' | translate"
-          [(ngModel)]="searchTerm"
-          (ngModelChange)="onSearchChange()">
+        <input type="text" class="form-control search-input" [placeholder]="'CHILDREN.SEARCH_PLACEHOLDER' | translate"
+          [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()">
       </div>
 
       <!-- Gender Filter -->
-       <div class="input-with-icon">
-      <ng-select
-        class="filter-select"
-        [(ngModel)]="filterGender"
-        [items]="genderOptions"
-        bindLabel="label"
-        bindValue="value"
-        [placeholder]="'CHILDREN.FILTER_GENDER' | translate"
-        [clearable]="true"
-        [searchable]="false"
-        (change)="onFilterChange()">
-        <ng-template ng-option-tmp let-item="item">
-          <div class="option-with-image">
-            <i class="bi {{item.icon}}" style="font-size: 16px; color: #7dd3c0;"></i>
-            <span class="option-title">{{ item.label }}</span>
-          </div>
-        </ng-template>
-      </ng-select>
-        </div>
+      <div class="input-with-icon">
+        <ng-select class="filter-select" [(ngModel)]="filterGender" [items]="genderOptions" bindLabel="label"
+          bindValue="value" [placeholder]="'CHILDREN.FILTER_GENDER' | translate" [clearable]="true" [searchable]="false"
+          (change)="onFilterChange()">
+          <ng-template ng-option-tmp let-item="item">
+            <div class="option-with-image">
+              <i class="bi {{item.icon}}" style="font-size: 16px; color: #7dd3c0;"></i>
+              <span class="option-title">{{ item.label }}</span>
+            </div>
+          </ng-template>
+        </ng-select>
+      </div>
 
       <!-- Status Filter -->
-      <ng-select
-        class="filter-select"
-        [(ngModel)]="filterStatus"
-        [items]="statusOptions"
-        bindLabel="label"
-        bindValue="value"
-        [placeholder]="'CHILDREN.FILTER_STATUS' | translate"
-        [clearable]="true"
-        [searchable]="false"
+      <ng-select class="filter-select" [(ngModel)]="filterStatus" [items]="statusOptions" bindLabel="label"
+        bindValue="value" [placeholder]="'CHILDREN.FILTER_STATUS' | translate" [clearable]="true" [searchable]="false"
         (change)="onFilterChange()">
         <ng-template ng-option-tmp let-item="item">
           <div class="option-with-image">
@@ -170,15 +166,8 @@
       </ng-select>
 
       <!-- Sort Select -->
-      <ng-select
-        class="filter-select"
-        [(ngModel)]="sortBy"
-        [items]="sortOptions"
-        bindLabel="label"
-        bindValue="value"
-        [placeholder]="'CHILDREN.SORT_BY' | translate"
-        [clearable]="false"
-        [searchable]="false"
+      <ng-select class="filter-select" [(ngModel)]="sortBy" [items]="sortOptions" bindLabel="label" bindValue="value"
+        [placeholder]="'CHILDREN.SORT_BY' | translate" [clearable]="false" [searchable]="false"
         (change)="onSortChange()">
         <ng-template ng-option-tmp let-item="item">
           <div class="option-with-image">
@@ -189,27 +178,19 @@
       </ng-select>
 
       <!-- Clear Filters -->
-      <button
-        *ngIf="searchTerm || filterGender || filterStatus !== null"
-        class="btn btn-outline-secondary btn-sm"
+      <button *ngIf="searchTerm || filterGender || filterStatus !== null" class="btn btn-outline-secondary btn-sm"
         (click)="clearFilters()">
         <i class="bi bi-x-circle me-1"></i>{{ 'CHILDREN.CLEAR_FILTERS' | translate }}
       </button>
 
       <!-- View Toggle -->
       <div class="d-flex align-items-center bg-white border rounded-2 p-1 me-2">
-        <button
-          class="btn btn-icon btn-sm me-1"
-          [class.bg-light]="viewMode === 'list'"
-          [class.primary-hover]="viewMode !== 'list'"
-          (click)="setViewMode('list')">
+        <button class="btn btn-icon btn-sm me-1" [class.bg-light]="viewMode === 'list'"
+          [class.primary-hover]="viewMode !== 'list'" (click)="setViewMode('list')">
           <i class="bi bi-list-ul"></i>
         </button>
-        <button
-          class="btn btn-icon btn-sm"
-          [class.bg-light]="viewMode === 'grid'"
-          [class.primary-hover]="viewMode !== 'grid'"
-          (click)="setViewMode('grid')">
+        <button class="btn btn-icon btn-sm" [class.bg-light]="viewMode === 'grid'"
+          [class.primary-hover]="viewMode !== 'grid'" (click)="setViewMode('grid')">
           <i class="bi bi-grid"></i>
         </button>
       </div>
@@ -233,14 +214,15 @@
           </span>
           <div class="d-flex align-items-center" *ngIf="permissions.canEdit() || permissions.canDelete()">
             <div class="dropdown">
-              <span  class=" btn-white btn-icon btn-sm d-flex align-items-center justify-content-center p-0" data-bs-toggle="dropdown">
+              <span class=" btn-white btn-icon btn-sm d-flex align-items-center justify-content-center p-0"
+                data-bs-toggle="dropdown">
                 <i class="bi bi-three-dots-vertical"></i>
               </span>
               <ul class="dropdown-menu dropdown-menu-end p-3">
                 <li *ngIf="permissions.canEdit()" class="dropdown-item_list">
-                   <a class="dropdown-item rounded-1" href="javascript:void(0);" (click)="viewDetails(child)">
-                        <i class="bi bi-eye me-2"></i>{{ 'CHILDREN.VIEW_DETAILS' | translate }}
-                      </a>
+                  <a class="dropdown-item rounded-1" href="javascript:void(0);" (click)="viewDetails(child)">
+                    <i class="bi bi-eye me-2"></i>{{ 'CHILDREN.VIEW_DETAILS' | translate }}
+                  </a>
                 <li *ngIf="permissions.canEdit()" class="dropdown-item_list">
                   <a class="dropdown-item rounded-1" href="javascript:void(0);" (click)="editChild(child)">
                     <i class="bi bi-pencil-square me-2"></i>{{ 'CHILDREN.EDIT' | translate }}
@@ -248,7 +230,8 @@
                 </li>
                 <li *ngIf="permissions.canEdit()" class="dropdown-item_list">
                   <a class="dropdown-item rounded-1" href="javascript:void(0);" (click)="toggleChildStatus(child.id!)">
-                    <i class="bi bi-toggle-{{ child.isActive ? 'on' : 'off' }} me-2"></i>{{ child.isActive ? ('CHILDREN.DEACTIVATE' | translate) : ('CHILDREN.ACTIVATE' | translate) }}
+                    <i class="bi bi-toggle-{{ child.isActive ? 'on' : 'off' }} me-2"></i>{{ child.isActive ?
+                    ('CHILDREN.DEACTIVATE' | translate) : ('CHILDREN.ACTIVATE' | translate) }}
                   </a>
                 </li>
                 <li *ngIf="permissions.canDelete()" class="dropdown-item_list">
@@ -264,13 +247,20 @@
           <div class="bg-light rounded-2 p-3 mb-3">
             <div class="d-flex align-items-center">
               <a href="#" class="avatar avatar-lg flex-shrink-0" (click)="viewDetails(child); $event.preventDefault()">
-                <img loading="lazy" [src]="child.profilePicture || 'assets/child.png'" class="img-fluid rounded-circle" alt="Child" width="80" height="80">
+                <img loading="lazy" [src]="getProfilePictureUrl(child)" class="img-fluid rounded-circle"
+                  alt="Child" width="80" height="80">
               </a>
               <div class="ms-2">
                 <h6 class="text-dark text-truncate mb-0 title-card__name">
-                  <a href="#" (click)="viewDetails(child); $event.preventDefault()">{{ child.firstName }} {{ child.lastName }}</a>
+                  <a href="#" (click)="viewDetails(child); $event.preventDefault()">{{ child.firstName }} {{
+                    child.lastName }}</a>
                 </h6>
-                <p class="mb-0 card-age">{{ 'CHILDREN.AGE' | translate }}: {{ getAgeDisplay(child.dateOfBirth) }}</p>
+                <p class="mb-0 card-age">{{ 'CHILDREN.AGE' | translate }}:
+                  @if( calculateAge(child.dateOfBirth).years > 0){
+                  {{ calculateAge(child.dateOfBirth).years}} {{ 'CHILDREN.YEARS' | translate }}
+                  }
+                  @if( calculateAge(child.dateOfBirth).years <= 0){ {{ calculateAge(child.dateOfBirth).months}}
+                    {{ 'CHILDREN.MONTHS' | translate }} } </p>
 
               </div>
             </div>
@@ -278,7 +268,8 @@
           <div class="d-flex  justify-content-between body-information">
             <div>
               <p class="mb-0 information-title">{{ 'CHILDREN.PARENT' | translate }}</p>
-              <p class="text-dark information-description">{{ child.parent?.firstName }} {{ child.parent?.lastName }}</p>
+              <p class="text-dark information-description">{{ child.parent?.firstName }} {{ child.parent?.lastName }}
+              </p>
             </div>
             <div>
               <p class="mb-0 information-title">{{ 'CHILDREN.GENDER' | translate }}</p>
@@ -288,15 +279,28 @@
         </div>
         <div class="card-footer d-flex align-items-center justify-content-between">
           <div class="d-flex align-items-center">
-            <a href="#" class="btn btn-outline-light bg-white btn-icon d-flex align-items-center justify-content-center rounded-circle p-0 me-2 footer-icon-action"><i class="bi bi-telephone"></i></a>
+            <a *ngIf="child.parent?.phoneNumber"
+              [href]="'tel:' + child.parent?.phoneNumber"
+              [title]="(child.parent?.firstName || '') + ' ' + (child.parent?.lastName || '') + ': ' + (child.parent?.phoneNumber || '')"
+              class="btn btn-outline-light bg-white btn-icon d-flex align-items-center justify-content-center rounded-circle p-0 me-2 footer-icon-action"
+              (click)="$event.stopPropagation()">
+              <i class="bi bi-telephone"></i>
+            </a>
+            <span *ngIf="!child.parent?.phoneNumber"
+              class="btn btn-outline-light bg-white btn-icon d-flex align-items-center justify-content-center rounded-circle p-0 me-2 footer-icon-action disabled"
+              style="opacity: 0.5; cursor: not-allowed;">
+              <i class="bi bi-telephone"></i>
+            </span>
           </div>
-          <button class="btn btn-light btn-sm btn-footer" (click)="viewDetails(child)">{{ 'CHILDREN.VIEW_DETAILS' | translate }}</button>
+          <button class="btn btn-light btn-sm btn-footer" (click)="viewDetails(child)">{{ 'CHILDREN.VIEW_DETAILS' |
+            translate }}</button>
         </div>
       </div>
     </div>
 
     <div *ngIf="filteredChildren.length === 0 && !loading" class="col-12 text-center">
-      <p>{{ userRole === 'Parent' ? ('CHILDREN.NO_CHILDREN_FOUND' | translate) : ('CHILDREN.NO_CHILDREN_REGISTERED' | translate) }}</p>
+      <p>{{ userRole === 'Parent' ? ('CHILDREN.NO_CHILDREN_FOUND' | translate) : ('CHILDREN.NO_CHILDREN_REGISTERED' |
+        translate) }}</p>
     </div>
   </div>
 
@@ -331,10 +335,11 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let child of displayedChildren; trackBy: trackById" (click)="viewDetails(child)" style="cursor: pointer;">
+              <tr *ngFor="let child of displayedChildren; trackBy: trackById" (click)="viewDetails(child)"
+                style="cursor: pointer;">
                 <td>
-                  <img loading="lazy" [src]="child.profilePicture || 'assets/child.png'"
-                       class="rounded-circle" width="40" height="40" alt="Child">
+                  <img loading="lazy" [src]="getProfilePictureUrl(child)" class="rounded-circle"
+                    width="40" height="40" alt="Child">
                 </td>
                 <td class="name-last">
                   <span>{{ child.firstName }} {{ child.lastName }}</span>
@@ -351,10 +356,12 @@
                     <button *ngIf="permissions.canEdit()" class="btn btn-sm btn-edit" (click)="editChild(child)">
                       <i class="bi bi-pencil-square"></i>
                     </button>
-                    <button *ngIf="permissions.canEdit()" class="btn btn-sm btn-active" (click)="toggleChildStatus(child.id!)">
+                    <button *ngIf="permissions.canEdit()" class="btn btn-sm btn-active"
+                      (click)="toggleChildStatus(child.id!)">
                       <i class="bi" [class.bi-pause-fill]="child.isActive" [class.bi-play-fill]="!child.isActive"></i>
                     </button>
-                    <button *ngIf="permissions.canDelete()" class="btn btn-sm btn-remove" (click)="deleteChild(child.id!)">
+                    <button *ngIf="permissions.canDelete()" class="btn btn-sm btn-remove"
+                      (click)="deleteChild(child.id!)">
                       <i class="bi bi-trash3"></i>
                     </button>
                   </div>
@@ -362,7 +369,8 @@
               </tr>
               <tr *ngIf="filteredChildren.length === 0">
                 <td colspan="7" class="text-center py-4">
-                  {{ userRole === 'Parent' ? ('CHILDREN.NO_CHILDREN_FOUND' | translate) : ('CHILDREN.NO_CHILDREN_REGISTERED' | translate) }}
+                  {{ userRole === 'Parent' ? ('CHILDREN.NO_CHILDREN_FOUND' | translate) :
+                  ('CHILDREN.NO_CHILDREN_REGISTERED' | translate) }}
                 </td>
               </tr>
             </tbody>
@@ -370,7 +378,8 @@
         </div>
       </div>
       <div class="card-footer d-flex align-items-center justify-content-between">
-        <span class="text-muted">{{ 'CHILDREN.TOTAL' | translate }}: {{ displayedChildren.length }} {{ 'CHILDREN.CHILD_S' | translate }}</span>
+        <span class="text-muted">{{ 'CHILDREN.TOTAL' | translate }}: {{ displayedChildren.length }} {{
+          'CHILDREN.CHILD_S' | translate }}</span>
       </div>
     </div>
 

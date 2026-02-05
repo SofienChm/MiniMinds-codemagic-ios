@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { NgSelectModule } from '@ng-select/ng-select';
 import { ApiConfig } from '../../../core/config/api.config';
 import { ClassesService } from '../classes.service';
 import { ClassModel } from '../classes.interface';
@@ -15,7 +16,7 @@ import Swal from 'sweetalert2';
 @Component({
   selector: 'app-class-detail',
   standalone: true,
-  imports: [CommonModule, TitlePage, FormsModule, TranslateModule],
+  imports: [CommonModule, TitlePage, FormsModule, TranslateModule, NgSelectModule],
   templateUrl: './class-detail.component.html',
   styleUrls: ['./class-detail.component.scss']
 })
@@ -31,7 +32,6 @@ export class ClassDetailComponent implements OnInit, AfterViewInit, OnDestroy {
   availableTeachers: any[] = [];
   selectedTeacherIds: number[] = [];
   assignedTeachers: any[] = [];
-  private niceSelect: any;
   private langChangeSub?: Subscription;
 
   breadcrumbs: Breadcrumb[] = [];
@@ -168,29 +168,15 @@ export class ClassDetailComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy() {
     this.langChangeSub?.unsubscribe();
-    if (this.niceSelect) {
-      this.niceSelect.destroy();
-    }
   }
 
   openAssignTeacherModal() {
     this.showAssignTeacherModal = true;
+    this.selectedTeacherIds = [];
     this.loadAvailableTeachers();
-    setTimeout(() => this.initNiceSelect(), 100);
-  }
-
-  initNiceSelect() {
-    const selectElement = document.getElementById('teacherSelect') as HTMLSelectElement;
-    if (selectElement && typeof (window as any).NiceSelect !== 'undefined') {
-      this.niceSelect = (window as any).NiceSelect.bind(selectElement, { searchable: true, placeholder: 'Select teachers...' });
-    }
   }
 
   closeAssignTeacherModal() {
-    if (this.niceSelect) {
-      this.niceSelect.destroy();
-      this.niceSelect = null;
-    }
     this.showAssignTeacherModal = false;
     this.selectedTeacherIds = [];
   }
@@ -206,13 +192,14 @@ export class ClassDetailComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   assignTeacher() {
-    const selectElement = document.getElementById('teacherSelect') as HTMLSelectElement;
-    if (!selectElement) return;
-
-    const selectedOptions = Array.from(selectElement.selectedOptions);
-    this.selectedTeacherIds = selectedOptions.map(option => parseInt(option.value));
-
-    if (this.selectedTeacherIds.length === 0) return;
+    if (!this.selectedTeacherIds || this.selectedTeacherIds.length === 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Warning',
+        text: 'Please select at least one teacher'
+      });
+      return;
+    }
 
     const payload = { classId: this.classId, teacherIds: this.selectedTeacherIds };
     this.http.post(`${ApiConfig.ENDPOINTS.CLASSES}/assign-teachers`, payload).subscribe({
@@ -222,7 +209,7 @@ export class ClassDetailComponent implements OnInit, AfterViewInit, OnDestroy {
         Swal.fire({
           icon: 'success',
           title: 'Success!',
-          text: 'Teacher assigned successfully',
+          text: 'Teacher(s) assigned successfully',
           timer: 2000,
           showConfirmButton: false
         });

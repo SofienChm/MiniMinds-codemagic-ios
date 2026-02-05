@@ -9,46 +9,61 @@
   <nav class="nav-sidebar">
     <ul class="nav flex-column">
       <li>
-        <h6 class="submenu-hdr"><span>Main</span></h6>
+        <h6 class="submenu-hdr"><span>{{ 'SIDEBAR.SECTIONS.MAIN' | translate }}</span></h6>
       </li>
       <li class="nav-item" *ngFor="let item of menuItemsMain">
-        <a 
-          [routerLink]="item.path" 
+        <a
+          [routerLink]="item.path"
           routerLinkActive="active"
           (click)="onLinkClick()"
           class="nav-link text-dark d-flex align-items-center py-1 px-3 rounded mb-1">
           <i class="bi {{ item.icon }} me-3 fs-5"></i>
-          <span>{{ item.label }}</span>
+          <span>{{ item.label | translate }}</span>
         </a>
       </li>
-      <li>
-        <h6 class="submenu-hdr"><span>Principal</span></h6>
+      <!-- SuperAdmin Management Section -->
+      <li *ngIf="menuItemsSuperAdmin.length > 0">
+        <h6 class="submenu-hdr"><span>{{ 'SIDEBAR.SECTIONS.MANAGEMENT' | translate }}</span></h6>
+      </li>
+      <li class="nav-item" *ngFor="let item of menuItemsSuperAdmin">
+        <a
+          [routerLink]="item.path"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          (click)="onLinkClick()"
+          class="nav-link text-dark d-flex align-items-center py-1 px-3 rounded mb-1">
+          <i class="bi {{ item.icon }} me-3 fs-5"></i>
+          <span>{{ item.label | translate }}</span>
+        </a>
+      </li>
+      <li *ngIf="menuItemsPrincipal.length > 0">
+        <h6 class="submenu-hdr"><span>{{ 'SIDEBAR.SECTIONS.PRINCIPAL' | translate }}</span></h6>
       </li>
       <li class="nav-item" *ngFor="let item of menuItemsPrincipal">
-        <a 
-          [routerLink]="item.path" 
+        <a
+          [routerLink]="item.path"
           routerLinkActive="active"
           (click)="onLinkClick()"
           class="nav-link text-dark d-flex align-items-center py-1 px-3 rounded mb-1">
           <i class="bi {{ item.icon }} me-3 fs-5"></i>
-          <span>{{ item.label }}</span>
+          <span>{{ item.label | translate }}</span>
         </a>
       </li>
-      <li>
-        <h6 class="submenu-hdr"><span>Child</span></h6>
+      <li *ngIf="menuItemsChild.length > 0">
+        <h6 class="submenu-hdr"><span>{{ 'SIDEBAR.SECTIONS.CHILD' | translate }}</span></h6>
       </li>
       <li class="nav-item" *ngFor="let item of menuItemsChild">
-        <a 
-          [routerLink]="item.path" 
+        <a
+          [routerLink]="item.path"
           routerLinkActive="active"
           (click)="onLinkClick()"
           class="nav-link text-dark d-flex align-items-center py-1 px-3 rounded mb-1">
           <i class="bi {{ item.icon }} me-3 fs-5"></i>
-          <span>{{ item.label }}</span>
+          <span>{{ item.label | translate }}</span>
         </a>
       </li>
       <li *ngIf="menuItemsPeople.length > 0">
-        <h6 class="submenu-hdr"><span>People</span></h6>
+        <h6 class="submenu-hdr"><span>{{ 'SIDEBAR.SECTIONS.PEOPLE' | translate }}</span></h6>
       </li>
       <li class="nav-item" *ngFor="let item of menuItemsPeople">
         <a
@@ -58,33 +73,33 @@
           (click)="onLinkClick()"
           class="nav-link text-dark d-flex align-items-center py-1 px-3 rounded mb-1">
           <i class="bi {{ item.icon }} me-3 fs-5"></i>
-          <span>{{ item.usePrefix ? ('' | prefix:'child':true) : item.label }}</span>
+          <span>{{ item.usePrefix ? ('' | prefix:'child':true) : (item.label | translate) }}</span>
         </a>
       </li>
       <li *ngIf="menuItemsIa.length > 0">
-        <h6 class="submenu-hdr"><span>IA</span></h6>
+        <h6 class="submenu-hdr"><span>{{ 'SIDEBAR.SECTIONS.IA' | translate }}</span></h6>
       </li>
       <li class="nav-item" *ngFor="let item of menuItemsIa">
-        <a 
-          [routerLink]="item.path" 
+        <a
+          [routerLink]="item.path"
           routerLinkActive="active"
           (click)="onLinkClick()"
           class="nav-link text-dark d-flex align-items-center py-1 px-3 rounded mb-1">
           <i class="bi {{ item.icon }} me-3 fs-5"></i>
-          <span>{{ item.label }}</span>
+          <span>{{ item.label | translate }}</span>
         </a>
       </li>
       <li *ngIf="menuItemsSetting.length > 0">
-        <h6 class="submenu-hdr"><span>Setting</span></h6>
+        <h6 class="submenu-hdr"><span>{{ 'SIDEBAR.SECTIONS.SETTING' | translate }}</span></h6>
       </li>
       <li class="nav-item" *ngFor="let item of menuItemsSetting">
-        <a 
-          [routerLink]="item.path" 
+        <a
+          [routerLink]="item.path"
           routerLinkActive="active"
           (click)="onLinkClick()"
           class="nav-link text-dark d-flex align-items-center py-1 px-3 rounded mb-1">
           <i class="bi {{ item.icon }} me-3 fs-5"></i>
-          <span>{{ item.label }}</span>
+          <span>{{ item.label | translate }}</span>
         </a>
       </li>
     </ul>

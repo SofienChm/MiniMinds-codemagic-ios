@@ -107,6 +107,7 @@
                 [placeholder]="'ATTENDANCE_PAGE.CHOOSE_CHILD' | translate"
                 [searchable]="true"
                 [clearable]="true"
+                [searchFn]="searchChild"
                 appendTo="body">
                 <ng-template ng-label-tmp let-item="item">
                   {{ item.firstName }} {{ item.lastName }}
@@ -173,7 +174,7 @@
               <td class="name-last">
                 <div class="d-flex align-items-center">
                       <a href="#" class="child-avatar flex-shrink-0">
-                        <img loading="lazy" [src]="attendance.child?.profilePicture || 'assets/child.png'" class="img-fluid rounded-circle" alt="Child" width="80" height="80">
+                        <img loading="lazy" [src]="getChildProfilePictureUrl(attendance.child)" class="img-fluid rounded-circle" alt="Child" width="80" height="80">
                       </a>
 
                   <div class="ms-2">

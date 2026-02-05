@@ -1,0 +1,21 @@
+.consent-section {
+  border: 1px solid #dee2e6;
+
+  .form-check-label {
+    font-size: 0.9rem;
+
+    a {
+      color: #0d6efd;
+      text-decoration: underline;
+
+      &:hover {
+        color: #0a58ca;
+      }
+    }
+  }
+
+  .form-check-input:checked {
+    background-color: #198754;
+    border-color: #198754;
+  }
+}

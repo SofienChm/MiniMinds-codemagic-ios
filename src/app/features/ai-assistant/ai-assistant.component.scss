@@ -9,34 +9,107 @@
   overflow: hidden;
 }
 
+// EU AI Act Compliance: Disclosure Banner
+.ai-disclosure-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  color: white;
+  font-size: 0.85rem;
+
+  .disclosure-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+
+    i {
+      font-size: 1rem;
+      color: #00d4ff;
+    }
+  }
+
+  .disclosure-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+
+    .disclosure-label {
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #00d4ff;
+    }
+
+    .disclosure-text {
+      font-size: 0.8rem;
+      opacity: 0.9;
+    }
+  }
+
+  .btn-outline-light {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    white-space: nowrap;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }
+}
+
 .chat-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 1.5rem;
+  padding: 0.75rem 1.5rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  
+
   .header-content {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    
+
     i {
       font-size: 1.2rem;
     }
-    
+
     h3 {
       margin: 0;
       font-size: 1.1rem;
       font-weight: 600;
     }
+
+    .privacy-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 0.15rem 0.5rem;
+      border-radius: 10px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+
+      i {
+        font-size: 0.7rem;
+      }
+    }
   }
-  
+
   button {
     color: white;
     border-color: rgba(255, 255, 255, 0.3);
-    
+
     &:hover {
       background-color: rgba(255, 255, 255, 0.1);
       border-color: rgba(255, 255, 255, 0.5);
@@ -49,14 +122,14 @@
   overflow-y: auto;
   padding: 1rem;
   background: #f8f9fa;
-  
+
   .message {
     margin-bottom: 1rem;
     display: flex;
-    
+
     &.user-message {
       justify-content: flex-end;
-      
+
       .message-content {
         background: #007bff;
         color: white;
@@ -64,10 +137,10 @@
         max-width: 70%;
       }
     }
-    
+
     &.ai-message {
       justify-content: flex-start;
-      
+
       .message-content {
         background: white;
         color: #333;
@@ -76,20 +149,62 @@
         max-width: 80%;
       }
     }
+
+    // Blocked message styling
+    &.blocked-message {
+      .message-content {
+        background: #fff5f5;
+        border-color: #feb2b2;
+      }
+    }
+
+    // Disclosure message styling
+    &.disclosure-message {
+      .message-content {
+        background: linear-gradient(135deg, #e8f4fd 0%, #f0e6ff 100%);
+        border-color: #b8d4e8;
+      }
+    }
+
+    // Escalation message styling
+    &.escalation-message {
+      .message-content {
+        background: #f0fdf4;
+        border-color: #86efac;
+      }
+    }
   }
-  
+
   .message-content {
     padding: 0.75rem 1rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    
+
+    .blocked-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+      font-size: 0.8rem;
+      color: #dc2626;
+
+      i {
+        font-size: 1rem;
+      }
+    }
+
     .message-text {
       margin-bottom: 0.5rem;
-      line-height: 1.4;
+      line-height: 1.5;
+      word-wrap: break-word;
     }
-    
+
     .message-data {
       margin-top: 0.75rem;
-      
+
       .data-header {
         font-size: 0.85rem;
         font-weight: 600;
@@ -99,7 +214,7 @@
         align-items: center;
         gap: 0.25rem;
       }
-      
+
       .data-content {
         background: #f8f9fa;
         border: 1px solid #e9ecef;
@@ -113,16 +228,26 @@
         margin: 0;
       }
     }
-    
-    .message-time {
-      font-size: 0.7rem;
-      color: rgba(255, 255, 255, 0.7);
+
+    .message-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-top: 0.25rem;
-      text-align: right;
+
+      .message-time {
+        font-size: 0.7rem;
+        color: rgba(255, 255, 255, 0.7);
+      }
+
+      .compliance-badge {
+        font-size: 0.7rem;
+        color: #22c55e;
+      }
     }
   }
-  
-  .ai-message .message-content .message-time {
+
+  .ai-message .message-content .message-footer .message-time {
     color: #6c757d;
   }
 }
@@ -159,20 +284,27 @@
   padding: 1rem 1.5rem;
   background: white;
   border-top: 1px solid #e9ecef;
-  
+
   .suggestions-header {
     font-size: 0.9rem;
     color: #6c757d;
     margin-bottom: 0.75rem;
     font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    i {
+      color: #f59e0b;
+    }
   }
-  
+
   .suggestions-grid {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
   }
-  
+
   .suggestion-btn {
     background: #f8f9fa;
     border: 1px solid #dee2e6;
@@ -182,7 +314,7 @@
     color: #495057;
     cursor: pointer;
     transition: all 0.2s ease;
-    
+
     &:hover {
       background: #e9ecef;
       border-color: #adb5bd;
@@ -191,27 +323,43 @@
   }
 }
 
+// Query warning banner
+.query-warning {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.5rem;
+  background: #fffbeb;
+  border-top: 1px solid #fcd34d;
+  color: #92400e;
+  font-size: 0.8rem;
+
+  i {
+    color: #f59e0b;
+  }
+}
+
 .input-container {
   padding: 1rem 1.5rem;
   background: white;
   border-top: 1px solid #e9ecef;
-  
+
   .input-group {
     display: flex;
     gap: 0.5rem;
-    
+
     .form-control {
       flex: 1;
       border-radius: 25px;
       border: 1px solid #dee2e6;
       padding: 0.75rem 1rem;
-      
+
       &:focus {
         border-color: #007bff;
         box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
       }
     }
-    
+
     .btn {
       border-radius: 50%;
       width: 45px;
@@ -219,10 +367,49 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      
+
       &:disabled {
         opacity: 0.6;
       }
+    }
+  }
+
+  .input-hint {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: #6b7280;
+
+    i {
+      color: #9ca3af;
+    }
+  }
+}
+
+// Human contact footer
+.human-contact-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #f3f4f6;
+  border-top: 1px solid #e5e7eb;
+  font-size: 0.75rem;
+  color: #6b7280;
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: #4f46e5;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
     }
   }
 }

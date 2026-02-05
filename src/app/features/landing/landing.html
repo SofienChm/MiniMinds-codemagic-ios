@@ -1,0 +1,314 @@
+<div class="landing-page">
+  <!-- Navigation -->
+  <nav class="landing-nav">
+    <div class="nav-container">
+      <div class="logo">
+        <img src="/assets/images/icon.png" alt="MiniMinds Logo" class="logo-img">
+        <span class="logo-text">MiniMinds</span>
+      </div>
+      <div class="nav-center">
+        <a class="page-scroll" href="#features">{{ 'LANDING.NAV.FEATURES' | translate }}</a>
+        <a class="page-scroll" href="#how-it-works">{{ 'LANDING.NAV.HOW_IT_WORKS' | translate }}</a>
+        <a class="page-scroll" href="#roles">{{ 'LANDING.NAV.ROLES' | translate }}</a>
+        <a routerLink="/about">{{ 'LANDING.NAV.ABOUT' | translate }}</a>
+        <a class="page-scroll" href="#download">{{ 'LANDING.NAV.DOWNLOAD' | translate }}</a>
+      </div>
+      <div class="nav-actions">
+        <a routerLink="/request-demo" class="btn-nav btn-demo-nav">{{ 'LANDING.NAV.REQUEST_DEMO' | translate }}</a>
+        <a *ngIf="!isLoggedIn" routerLink="/login" class="btn-nav btn-login-nav">{{ 'LANDING.NAV.SIGN_IN' | translate }}</a>
+        <a *ngIf="isLoggedIn" routerLink="/dashboard" class="btn-nav btn-login-nav">{{ 'LANDING.NAV.GO_TO_DASHBOARD' | translate }}</a>
+      </div>
+      <!-- Language Selector -->
+      <div class="language-selector">
+        <button class="language-btn" (click)="toggleLanguageDropdown()">
+          <span class="lang-flag">{{ getCurrentLanguageFlag() }}</span>
+          <span class="lang-code">{{ currentLang | uppercase }}</span>
+          <i class="bi bi-chevron-down"></i>
+        </button>
+        <div class="language-dropdown" *ngIf="showLanguageDropdown">
+          <button
+            *ngFor="let lang of availableLanguages"
+            class="language-option"
+            [class.active]="lang.code === currentLang"
+            (click)="selectLanguage(lang.code)">
+            <span class="lang-name">{{ lang.nativeName }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-background">
+      <div class="gradient-blob blob-1"></div>
+      <div class="gradient-blob blob-2"></div>
+      <div class="gradient-blob blob-3"></div>
+    </div>
+    <div class="hero-container">
+      <div class="hero-content">
+        <h1 class="hero-title">
+          {{ 'LANDING.HERO.TITLE' | translate }} <span class="highlight">{{ 'LANDING.HERO.TITLE_HIGHLIGHT' | translate }}</span>
+        </h1>
+        <p class="hero-subtitle">
+          {{ 'LANDING.HERO.SUBTITLE' | translate }}
+        </p>
+        <div class="hero-actions">
+          <a routerLink="/request-demo" class="btn-hero btn-primary-hero">
+            {{ 'LANDING.HERO.REQUEST_DEMO' | translate }}
+            <i class="bi bi-play-circle"></i>
+          </a>
+          <a href="#features" class="btn-hero btn-secondary-hero">
+            {{ 'LANDING.HERO.LEARN_MORE' | translate }}
+          </a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-item">
+            <span class="stat-number">100+</span>
+            <span class="stat-label">{{ 'LANDING.HERO.STAT_DAYCARES' | translate }}</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-number">5,000+</span>
+            <span class="stat-label">{{ 'LANDING.HERO.STAT_CHILDREN' | translate }}</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-number">10,000+</span>
+            <span class="stat-label">{{ 'LANDING.HERO.STAT_PARENTS' | translate }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-image">
+        <img src="/assets/mockup.png" alt="MiniMinds App Mockup" class="mockup-image">
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="features-section">
+    <div class="section-container">
+      <div class="section-header">
+        <span class="section-badge">{{ 'LANDING.FEATURES.BADGE' | translate }}</span>
+        <h2 class="section-title">{{ 'LANDING.FEATURES.TITLE' | translate }}</h2>
+        <p class="section-subtitle">{{ 'LANDING.FEATURES.SUBTITLE' | translate }}</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon icon-attendance">
+            <i class="bi bi-qr-code-scan"></i>
+          </div>
+          <h3 class="feature-title">{{ 'LANDING.FEATURES.QR_CHECKIN.TITLE' | translate }}</h3>
+          <p class="feature-desc">{{ 'LANDING.FEATURES.QR_CHECKIN.DESC' | translate }}</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon icon-activities">
+            <i class="bi bi-journal-text"></i>
+          </div>
+          <h3 class="feature-title">{{ 'LANDING.FEATURES.DAILY_ACTIVITIES.TITLE' | translate }}</h3>
+          <p class="feature-desc">{{ 'LANDING.FEATURES.DAILY_ACTIVITIES.DESC' | translate }}</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon icon-messaging">
+            <i class="bi bi-chat-heart"></i>
+          </div>
+          <h3 class="feature-title">{{ 'LANDING.FEATURES.MESSAGING.TITLE' | translate }}</h3>
+          <p class="feature-desc">{{ 'LANDING.FEATURES.MESSAGING.DESC' | translate }}</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon icon-gallery">
+            <i class="bi bi-images"></i>
+          </div>
+          <h3 class="feature-title">{{ 'LANDING.FEATURES.GALLERY.TITLE' | translate }}</h3>
+          <p class="feature-desc">{{ 'LANDING.FEATURES.GALLERY.DESC' | translate }}</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon icon-payments">
+            <i class="bi bi-credit-card"></i>
+          </div>
+          <h3 class="feature-title">{{ 'LANDING.FEATURES.PAYMENTS.TITLE' | translate }}</h3>
+          <p class="feature-desc">{{ 'LANDING.FEATURES.PAYMENTS.DESC' | translate }}</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon icon-notifications">
+            <i class="bi bi-bell"></i>
+          </div>
+          <h3 class="feature-title">{{ 'LANDING.FEATURES.NOTIFICATIONS.TITLE' | translate }}</h3>
+          <p class="feature-desc">{{ 'LANDING.FEATURES.NOTIFICATIONS.DESC' | translate }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section id="how-it-works" class="how-it-works-section">
+    <div class="section-container">
+      <div class="section-header">
+        <span class="section-badge">{{ 'LANDING.HOW_IT_WORKS.BADGE' | translate }}</span>
+        <h2 class="section-title">{{ 'LANDING.HOW_IT_WORKS.TITLE' | translate }}</h2>
+      </div>
+      <div class="steps-container">
+        <div class="step-item">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h3>{{ 'LANDING.HOW_IT_WORKS.STEP1.TITLE' | translate }}</h3>
+            <p>{{ 'LANDING.HOW_IT_WORKS.STEP1.DESC' | translate }}</p>
+          </div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-item">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h3>{{ 'LANDING.HOW_IT_WORKS.STEP2.TITLE' | translate }}</h3>
+            <p>{{ 'LANDING.HOW_IT_WORKS.STEP2.DESC' | translate }}</p>
+          </div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step-item">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h3>{{ 'LANDING.HOW_IT_WORKS.STEP3.TITLE' | translate }}</h3>
+            <p>{{ 'LANDING.HOW_IT_WORKS.STEP3.DESC' | translate }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Roles Section -->
+  <section id="roles" class="roles-section">
+    <div class="section-container">
+      <div class="section-header">
+        <span class="section-badge">{{ 'LANDING.ROLES.BADGE' | translate }}</span>
+        <h2 class="section-title">{{ 'LANDING.ROLES.TITLE' | translate }}</h2>
+      </div>
+      <div class="roles-grid">
+        <div class="role-card role-admin">
+          <div class="role-icon">
+            <i class="bi bi-shield-check"></i>
+          </div>
+          <h3>{{ 'LANDING.ROLES.ADMIN.TITLE' | translate }}</h3>
+          <ul class="role-features">
+            <li><i class="bi bi-check2"></i> {{ 'LANDING.ROLES.ADMIN.FEATURE1' | translate }}</li>
+            <li><i class="bi bi-check2"></i> {{ 'LANDING.ROLES.ADMIN.FEATURE2' | translate }}</li>
+            <li><i class="bi bi-check2"></i> {{ 'LANDING.ROLES.ADMIN.FEATURE3' | translate }}</li>
+            <li><i class="bi bi-check2"></i> {{ 'LANDING.ROLES.ADMIN.FEATURE4' | translate }}</li>
+          </ul>
+        </div>
+        <div class="role-card role-teacher">
+          <div class="role-icon">
+            <i class="bi bi-mortarboard"></i>
+          </div>
+          <h3>{{ 'LANDING.ROLES.TEACHER.TITLE' | translate }}</h3>
+          <ul class="role-features">
+            <li><i class="bi bi-check2"></i> {{ 'LANDING.ROLES.TEACHER.FEATURE1' | translate }}</li>
+            <li><i class="bi bi-check2"></i> {{ 'LANDING.ROLES.TEACHER.FEATURE2' | translate }}</li>
+            <li><i class="bi bi-check2"></i> {{ 'LANDING.ROLES.TEACHER.FEATURE3' | translate }}</li>
+            <li><i class="bi bi-check2"></i> {{ 'LANDING.ROLES.TEACHER.FEATURE4' | translate }}</li>
+          </ul>
+        </div>
+        <div class="role-card role-parent">
+          <div class="role-icon">
+            <i class="bi bi-people-fill"></i>
+          </div>
+          <h3>{{ 'LANDING.ROLES.PARENT.TITLE' | translate }}</h3>
+          <ul class="role-features">
+            <li><i class="bi bi-check2"></i> {{ 'LANDING.ROLES.PARENT.FEATURE1' | translate }}</li>
+            <li><i class="bi bi-check2"></i> {{ 'LANDING.ROLES.PARENT.FEATURE2' | translate }}</li>
+            <li><i class="bi bi-check2"></i> {{ 'LANDING.ROLES.PARENT.FEATURE3' | translate }}</li>
+            <li><i class="bi bi-check2"></i> {{ 'LANDING.ROLES.PARENT.FEATURE4' | translate }}</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Download Section -->
+  <section id="download" class="download-section">
+    <div class="section-container">
+      <div class="download-grid">
+        <div class="download-content">
+          <span class="section-badge">{{ 'LANDING.DOWNLOAD.BADGE' | translate }}</span>
+          <h2 class="download-title">{{ 'LANDING.DOWNLOAD.TITLE' | translate }}</h2>
+          <p class="download-subtitle">
+            {{ 'LANDING.DOWNLOAD.SUBTITLE' | translate }}
+          </p>
+          <div class="download-features">
+            <div class="download-feature">
+              <i class="bi bi-check-circle-fill"></i>
+              <span>{{ 'LANDING.DOWNLOAD.FEATURE1' | translate }}</span>
+            </div>
+            <div class="download-feature">
+              <i class="bi bi-check-circle-fill"></i>
+              <span>{{ 'LANDING.DOWNLOAD.FEATURE2' | translate }}</span>
+            </div>
+            <div class="download-feature">
+              <i class="bi bi-check-circle-fill"></i>
+              <span>{{ 'LANDING.DOWNLOAD.FEATURE3' | translate }}</span>
+            </div>
+            <div class="download-feature">
+              <i class="bi bi-check-circle-fill"></i>
+              <span>{{ 'LANDING.DOWNLOAD.FEATURE4' | translate }}</span>
+            </div>
+          </div>
+          <div class="store-buttons">
+            <a href="#" class="store-btn app-store">
+              <i class="bi bi-apple"></i>
+              <div class="store-text">
+                <span class="store-label">{{ 'LANDING.DOWNLOAD.DOWNLOAD_ON' | translate }}</span>
+                <span class="store-name">{{ 'LANDING.DOWNLOAD.APP_STORE' | translate }}</span>
+              </div>
+            </a>
+            <a href="#" class="store-btn play-store">
+              <i class="bi bi-google-play"></i>
+              <div class="store-text">
+                <span class="store-label">{{ 'LANDING.DOWNLOAD.GET_IT_ON' | translate }}</span>
+                <span class="store-name">{{ 'LANDING.DOWNLOAD.PLAY_STORE' | translate }}</span>
+              </div>
+            </a>
+          </div>
+        </div>
+        <div class="download-image">
+          <div class="phone-frame">
+            <img src="/assets/mockup.png" alt="MiniMinds Mobile App" class="app-screenshot">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="cta-container">
+      <div class="cta-content">
+        <h2>{{ 'LANDING.CTA.TITLE' | translate }}</h2>
+        <p>{{ 'LANDING.CTA.SUBTITLE' | translate }}</p>
+        <a *ngIf="!isLoggedIn" routerLink="/login" class="btn-cta">
+          {{ 'LANDING.CTA.GET_STARTED' | translate }}
+          <i class="bi bi-arrow-right"></i>
+        </a>
+        <a *ngIf="isLoggedIn" routerLink="/dashboard" class="btn-cta">
+          {{ 'LANDING.NAV.GO_TO_DASHBOARD' | translate }}
+          <i class="bi bi-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="landing-footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <img src="/assets/images/icon.png" alt="MiniMinds Logo" class="footer-logo">
+        <span class="footer-brand-name">MiniMinds</span>
+      </div>
+      <div class="footer-links">
+        <a routerLink="/privacy-policy">{{ 'LANDING.FOOTER.PRIVACY_POLICY' | translate }}</a>
+        <a routerLink="/terms-of-service">{{ 'LANDING.FOOTER.TERMS_OF_SERVICE' | translate }}</a>
+      </div>
+      <div class="footer-copyright">
+        &copy; {{ currentYear }} {{ 'LANDING.FOOTER.COPYRIGHT' | translate }}
+      </div>
+    </div>
+  </footer>
+</div>

@@ -35,4 +35,16 @@ export class EventParticipantsService {
   rejectParticipant(id: number): Observable<void> {
     return this.http.put<void>(`${this.apiUrl}/${id}/reject`, {});
   }
+
+  requestCancellation(id: number): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/${id}/request-cancellation`, {});
+  }
+
+  approveCancellation(id: number): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/${id}/approve-cancellation`, {});
+  }
+
+  rejectCancellation(id: number): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/${id}/reject-cancellation`, {});
+  }
 }

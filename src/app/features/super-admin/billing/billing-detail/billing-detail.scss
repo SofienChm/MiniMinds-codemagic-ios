@@ -1,0 +1,91 @@
+.tenant-avatar {
+  .avatar-placeholder-lg {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 24px;
+  }
+}
+
+.plan-badge {
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+
+  &.plan-free {
+    background-color: #e9ecef;
+    color: #495057;
+  }
+
+  &.plan-basic {
+    background-color: #cce5ff;
+    color: #004085;
+  }
+
+  &.plan-premium {
+    background-color: #d4edda;
+    color: #155724;
+  }
+
+  &.plan-enterprise {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+}
+
+.summary-item {
+  padding: 0.5rem 0;
+}
+
+.dropdown-menu {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e9ecef;
+
+  .dropdown-item {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+
+    &:hover {
+      background-color: #f8f9fa;
+    }
+
+    &.text-danger:hover {
+      background-color: #fff5f5;
+    }
+  }
+}
+.mobile-view-superadmin {
+  .header-info {
+    background: var(--secondary-color);
+    padding: 40px 20px 23px;
+    border-radius: 0 0 15px 15px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    justify-content: center;
+    h5 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #fff;
+    }
+    .page-back {
+      i {
+        background: rgba(255, 255, 255, 0.2117647059);
+        padding: 4px 8px;
+        border-radius: 12px;
+        position: absolute;
+        left: 20px;
+        bottom: 19px;
+        font-size: 15px;
+      }
+    }
+  }
+}

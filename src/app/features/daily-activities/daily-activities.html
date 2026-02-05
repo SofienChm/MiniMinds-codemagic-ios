@@ -362,6 +362,17 @@
 
           <!-- Activity Form -->
           <div *ngIf="newActivity.activityType">
+            <!-- Apply to all children checkbox -->
+            <div class="mb-3 p-3 bg-light rounded">
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="applyToAllChildren" [(ngModel)]="applyToAllChildren">
+                <label class="form-check-label" for="applyToAllChildren">
+                  <i class="bi bi-people-fill me-2"></i>{{ 'DAILY_REPORT.APPLY_TO_ALL_CHILDREN' | translate }}
+                </label>
+              </div>
+              <small class="form-text text-muted">{{ 'DAILY_REPORT.APPLY_TO_ALL_CHILDREN_HINT' | translate }}</small>
+            </div>
+
             <div class="row g-3">
               <div class="col-md-6">
                 <label class="form-label">{{ 'DAILY_REPORT.TIME' | translate }}</label>

@@ -62,12 +62,77 @@
 
       <div class="mb-3">
         <label class="form-label">Confirm Password</label>
-        <input 
-          type="password" 
-          class="form-control" 
-          [(ngModel)]="registerData.confirmPassword" 
-          name="confirmPassword" 
+        <input
+          type="password"
+          class="form-control"
+          [(ngModel)]="registerData.confirmPassword"
+          name="confirmPassword"
           required>
+      </div>
+
+      <!-- COPPA Compliance Section -->
+      <div class="consent-section mb-4 p-3 bg-light rounded">
+        <h6 class="fw-bold mb-3">Legal Agreements</h6>
+
+        <div class="form-check mb-2">
+          <input
+            type="checkbox"
+            class="form-check-input"
+            id="isOver18"
+            [(ngModel)]="registerData.isOver18"
+            name="isOver18"
+            required>
+          <label class="form-check-label" for="isOver18">
+            I confirm that I am <strong>18 years of age or older</strong>
+          </label>
+        </div>
+
+        <div class="form-check mb-2">
+          <input
+            type="checkbox"
+            class="form-check-input"
+            id="acceptTerms"
+            [(ngModel)]="registerData.acceptedTermsOfService"
+            name="acceptedTermsOfService"
+            required>
+          <label class="form-check-label" for="acceptTerms">
+            I have read and agree to the
+            <a routerLink="/terms-of-service" target="_blank">Terms of Service</a>
+          </label>
+        </div>
+
+        <div class="form-check mb-2">
+          <input
+            type="checkbox"
+            class="form-check-input"
+            id="acceptPrivacy"
+            [(ngModel)]="registerData.acceptedPrivacyPolicy"
+            name="acceptedPrivacyPolicy"
+            required>
+          <label class="form-check-label" for="acceptPrivacy">
+            I have read and agree to the
+            <a routerLink="/privacy-policy" target="_blank">Privacy Policy</a>
+          </label>
+        </div>
+
+        <div class="form-check mb-2">
+          <input
+            type="checkbox"
+            class="form-check-input"
+            id="parentalConsent"
+            [(ngModel)]="registerData.parentalConsentAcknowledged"
+            name="parentalConsentAcknowledged"
+            required>
+          <label class="form-check-label" for="parentalConsent">
+            I understand that this app collects information about children and I, as a parent/guardian,
+            <strong>provide consent</strong> for data collection in accordance with COPPA regulations
+          </label>
+        </div>
+
+        <small class="text-muted d-block mt-2">
+          <i class="bi bi-info-circle me-1"></i>
+          By registering, you acknowledge that MiniMinds collects children's data only with verifiable parental consent.
+        </small>
       </div>
 
       <div *ngIf="errorMessage" class="alert alert-danger">

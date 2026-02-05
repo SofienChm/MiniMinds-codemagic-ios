@@ -14,6 +14,7 @@ export interface CachedResponse {
 export class OfflineCacheService {
   private readonly STORAGE_KEY = 'miniminds_http_cache';
   private readonly DEFAULT_TTL = 3600000; // 1 hour in milliseconds
+  private readonly MAX_CACHE_ENTRIES = 50; // Limit cache entries to prevent quota issues
   private cache = new Map<string, CachedResponse>();
 
   constructor() {
@@ -25,6 +26,11 @@ export class OfflineCacheService {
    * Cache a GET response
    */
   set(url: string, response: HttpResponse<any>, ttl: number = this.DEFAULT_TTL): void {
+    // Enforce max cache size
+    if (this.cache.size >= this.MAX_CACHE_ENTRIES && !this.cache.has(url)) {
+      this.clearOldest(5);
+    }
+
     const cached: CachedResponse = {
       url,
       response,
@@ -166,7 +172,9 @@ export class OfflineCacheService {
   /**
    * Save cache to localStorage
    */
-  private saveCache(): void {
+  private saveCache(retryCount: number = 0): void {
+    const MAX_RETRIES = 3;
+
     try {
       const serializable = Array.from(this.cache.values()).map(item => ({
         url: item.url,
@@ -183,13 +191,22 @@ export class OfflineCacheService {
 
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(serializable));
     } catch (error) {
-      console.error('[OfflineCache] Error saving cache:', error);
+      // If localStorage is full, clear old cache and retry
+      if (error instanceof DOMException &&
+          (error.name === 'QuotaExceededError' || error.code === 22)) {
 
-      // If localStorage is full, clear old cache
-      if (error instanceof DOMException && error.name === 'QuotaExceededError') {
-        console.warn('[OfflineCache] Storage quota exceeded, clearing old cache');
-        this.clearOldest(5);
-        this.saveCache(); // Try again
+        if (retryCount < MAX_RETRIES) {
+          console.warn(`[OfflineCache] Storage quota exceeded, clearing old cache (attempt ${retryCount + 1}/${MAX_RETRIES})`);
+          this.clearOldest(10); // Clear more entries each retry
+          this.saveCache(retryCount + 1);
+        } else {
+          // Give up and clear all cache
+          console.warn('[OfflineCache] Storage quota still exceeded after retries, clearing all cache');
+          this.cache.clear();
+          localStorage.removeItem(this.STORAGE_KEY);
+        }
+      } else {
+        console.error('[OfflineCache] Error saving cache:', error);
       }
     }
   }

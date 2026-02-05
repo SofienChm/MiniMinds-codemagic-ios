@@ -3,6 +3,7 @@ import { environment } from '../../../environments/environment';
 export class ApiConfig {
   static readonly BASE_URL = environment.apiUrl;
   static readonly HUB_URL = environment.apiUrl.replace('/api', '');
+  static readonly STATIC_URL = environment.apiUrl.replace('/api', '');
 
   static readonly ENDPOINTS = {
     AUTH: `${ApiConfig.BASE_URL}/auth`,
@@ -18,6 +19,7 @@ export class ApiConfig {
     DAILY_ACTIVITIES: `${ApiConfig.BASE_URL}/dailyactivities`,
     NOTIFICATIONS: `${ApiConfig.BASE_URL}/notifications`,
     MESSAGES: `${ApiConfig.BASE_URL}/messages`,
+    MAIL: `${ApiConfig.BASE_URL}/mail`,
     CLASSES: `${ApiConfig.BASE_URL}/classes`,
     SETTINGS: `${ApiConfig.BASE_URL}/settings`,
     PAYMENT: `${ApiConfig.BASE_URL}/Payment`,
@@ -27,6 +29,12 @@ export class ApiConfig {
     FOOD_ITEMS: `${ApiConfig.BASE_URL}/fooditems`,
     MENUS: `${ApiConfig.BASE_URL}/menus`,
     MENU_SELECTIONS: `${ApiConfig.BASE_URL}/menuselections`,
-    DEVICE_TOKENS: `${ApiConfig.BASE_URL}/devicetokens`
+    DEVICE_TOKENS: `${ApiConfig.BASE_URL}/devicetokens`,
+    TENANTS: `${ApiConfig.BASE_URL}/tenants`,
+    TENANT_FEATURES: `${ApiConfig.BASE_URL}/tenantfeatures`,
+    APPOINTMENTS: `${ApiConfig.BASE_URL}/appointments`,
+    STATIC_FEES: `${ApiConfig.BASE_URL}/staticfees`,
+    NOTIFICATION_PREFERENCES: `${ApiConfig.BASE_URL}/notificationpreferences`,
+    DEMO_REQUESTS: `${ApiConfig.BASE_URL}/demorequests`
   };
 }

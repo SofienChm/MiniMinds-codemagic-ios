@@ -7,4 +7,7 @@ export interface AuthResponse {
   preferredLanguage?: string;
   expiration: Date;
   role: string;
+  // Multi-tenancy
+  tenantId?: number;
+  tenantName?: string;
 }

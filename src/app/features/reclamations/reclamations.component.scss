@@ -743,6 +743,9 @@ ion-content.parent-reclamations {
     justify-content: center;
     color: #FFFFFF;
     margin-right: 12px;
+    i{
+        padding: 10px;
+    }
 }
 
 .nd-field-input {
@@ -816,7 +819,7 @@ ion-content.parent-reclamations {
 .nd-submit-btn {
     flex: 1;
     padding: 14px;
-    background: linear-gradient(135deg, #9B6BCC 0%, #7B4FB8 100%);
+    background: var(--gradient-primary);
     border: none;
     border-radius: 12px;
     font-size: 14px;

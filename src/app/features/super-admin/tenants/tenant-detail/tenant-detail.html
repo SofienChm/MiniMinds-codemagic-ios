@@ -1,0 +1,240 @@
+<app-header-superadmin></app-header-superadmin>
+<div *ngIf="isMobile()" class="mobile-view-superadmin">
+  <div class="header-info">
+    <div class="title-icons">
+      <div class="page-back" (click)="back()">
+        <i class="bi bi-arrow-left"></i>
+      </div>
+    </div>
+    <div class="d-flex">
+      <div class="overflow-hidden">
+        <h5 class="name simple">Detail daycare</h5>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Icons Section -->
+  <div class="action-icons-section" *ngIf="tenant">
+    <button class="action-icon-btn edit" (click)="editTenant()">
+      <i class="bi bi-pencil-square"></i>
+      <span>Edit</span>
+    </button>
+    <button class="action-icon-btn delete" (click)="deleteTenant()">
+      <i class="bi bi-trash"></i>
+      <span>Delete</span>
+    </button>
+    <button class="action-icon-btn activate" (click)="toggleStatus()">
+      <i class="bi" [ngClass]="tenant.isActive ? 'bi-pause-circle' : 'bi-play-circle'"></i>
+      <span>{{ tenant.isActive ? 'Deactivate' : 'Activate' }}</span>
+    </button>
+    <button class="action-icon-btn manage" (click)="manageFeatures()">
+      <i class="bi bi-toggles"></i>
+      <span>Manage</span>
+    </button>
+  </div>
+</div>
+<div [class]="isMobile() ? 'mobileview mobile-view container-fluid mt-4' : 'container-fluid mt-4'">
+  <app-title-page *ngIf=" !isMobile()"
+    [title]="tenant?.name || ('SUPER_ADMIN.DAYCARE_DETAILS' | translate)"
+    [subtitle]="'SUPER_ADMIN.DAYCARE_DETAILS_SUBTITLE' | translate"
+    icon="bi bi-building"
+    [breadcrumbs]="breadcrumbs"
+    [actions]="getActions()">
+  </app-title-page>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+  <!-- Tenant Details -->
+  <div *ngIf="tenant && !loading" class="row">
+    <!-- Main Info Card -->
+    <div class="col-lg-8">
+      <div class="card card-general shadow-sm mb-3">
+        <div class="card-header d-flex align-items-center">
+          <div class="tenant-avatar me-3">
+            <img *ngIf="tenant.logo" [src]="tenant.logo" [alt]="tenant.name" class="rounded-circle" width="60" height="60">
+            <div *ngIf="!tenant.logo" class="avatar-placeholder-lg">
+              {{ tenant.name.charAt(0).toUpperCase() }}
+            </div>
+          </div>
+          <div>
+            <h4 class="mb-1">{{ tenant.name }}</h4>
+            <span class="badge" [ngClass]="tenant.isActive ? 'bg-success' : 'bg-danger'">
+              {{ tenant.isActive ? ('SUPER_ADMIN.ACTIVE' | translate) : ('SUPER_ADMIN.INACTIVE' | translate) }}
+            </span>
+            <span class="badge plan-badge ms-2" [ngClass]="'plan-' + tenant.subscriptionPlan.toLowerCase()">
+              {{ tenant.subscriptionPlan }}
+            </span>
+          </div>
+        </div>
+        <div class="card-body">
+          <!-- Basic Information -->
+          <div class="info-section mb-4">
+            <h6 class="section-title">
+              <i class="bi bi-info-circle me-2"></i>
+              {{ 'SUPER_ADMIN.BASIC_INFO' | translate }}
+            </h6>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="info-item">
+                  <label>{{ 'SUPER_ADMIN.DAYCARE_NAME' | translate }}</label>
+                  <p>{{ tenant.name }}</p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="info-item">
+                  <label>{{ 'SUPER_ADMIN.SUBDOMAIN' | translate }}</label>
+                  <p>{{ tenant.subdomain || 'N/A' }}</p>
+                </div>
+              </div>
+              <div class="col-md-12">
+                <div class="info-item">
+                  <label>{{ 'SUPER_ADMIN.ADDRESS' | translate }}</label>
+                  <p>{{ tenant.address || 'N/A' }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contact Information -->
+          <div class="info-section mb-4">
+            <h6 class="section-title">
+              <i class="bi bi-telephone me-2"></i>
+              {{ 'SUPER_ADMIN.CONTACT_INFO' | translate }}
+            </h6>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="info-item">
+                  <label>{{ 'SUPER_ADMIN.EMAIL' | translate }}</label>
+                  <p>
+                    <a *ngIf="tenant.email" [href]="'mailto:' + tenant.email">{{ tenant.email }}</a>
+                    <span *ngIf="!tenant.email">N/A</span>
+                  </p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="info-item">
+                  <label>{{ 'SUPER_ADMIN.PHONE' | translate }}</label>
+                  <p>
+                    <a *ngIf="tenant.phone" [href]="'tel:' + tenant.phone">{{ tenant.phone }}</a>
+                    <span *ngIf="!tenant.phone">N/A</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Settings -->
+          <div class="info-section">
+            <h6 class="section-title">
+              <i class="bi bi-gear me-2"></i>
+              {{ 'SUPER_ADMIN.SETTINGS' | translate }}
+            </h6>
+            <div class="row">
+              <div class="col-md-4">
+                <div class="info-item">
+                  <label>{{ 'SUPER_ADMIN.TIMEZONE' | translate }}</label>
+                  <p>{{ getTimezoneDisplay(tenant.timezone) }}</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="info-item">
+                  <label>{{ 'SUPER_ADMIN.CURRENCY' | translate }}</label>
+                  <p>{{ getCurrencyDisplay(tenant.currency) }}</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="info-item">
+                  <label>{{ 'SUPER_ADMIN.LANGUAGE' | translate }}</label>
+                  <p>{{ getLanguageDisplay(tenant.language) }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Sidebar -->
+    <div class="col-lg-4">
+      <!-- Quick Stats -->
+      <div class="card card-general shadow-sm mb-3">
+        <div class="card-header">
+          <h6 class="mb-0">
+            <i class="bi bi-bar-chart me-2"></i>
+            {{ 'SUPER_ADMIN.QUICK_STATS' | translate }}
+          </h6>
+        </div>
+        <div class="card-body">
+          <div class="stat-item">
+            <div class="stat-icon bg-primary-light">
+              <i class="bi bi-people"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-value">{{ tenant.userCount }}</span>
+              <span class="stat-label">{{ 'SUPER_ADMIN.USERS' | translate }}</span>
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon bg-success-light">
+              <i class="bi bi-person-hearts"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-value">{{ tenant.childCount }}</span>
+              <span class="stat-label">{{ 'SUPER_ADMIN.CHILDREN' | translate }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Subscription Info -->
+      <div class="card card-general shadow-sm mb-3">
+        <div class="card-header">
+          <h6 class="mb-0">
+            <i class="bi bi-credit-card me-2"></i>
+            {{ 'SUPER_ADMIN.SUBSCRIPTION' | translate }}
+          </h6>
+        </div>
+        <div class="card-body">
+          <div class="info-item">
+            <label>{{ 'SUPER_ADMIN.CURRENT_PLAN' | translate }}</label>
+            <p>
+              <span class="badge plan-badge" [ngClass]="'plan-' + tenant.subscriptionPlan.toLowerCase()">
+                {{ tenant.subscriptionPlan }}
+              </span>
+            </p>
+          </div>
+          <div class="info-item" *ngIf="tenant.subscriptionExpiresAt">
+            <label>{{ 'SUPER_ADMIN.EXPIRES_AT' | translate }}</label>
+            <p>{{ formatDate(tenant.subscriptionExpiresAt) }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dates -->
+      <div class="card card-general shadow-sm">
+        <div class="card-header">
+          <h6 class="mb-0">
+            <i class="bi bi-calendar me-2"></i>
+            {{ 'SUPER_ADMIN.DATES' | translate }}
+          </h6>
+        </div>
+        <div class="card-body">
+          <div class="info-item">
+            <label>{{ 'SUPER_ADMIN.CREATED_AT' | translate }}</label>
+            <p>{{ formatDate(tenant.createdAt) }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

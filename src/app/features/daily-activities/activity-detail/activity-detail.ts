@@ -37,7 +37,9 @@ interface ActivityPhoto {
   fileSize: number;
   title?: string;
   description?: string;
-  thumbnailData: string;
+  thumbnailData?: string;
+  thumbnailUrl?: string;
+  imageUrl?: string;
   createdAt: string;
   uploadedByName?: string;
 }
@@ -507,10 +509,16 @@ export class ActivityDetail implements OnInit, OnDestroy {
 
   loadFullImage(photoId: number): void {
     this.loadingFullImage = true;
-    this.http.get<{ id: number, imageData: string }>(`${ApiConfig.ENDPOINTS.PHOTOS}/${photoId}`)
+    this.http.get<{ id: number, imageData?: string, imageUrl?: string }>(`${ApiConfig.ENDPOINTS.PHOTOS}/${photoId}`)
       .subscribe({
         next: (photo) => {
-          this.fullImageData = photo.imageData;
+          if (photo.imageUrl) {
+            // File-based URL - construct full URL using API base
+            this.fullImageData = ApiConfig.HUB_URL + photo.imageUrl;
+          } else {
+            // Fallback to Base64 data
+            this.fullImageData = photo.imageData || null;
+          }
           this.loadingFullImage = false;
         },
         error: (error) => {
@@ -567,6 +575,19 @@ export class ActivityDetail implements OnInit, OnDestroy {
     if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
 
     return date.toLocaleDateString();
+  }
+
+  /**
+   * Get the thumbnail source URL for a photo
+   * Handles both file-based URLs and Base64 data
+   */
+  getThumbnailSrc(photo: ActivityPhoto): string {
+    if (photo.thumbnailUrl) {
+      // File-based URL - construct full URL using API base
+      return ApiConfig.HUB_URL + photo.thumbnailUrl;
+    }
+    // Fallback to Base64 data
+    return photo.thumbnailData || '';
   }
 
   setupBreadcrumbs(): void {

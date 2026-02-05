@@ -106,7 +106,7 @@
                   }}</label>
                 <div class="input-with-icon">
                   <i class="bi bi-phone input-icon"></i>
-                  <input type="text" class="form-input" [class.is-invalid]="isFieldInvalid('phoneNumber')"
+                  <input type="tel" class="form-input" [class.is-invalid]="isFieldInvalid('phoneNumber')"
                     formControlName="phoneNumber" [placeholder]="'EDIT_PARENT.PHONE_PLACEHOLDER' | translate">
                 </div>
                 <div *ngIf="isFieldInvalid('phoneNumber')" class="error-message">
@@ -406,6 +406,27 @@
                 <strong>{{ 'EDIT_PARENT.MEDICAL_NOTES' | translate }}:</strong> {{ child.medicalNotes }}
               </small>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Danger Zone - Delete Account -->
+      <div class="card-add-pages danger-zone-card">
+        <div class="add-form form-section">
+          <div class="section-header danger-header">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <h4>{{ 'SETTINGS.DANGER_ZONE' | translate }}</h4>
+          </div>
+          <div class="danger-zone-content">
+            <div class="danger-zone-info">
+              <h5>{{ 'SETTINGS.DELETE_ACCOUNT' | translate }}</h5>
+              <p>{{ 'SETTINGS.DELETE_ACCOUNT_DESC' | translate }}</p>
+            </div>
+            <button type="button" class="btn-delete-account" (click)="deleteAccount()" [disabled]="deleting">
+              <span *ngIf="deleting" class="spinner-border spinner-border-sm me-2"></span>
+              <i *ngIf="!deleting" class="bi bi-trash3"></i>
+              {{ deleting ? ('SETTINGS.DELETING' | translate) : ('SETTINGS.DELETE_ACCOUNT_BTN' | translate) }}
+            </button>
           </div>
         </div>
       </div>

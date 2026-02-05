@@ -61,7 +61,7 @@ export class FeeComponent implements OnInit, AfterViewInit, OnDestroy {
   // Bulk fee form
   bulkFee = {
     amount: 0,
-    description: 'Monthly Fee',
+    description: '',
     dueDate: ''
   };
 
@@ -265,10 +265,13 @@ export class FeeComponent implements OnInit, AfterViewInit, OnDestroy {
     const nextMonth = new Date();
     nextMonth.setMonth(nextMonth.getMonth() + 1);
     nextMonth.setDate(1);
-    
+
+    const currentLang = this.translateService.currentLang || 'en';
+    const monthYear = nextMonth.toLocaleDateString(currentLang, { month: 'long', year: 'numeric' });
+
     this.bulkFee = {
       amount: 0,
-      description: `Monthly Fee - ${nextMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`,
+      description: `${this.translateService.instant('FEES_PAGE.MONTHLY_FEE')} - ${monthYear}`,
       dueDate: nextMonth.toISOString().split('T')[0]
     };
     this.showBulkFeeModal = true;

@@ -13,6 +13,7 @@ import { environment } from '../../../../environments/environment';
 import { ParentChildHeaderComponent } from '../../../shared/components/parent-child-header/parent-child-header.component';
 import { ImageCropperModalComponent } from '../../../shared/components/image-cropper-modal/image-cropper-modal.component';
 import { Location } from '@angular/common';
+import { SimpleToastService } from '../../../core/services/simple-toast.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -60,7 +61,8 @@ export class EditProfile implements OnInit {
     private fb: FormBuilder,
     private location: Location,
     private translate: TranslateService,
-    private languageService: LanguageService
+    private languageService: LanguageService,
+    private simpleToastService: SimpleToastService
   ) {
     this.initBreadcrumbs();
   }
@@ -107,7 +109,14 @@ export class EditProfile implements OnInit {
             address: parent.address,
             emergencyContact: parent.emergencyContact
           });
-          this.imagePreview = parent.profilePicture || null;
+          // Use profilePictureUrl (file-based) if available, otherwise fall back to profilePicture (base64)
+          if (parent.profilePictureUrl) {
+            this.imagePreview = parent.profilePictureUrl.startsWith('/')
+              ? environment.apiUrl.replace('/api', '') + parent.profilePictureUrl
+              : parent.profilePictureUrl;
+          } else {
+            this.imagePreview = parent.profilePicture || null;
+          }
         },
         error: (err) => {
           console.error('Failed to load parent data:', err);
@@ -118,11 +127,14 @@ export class EditProfile implements OnInit {
   }
 
   initForms() {
+    // Phone number is only required for Parents
+    const phoneValidators = this.isParent() ? [Validators.required, CustomValidators.phone] : [];
+
     this.profileForm = this.fb.group({
       firstName: ['', [Validators.required, CustomValidators.noWhitespace, CustomValidators.alphaOnly]],
       lastName: ['', [Validators.required, CustomValidators.noWhitespace, CustomValidators.alphaOnly]],
       email: ['', [Validators.required, CustomValidators.email]],
-      phoneNumber: ['', [Validators.required, CustomValidators.phone]],
+      phoneNumber: ['', phoneValidators],
       address: [''],
       emergencyContact: [''],
       profilePicture: ['']
@@ -167,9 +179,10 @@ export class EditProfile implements OnInit {
 
     this.saving = true;
     this.errorMessage = '';
-    
+
     const parentId = this.authService.getParentId();
     if (parentId) {
+      // Parent profile update - uses parent API
       this.http.get<any>(`${environment.apiUrl}/parents/${parentId}`).subscribe({
         next: (parent) => {
           const updatedData = {
@@ -182,7 +195,7 @@ export class EditProfile implements OnInit {
             emergencyContact: this.profileForm.value.emergencyContact,
             profilePicture: this.imagePreview || parent.profilePicture
           };
-          
+
           this.http.put(`${environment.apiUrl}/parents/${parentId}`, updatedData).subscribe({
             next: () => {
               const currentUser = this.authService.getCurrentUser();
@@ -206,6 +219,41 @@ export class EditProfile implements OnInit {
         },
         error: (error) => {
           this.errorMessage = 'Failed to load profile data';
+          this.saving = false;
+        }
+      });
+    } else {
+      // Admin/Teacher profile update - uses auth API
+      const updatedData = {
+        firstName: this.profileForm.value.firstName,
+        lastName: this.profileForm.value.lastName,
+        email: this.profileForm.value.email,
+        profilePicture: this.imagePreview || ''
+      };
+
+      this.http.put(`${environment.apiUrl}/auth/update-profile`, updatedData).subscribe({
+        next: () => {
+          const currentUser = this.authService.getCurrentUser();
+          if (currentUser) {
+            this.authService.updateCurrentUser({
+              ...currentUser,
+              firstName: updatedData.firstName,
+              lastName: updatedData.lastName,
+              email: updatedData.email,
+              profilePicture: updatedData.profilePicture || currentUser.profilePicture
+            });
+          }
+          Swal.fire({
+            icon: 'success',
+            title: this.translate.instant('EDIT_PROFILE.SUCCESS'),
+            timer: 2000,
+            showConfirmButton: false
+          });
+          this.router.navigate(['/dashboard']);
+          this.saving = false;
+        },
+        error: (error) => {
+          this.errorMessage = error.error?.message || 'Failed to update profile';
           this.saving = false;
         }
       });
@@ -245,21 +293,14 @@ export class EditProfile implements OnInit {
         // Update breadcrumbs after language change
         this.initBreadcrumbs();
 
-        Swal.fire({
-          icon: 'success',
-          title: this.translate.instant('SETTINGS.SUCCESS'),
-          text: this.translate.instant('SETTINGS.LANGUAGE_SAVED'),
-          timer: 2000,
-          showConfirmButton: false
-        });
+        this.simpleToastService.success(
+          this.translate.instant('SETTINGS.LANGUAGE_SAVED')
+        );
       },
       error: () => {
-        Swal.fire({
-          icon: 'warning',
-          title: this.translate.instant('SETTINGS.PARTIAL_SUCCESS'),
-          text: this.translate.instant('SETTINGS.LANGUAGE_SAVED_LOCALLY'),
-          timer: 2000
-        });
+        this.simpleToastService.warning(
+          this.translate.instant('SETTINGS.LANGUAGE_SAVED_LOCALLY')
+        );
       }
     });
   }
@@ -333,22 +374,19 @@ export class EditProfile implements OnInit {
 
     // Validate file type
     if (!this.ALLOWED_IMAGE_TYPES.includes(file.type)) {
-      Swal.fire({
-        icon: 'error',
-        title: this.translate.instant('EDIT_PROFILE.INVALID_FILE_TYPE'),
-        text: this.translate.instant('EDIT_PROFILE.INVALID_FILE_TYPE_TEXT')
-      });
+        this.simpleToastService.error(
+          this.translate.instant('EDIT_PROFILE.INVALID_FILE_TYPE_TEXT')
+        );
+      
       this.resetFileInput();
       return;
     }
 
     // Validate file size
     if (file.size > this.MAX_FILE_SIZE) {
-      Swal.fire({
-        icon: 'error',
-        title: this.translate.instant('EDIT_PROFILE.FILE_TOO_LARGE'),
-        text: this.translate.instant('EDIT_PROFILE.FILE_TOO_LARGE_TEXT')
-      });
+        this.simpleToastService.error(
+          this.translate.instant('EDIT_PROFILE.FILE_TOO_LARGE_TEXT')
+        );
       this.resetFileInput();
       return;
     }
@@ -375,13 +413,9 @@ export class EditProfile implements OnInit {
     this.imagePreview = null;
     this.profileForm.patchValue({ profilePicture: '' });
     this.resetFileInput();
-    Swal.fire({
-      icon: 'success',
-      title: this.translate.instant('EDIT_PROFILE.PHOTO_REMOVED'),
-      text: this.translate.instant('EDIT_PROFILE.PHOTO_REMOVED_TEXT'),
-      timer: 1500,
-      showConfirmButton: false
-    });
+        this.simpleToastService.success(
+          this.translate.instant('EDIT_PROFILE.PHOTO_REMOVED_TEXT')
+        );
   }
 
   private resetFileInput(): void {

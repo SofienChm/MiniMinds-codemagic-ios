@@ -15,7 +15,7 @@
 
   <div *ngIf="classData && !loading" class="row">
     <div class="  col-md-4">
-      <div class="card card-detail_pages border-white">
+      <div class="card card-general card-detail_pages border-white">
         <div class="card-header">
           <div class="d-flex align-items-center flex-wrap row-gap-3">
             
@@ -60,11 +60,11 @@
                 <div *ngFor="let teacher of assignedTeachers" class="d-inline-block me-2 mb-2">
                   <span class="badge bg-primary">
                     {{ teacher.firstName }} {{ teacher.lastName }}
-                    <button class="btn-close btn-close-white ms-1" style="font-size: 10px;" (click)="removeTeacher(teacher.id)"></button>
+                    <button class="btn-close btn-close ms-1" style="font-size: 10px;" (click)="removeTeacher(teacher.id)"></button>
                   </span>
                 </div>
               </div>
-              <button class="btn btn-sm btn-primary mt-2" (click)="openAssignTeacherModal()">
+              <button class="action-btn custom-btn-2 btn-add-global-2" (click)="openAssignTeacherModal()">
                 <i class="bi bi-plus-square me-1"></i>{{ assignedTeachers.length > 0 ? 'Add More' : 'Assign Teachers' }}
               </button>
             </div>
@@ -87,7 +87,7 @@
       <div class="card card-general mt-3">
         <div class="card-header d-flex justify-content-between align-items-center">
           <h5>Enrolled Children</h5>
-          <button class="btn btn-sm btn-primary" (click)="openAddChildModal()">
+          <button class="action-btn custom-btn-2 btn-add-global-2" (click)="openAddChildModal()">
             <i class="bi bi-plus-square me-1"></i>Add Child
           </button>
         </div>
@@ -95,12 +95,18 @@
           <div *ngIf="enrolledChildren.length > 0">
             <div *ngFor="let child of enrolledChildren" class="border rounded p-3 mb-3">
               <div class="row align-items-center">
-                <div class="col-md-8">
-                  <h6 class="mb-1">{{ child.firstName }} {{ child.lastName }}</h6>
-                  <p class="text-muted mb-0">Age: {{ child.dateOfBirth | date:'yyyy' }}</p>
+                <div class="col-md-8 d-flex align-items-center gap-3">
+                  <div class="d-flex align-items-center justify-content-center rounded-circle bg-light overflow-hidden" style="width: 45px; height: 45px;">
+                    <img *ngIf="child.profilePicture" [src]="child.profilePicture" alt="" class="w-100 h-100" style="object-fit: cover;">
+                    <i *ngIf="!child.profilePicture" class="bi bi-person text-muted fs-4"></i>
+                  </div>
+                  <div>
+                    <h6 class="mb-1">{{ child.firstName }} {{ child.lastName }}</h6>
+                    <p class="text-muted mb-0">Age: {{ child.dateOfBirth | date:'yyyy' }}</p>
+                  </div>
                 </div>
                 <div class="col-md-4 text-end">
-                  <button class="btn btn-sm btn-danger" (click)="removeChild(child.id)">
+                  <button class="action-btn custom-btn-2 btn-remove-2" (click)="removeChild(child.id)">
                     <i class="bi bi-trash3"></i> Remove
                   </button>
                 </div>
@@ -145,56 +151,107 @@
 </div>
 
 <!-- Add Child Modal -->
-<div class="modal" [class.show]="showAddChildModal" [style.display]="showAddChildModal ? 'block' : 'none'" *ngIf="showAddChildModal">
-  <div class="modal-dialog">
+<div class="modal" [class.show]="showAddChildModal" [style.display]="showAddChildModal ? 'block' : 'none'" style="z-index: 1055;" *ngIf="showAddChildModal">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Add Child to Class</h5>
         <button type="button" class="btn-close" (click)="closeAddChildModal()"></button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" style="overflow: visible;">
         <div class="mb-3">
           <label class="form-label">Select Child</label>
-          <select class="form-select" [(ngModel)]="selectedChildId">
-            <option [value]="null">Choose a child...</option>
-            <option *ngFor="let child of availableChildren" [value]="child.id">
-              {{ child.firstName }} {{ child.lastName }}
-            </option>
-          </select>
+          <ng-select
+            [items]="availableChildren"
+            bindLabel="firstName"
+            bindValue="id"
+            [(ngModel)]="selectedChildId"
+            [placeholder]="'Choose a child...'"
+            [searchable]="true"
+            [clearable]="true">
+            <ng-template ng-label-tmp let-item="item">
+              <div class="d-flex align-items-center gap-1">
+                <div class="d-flex align-items-center justify-content-center rounded-circle bg-light overflow-hidden" style="width: 20px; height: 20px;">
+                  <img *ngIf="item.profilePicture" [src]="item.profilePicture" alt="" class="w-100 h-100" style="object-fit: cover;">
+                  <i *ngIf="!item.profilePicture" class="bi bi-person text-muted" style="font-size: 12px;"></i>
+                </div>
+                {{ item.firstName }} {{ item.lastName }}
+              </div>
+            </ng-template>
+            <ng-template ng-option-tmp let-item="item">
+              <div class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center justify-content-center rounded-circle bg-light overflow-hidden" style="width: 32px; height: 32px;">
+                  <img *ngIf="item.profilePicture" [src]="item.profilePicture" alt="" class="w-100 h-100" style="object-fit: cover;">
+                  <i *ngIf="!item.profilePicture" class="bi bi-person text-muted"></i>
+                </div>
+                <div>
+                  <div>{{ item.firstName }} {{ item.lastName }}</div>
+                  <small class="text-muted" *ngIf="item.dateOfBirth">{{ item.dateOfBirth | date:'yyyy' }}</small>
+                </div>
+              </div>
+            </ng-template>
+          </ng-select>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="closeAddChildModal()">Cancel</button>
-        <button type="button" class="btn btn-primary" (click)="addChildToClass()" [disabled]="!selectedChildId">Add Child</button>
+        <button type="button" class="action-btn custom-btn-2 btn-cancel-2" (click)="closeAddChildModal()">Cancel</button>
+        <button type="button" class="action-btn custom-btn-2 btn-view-global-2" (click)="addChildToClass()" [disabled]="!selectedChildId">Add Child</button>
       </div>
     </div>
   </div>
 </div>
-<div class="modal-backdrop fade" [class.show]="showAddChildModal" *ngIf="showAddChildModal"></div>
+<div class="modal-backdrop fade" [class.show]="showAddChildModal" style="z-index: 1050;" *ngIf="showAddChildModal"></div>
 
 <!-- Assign Teacher Modal -->
-<div class="modal" [class.show]="showAssignTeacherModal" [style.display]="showAssignTeacherModal ? 'block' : 'none'" *ngIf="showAssignTeacherModal">
-  <div class="modal-dialog">
+<div class="modal" [class.show]="showAssignTeacherModal" [style.display]="showAssignTeacherModal ? 'block' : 'none'" style="z-index: 1055;" *ngIf="showAssignTeacherModal">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Assign Teacher</h5>
         <button type="button" class="btn-close" (click)="closeAssignTeacherModal()"></button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" style="overflow: visible;">
         <div class="mb-3">
           <label class="form-label">Select Teachers (Multiple)</label>
-          <select id="teacherSelect" class="form-select" multiple>
-            <option *ngFor="let teacher of availableTeachers" [value]="teacher.id">
-              {{ teacher.firstName }} {{ teacher.lastName }}
-            </option>
-          </select>
+          <ng-select
+            [items]="availableTeachers"
+            [multiple]="true"
+            bindLabel="firstName"
+            bindValue="id"
+            [(ngModel)]="selectedTeacherIds"
+            [placeholder]="'Select teachers...'"
+            [closeOnSelect]="false"
+            [searchable]="true"
+            [clearable]="true">
+            <ng-template ng-label-tmp let-item="item">
+              <div class="d-flex align-items-center gap-1">
+                <div class="d-flex align-items-center justify-content-center rounded-circle bg-light overflow-hidden" style="width: 20px; height: 20px;">
+                  <img *ngIf="item.profilePicture" [src]="item.profilePicture" alt="" class="w-100 h-100" style="object-fit: cover;">
+                  <i *ngIf="!item.profilePicture" class="bi bi-person text-muted" style="font-size: 12px;"></i>
+                </div>
+                {{ item.firstName }} {{ item.lastName }}
+              </div>
+            </ng-template>
+            <ng-template ng-option-tmp let-item="item">
+              <div class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center justify-content-center rounded-circle bg-light overflow-hidden" style="width: 32px; height: 32px;">
+                  <img *ngIf="item.profilePicture" [src]="item.profilePicture" alt="" class="w-100 h-100" style="object-fit: cover;">
+                  <i *ngIf="!item.profilePicture" class="bi bi-person text-muted"></i>
+                </div>
+                <div>
+                  <div>{{ item.firstName }} {{ item.lastName }}</div>
+                  <small class="text-muted">{{ item.email }}</small>
+                </div>
+              </div>
+            </ng-template>
+          </ng-select>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="closeAssignTeacherModal()">Cancel</button>
-        <button type="button" class="btn btn-primary" (click)="assignTeacher()">Assign Teachers</button>
+        <button type="button" class="action-btn custom-btn-2 btn-cancel-2" (click)="closeAssignTeacherModal()">Cancel</button>
+        <button type="button" class="action-btn custom-btn-2 btn-view-global-2" (click)="assignTeacher()" [disabled]="selectedTeacherIds.length === 0">Assign Teachers</button>
       </div>
     </div>
   </div>
 </div>
-<div class="modal-backdrop fade" [class.show]="showAssignTeacherModal" *ngIf="showAssignTeacherModal"></div>
+<div class="modal-backdrop fade" [class.show]="showAssignTeacherModal" style="z-index: 1050;" *ngIf="showAssignTeacherModal"></div>

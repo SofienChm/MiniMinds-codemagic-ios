@@ -1,0 +1,264 @@
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { NgSelectModule } from '@ng-select/ng-select';
+import { TitlePage, Breadcrumb, TitleAction } from '../../../shared/layouts/title-page/title-page';
+import { AuthService } from '../../../core/services/auth';
+import { AppointmentsService, CreateAppointmentDto, TeacherOption } from '../appointments.service';
+import { ChildrenService } from '../../children/children.service';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { PageTitleService } from '../../../core/services/page-title.service';
+import { ParentChildHeaderSimpleComponent } from '../../../shared/components/parent-child-header-simple/parent-child-header-simple.component';   
+import { Subscription } from 'rxjs';
+import Swal from 'sweetalert2';
+
+interface ChildOption {
+  id: number;
+  fullName: string;
+}
+
+@Component({
+  selector: 'app-add-appointment',
+  standalone: true,
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, TitlePage, NgSelectModule, TranslateModule, ParentChildHeaderSimpleComponent],
+  templateUrl: './add-appointment.html',
+  styleUrls: ['./add-appointment.scss']
+})
+export class AddAppointment implements OnInit, OnDestroy {
+  breadcrumbs: Breadcrumb[] = [];
+  actions: TitleAction[] = [];
+  private langChangeSub?: Subscription;
+
+  isParent = false;
+  appointmentForm!: FormGroup;
+  submitting = false;
+  errorMessage = '';
+
+  // Options for dropdowns
+  teachers: TeacherOption[] = [];
+  children: ChildOption[] = [];
+  appointmentTypes: Array<{ value: string; label: string }> = [];
+
+  // Time options
+  timeSlots: string[] = [];
+
+  // Min date for appointment (today)
+  minDate = '';
+
+  constructor(
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private appointmentsService: AppointmentsService,
+    private childrenService: ChildrenService,
+    private router: Router,
+    private translateService: TranslateService,
+    private pageTitleService: PageTitleService
+  ) {
+    this.generateTimeSlots();
+    this.setMinDate();
+  }
+
+  ngOnInit(): void {
+    this.pageTitleService.setTitle(this.translateService.instant('APPOINTMENTS_PAGE.BOOK_APPOINTMENT'));
+    this.initForm();
+    this.loadTeachers();
+    this.loadChildren();
+    this.updateTranslatedContent();
+    this.isParent = this.authService.isParent();
+    
+    this.langChangeSub = this.translateService.onLangChange.subscribe(() => {
+      this.updateTranslatedContent();
+      this.pageTitleService.setTitle(this.translateService.instant('APPOINTMENTS_PAGE.BOOK_APPOINTMENT'));
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.langChangeSub?.unsubscribe();
+  }
+
+  private initForm(): void {
+    this.appointmentForm = this.fb.group({
+      title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(200)]],
+      description: ['', [Validators.maxLength(1000)]],
+      type: ['General', Validators.required],
+      childId: [null],
+      teacherId: [null],
+      appointmentDate: ['', Validators.required],
+      startTime: ['', Validators.required],
+      endTime: ['', Validators.required]
+    });
+  }
+
+  private generateTimeSlots(): void {
+    this.timeSlots = [];
+    for (let h = 8; h <= 17; h++) {
+      for (let m = 0; m < 60; m += 30) {
+        const hour = h.toString().padStart(2, '0');
+        const minute = m.toString().padStart(2, '0');
+        this.timeSlots.push(`${hour}:${minute}`);
+      }
+    }
+  }
+
+  private setMinDate(): void {
+    const today = new Date();
+    this.minDate = today.toISOString().split('T')[0];
+  }
+
+  updateTranslatedContent(): void {
+    this.breadcrumbs = [
+      { label: this.translateService.instant('APPOINTMENTS_PAGE.DASHBOARD'), url: '/dashboard' },
+      { label: this.translateService.instant('APPOINTMENTS_PAGE.APPOINTMENTS'), url: '/appointments' },
+      { label: this.translateService.instant('APPOINTMENTS_PAGE.BOOK_APPOINTMENT') }
+    ];
+
+    this.actions = [
+      {
+        label: this.translateService.instant('APPOINTMENTS_PAGE.BACK_TO_LIST'),
+        icon: 'bi bi-arrow-left',
+        class: 'btn-cancel-global',
+        action: () => this.cancel()
+      }
+    ];
+
+    this.appointmentTypes = [
+      { value: 'General', label: this.translateService.instant('APPOINTMENTS_PAGE.TYPE_GENERAL') },
+      { value: 'Academic', label: this.translateService.instant('APPOINTMENTS_PAGE.TYPE_ACADEMIC') },
+      { value: 'Behavioral', label: this.translateService.instant('APPOINTMENTS_PAGE.TYPE_BEHAVIORAL') },
+      { value: 'Medical', label: this.translateService.instant('APPOINTMENTS_PAGE.TYPE_MEDICAL') },
+      { value: 'Other', label: this.translateService.instant('APPOINTMENTS_PAGE.TYPE_OTHER') }
+    ];
+  }
+
+  loadTeachers(): void {
+    this.appointmentsService.getAvailableTeachers().subscribe({
+      next: (list) => this.teachers = list || [],
+      error: () => this.teachers = []
+    });
+  }
+
+  loadChildren(): void {
+    // Load children using the ChildrenService
+    // The backend filters children based on the user's role (parents only see their own children)
+    this.childrenService.loadChildren().subscribe({
+      next: (list) => {
+        this.children = (list || []).map(c => ({
+          id: c.id!,
+          fullName: `${c.firstName} ${c.lastName}`
+        }));
+      },
+      error: () => this.children = []
+    });
+  }
+
+  cancel(): void {
+    if (this.appointmentForm.dirty) {
+      Swal.fire({
+        title: this.translateService.instant('APPOINTMENTS_PAGE.UNSAVED_CHANGES'),
+        text: this.translateService.instant('APPOINTMENTS_PAGE.UNSAVED_CHANGES_MESSAGE'),
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: this.translateService.instant('APPOINTMENTS_PAGE.YES_LEAVE'),
+        cancelButtonText: this.translateService.instant('APPOINTMENTS_PAGE.NO_STAY')
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.router.navigate(['/appointments']);
+        }
+      });
+    } else {
+      this.router.navigate(['/appointments']);
+    }
+  }
+
+  onStartTimeChange(): void {
+    const startTime = this.appointmentForm.get('startTime')?.value;
+    if (startTime) {
+      // Auto-set end time to 30 minutes after start
+      const [hours, minutes] = startTime.split(':').map(Number);
+      let endMinutes = minutes + 30;
+      let endHours = hours;
+      if (endMinutes >= 60) {
+        endMinutes -= 60;
+        endHours += 1;
+      }
+      const endTime = `${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}`;
+      this.appointmentForm.patchValue({ endTime });
+    }
+  }
+
+  submitAppointment(): void {
+    if (this.appointmentForm.invalid) {
+      this.markFormGroupTouched();
+      return;
+    }
+
+    // Validate end time is after start time
+    const startTime = this.appointmentForm.get('startTime')?.value;
+    const endTime = this.appointmentForm.get('endTime')?.value;
+    if (startTime >= endTime) {
+      this.errorMessage = this.translateService.instant('APPOINTMENTS_PAGE.END_TIME_ERROR');
+      return;
+    }
+
+    this.errorMessage = '';
+    this.submitting = true;
+
+    const formValue = this.appointmentForm.value;
+    const dto: CreateAppointmentDto = {
+      title: formValue.title.trim(),
+      description: formValue.description?.trim() || undefined,
+      type: formValue.type,
+      childId: formValue.childId || undefined,
+      teacherId: formValue.teacherId || undefined,
+      appointmentDate: formValue.appointmentDate,
+      startTime: formValue.startTime,
+      endTime: formValue.endTime
+    };
+
+    this.appointmentsService.requestAppointment(dto).subscribe({
+      next: () => {
+        Swal.fire({
+          icon: 'success',
+          title: this.translateService.instant('APPOINTMENTS_PAGE.SUCCESS'),
+          text: this.translateService.instant('APPOINTMENTS_PAGE.APPOINTMENT_CREATED'),
+          timer: 2000,
+          showConfirmButton: false
+        }).then(() => {
+          this.router.navigate(['/appointments']);
+        });
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || this.translateService.instant('APPOINTMENTS_PAGE.FAILED_TO_CREATE');
+        this.submitting = false;
+      }
+    });
+  }
+
+  private markFormGroupTouched(): void {
+    Object.values(this.appointmentForm.controls).forEach(control => {
+      control.markAsTouched();
+    });
+  }
+
+  isFieldInvalid(fieldName: string): boolean {
+    const field = this.appointmentForm.get(fieldName);
+    return !!(field && field.invalid && field.touched);
+  }
+
+  getFieldError(fieldName: string): string {
+    const field = this.appointmentForm.get(fieldName);
+    if (field?.errors) {
+      if (field.errors['required']) {
+        return this.translateService.instant('APPOINTMENTS_PAGE.FIELD_REQUIRED');
+      }
+      if (field.errors['minlength']) {
+        return this.translateService.instant('APPOINTMENTS_PAGE.MIN_LENGTH', { min: field.errors['minlength'].requiredLength });
+      }
+      if (field.errors['maxlength']) {
+        return this.translateService.instant('APPOINTMENTS_PAGE.MAX_LENGTH', { max: field.errors['maxlength'].requiredLength });
+      }
+    }
+    return '';
+  }
+}

@@ -8,6 +8,7 @@ import { EducatorService } from '../educator.service';
 import { TitlePage, Breadcrumb, TitleAction } from '../../../shared/layouts/title-page/title-page';
 import { ImageCropperModalComponent } from '../../../shared/components/image-cropper-modal/image-cropper-modal.component';
 import Swal from 'sweetalert2';
+import { SimpleToastService } from '../../../core/services/simple-toast.service';
 
 @Component({
   selector: 'app-edit-educator',
@@ -50,7 +51,8 @@ export class EditEducator implements OnInit {
     private educatorService: EducatorService,
     private router: Router,
     private route: ActivatedRoute,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private simpleToastService: SimpleToastService
   ) {}
 
   ngOnInit() {
@@ -93,6 +95,13 @@ export class EditEducator implements OnInit {
     this.educatorService.getEducator(this.educatorId).subscribe({
       next: (educator) => {
         this.educator = { ...educator };
+        // Format dates to YYYY-MM-DD for HTML date inputs
+        if (educator.dateOfBirth) {
+          this.educator.dateOfBirth = this.formatDateForInput(educator.dateOfBirth);
+        }
+        if (educator.hireDate) {
+          this.educator.hireDate = this.formatDateForInput(educator.hireDate);
+        }
         this.imagePreview = educator.profilePicture || null;
         this.loading = false;
       },
@@ -104,29 +113,73 @@ export class EditEducator implements OnInit {
     });
   }
 
+  private formatDateForInput(dateString: string): string {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      return '';
+    }
+    return date.toISOString().split('T')[0];
+  }
+
   updateEducator() {
     this.saving = true;
     this.educatorService.updateEducator(this.educator).subscribe({
       next: () => {
-        Swal.fire({
-          icon: 'success',
-          title: this.translate.instant('MESSAGES.SUCCESS'),
-          text: this.translate.instant('EDIT_EDUCATOR.UPDATE_SUCCESS')
-        }).then(() => {
+        this.simpleToastService.success(this.translate.instant('EDIT_EDUCATOR.UPDATE_SUCCESS'));
+        setTimeout(() => {
           this.router.navigate(['/educators']);
-        });
+        }, 200);
         this.saving = false;
       },
       error: (error) => {
         console.error('Error updating educator:', error);
+        const errorMessage = this.extractErrorMessage(error);
         Swal.fire({
           icon: 'error',
           title: this.translate.instant('MESSAGES.ERROR'),
-          text: this.translate.instant('EDIT_EDUCATOR.UPDATE_ERROR')
+          text: errorMessage
         });
         this.saving = false;
       }
     });
+  }
+
+  private extractErrorMessage(error: any): string {
+    if (error?.error) {
+      // Handle .NET validation errors format
+      if (error.error.errors) {
+        const errorMessages: string[] = [];
+        for (const key in error.error.errors) {
+          if (error.error.errors.hasOwnProperty(key)) {
+            const messages = error.error.errors[key];
+            if (Array.isArray(messages)) {
+              errorMessages.push(...messages);
+            }
+          }
+        }
+        if (errorMessages.length > 0) {
+          return errorMessages.join('\n');
+        }
+      }
+
+      // Handle custom error message format
+      if (error.error.message) {
+        return error.error.message;
+      }
+
+      // Handle string error
+      if (typeof error.error === 'string') {
+        return error.error;
+      }
+    }
+
+    // Handle duplicate email
+    if (error?.status === 409 || error?.error?.message?.includes('already exists')) {
+      return this.translate.instant('MESSAGES.EMAIL_ALREADY_EXISTS');
+    }
+
+    // Default fallback
+    return this.translate.instant('EDIT_EDUCATOR.UPDATE_ERROR');
   }
 
   cancel() {
@@ -141,11 +194,10 @@ export class EditEducator implements OnInit {
 
     // Validate file type
     if (!this.ALLOWED_IMAGE_TYPES.includes(file.type)) {
-      Swal.fire({
-        icon: 'error',
-        title: this.translate.instant('MESSAGES.ERROR'),
-        text: this.translate.instant('EDIT_EDUCATOR.INVALID_FILE_TYPE')
-      });
+        this.simpleToastService.error(
+          this.translate.instant('EDIT_EDUCATOR.INVALID_FILE_TYPE')
+        );
+
       this.resetFileInput();
       return;
     }

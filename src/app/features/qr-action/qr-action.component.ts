@@ -201,7 +201,7 @@ type QrActionState =
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #7db9ff 0%, #7dd3c0 100%);
       padding: 20px;
     }
 
@@ -393,12 +393,12 @@ type QrActionState =
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #7db9ff 0%, #7dd3c0 100%);
       border: none;
     }
 
     .btn-primary:hover {
-      background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%);
+      background: linear-gradient(135deg, #7dd3c0 0%, #7dd3c0 100%);
     }
 
     .btn-primary:disabled {

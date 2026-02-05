@@ -43,7 +43,7 @@
               </div>
               <div class="col-md-6 mb-3" *ngIf="isParent()">
                 <label class="form-label">Phone Number *</label>
-                <input type="text" class="form-control" formControlName="phoneNumber"
+                <input type="number" class="form-control" formControlName="phoneNumber"
                        [class.is-invalid]="phoneNumber.invalid && phoneNumber.touched">
                 <div class="invalid-feedback" *ngIf="phoneNumber.invalid && phoneNumber.touched">
                   {{ getErrorMessage(profileForm, 'phoneNumber') }}
@@ -71,7 +71,7 @@
             <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
 
             <div class="d-flex gap-2 justify-content-end">
-              <button type="submit" class="btn btn-primary btn-add-global" [disabled]="saving || profileForm.invalid">
+              <button type="submit" class="action-btn custom-btn-2 btn-add-global-2" [disabled]="saving || profileForm.invalid">
                 <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
                 {{ saving ? 'Updating...' : 'Update Profile' }}
               </button>
@@ -116,7 +116,7 @@
                 {{ getErrorMessage(securityForm, 'confirmPassword') }}
               </div>
             </div>
-            <button type="submit" class="btn btn-primary float-right btn-add-global" [disabled]="securityForm.invalid">Update Password</button>
+            <button type="submit" class="float-right action-btn custom-btn-2 btn-add-global-2" [disabled]="securityForm.invalid">Update Password</button>
           </form>
         </div>
       </div>
@@ -145,7 +145,7 @@
                 <option value="PST">PST</option>
               </select>
             </div>
-            <button type="submit" class="btn btn-primary btn-add-global float-right">Save Preferences</button>
+            <button type="submit" class="action-btn custom-btn-2 btn-add-global-2 float-right">Save Preferences</button>
           </form>
         </div>
       </div>
@@ -162,7 +162,7 @@
 
   <!-- Profile Picture Card -->
    <div class="row">
-    <div class="col-4">
+    <div class="col-12 col-md-4">
       <div class="card card-general shadow-sm">
         <div class="card-header">
           <h5 class="mb-0"><i class="bi bi-person-circle"></i>{{ 'EDIT_PROFILE.PROFILE_PICTURE' | translate }}</h5>
@@ -186,7 +186,7 @@
         </div>
       </div>
     </div>
-    <div class="col-8">
+    <div class="col-12 col-md-8">
       <!-- Personal Info Card -->
       <div class="card card-general shadow-sm">
         <div class="card-header">

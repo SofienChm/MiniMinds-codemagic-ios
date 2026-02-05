@@ -1,0 +1,276 @@
+// Ion Content Styling for Notification Settings
+ion-content.notification-settings-page {
+  --background: #ffffff;
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  display: block !important;
+  position: relative !important;
+  min-height: calc(100vh - 95px) !important;
+
+  .inner-scroll {
+    display: block !important;
+  }
+}
+
+// Parent layout styles
+.parent-detailchild {
+  .body {
+    padding: 20px;
+  }
+
+  .main-information {
+    padding: 0;
+    overflow: hidden;
+  }
+}
+
+.description {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.preferences-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.preference-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #fff;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.preference-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  i {
+    font-size: 20px;
+    color: #fff;
+  }
+
+  // Icon colors based on notification type
+  &.icon-event {
+    background: linear-gradient(135deg, #ff8cc8 0%, #f06595 100%);
+  }
+
+  &.icon-message {
+    background: linear-gradient(135deg, #b197fc 0%, #9775fa 100%);
+  }
+
+  &.icon-dailyactivity {
+    background: linear-gradient(135deg, #ffd43b 0%, #fab005 100%);
+  }
+
+  &.icon-fee {
+    background: linear-gradient(135deg, #74c0fc 0%, #339af0 100%);
+  }
+
+  &.icon-attendance {
+    background: linear-gradient(135deg, #8ce99a 0%, #51cf66 100%);
+  }
+
+  &.icon-reclamation {
+    background: linear-gradient(135deg, #ffa94d 0%, #fd7e14 100%);
+  }
+
+  &.icon-system {
+    background: linear-gradient(135deg, #868e96 0%, #495057 100%);
+  }
+
+  &.icon-appointment {
+    background: linear-gradient(135deg, #69db7c 0%, #37b24d 100%);
+  }
+}
+
+.preference-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.preference-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #212529;
+  margin: 0 0 4px 0;
+}
+
+.preference-description {
+  font-size: 13px;
+  color: #6c757d;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.preference-toggle {
+  flex-shrink: 0;
+}
+
+// Toggle Switch Styles
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 28px;
+
+  input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+
+    &:checked + .slider {
+      background: linear-gradient(135deg, #90bbfa, #95f1d8);
+    }
+
+    &:checked + .slider:before {
+      transform: translateX(22px);
+    }
+
+    &:disabled + .slider {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #e9ecef;
+  transition: 0.3s;
+
+  &:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.3s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  &.round {
+    border-radius: 28px;
+
+    &:before {
+      border-radius: 50%;
+    }
+  }
+}
+
+// Save Button
+.save-button-container {
+  padding: 16px 0;
+}
+
+.btn-save {
+  padding: 14px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+  background: var(--primary-color);
+  border: none;
+  transition: all 0.3s;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+// Empty state
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+
+  i {
+    font-size: 64px;
+    color: #dee2e6;
+    margin-bottom: 16px;
+  }
+
+  h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #212529;
+    margin: 0;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .parent-detailchild .body {
+    padding: 16px;
+  }
+
+  .preference-card {
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .preference-icon {
+    width: 44px;
+    height: 44px;
+
+    i {
+      font-size: 18px;
+    }
+  }
+
+  .preference-title {
+    font-size: 15px;
+  }
+
+  .preference-description {
+    font-size: 12px;
+  }
+
+  .switch {
+    width: 46px;
+    height: 26px;
+
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+  }
+
+  .slider:before {
+    height: 20px;
+    width: 20px;
+  }
+}
+
+::ng-deep {
+  .header-info {
+    margin-bottom: 5px !important;
+  }
+}

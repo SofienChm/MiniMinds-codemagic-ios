@@ -5,7 +5,8 @@ export interface ParentModel {
   email: string;
   address?: string;
   phoneNumber: string;
-  profilePicture?: string;
+  profilePicture?: string; // Base64 (deprecated, for backward compatibility)
+  profilePictureUrl?: string; // File-based URL path
   hasProfilePicture?: boolean;
   emergencyContact?: string;
   gender?: string;
@@ -28,7 +29,8 @@ export interface ChildInfo {
   gender: string;
   allergies?: string;
   medicalNotes?: string;
-  profilePicture?: string;
+  profilePicture?: string; // Base64 (deprecated, for backward compatibility)
+  profilePictureUrl?: string; // File-based URL path
   hasProfilePicture?: boolean;
   enrollmentDate: string;
   isActive?: boolean;

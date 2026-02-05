@@ -1,0 +1,224 @@
+.card-general {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: none;
+
+  .card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    padding: 1rem 1.25rem;
+
+    h5 {
+      font-weight: 600;
+      color: #333;
+      font-size: 1rem;
+    }
+  }
+
+  .card-body {
+    padding: 1.25rem;
+  }
+}
+
+.detail-label {
+  font-size: 0.8rem;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.detail-value {
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 0;
+}
+
+.description-box,
+.notes-box {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 6px;
+  white-space: pre-wrap;
+}
+
+.rejection-box {
+  background-color: #fff5f5;
+  border-left: 3px solid #dc3545;
+  padding: 1rem;
+  border-radius: 0 6px 6px 0;
+  white-space: pre-wrap;
+}
+
+// Status badges
+.badge-pending {
+  background-color: #fff3cd;
+  color: #856404;
+  font-size: 0.85rem;
+  padding: 0.5em 1em;
+}
+
+.badge-approved {
+  background-color: #d4edda;
+  color: #155724;
+  font-size: 0.85rem;
+  padding: 0.5em 1em;
+}
+
+.badge-rejected {
+  background-color: #f8d7da;
+  color: #721c24;
+  font-size: 0.85rem;
+  padding: 0.5em 1em;
+}
+
+.badge-completed {
+  background-color: #cce5ff;
+  color: #004085;
+  font-size: 0.85rem;
+  padding: 0.5em 1em;
+}
+
+.badge-cancelled {
+  background-color: #e2e3e5;
+  color: #383d41;
+  font-size: 0.85rem;
+  padding: 0.5em 1em;
+}
+
+// Type badges
+.badge-general {
+  background-color: #e7f1ff;
+  color: #0056b3;
+}
+
+.badge-academic {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.badge-behavioral {
+  background-color: #fff8e1;
+  color: #f57c00;
+}
+
+.badge-medical {
+  background-color: #fce4ec;
+  color: #c2185b;
+}
+
+.badge-other {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
+
+// People section
+.person-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.person-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  i {
+    font-size: 1.2rem;
+  }
+}
+
+.bg-primary-light {
+  background-color: #e7f1ff;
+}
+
+.bg-info-light {
+  background-color: #e0f7fa;
+}
+
+.bg-success-light {
+  background-color: #e8f5e9;
+}
+
+.person-info {
+  flex: 1;
+}
+
+// Timeline
+.timeline {
+  position: relative;
+  padding-left: 30px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: #e9ecef;
+  }
+}
+
+.timeline-item {
+  position: relative;
+  padding-bottom: 1.5rem;
+
+  &:last-child {
+    padding-bottom: 0;
+  }
+}
+
+.timeline-marker {
+  position: absolute;
+  left: -26px;
+  top: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 2px #e9ecef;
+}
+
+.timeline-content {
+  padding-left: 0.5rem;
+}
+
+.timeline-label {
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.timeline-date {
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin-bottom: 0;
+}
+
+// Buttons
+.btn-outline-primary {
+  border-color: #7dd3c0;
+  color: #7dd3c0;
+
+  &:hover {
+    background-color: #7dd3c0;
+    border-color: #7dd3c0;
+    color: #fff;
+  }
+}
+
+.btn-outline-danger {
+  &:hover {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    color: #fff;
+  }
+}

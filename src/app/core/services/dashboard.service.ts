@@ -7,18 +7,23 @@ export interface DashboardStats {
   totalChildren: number;
   activeChildren: number;
   totalParents: number;
+  totalTeachers: number;
   totalEvents: number;
   boysCount: number;
   girlsCount: number;
   newChildrenThisMonth: number;
+  todayPresentCount: number;
+  todayAbsentCount: number;
 }
 
 export interface ChildSummary {
+  id: number;
   firstName: string;
   lastName: string;
   gender?: string;
   parentName?: string;
   parentPhoneNumber?: string;
+  profilePictureUrl?: string;
   createdAt: string;
 }
 
@@ -89,6 +94,7 @@ export interface ParentDashboardData {
     firstName: string;
     lastName: string;
     profilePicture?: string;
+    profilePictureUrl?: string;
   };
   children: ChildWithAttendance[];
   upcomingEvents: EventSummary[];

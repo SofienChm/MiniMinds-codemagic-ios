@@ -12,6 +12,7 @@ import { interval, Subscription } from 'rxjs';
 import { AuthService } from '../../core/services/auth';
 import { SignalRService } from '../../core/services/signalr.service';
 import { PageTitleService } from '../../core/services/page-title.service';
+import { ApiConfig } from '../../core/config/api.config';
 
 @Component({
   selector: 'app-attendance-sheet',
@@ -184,16 +185,29 @@ export class AttendanceSheet implements OnInit, OnDestroy {
     return this.translate.instant('ATTENDANCE_PAGE.STATUS_PRESENT');
   }
 
+  /**
+   * Parse a date string from the API as UTC time.
+   * The API returns UTC times without the 'Z' suffix, so we need to add it.
+   */
+  private parseUtcDate(dateString: string): Date {
+    if (!dateString) return new Date();
+    // If the date string doesn't end with 'Z' and doesn't have timezone info, treat it as UTC
+    if (!dateString.endsWith('Z') && !dateString.includes('+') && !dateString.includes('-', 10)) {
+      return new Date(dateString + 'Z');
+    }
+    return new Date(dateString);
+  }
+
   formatTime(dateString: string): string {
-    return new Date(dateString).toLocaleTimeString('en-US', {
+    return this.parseUtcDate(dateString).toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit'
     });
   }
 
   calculateDuration(checkIn: string, checkOut?: string): number {
-    const checkInTime = new Date(checkIn).getTime();
-    const endTime = checkOut ? new Date(checkOut).getTime() : Date.now();
+    const checkInTime = this.parseUtcDate(checkIn).getTime();
+    const endTime = checkOut ? this.parseUtcDate(checkOut).getTime() : Date.now();
     return (endTime - checkInTime) / (1000 * 60 * 60);
   }
 
@@ -219,6 +233,15 @@ export class AttendanceSheet implements OnInit, OnDestroy {
     this.availableChildren = this.children.filter(c => !checkedInIds.includes(c.id!));
   }
 
+  // Custom search function for ng-select to search by first and last name
+  searchChild = (term: string, item: ChildModel): boolean => {
+    const searchTerm = term.toLowerCase();
+    const fullName = `${item.firstName} ${item.lastName}`.toLowerCase();
+    return fullName.includes(searchTerm) ||
+           item.firstName.toLowerCase().includes(searchTerm) ||
+           item.lastName.toLowerCase().includes(searchTerm);
+  }
+
   toggleCheckInForm(): void {
     this.showCheckInForm = !this.showCheckInForm;
     if (!this.showCheckInForm) {
@@ -241,5 +264,29 @@ export class AttendanceSheet implements OnInit, OnDestroy {
         this.showCheckInForm = false;
       }
     });
+  }
+
+  /**
+   * Get the profile picture URL for a child, preferring file-based URL over Base64
+   */
+  getChildProfilePictureUrl(child: Attendance['child']): string {
+    const defaultPicture = 'assets/child.png';
+    if (!child) return defaultPicture;
+
+    // Prefer file-based URL
+    if (child.profilePictureUrl && child.profilePictureUrl.trim() !== '') {
+      // Prepend the API base URL if it's a relative path
+      if (child.profilePictureUrl.startsWith('/')) {
+        return ApiConfig.HUB_URL + child.profilePictureUrl;
+      }
+      return child.profilePictureUrl;
+    }
+
+    // Fallback to Base64
+    if (child.profilePicture && child.profilePicture.trim() !== '') {
+      return child.profilePicture;
+    }
+
+    return defaultPicture;
   }
 }

@@ -10,6 +10,7 @@ import { AuthService } from '../../core/services/auth';
 import { PermissionService } from '../../core/services/permission.service';
 import { TitlePage, TitleAction, Breadcrumb } from '../../shared/layouts/title-page/title-page';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { ApiConfig } from '../../core/config/api.config';
 import { PageTitleService } from '../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
@@ -656,13 +657,23 @@ export class Gallery implements OnInit, OnDestroy {
   openPreview(photo: Photo) {
     this.selectedPhoto = photo;
     this.showPreviewModal = true;
-    this.loadingFullImage = true;
 
-    // Fetch full resolution image from API
+    // If we have a file-based URL, no need to fetch - image loads directly
+    if (photo.imageUrl) {
+      this.loadingFullImage = false;
+      return;
+    }
+
+    // For Base64-based photos, fetch full resolution from API
+    this.loadingFullImage = true;
     this.galleryService.getPhoto(photo.id).subscribe({
       next: (fullPhoto) => {
         if (this.selectedPhoto && this.selectedPhoto.id === photo.id) {
-          this.selectedPhoto = { ...this.selectedPhoto, imageData: fullPhoto.imageData };
+          this.selectedPhoto = {
+            ...this.selectedPhoto,
+            imageData: fullPhoto.imageData,
+            imageUrl: fullPhoto.imageUrl
+          };
         }
         this.loadingFullImage = false;
       },
@@ -684,8 +695,13 @@ export class Gallery implements OnInit, OnDestroy {
   async downloadPhoto(): Promise<void> {
     if (!this.selectedPhoto || this.downloadingImage) return;
 
+    // Prefer file-based URL, fallback to Base64
+    const imageUrl = this.selectedPhoto.imageUrl
+      ? ApiConfig.HUB_URL + this.selectedPhoto.imageUrl
+      : null;
     const imageData = this.selectedPhoto.imageData || this.selectedPhoto.thumbnailData;
-    if (!imageData) {
+
+    if (!imageUrl && !imageData) {
       Swal.fire({
         icon: 'error',
         title: this.translate.instant('GALLERY.ERROR'),
@@ -702,40 +718,64 @@ export class Gallery implements OnInit, OnDestroy {
                        this.selectedPhoto.fileName ||
                        this.imageDownloadService.generateFileName('miniminds_photo');
 
-      // On mobile, use share to give user option to save to gallery
-      if (this.imageDownloadService.isNativePlatform()) {
-        const result = await this.imageDownloadService.shareImage(
-          imageData,
-          fileName,
-          this.selectedPhoto.title || 'Save Photo'
-        );
-
-        if (!result.success) {
-          Swal.fire({
-            icon: 'error',
-            title: this.translate.instant('GALLERY.ERROR'),
-            text: result.message
-          });
+      // If we have a URL, fetch it first to get the data
+      let downloadData = imageData;
+      if (imageUrl && !imageData) {
+        try {
+          const response = await fetch(imageUrl);
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+          const blob = await response.blob();
+          downloadData = await this.blobToBase64(blob);
+        } catch (fetchError) {
+          console.error('Error fetching image from URL:', fetchError);
+          // On web, try opening in new tab. On mobile, show error (don't use window.open as it triggers deep links)
+          if (!this.imageDownloadService.isNativePlatform()) {
+            window.open(imageUrl, '_blank');
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: this.translate.instant('GALLERY.ERROR'),
+              text: this.translate.instant('GALLERY.DOWNLOAD_FAILED')
+            });
+          }
+          this.downloadingImage = false;
+          return;
         }
+      }
+
+      if (!downloadData) {
+        Swal.fire({
+          icon: 'error',
+          title: this.translate.instant('GALLERY.ERROR'),
+          text: this.translate.instant('GALLERY.NO_IMAGE_DATA')
+        });
+        this.downloadingImage = false;
+        return;
+      }
+
+      // Download image - works on both mobile (saves to gallery) and web (downloads)
+      const result = await this.imageDownloadService.downloadImage(downloadData, fileName);
+
+      if (result.success) {
+        Swal.fire({
+          icon: 'success',
+          title: this.translate.instant('GALLERY.SUCCESS'),
+          text: this.imageDownloadService.isNativePlatform()
+            ? this.translate.instant('GALLERY.IMAGE_SAVED_TO_GALLERY')
+            : this.translate.instant('GALLERY.IMAGE_DOWNLOADED'),
+          timer: 3000,
+          timerProgressBar: true,
+          showConfirmButton: true,
+          confirmButtonText: 'OK'
+        });
       } else {
-        // On web, download directly
-        const result = await this.imageDownloadService.downloadImage(imageData, fileName);
-
-        if (result.success) {
-          Swal.fire({
-            icon: 'success',
-            title: this.translate.instant('GALLERY.SUCCESS'),
-            text: this.translate.instant('GALLERY.IMAGE_DOWNLOADED'),
-            timer: 2000,
-            showConfirmButton: false
-          });
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: this.translate.instant('GALLERY.ERROR'),
-            text: result.message
-          });
-        }
+        Swal.fire({
+          icon: 'error',
+          title: this.translate.instant('GALLERY.ERROR'),
+          text: result.message
+        });
       }
     } catch (error: any) {
       console.error('Error downloading photo:', error);
@@ -747,6 +787,18 @@ export class Gallery implements OnInit, OnDestroy {
     } finally {
       this.downloadingImage = false;
     }
+  }
+
+  /**
+   * Convert blob to base64 string
+   */
+  private blobToBase64(blob: Blob): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
   }
 
   // Edit modal
@@ -832,14 +884,22 @@ export class Gallery implements OnInit, OnDestroy {
     });
   }
 
-  // Helpers - now uses Base64 data URLs from database
+  // Helpers - prefers file-based URLs, falls back to Base64
   getPhotoUrl(photo: Photo): string {
-    // Use thumbnailData for gallery view (fast loading)
+    // Prefer file-based URL for gallery view (fast loading)
+    if (photo.thumbnailUrl) {
+      return ApiConfig.HUB_URL + photo.thumbnailUrl;
+    }
+    // Fallback to Base64 for backward compatibility
     return photo.thumbnailData || '';
   }
 
   getFullImageUrl(photo: Photo): string {
-    // Use imageData for full resolution view
+    // Prefer file-based URL for full resolution view
+    if (photo.imageUrl) {
+      return ApiConfig.HUB_URL + photo.imageUrl;
+    }
+    // Fallback to Base64 for backward compatibility
     return photo.imageData || photo.thumbnailData || '';
   }
 

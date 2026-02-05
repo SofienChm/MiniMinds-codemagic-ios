@@ -6,14 +6,14 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { EventModel } from '../event.interface';
 import { EventService } from '../event.service';
-import { Breadcrumb } from '../../../shared/layouts/title-page/title-page';
+import { TitlePage, Breadcrumb, TitleAction } from '../../../shared/layouts/title-page/title-page';
 import { PageTitleService } from '../../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-edit-event',
-  imports: [CommonModule, ReactiveFormsModule, TranslateModule, NgSelectModule],
+  imports: [CommonModule, ReactiveFormsModule, TranslateModule, NgSelectModule, TitlePage],
   standalone: true,
   templateUrl: './edit-event.html',
   styleUrl: './edit-event.scss'
@@ -33,6 +33,7 @@ export class EditEvent implements OnInit, OnDestroy {
   readonly ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
   breadcrumbs: Breadcrumb[] = [];
+  titleActions: TitleAction[] = [];
 
   // Options for ng-select
   eventTypes: Array<{ value: string; label: string; icon: string }> = [];
@@ -66,6 +67,22 @@ export class EditEvent implements OnInit, OnDestroy {
   private updateTranslatedContent(): void {
     this.initBreadcrumbs();
     this.initSelectOptions();
+    this.initTitleActions();
+  }
+
+  private initTitleActions(): void {
+    this.titleActions = [
+      {
+        label: this.translate.instant('COMMON.BACK'),
+        icon: 'bi bi-arrow-left',
+        class: 'btn-cancel-2',
+        action: () => this.back()
+      }
+    ];
+  }
+
+  back(): void {
+    this.router.navigate(['/events']);
   }
 
   private initBreadcrumbs(): void {
@@ -82,6 +99,7 @@ export class EditEvent implements OnInit, OnDestroy {
       name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
       type: ['', [Validators.required]],
       description: ['', [Validators.required, Validators.maxLength(1000)]],
+      includeAllChildren: [false],
       price: [0, [Validators.required, Validators.min(0)]],
       capacity: [1, [Validators.required, Validators.min(1), Validators.max(1000)]],
       ageFrom: [0, [Validators.required, Validators.min(0), Validators.max(18)]],
@@ -91,6 +109,32 @@ export class EditEvent implements OnInit, OnDestroy {
       place: ['', [Validators.maxLength(200)]],
       image: ['']
     });
+  }
+
+  onIncludeAllChildrenChange(): void {
+    const includeAll = this.eventForm.get('includeAllChildren')?.value;
+    const capacityControl = this.eventForm.get('capacity');
+    const ageFromControl = this.eventForm.get('ageFrom');
+    const ageToControl = this.eventForm.get('ageTo');
+
+    if (includeAll) {
+      capacityControl?.disable();
+      ageFromControl?.disable();
+      ageToControl?.disable();
+      capacityControl?.clearValidators();
+      ageFromControl?.clearValidators();
+      ageToControl?.clearValidators();
+    } else {
+      capacityControl?.enable();
+      ageFromControl?.enable();
+      ageToControl?.enable();
+      capacityControl?.setValidators([Validators.required, Validators.min(1), Validators.max(1000)]);
+      ageFromControl?.setValidators([Validators.required, Validators.min(0), Validators.max(18)]);
+      ageToControl?.setValidators([Validators.required, Validators.min(0), Validators.max(18)]);
+    }
+    capacityControl?.updateValueAndValidity();
+    ageFromControl?.updateValueAndValidity();
+    ageToControl?.updateValueAndValidity();
   }
 
   private initSelectOptions(): void {
@@ -139,6 +183,7 @@ export class EditEvent implements OnInit, OnDestroy {
           name: event.name,
           type: event.type,
           description: event.description,
+          includeAllChildren: event.includeAllChildren || false,
           price: event.price,
           capacity: event.capacity,
           ageFrom: event.ageFrom,
@@ -148,6 +193,11 @@ export class EditEvent implements OnInit, OnDestroy {
           place: event.place || '',
           image: event.image || ''
         });
+
+        // Apply the disabled state based on includeAllChildren
+        if (event.includeAllChildren) {
+          this.onIncludeAllChildrenChange();
+        }
 
         this.imagePreview = event.image || null;
         this.loading = false;
@@ -173,10 +223,10 @@ export class EditEvent implements OnInit, OnDestroy {
       return;
     }
 
-    const formValue = this.eventForm.value;
+    const formValue = this.eventForm.getRawValue(); // getRawValue to include disabled fields
 
-    // Validate age range
-    if (formValue.ageFrom > formValue.ageTo) {
+    // Validate age range only if not including all children
+    if (!formValue.includeAllChildren && formValue.ageFrom > formValue.ageTo) {
       Swal.fire({
         icon: 'error',
         title: this.translate.instant('MESSAGES.ERROR'),
@@ -195,10 +245,11 @@ export class EditEvent implements OnInit, OnDestroy {
       name: formValue.name,
       type: formValue.type,
       description: formValue.description,
+      includeAllChildren: formValue.includeAllChildren,
       price: formValue.price,
-      capacity: formValue.capacity,
-      ageFrom: formValue.ageFrom,
-      ageTo: formValue.ageTo,
+      capacity: formValue.includeAllChildren ? 0 : formValue.capacity,
+      ageFrom: formValue.includeAllChildren ? 0 : formValue.ageFrom,
+      ageTo: formValue.includeAllChildren ? 99 : formValue.ageTo,
       time: combinedDateTime,
       place: formValue.place,
       image: formValue.image || this.imagePreview || undefined

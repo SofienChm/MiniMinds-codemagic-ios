@@ -75,3 +75,78 @@
 .text-center {
   text-align: center !important;
 }
+
+.add-form.form-section {
+  .btn-add-global-2 {
+    i{
+      font-size: 14px;
+      color: #ffffff;
+    }
+}
+}
+
+// Danger Zone Styles
+.danger-zone-card {
+  border: 1px solid #dc3545 !important;
+  margin-top: 1.5rem;
+
+  .danger-header {
+    i, h4 {
+      color: #dc3545 !important;
+    }
+  }
+}
+
+.danger-zone-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1rem 0;
+
+  .danger-zone-info {
+    flex: 1;
+    min-width: 200px;
+
+    h5 {
+      color: #dc3545;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+    }
+
+    p {
+      color: #6c757d;
+      margin-bottom: 0;
+      font-size: 0.875rem;
+    }
+  }
+}
+
+.btn-delete-account {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background-color: #dc3545;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background-color: #bb2d3b;
+  }
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+
+  i {
+    font-size: 1rem;
+  }
+}

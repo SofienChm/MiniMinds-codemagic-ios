@@ -143,6 +143,10 @@ ion-content {
   background-color: var(--gradient-primary) !important;
   color: white !important;
 }
+.form-check-input:checked {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
 // ===================================
 // NG-SELECT CUSTOM STYLING
 // ===================================

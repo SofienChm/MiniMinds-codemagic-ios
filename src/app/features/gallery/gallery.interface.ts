@@ -13,6 +13,10 @@ export interface Photo {
   childName?: string;
   uploadedById?: string;
   uploadedByName?: string;
+  // File-based URLs (preferred)
+  thumbnailUrl?: string; // URL to thumbnail file
+  imageUrl?: string; // URL to full resolution image file
+  // Base64 fallback (deprecated - kept for backward compatibility)
   thumbnailData?: string; // Base64 thumbnail for fast gallery loading
   imageData?: string; // Full resolution Base64 image (only loaded when viewing)
   createdAt: string;

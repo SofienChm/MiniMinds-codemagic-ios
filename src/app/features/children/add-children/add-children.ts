@@ -11,6 +11,7 @@ import { ParentModel } from '../../parent/parent.interface';
 import { AuthService } from '../../../core/services/auth';
 import { TitlePage, Breadcrumb, TitleAction } from '../../../shared/layouts/title-page/title-page';
 import { ImageCropperModalComponent } from '../../../shared/components/image-cropper-modal/image-cropper-modal.component';
+import { SimpleToastService } from '../../../core/services/simple-toast.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -46,6 +47,7 @@ export class AddChildren implements OnInit {
     private parentService: ParentService,
     private authService: AuthService,
     private router: Router,
+    private simpleToastService: SimpleToastService,
     private translate: TranslateService
   ) {}
 
@@ -123,11 +125,7 @@ export class AddChildren implements OnInit {
         error: (error) => {
           const sanitizedMessage = this.sanitizeLogMessage(error?.message);
           console.error(`Error loading parents: ${sanitizedMessage}`);
-          Swal.fire({
-            icon: 'error',
-            title: this.translate.instant('MESSAGES.ERROR'),
-            text: this.translate.instant('MESSAGES.LOAD_PARENTS_ERROR')
-          });
+          this.simpleToastService.error(this.translate.instant('MESSAGES.LOAD_PARENTS_ERROR'));
         }
       });
     }
@@ -143,15 +141,42 @@ export class AddChildren implements OnInit {
     const childData: ChildModel = this.childForm.value;
 
     this.childrenService.addChild(childData).subscribe({
-      next: () => {
-        this.saving = false;
-        Swal.fire({
-          icon: 'success',
-          title: this.translate.instant('MESSAGES.SUCCESS'),
-          text: this.translate.instant('MESSAGES.CHILD_CREATED')
-        }).then(() => {
-          this.router.navigate(['/children']);
-        });
+      next: (createdChild) => {
+        // If we have a selected image file, upload it separately using the new endpoint
+        if (this.selectedImageFile && createdChild?.id) {
+          this.childrenService.uploadChildProfilePicture(createdChild.id, this.selectedImageFile).subscribe({
+            next: () => {
+              this.saving = false;
+              Swal.fire({
+                icon: 'success',
+                title: this.translate.instant('MESSAGES.SUCCESS'),
+                text: this.translate.instant('MESSAGES.CHILD_CREATED')
+              }).then(() => {
+                this.router.navigate(['/children']);
+              });
+            },
+            error: () => {
+              // Child created but profile picture upload failed
+              this.saving = false;
+              Swal.fire({
+                icon: 'success',
+                title: this.translate.instant('MESSAGES.SUCCESS'),
+                text: this.translate.instant('MESSAGES.CHILD_CREATED')
+              }).then(() => {
+                this.router.navigate(['/children']);
+              });
+            }
+          });
+        } else {
+          this.saving = false;
+          Swal.fire({
+            icon: 'success',
+            title: this.translate.instant('MESSAGES.SUCCESS'),
+            text: this.translate.instant('MESSAGES.CHILD_CREATED')
+          }).then(() => {
+            this.router.navigate(['/children']);
+          });
+        }
       },
       error: (error) => {
         this.saving = false;
@@ -159,12 +184,8 @@ export class AddChildren implements OnInit {
         const sanitizedStatus = typeof error?.status === 'number' ? error.status : 0;
         const sanitizedStatusText = this.sanitizeLogMessage(error?.statusText);
         console.error(`Failed to create child: status=${sanitizedStatus}, statusText=${sanitizedStatusText}, message=${sanitizedMessage}`);
+        this.simpleToastService.error(this.translate.instant('MESSAGES.CHILD_CREATE_ERROR'));
 
-        Swal.fire({
-          icon: 'error',
-          title: this.translate.instant('MESSAGES.ERROR'),
-          text: this.translate.instant('MESSAGES.CHILD_CREATE_ERROR')
-        });
       }
     });
   }
@@ -208,22 +229,17 @@ export class AddChildren implements OnInit {
 
     // Validate file type
     if (!this.ALLOWED_IMAGE_TYPES.includes(file.type)) {
-      Swal.fire({
-        icon: 'error',
-        title: this.translate.instant('MESSAGES.INVALID_FILE_TYPE'),
-        text: this.translate.instant('MESSAGES.ALLOWED_IMAGE_TYPES')
-      });
+        this.simpleToastService.error(
+          this.translate.instant('MESSAGES.ALLOWED_IMAGE_TYPES')
+        );
       this.resetFileInput();
       return;
     }
 
     // Validate file size
     if (file.size > this.MAX_FILE_SIZE) {
-      Swal.fire({
-        icon: 'error',
-        title: this.translate.instant('MESSAGES.FILE_TOO_LARGE'),
-        text: this.translate.instant('MESSAGES.MAX_FILE_SIZE', { size: this.getReadableFileSize() })
-      });
+      this.simpleToastService.error(this.translate.instant('MESSAGES.FILE_TOO_LARGE', { size: this.getReadableFileSize() }));
+
       this.resetFileInput();
       return;
     }
@@ -237,8 +253,22 @@ export class AddChildren implements OnInit {
 
   onImageCropped(croppedImage: string): void {
     this.imagePreview = croppedImage;
-    this.childForm.patchValue({ profilePicture: croppedImage });
-    this.selectedImageFile = null;
+    // Don't store Base64 in form - we'll upload the file separately
+    this.childForm.patchValue({ profilePicture: '' });
+    // Convert Base64 to File for upload
+    this.selectedImageFile = this.base64ToFile(croppedImage, 'profile.jpg');
+  }
+
+  private base64ToFile(base64: string, filename: string): File {
+    const arr = base64.split(',');
+    const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/jpeg';
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
   }
 
   onCropCancelled(): void {
@@ -252,6 +282,7 @@ export class AddChildren implements OnInit {
 
   private resetFileInput(): void {
     this.imagePreview = null;
+    this.selectedImageFile = null;
     this.childForm.patchValue({ profilePicture: '' });
     if (this.fileInput?.nativeElement) {
       this.fileInput.nativeElement.value = '';
@@ -301,5 +332,13 @@ export class AddChildren implements OnInit {
 
   isParent(): boolean {
     return this.authService.isParent();
+  }
+
+  searchParentsFullName(term: string, item: any) {
+    term = term.toLowerCase();
+    return (
+      item.firstName?.toLowerCase().includes(term) ||
+      item.lastName?.toLowerCase().includes(term)
+    );
   }
 }

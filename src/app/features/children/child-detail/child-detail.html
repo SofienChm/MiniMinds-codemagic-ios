@@ -88,7 +88,7 @@
 
   <!-- Loaded Content -->
   <div *ngIf="child && !loading" class="parent-detailchild font-inter">
-    <app-parent-child-header  [children]="[child]" [currentChildIndex]="0" [showDatePicker]="false"
+    <app-parent-child-header [children]="[child]" [currentChildIndex]="0" [showDatePicker]="false"
       [showSettings]="false" [showEdit]="true" [showImages]="true" [hasCustomContent]="true" (onBack)="back()"
       (onEdit)="editChild()">
 
@@ -114,54 +114,59 @@
           </div>
           <h5>Personal Information</h5>
         </div>
-        
+
         <div class="info-row">
-            <div class="info-label">Full Name</div>
-            <div class="info-value">{{ child.firstName }} {{ child.lastName }}</div>
+          <div class="info-label">Full Name</div>
+          <div class="info-value">{{ child.firstName }} {{ child.lastName }}</div>
         </div>
         <div class="info-row">
-            <div class="info-label">Age </div>
-            <div class="info-value">{{ getAgeDisplay(child.dateOfBirth) }}</div>
-        </div>
-        <div class="info-row">
+          <div class="info-label">Age </div>
+          <div class="info-value">
+            @if( calculateAge(child.dateOfBirth).years > 0){
+            {{ calculateAge(child.dateOfBirth).years}} {{ 'CHILD_DETAIL.YEARS_OLD' | translate }}
+            }
+            @if( calculateAge(child.dateOfBirth).years <= 0){ {{ calculateAge(child.dateOfBirth).months}}
+              {{ 'CHILD_DETAIL.MONTHS_OLD' | translate }} } </div>
+          </div>
+          <div class="info-row">
             <div class="info-label">Birthday</div>
-            <div class="info-value">{{ child.dateOfBirth  | date:'yyyy/MM/dd' }}</div>
-        </div>
-        <div class="info-row">
+            <div class="info-value">{{ child.dateOfBirth | date:'yyyy/MM/dd' }}</div>
+          </div>
+          <div class="info-row">
             <div class="info-label">Gender</div>
             <div class="info-value">{{ child.gender}}</div>
-        </div>
-      </div>
-      <div class="info-card card-mobile card mb-3">
-        <div class="card-title">
-          <div class="icon-box">
-            <i class="bi bi-heart-pulse"></i>
           </div>
-          <h5>Health Information</h5>
         </div>
-        
-        <div class="info-row">
+        <div class="info-card card-mobile card mb-3">
+          <div class="card-title">
+            <div class="icon-box">
+              <i class="bi bi-heart-pulse"></i>
+            </div>
+            <h5>Health Information</h5>
+          </div>
+
+          <div class="info-row">
             <div class="info-label">Medical Notes</div>
             <div class="info-value">{{ child.medicalNotes }}</div>
-        </div>
-        <div class="info-row">
+          </div>
+          <div class="info-row">
             <div class="info-label">Allergies </div>
             <div class="info-value">{{ child.allergies }}</div>
-        </div>
-      </div>
-      <div *ngIf="child.parent" class="info-card card-mobile card mb-3">
-        <div class="card-title">
-          <div class="icon-box">
-            <i class="bi bi-person-lines-fill"></i>
           </div>
-          <h5>Emergency Contact</h5>
         </div>
-        
-        <div class="info-row">
+        <div *ngIf="child.parent" class="info-card card-mobile card mb-3">
+          <div class="card-title">
+            <div class="icon-box">
+              <i class="bi bi-person-lines-fill"></i>
+            </div>
+            <h5>Emergency Contact</h5>
+          </div>
+
+          <div class="info-row">
             <div class="info-label">Emergency name</div>
             <div class="info-value">{{child.parent.firstName}} {{child.parent.lastName}}</div>
-        </div>
-        <div class="info-row">
+          </div>
+          <div class="info-row">
             <div class="info-label">Phone </div>
             <div class="info-value">{{child.parent.emergencyContact}}</div>
         </div>
@@ -173,7 +178,7 @@
         <div *ngIf="child.parent" class="profile-info-card_parent mb-3">
           <div class="d-flex gap-3 align-items-center" (click)="navigateToParentDetail()">
             <div class="info-image">
-              <img [src]="getProfilePicture(child.parent.profilePicture)" class="img-fluid" alt="Parent Photo">
+              <img [src]="getParentProfilePictureUrl(child.parent)" class="img-fluid" alt="Parent Photo">
             </div>
             <div class="info">
               <div class="info-title">{{child.parent.firstName}} {{child.parent.lastName}}</div>
@@ -190,63 +195,70 @@
   </div>
 </ion-content>
 
-<div class="container-fluid mt-4">
-  <app-title-page *ngIf="!isParent" [title]="'CHILD_DETAIL.TITLE' | translate" [subtitle]="'CHILD_DETAIL.SUBTITLE' | translate"
-    icon="bi bi-person-fill" [breadcrumbs]="breadcrumbs" [actions]="titleActions">
-  </app-title-page>
+  <div class="container-fluid mt-4">
+    <app-title-page *ngIf="!isParent" [title]="'CHILD_DETAIL.TITLE' | translate"
+      [subtitle]="'CHILD_DETAIL.SUBTITLE' | translate" icon="bi bi-person-fill" [breadcrumbs]="breadcrumbs"
+      [actions]="titleActions">
+    </app-title-page>
 
-  <div *ngIf="loading" class="text-center">
-    <div class="spinner-border" role="status">
-      <span class="visually-hidden">{{ 'CHILD_DETAIL.LOADING' | translate }}</span>
+    <div *ngIf="loading" class="text-center">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">{{ 'CHILD_DETAIL.LOADING' | translate }}</span>
+      </div>
     </div>
-  </div>
 
-  <div *ngIf="child && !loading && !isParent" class="row mb-4 child-detail-row">
-    <div class="col-md-6">
-      <div class="card card-detail_pages card-general shodown-effect">
-        <div class="card card-header">
-          <div class="d-flex align-items-center flex-wrap row-gap-2 row_direction">
-            <div
-              class="d-flex align-items-center justify-content-center avatar avatar-xxl border border-dashed me-2 flex-shrink-0 text-dark frames">
-              <img loading="lazy" [src]="child.profilePicture || 'assets/child.png'" class="img-fluid"
-                alt="Child Photo">
-              <span class="badge d-inline-flex align-items-center mb-2"
-                [ngClass]="{'badge-active': isActive, 'badge-inactive': !isActive}">
-                <i class="ti ti-circle-filled fs-5 me-1"></i>{{ isActive ? ('CHILD_DETAIL.ACTIVE' | translate) : ('CHILD_DETAIL.INACTIVE' | translate) }}
-              </span>
-            </div>
-            <div class="overflow-hidden">
-              <h5 class="mb-1 text-truncate name-user">{{ child.firstName }} {{ child.lastName }}</h5>
-              <p class="age">{{ 'CHILD_DETAIL.AGE' | translate }} : {{ getAgeDisplay(child.dateOfBirth) }}</p>
+    <div *ngIf="child && !loading && !isParent" class="row mb-4 child-detail-row">
+      <div class="col-md-6">
+        <div class="card card-detail_pages card-general shodown-effect">
+          <div class="card card-header">
+            <div class="d-flex align-items-center flex-wrap row-gap-2 row_direction">
+              <div
+                class="d-flex align-items-center justify-content-center avatar avatar-xxl border border-dashed me-2 flex-shrink-0 text-dark frames">
+                <img loading="lazy" [src]="getChildProfilePictureUrl(child)" class="img-fluid"
+                  alt="Child Photo">
+                <span class="badge d-inline-flex align-items-center mb-2"
+                  [ngClass]="{'badge-active': isActive, 'badge-inactive': !isActive}">
+                  <i class="ti ti-circle-filled fs-5 me-1"></i>{{ isActive ? ('CHILD_DETAIL.ACTIVE' | translate) :
+                  ('CHILD_DETAIL.INACTIVE' | translate) }}
+                </span>
+              </div>
+              <div class="overflow-hidden">
+                <h5 class="mb-1 text-truncate name-user">{{ child.firstName }} {{ child.lastName }}</h5>
+                <p class="age">{{ 'CHILD_DETAIL.AGE' | translate }} :
+                  @if( calculateAge(child.dateOfBirth).years > 0){
+                  {{ calculateAge(child.dateOfBirth).years}} {{ 'CHILD_DETAIL.YEARS_OLD' | translate }}
+                  }
+                  @if( calculateAge(child.dateOfBirth).years <= 0){ {{ calculateAge(child.dateOfBirth).months}}
+                    {{ 'CHILD_DETAIL.MONTHS_OLD' | translate }} } </p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Basic Information -->
-        <div class="card-body">
-          <h5 class="mb-3 title-body">{{ 'CHILD_DETAIL.BASIC_INFO' | translate }}</h5>
-          <dl class="row mb-0 table">
-            <dt class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.FULL_NAME' | translate }}</dt>
-            <dd class="col-6 description-dt-body-card mb-2">{{ child.firstName }} {{ child.lastName }}</dd>
-            <dt class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.GENDER' | translate }}</dt>
-            <dd class="col-6 description-dt-body-card mb-2">{{ child.gender }}</dd>
-            <dt class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.DATE_OF_BIRTH' | translate }}</dt>
-            <dd class="col-6 description-dt-body-card mb-2">{{ child.dateOfBirth | date:'yy/MM/dd' }}</dd>
-            <dt class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.ENROLLMENT_DATE' | translate }}</dt>
-            <dd class="col-6 description-dt-body-card mb-2">{{ child.enrollmentDate | date:'yy/MM/dd' }}</dd>
-          </dl>
-          <div *ngIf="child.medicalNotes || child.allergies">
-            <h5 class="mb-3 title-body">Medical Information</h5>
-            <div *ngIf="child.medicalNotes">
-              <dt class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.MEDICAL_NOTES' | translate }}</dt>
-              <dd class="col-6 description-dt-body-card mb-2">{{ child.medicalNotes }}</dd>
-            </div>
-            <div *ngIf="child.allergies">
-              <dt class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.ALLERGIES' | translate }}</dt>
-              <dd class="col-6 description-dt-body-card mb-2">{{ child.allergies }}</dd>
-            </div>
+          <!-- Basic Information -->
+          <div class="card-body">
+            <h5 class="mb-3 title-body">{{ 'CHILD_DETAIL.BASIC_INFO' | translate }}</h5>
+            <dl class="row mb-0 table">
+              <dt class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.FULL_NAME' | translate }}</dt>
+              <dd class="col-6 description-dt-body-card mb-2">{{ child.firstName }} {{ child.lastName }}</dd>
+              <dt class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.GENDER' | translate }}</dt>
+              <dd class="col-6 description-dt-body-card mb-2">{{ child.gender }}</dd>
+              <dt class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.DATE_OF_BIRTH' | translate }}</dt>
+              <dd class="col-6 description-dt-body-card mb-2">{{ child.dateOfBirth | date:'yy/MM/dd' }}</dd>
+              <dt class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.ENROLLMENT_DATE' | translate }}</dt>
+              <dd class="col-6 description-dt-body-card mb-2">{{ child.enrollmentDate | date:'yy/MM/dd' }}</dd>
+            </dl>
+            <div *ngIf="child.medicalNotes || child.allergies">
+              <h5 class="mb-3 title-body">Medical Information</h5>
+              <div *ngIf="child.medicalNotes">
+                <dt class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.MEDICAL_NOTES' | translate }}</dt>
+                <dd class="col-6 description-dt-body-card mb-2">{{ child.medicalNotes }}</dd>
+              </div>
+              <div *ngIf="child.allergies">
+                <dt class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.ALLERGIES' | translate }}</dt>
+                <dd class="col-6 description-dt-body-card mb-2">{{ child.allergies }}</dd>
+              </div>
 
-          </div>
+            </div>
 
         </div>
         <div class="card-footer">
@@ -260,209 +272,220 @@
         <!-- /Basic Information -->
       </div>
 
-      <div class="card card-general shodown-effect" *ngIf="child.allergies || child.medicalNotes">
-        <div class="card-header">
-          <h5>{{ 'CHILD_DETAIL.MEDICAL_INFO' | translate }}</h5>
-        </div>
-        <div class="card-body">
-          <div class="row mb-2" *ngIf="child.allergies">
-            <div class="col-sm-4"><strong>{{ 'CHILD_DETAIL.ALLERGIES' | translate }}:</strong></div>
-            <div class="col-sm-8">{{ child.allergies }}</div>
+        <div class="card card-general shodown-effect" *ngIf="child.allergies || child.medicalNotes">
+          <div class="card-header">
+            <h5>{{ 'CHILD_DETAIL.MEDICAL_INFO' | translate }}</h5>
           </div>
-          <div class="row mb-3" *ngIf="child.medicalNotes">
-            <div class="col-sm-4"><strong>{{ 'CHILD_DETAIL.MEDICAL_NOTES' | translate }}:</strong></div>
-            <div class="col-sm-8">{{ child.medicalNotes }}</div>
+          <div class="card-body">
+            <div class="row mb-2" *ngIf="child.allergies">
+              <div class="col-sm-4"><strong>{{ 'CHILD_DETAIL.ALLERGIES' | translate }}:</strong></div>
+              <div class="col-sm-8">{{ child.allergies }}</div>
+            </div>
+            <div class="row mb-3" *ngIf="child.medicalNotes">
+              <div class="col-sm-4"><strong>{{ 'CHILD_DETAIL.MEDICAL_NOTES' | translate }}:</strong></div>
+              <div class="col-sm-8">{{ child.medicalNotes }}</div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="col-md-6">
-      <div class="card card-general card-children-info shodown-effect">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <h5 class="mb-0">{{ 'CHILD_DETAIL.PARENTS_GUARDIANS_INFO' | translate }}</h5>
-          <button *ngIf="!isParent" class="custom-btn-2 btn-add-border" (click)="openAddParentModal()">
-            <i class="bi bi-plus-square me-1"></i>{{ 'CHILD_DETAIL.ADD_PARENT' | translate }}
-          </button>
-        </div>
-        <div class="card-body">
-          <div *ngIf="(!child.childParents || child.childParents.length === 0) && !child.parent"
-            class="text-center text-muted">
-            <p>{{ 'CHILD_DETAIL.NO_PARENT_INFO' | translate }}</p>
+      <div class="col-md-6">
+        <div class="card card-general card-children-info shodown-effect">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">{{ 'CHILD_DETAIL.PARENTS_GUARDIANS_INFO' | translate }}</h5>
+            <button *ngIf="!isParent" class="custom-btn-2 btn-add-border" (click)="openAddParentModal()">
+              <i class="bi bi-plus-square me-1"></i>{{ 'CHILD_DETAIL.ADD_PARENT' | translate }}
+            </button>
           </div>
+          <div class="card-body">
+            <div *ngIf="(!child.childParents || child.childParents.length === 0) && !child.parent"
+              class="text-center text-muted">
+              <p>{{ 'CHILD_DETAIL.NO_PARENT_INFO' | translate }}</p>
+            </div>
 
-          <div *ngIf="(child.childParents && child.childParents.length > 0) || child.parent">
-            <div *ngIf="child.childParents && child.childParents.length > 0" class="p-3 pb-0 pt-0 mb-3">
-              <div class="card card-detail_pages card-general">
-                <div class="card-header">
-                  <div class="d-flex align-items-start flex-wrap row-gap-2 row_direction">
-                    <div
-                      class="d-flex align-items-center justify-content-center avatar avatar-xxl border border-dashed me-2 flex-shrink-0 text-dark frames">
-                      <img loading="lazy" [src]="getProfilePicture(currentChildParent?.parent?.profilePicture)"
-                        class="img-fluid" alt="Parent Photo">
-                      <span class="badge badge-age d-inline-flex align-items-center mb-2">
-                        {{ currentChildParent?.parent?.parentType }}
-                      </span>
-                    </div>
-                    <div class="overflow-hidden">
-                      <h5 class="mb-1 text-truncate name-user">{{ currentChildParent?.parent?.firstName }} {{
-                        currentChildParent?.parent?.lastName }}</h5>
+            <div *ngIf="(child.childParents && child.childParents.length > 0) || child.parent">
+              <div *ngIf="child.childParents && child.childParents.length > 0" class="p-3 pb-0 pt-0 mb-3">
+                <div class="card card-detail_pages card-general">
+                  <div class="card-header">
+                    <div class="d-flex align-items-start flex-wrap row-gap-2 row_direction">
+                      <div
+                        class="d-flex align-items-center justify-content-center avatar avatar-xxl border border-dashed me-2 flex-shrink-0 text-dark frames">
+                        <img loading="lazy" [src]="getParentProfilePictureUrl(currentChildParent?.parent)"
+                          class="img-fluid" alt="Parent Photo">
+                        <span class="badge badge-age d-inline-flex align-items-center mb-2">
+                          {{ currentChildParent?.parent?.parentType }}
+                        </span>
+                      </div>
+                      <div class="overflow-hidden">
+                        <h5 class="mb-1 text-truncate name-user">{{ currentChildParent?.parent?.firstName }} {{
+                          currentChildParent?.parent?.lastName }}</h5>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <!-- Basic Information -->
-                <div class="card-body">
-                  <h5 class="mb-3 title-body">{{ 'CHILD_DETAIL.BASIC_INFO' | translate }}</h5>
-                  <dl class="row mb-0 table">
-                    <dt class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.EMAIL' | translate }}</dt>
-                    <dd class="col-6 description-dt-body-card mb-2"><a
-                        href="mailto:{{ currentChildParent?.parent?.email }}">{{ currentChildParent?.parent?.email
-                        }}</a></dd>
-                    <dt class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.PHONE' | translate }}</dt>
-                    <dd class="col-6 description-dt-body-card mb-2"><a
-                        href="tel:{{ currentChildParent?.parent?.phoneNumber }}">{{
-                        currentChildParent?.parent?.phoneNumber }}</a></dd>
-                    <dt class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.EMERGENCY_CONTACT' | translate }}</dt>
-                    <dd class="col-6 description-dt-body-card mb-2">{{ currentChildParent?.parent?.emergencyContact }}
-                    </dd>
-                    <dt *ngIf="currentChildParent?.parent?.work" class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.WORK' | translate }}</dt>
-                    <dd *ngIf="currentChildParent?.parent?.work" class="col-6 description-dt-body-card mb-2">{{
-                      currentChildParent?.parent?.work }}</dd>
-                    <dt class="col-6 title-dt-body-card mb-3">{{ 'CHILD_DETAIL.CREATED_AT' | translate }}</dt>
-                    <dd class="col-6 description-dt-body-card mb-3">{{ currentChildParent?.parent?.createdAt |
-                      date:'yy/MM/dd' }}</dd>
-                    <dt *ngIf="currentChildParent?.parent?.address" class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.ADDRESS' | translate }}</dt>
-                    <dd *ngIf="currentChildParent?.parent?.address" class="col-6 description-dt-body-card mb-2">{{
-                      currentChildParent?.parent?.address }}</dd>
-                  </dl>
+                  <!-- Basic Information -->
+                  <div class="card-body">
+                    <h5 class="mb-3 title-body">{{ 'CHILD_DETAIL.BASIC_INFO' | translate }}</h5>
+                    <dl class="row mb-0 table">
+                      <dt class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.EMAIL' | translate }}</dt>
+                      <dd class="col-6 description-dt-body-card mb-2"><a
+                          href="mailto:{{ currentChildParent?.parent?.email }}">{{ currentChildParent?.parent?.email
+                          }}</a></dd>
+                      <dt class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.PHONE' | translate }}</dt>
+                      <dd class="col-6 description-dt-body-card mb-2"><a
+                          href="tel:{{ currentChildParent?.parent?.phoneNumber }}">{{
+                          currentChildParent?.parent?.phoneNumber }}</a></dd>
+                      <dt class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.EMERGENCY_CONTACT' | translate }}</dt>
+                      <dd class="col-6 description-dt-body-card mb-2">{{ currentChildParent?.parent?.emergencyContact }}
+                      </dd>
+                      <dt *ngIf="currentChildParent?.parent?.work" class="col-6 title-dt-body-card mb-2">{{
+                        'CHILD_DETAIL.WORK' | translate }}</dt>
+                      <dd *ngIf="currentChildParent?.parent?.work" class="col-6 description-dt-body-card mb-2">{{
+                        currentChildParent?.parent?.work }}</dd>
+                      <dt class="col-6 title-dt-body-card mb-3">{{ 'CHILD_DETAIL.CREATED_AT' | translate }}</dt>
+                      <dd class="col-6 description-dt-body-card mb-3">{{ currentChildParent?.parent?.createdAt |
+                        date:'yy/MM/dd' }}</dd>
+                      <dt *ngIf="currentChildParent?.parent?.address" class="col-6 title-dt-body-card mb-2">{{
+                        'CHILD_DETAIL.ADDRESS' | translate }}</dt>
+                      <dd *ngIf="currentChildParent?.parent?.address" class="col-6 description-dt-body-card mb-2">{{
+                        currentChildParent?.parent?.address }}</dd>
+                    </dl>
+                  </div>
+                </div>
+              </div>
+
+              <div *ngIf="child.parent && (!child.childParents || child.childParents.length === 0)"
+                class="p-3 pb-0 pt-0 mb-3">
+                <div class="card card-detail_pages card-general">
+                  <div class="card-header">
+                    <div class="d-flex align-items-start flex-wrap row-gap-2 row_direction">
+                      <div
+                        class="d-flex align-items-center justify-content-center avatar avatar-xxl border border-dashed me-2 flex-shrink-0 text-dark frames">
+                        <img loading="lazy" [src]="getParentProfilePictureUrl(child.parent)" class="img-fluid"
+                          alt="Parent Photo">
+                        <span class="badge badge-age d-inline-flex align-items-center mb-2">
+                          {{ child.parent.parentType }}
+                        </span>
+                      </div>
+                      <div class="overflow-hidden">
+                        <h5 class="mb-1 text-truncate name-user">{{ child.parent.firstName }} {{ child.parent.lastName
+                          }}
+                        </h5>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Basic Information -->
+                  <div class="card-body">
+                    <h5 class="mb-3 title-body">{{ 'CHILD_DETAIL.BASIC_INFO' | translate }}</h5>
+                    <dl class="row mb-0 table">
+                      <dt class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.EMAIL' | translate }}</dt>
+                      <dd class="col-6 description-dt-body-card mb-2"><a href="mailto:{{ child.parent.email }}">{{
+                          child.parent.email }}</a></dd>
+                      <dt class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.PHONE' | translate }}</dt>
+                      <dd class="col-6 description-dt-body-card mb-2"><a href="tel:{{ child.parent.phoneNumber }}">{{
+                          child.parent.phoneNumber }}</a></dd>
+                      <dt class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.EMERGENCY_CONTACT' | translate }}</dt>
+                      <dd class="col-6 description-dt-body-card mb-2">{{ child.parent.emergencyContact }}</dd>
+                      <dt *ngIf="child.parent.work" class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.WORK' |
+                        translate }}</dt>
+                      <dd *ngIf="child.parent.work" class="col-6 description-dt-body-card mb-2">{{ child.parent.work }}
+                      </dd>
+                      <dt class="col-6 title-dt-body-card mb-3">{{ 'CHILD_DETAIL.CREATED_AT' | translate }}</dt>
+                      <dd class="col-6 description-dt-body-card mb-3">{{ child.parent.createdAt | date:'yy/MM/dd' }}
+                      </dd>
+                      <dt *ngIf="child.parent.address" class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.ADDRESS' |
+                        translate }}</dt>
+                      <dd *ngIf="child.parent.address" class="col-6 description-dt-body-card mb-2">{{
+                        child.parent.address
+                        }}</dd>
+                    </dl>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div *ngIf="child.parent && (!child.childParents || child.childParents.length === 0)"
-              class="p-3 pb-0 pt-0 mb-3">
-              <div class="card card-detail_pages card-general">
-                <div class="card-header">
-                  <div class="d-flex align-items-start flex-wrap row-gap-2 row_direction">
-                    <div
-                      class="d-flex align-items-center justify-content-center avatar avatar-xxl border border-dashed me-2 flex-shrink-0 text-dark frames">
-                      <img loading="lazy" [src]="getProfilePicture(child.parent.profilePicture)" class="img-fluid"
-                        alt="Parent Photo">
-                      <span class="badge badge-age d-inline-flex align-items-center mb-2">
-                        {{ child.parent.parentType }}
-                      </span>
-                    </div>
-                    <div class="overflow-hidden">
-                      <h5 class="mb-1 text-truncate name-user">{{ child.parent.firstName }} {{ child.parent.lastName }}
-                      </h5>
-                    </div>
-                  </div>
-                </div>
+          </div>
 
-                <!-- Basic Information -->
-                <div class="card-body">
-                  <h5 class="mb-3 title-body">{{ 'CHILD_DETAIL.BASIC_INFO' | translate }}</h5>
-                  <dl class="row mb-0 table">
-                    <dt class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.EMAIL' | translate }}</dt>
-                    <dd class="col-6 description-dt-body-card mb-2"><a href="mailto:{{ child.parent.email }}">{{
-                        child.parent.email }}</a></dd>
-                    <dt class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.PHONE' | translate }}</dt>
-                    <dd class="col-6 description-dt-body-card mb-2"><a href="tel:{{ child.parent.phoneNumber }}">{{
-                        child.parent.phoneNumber }}</a></dd>
-                    <dt class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.EMERGENCY_CONTACT' | translate }}</dt>
-                    <dd class="col-6 description-dt-body-card mb-2">{{ child.parent.emergencyContact }}</dd>
-                    <dt *ngIf="child.parent.work" class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.WORK' | translate }}</dt>
-                    <dd *ngIf="child.parent.work" class="col-6 description-dt-body-card mb-2">{{ child.parent.work }}
-                    </dd>
-                    <dt class="col-6 title-dt-body-card mb-3">{{ 'CHILD_DETAIL.CREATED_AT' | translate }}</dt>
-                    <dd class="col-6 description-dt-body-card mb-3">{{ child.parent.createdAt | date:'yy/MM/dd' }}</dd>
-                    <dt *ngIf="child.parent.address" class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.ADDRESS' | translate }}</dt>
-                    <dd *ngIf="child.parent.address" class="col-6 description-dt-body-card mb-2">{{ child.parent.address
-                      }}</dd>
-                  </dl>
-                </div>
+          <div class="card-footer overflow-hidden" *ngIf="child.childParents && child.childParents.length > 1 ">
+            <div class="d-flex align-items-center justify-content-between w-100 flex-nowrap">
+              <div *ngIf="!isParent" class="d-flex align-items-center flex-shrink-0">
+                <button class="btn btn-outline-secondary btn-sm me-2" (click)="prevParent()"
+                  [disabled]="child.childParents.length <= 1">
+                  <i class="bi bi-chevron-left"></i>
+                </button>
+                <small class="text-muted">{{ currentParentIndex + 1 }} / {{ child.childParents.length }}</small>
+                <button class="btn btn-outline-secondary btn-sm ms-2" (click)="nextParent()"
+                  [disabled]="child.childParents.length <= 1">
+                  <i class="bi bi-chevron-right"></i>
+                </button>
+              </div>
+
+              <div class="d-flex align-items-center gap-2 flex-shrink-0 action-child">
+                <a *ngIf="!isParent" class="btn btn-secondary-global" (click)="removeParent(currentChildParent?.id!)">
+                  {{ 'CHILD_DETAIL.REMOVE' | translate }}
+                </a>
+                <a class="custom-btn-2 btn-add-global-2" (click)="viewParentDetails(currentChildParent?.parent?.id!)">
+                  {{ 'CHILD_DETAIL.VIEW_DETAILS' | translate }}
+                </a>
               </div>
             </div>
           </div>
 
-        </div>
-
-        <div class="card-footer overflow-hidden" *ngIf="child.childParents && child.childParents.length > 1 ">
-          <div class="d-flex align-items-center justify-content-between w-100 flex-nowrap">
-            <div *ngIf="!isParent" class="d-flex align-items-center flex-shrink-0">
-              <button class="btn btn-outline-secondary btn-sm me-2" (click)="prevParent()"
-                [disabled]="child.childParents.length <= 1">
-                <i class="bi bi-chevron-left"></i>
-              </button>
-              <small class="text-muted">{{ currentParentIndex + 1 }} / {{ child.childParents.length }}</small>
-              <button class="btn btn-outline-secondary btn-sm ms-2" (click)="nextParent()"
-                [disabled]="child.childParents.length <= 1">
-                <i class="bi bi-chevron-right"></i>
-              </button>
-            </div>
-
-            <div class="d-flex align-items-center gap-2 flex-shrink-0 action-child">
-              <a *ngIf="!isParent" class="btn btn-secondary-global" (click)="removeParent(currentChildParent?.id!)">
-                {{ 'CHILD_DETAIL.REMOVE' | translate }}
-              </a>
-              <a class="custom-btn-2 btn-add-global-2" (click)="viewParentDetails(currentChildParent?.parent?.id!)">
+          <div class="card-footer"
+            *ngIf="child.parent && (!child.childParents || child.childParents.length === 0 || child.childParents.length === 1)">
+            <div class="d-flex col-12 align-items-center justify-content-end action-child">
+              <a class="custom-btn-2 btn-add-global-2" (click)="viewParentDetails(child.parent.id!)">
                 {{ 'CHILD_DETAIL.VIEW_DETAILS' | translate }}
               </a>
             </div>
           </div>
-        </div>
 
-        <div class="card-footer"
-          *ngIf="child.parent && (!child.childParents || child.childParents.length === 0 || child.childParents.length === 1)">
-          <div class="d-flex col-12 align-items-center justify-content-end action-child">
-            <a class="custom-btn-2 btn-add-global-2" (click)="viewParentDetails(child.parent.id!)">
-              {{ 'CHILD_DETAIL.VIEW_DETAILS' | translate }}
-            </a>
-          </div>
         </div>
-
       </div>
     </div>
-  </div>
 
-  <!-- Add Parent Modal -->
-  <div class="modal fade show d-block" *ngIf="showAddParentModal" style="background-color: rgba(0,0,0,0.5)"
-    (click)="closeAddParentModal()">
-    <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">{{ 'CHILD_DETAIL.ADD_PARENT_MODAL_TITLE' | translate }}</h5>
-          <button type="button" class="btn-close" (click)="closeAddParentModal()"></button>
-        </div>
-        <div class="modal-body">
-          <div class="mb-3">
-            <label class="form-label">{{ 'CHILD_DETAIL.SELECT_PARENT' | translate }}</label>
-            <select class="form-select" [(ngModel)]="selectedParentId">
-              <option [value]="null">{{ 'CHILD_DETAIL.CHOOSE_PARENT' | translate }}</option>
-              <option *ngFor="let parent of availableParents" [value]="parent.id">
-                {{ parent.firstName }} {{ parent.lastName }} - {{ parent.email }}
-              </option>
-            </select>
+    <!-- Add Parent Modal -->
+    <div class="modal fade show d-block" *ngIf="showAddParentModal" style="background-color: rgba(0,0,0,0.5)"
+      (click)="closeAddParentModal()">
+      <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">{{ 'CHILD_DETAIL.ADD_PARENT_MODAL_TITLE' | translate }}</h5>
+            <button type="button" class="btn-close" (click)="closeAddParentModal()"></button>
           </div>
-          <div class="mb-3">
-            <label class="form-label">{{ 'CHILD_DETAIL.RELATIONSHIP_TYPE' | translate }}</label>
-            <select class="form-select" [(ngModel)]="relationshipType">
-              <option value="Mother">{{ 'CHILD_DETAIL.MOTHER' | translate }}</option>
-              <option value="Father">{{ 'CHILD_DETAIL.FATHER' | translate }}</option>
-              <option value="Guardian">{{ 'CHILD_DETAIL.GUARDIAN' | translate }}</option>
-              <option value="Grandparent">{{ 'CHILD_DETAIL.GRANDPARENT' | translate }}</option>
-              <option value="Parent">{{ 'CHILD_DETAIL.PARENT' | translate }}</option>
-            </select>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">{{ 'CHILD_DETAIL.SELECT_PARENT' | translate }}</label>
+              <select class="form-select" [(ngModel)]="selectedParentId">
+                <option [value]="null">{{ 'CHILD_DETAIL.CHOOSE_PARENT' | translate }}</option>
+                <option *ngFor="let parent of availableParents" [value]="parent.id">
+                  {{ parent.firstName }} {{ parent.lastName }} - {{ parent.email }}
+                </option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">{{ 'CHILD_DETAIL.RELATIONSHIP_TYPE' | translate }}</label>
+              <select class="form-select" [(ngModel)]="relationshipType">
+                <option value="Mother">{{ 'CHILD_DETAIL.MOTHER' | translate }}</option>
+                <option value="Father">{{ 'CHILD_DETAIL.FATHER' | translate }}</option>
+                <option value="Guardian">{{ 'CHILD_DETAIL.GUARDIAN' | translate }}</option>
+                <option value="Grandparent">{{ 'CHILD_DETAIL.GRANDPARENT' | translate }}</option>
+                <option value="Parent">{{ 'CHILD_DETAIL.PARENT' | translate }}</option>
+              </select>
+            </div>
+            <div class="mb-3 form-check">
+              <input type="checkbox" class="form-check-input" [(ngModel)]="isPrimaryContact" id="primaryContact">
+              <label class="form-check-label" for="primaryContact">{{ 'CHILD_DETAIL.PRIMARY_CONTACT' | translate
+                }}</label>
+            </div>
           </div>
-          <div class="mb-3 form-check">
-            <input type="checkbox" class="form-check-input" [(ngModel)]="isPrimaryContact" id="primaryContact">
-            <label class="form-check-label" for="primaryContact">{{ 'CHILD_DETAIL.PRIMARY_CONTACT' | translate }}</label>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="closeAddParentModal()">{{ 'CHILD_DETAIL.CANCEL' |
+              translate }}</button>
+            <button type="button" class="btn btn-primary" (click)="addParentToChild()" [disabled]="!selectedParentId">{{
+              'CHILD_DETAIL.ADD_PARENT' | translate }}</button>
           </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" (click)="closeAddParentModal()">{{ 'CHILD_DETAIL.CANCEL' | translate }}</button>
-          <button type="button" class="btn btn-primary" (click)="addParentToChild()" [disabled]="!selectedParentId">{{ 'CHILD_DETAIL.ADD_PARENT' | translate }}</button>
         </div>
       </div>
     </div>
@@ -482,7 +505,7 @@
         <div class="modal-body">
           <!-- Child Info -->
           <div class="text-center mb-3" *ngIf="child">
-            <img [src]="child.profilePicture || 'assets/child.png'" class="rounded-circle mb-2" width="60" height="60" alt="Child Photo">
+            <img [src]="getChildProfilePictureUrl(child)" class="rounded-circle mb-2" width="60" height="60" alt="Child Photo">
             <h6 class="mb-1">{{ child.firstName }} {{ child.lastName }}</h6>
             <span class="badge" [ngClass]="{
               'bg-warning': !childAttendanceStatus?.isCheckedIn,
@@ -574,4 +597,3 @@
       </div>
     </div>
   </div>
-</div>

@@ -79,7 +79,7 @@
       </div>
       <div *ngIf="!loadingPhotos" class="photo-grid-parent">
         <div class="photo-item-parent" *ngFor="let photo of photos" (click)="openPhotoModal(photo)">
-          <img [src]="photo.thumbnailData" [alt]="photo.title || 'Activity photo'">
+          <img [src]="getThumbnailSrc(photo)" [alt]="photo.title || 'Activity photo'">
         </div>
       </div>
     </div>
@@ -314,7 +314,7 @@
           <!-- Photo Grid -->
           <div *ngIf="!loadingPhotos && photos.length > 0" class="photo-grid">
             <div class="photo-item" *ngFor="let photo of photos" (click)="openPhotoModal(photo)">
-              <img [src]="photo.thumbnailData" [alt]="photo.title || 'Activity photo'">
+              <img [src]="getThumbnailSrc(photo)" [alt]="photo.title || 'Activity photo'">
               <div class="photo-overlay">
                 <i class="bi bi-zoom-in"></i>
               </div>

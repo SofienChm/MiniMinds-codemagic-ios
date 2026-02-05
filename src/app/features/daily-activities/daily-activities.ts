@@ -16,7 +16,7 @@ import { Location } from '@angular/common';
 import { ParentChildHeaderComponent } from '../../shared/components/parent-child-header/parent-child-header.component';
 import { PageTitleService } from '../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
-import { PullToRefreshComponent } from '../../shared/components/pull-to-refresh/pull-to-refresh.component';
+
 import { SkeletonActivityTimelineComponent } from '../../shared/components/skeleton/skeleton-activity-timeline.component';
 import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
 
@@ -26,14 +26,14 @@ Chart.register(ArcElement, Tooltip, Legend, DoughnutController, LineElement, Lin
 @Component({
   selector: 'app-daily-activities',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, NgSelectModule, TranslateModule, TitlePage, BaseChartDirective, ParentChildHeaderComponent, PullToRefreshComponent, SkeletonActivityTimelineComponent, IonContent, IonRefresher, IonRefresherContent],
+  imports: [CommonModule, FormsModule, RouterModule, NgSelectModule, TranslateModule, TitlePage, BaseChartDirective, ParentChildHeaderComponent, SkeletonActivityTimelineComponent, IonContent, IonRefresher, IonRefresherContent],
   templateUrl: './daily-activities.html',
   styleUrls: ['./daily-activities.scss']
 })
 export class DailyActivities implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('activityChart') activityChartRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('timelineChart') timelineChartRef!: ElementRef<HTMLCanvasElement>;
-  @ViewChild('pullToRefresh') pullToRefresh!: PullToRefreshComponent;
+
   
   activities: DailyActivity[] = [];
   children: any[] = [];
@@ -70,6 +70,7 @@ export class DailyActivities implements OnInit, AfterViewInit, OnDestroy {
     this.location.back();
   }
   moods = ['Happy', 'Sad', 'Cranky', 'Sleepy', 'Energetic', 'Calm'];
+  applyToAllChildren = false;
 
   newActivity: DailyActivity = this.getEmptyActivity();
 
@@ -203,36 +204,69 @@ export class DailyActivities implements OnInit, AfterViewInit, OnDestroy {
       ...this.getEmptyActivity(),
       activityType: template.type,
       childId: this.selectedChildId!,
-      activityTime: new Date().toISOString(),
+      activityTime: this.getCurrentDateTimeLocal(),
       duration: template.defaultDuration ? `${template.defaultDuration}` : undefined
     };
   }
 
+  private getCurrentDateTimeLocal(): string {
+    const now = new Date();
+    // Format: YYYY-MM-DDTHH:mm (required for datetime-local input)
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  }
+
   saveActivity() {
-    if (!this.newActivity.childId || !this.newActivity.activityType) return;
+    if (!this.newActivity.activityType) return;
+
+    // For single child activity, childId is required
+    if (!this.applyToAllChildren && !this.newActivity.childId) return;
 
     // Prepare activity data with correct format
     const activityData = {
       ...this.newActivity,
       // Convert duration minutes to TimeSpan format (HH:mm:ss)
-      duration: this.newActivity.duration ? 
-        `${Math.floor(parseInt(this.newActivity.duration) / 60).toString().padStart(2, '0')}:${(parseInt(this.newActivity.duration) % 60).toString().padStart(2, '0')}:00` 
+      duration: this.newActivity.duration ?
+        `${Math.floor(parseInt(this.newActivity.duration) / 60).toString().padStart(2, '0')}:${(parseInt(this.newActivity.duration) % 60).toString().padStart(2, '0')}:00`
         : undefined
     };
 
     console.log('Sending activity data:', activityData);
 
-    this.activityService.addActivity(activityData).subscribe({
-      next: () => {
-        this.showBulkAdd = false;
-        this.newActivity = this.getEmptyActivity();
-        this.loadActivities();
-      },
-      error: (err) => {
-        console.error('Error saving activity:', err);
-        console.error('Error details:', err.error);
-      }
-    });
+    if (this.applyToAllChildren) {
+      // Bulk add for all children
+      this.activityService.addBulkActivity(activityData).subscribe({
+        next: (response) => {
+          console.log(`Created activities for ${response.count} children`);
+          this.showBulkAdd = false;
+          this.newActivity = this.getEmptyActivity();
+          this.applyToAllChildren = false;
+          this.loadActivities();
+        },
+        error: (err) => {
+          console.error('Error saving bulk activity:', err);
+          console.error('Error details:', err.error);
+        }
+      });
+    } else {
+      // Single child activity
+      this.activityService.addActivity(activityData).subscribe({
+        next: () => {
+          this.showBulkAdd = false;
+          this.newActivity = this.getEmptyActivity();
+          this.applyToAllChildren = false;
+          this.loadActivities();
+        },
+        error: (err) => {
+          console.error('Error saving activity:', err);
+          console.error('Error details:', err.error);
+        }
+      });
+    }
   }
 
   editActivity(activity: DailyActivity) {
@@ -348,7 +382,7 @@ export class DailyActivities implements OnInit, AfterViewInit, OnDestroy {
     return {
       childId: this.selectedChildId || 0,
       activityType: '',
-      activityTime: new Date().toISOString(),
+      activityTime: this.getCurrentDateTimeLocal(),
       notes: '',
       mood: 'Happy'
     };

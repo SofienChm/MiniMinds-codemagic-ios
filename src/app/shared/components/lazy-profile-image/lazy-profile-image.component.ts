@@ -3,6 +3,12 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ApiConfig } from '../../../core/config/api.config';
 
+interface ProfilePictureResponse {
+  profilePictureUrl?: string;
+  profilePicture?: string;
+  isFileBased?: boolean;
+}
+
 @Component({
   selector: 'app-lazy-profile-image',
   standalone: true,
@@ -81,6 +87,7 @@ export class LazyProfileImageComponent implements OnInit, OnChanges {
   @Input() size: number = 40;
   @Input() alt: string = 'Profile picture';
   @Input() cachedImage?: string; // If image is already loaded (e.g., from detail view)
+  @Input() profilePictureUrl?: string; // File-based URL (new)
 
   loading: boolean = false;
   imageUrl: string | null = null;
@@ -92,20 +99,27 @@ export class LazyProfileImageComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['entityId'] || changes['hasProfilePicture'] || changes['cachedImage']) {
+    if (changes['entityId'] || changes['hasProfilePicture'] || changes['cachedImage'] || changes['profilePictureUrl']) {
       this.loadImage();
     }
   }
 
   private loadImage(): void {
-    // If we already have the image cached, use it
+    // Priority 1: Use profilePictureUrl if available (file-based storage)
+    if (this.profilePictureUrl) {
+      this.imageUrl = this.getFullUrl(this.profilePictureUrl);
+      this.loading = false;
+      return;
+    }
+
+    // Priority 2: Use cachedImage (Base64 or URL from parent component)
     if (this.cachedImage) {
       this.imageUrl = this.cachedImage;
       this.loading = false;
       return;
     }
 
-    // If no profile picture, don't load
+    // If no profile picture flag, don't load
     if (!this.hasProfilePicture || !this.entityId) {
       this.imageUrl = null;
       this.loading = false;
@@ -118,9 +132,16 @@ export class LazyProfileImageComponent implements OnInit, OnChanges {
       ? `${ApiConfig.ENDPOINTS.PARENTS}/${this.entityId}/profile-picture`
       : `${ApiConfig.ENDPOINTS.CHILDREN}/${this.entityId}/profile-picture`;
 
-    this.http.get<{ profilePicture: string }>(endpoint).subscribe({
+    this.http.get<ProfilePictureResponse>(endpoint).subscribe({
       next: (response) => {
-        this.imageUrl = response.profilePicture;
+        // Prefer file-based URL, fallback to Base64
+        if (response.profilePictureUrl) {
+          this.imageUrl = this.getFullUrl(response.profilePictureUrl);
+        } else if (response.profilePicture) {
+          this.imageUrl = response.profilePicture;
+        } else {
+          this.imageUrl = null;
+        }
         this.loading = false;
       },
       error: () => {
@@ -128,6 +149,15 @@ export class LazyProfileImageComponent implements OnInit, OnChanges {
         this.loading = false;
       }
     });
+  }
+
+  private getFullUrl(path: string): string {
+    // If already a full URL or data URL, return as-is
+    if (path.startsWith('http') || path.startsWith('data:')) {
+      return path;
+    }
+    // Prepend API base URL for relative paths
+    return `${ApiConfig.HUB_URL}${path.startsWith('/') ? '' : '/'}${path}`;
   }
 
   get initials(): string {
