@@ -1,6 +1,13 @@
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
+import localeIt from '@angular/common/locales/it';
+import localeAr from '@angular/common/locales/ar';
 import { FormsModule } from '@angular/forms';
+
+registerLocaleData(localeFr);
+registerLocaleData(localeIt);
+registerLocaleData(localeAr);
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { AttendanceService } from './attendance.service';
@@ -29,6 +36,7 @@ export class AttendanceSheet implements OnInit, OnDestroy {
   searchTerm = '';
   loading = false;
   currentTime = new Date();
+  currentLocale = 'en';
   children: ChildModel[] = [];
   availableChildren: ChildModel[] = [];
   selectedChildId: number | null = null;
@@ -52,14 +60,22 @@ export class AttendanceSheet implements OnInit, OnDestroy {
     private pageTitleService: PageTitleService
   ) {}
 
+  private readonly localeMapping: Record<string, string> = {
+    'fr': 'fr-FR',
+    'it': 'it-IT',
+    'ar': 'ar-SA'
+  };
+
   ngOnInit(): void {
     this.pageTitleService.setTitle(this.translate.instant('ATTENDANCE_PAGE.TITLE'));
+    this.currentLocale = this.translate.currentLang ?? this.translate.defaultLang ?? 'en';
     this.loadTodayData();
     this.loadChildren();
     this.setupRealtimeUpdates();
     this.startClock();
 
-    this.langChangeSub = this.translate.onLangChange.subscribe(() => {
+    this.langChangeSub = this.translate.onLangChange.subscribe((event) => {
+      this.currentLocale = event.lang;
       this.pageTitleService.setTitle(this.translate.instant('ATTENDANCE_PAGE.TITLE'));
       this.cdr.detectChanges();
     });
@@ -199,7 +215,8 @@ export class AttendanceSheet implements OnInit, OnDestroy {
   }
 
   formatTime(dateString: string): string {
-    return this.parseUtcDate(dateString).toLocaleTimeString('en-US', {
+    const locale = this.localeMapping[this.currentLocale] || 'en-US';
+    return this.parseUtcDate(dateString).toLocaleTimeString(locale, {
       hour: '2-digit',
       minute: '2-digit'
     });
@@ -212,7 +229,8 @@ export class AttendanceSheet implements OnInit, OnDestroy {
   }
 
   getCurrentTime(): string {
-    return this.currentTime.toLocaleTimeString('en-US', {
+    const locale = this.localeMapping[this.currentLocale] || 'en-US';
+    return this.currentTime.toLocaleTimeString(locale, {
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit'

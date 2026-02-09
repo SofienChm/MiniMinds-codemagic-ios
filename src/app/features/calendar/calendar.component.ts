@@ -1,5 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule, registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
+import localeIt from '@angular/common/locales/it';
+import localeAr from '@angular/common/locales/ar';
 import { TitlePage } from '../../shared/layouts/title-page/title-page';
 import { EventService } from '../event/event.service';
 import { EventModel } from '../event/event.interface';
@@ -11,11 +14,19 @@ import { CalendarOptions } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
+import frLocale from '@fullcalendar/core/locales/fr';
+import itLocale from '@fullcalendar/core/locales/it';
+import arLocale from '@fullcalendar/core/locales/ar';
 import { Router } from '@angular/router';
 import { ParentChildHeaderSimpleComponent } from '../../shared/components/parent-child-header-simple/parent-child-header-simple.component';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { PageTitleService } from '../../core/services/page-title.service';
 import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
+import { Subscription } from 'rxjs';
+
+registerLocaleData(localeFr);
+registerLocaleData(localeIt);
+registerLocaleData(localeAr);
 
 @Component({
   selector: 'app-calendar-page',
@@ -23,7 +34,7 @@ import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/st
   templateUrl: './calendar.component.html',
   styleUrls: ['./calendar.component.scss']
 })
-export class CalendarPageComponent implements OnInit {
+export class CalendarPageComponent implements OnInit, OnDestroy {
   selectedDate: Date = new Date();
   events: EventModel[] = [];
   holidays: Holiday[] = [];
@@ -33,9 +44,17 @@ export class CalendarPageComponent implements OnInit {
   showDateEventsModal = false;
   showNoEventsModal = false;
   loading = false;
+  currentLocale = 'en';
+  private langChangeSub?: Subscription;
+  private readonly localeMap: Record<string, any> = {
+    'fr': frLocale,
+    'it': itLocale,
+    'ar': arLocale
+  };
   calendarOptions: CalendarOptions = {
     plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
     initialView: 'dayGridMonth',
+    locales: [frLocale, itLocale, arLocale],
     height: 'auto',
     headerToolbar: {
       left: 'prev',
@@ -103,8 +122,26 @@ export class CalendarPageComponent implements OnInit {
 
   ngOnInit() {
     this.pageTitleService.setTitle(this.translateService.instant('CALENDAR_PAGE.TITLE'));
+    this.setCalendarLocale(this.translateService.currentLang ?? this.translateService.defaultLang ?? 'en');
     this.loadEvents();
     this.loadHolidays();
+
+    this.langChangeSub = this.translateService.onLangChange.subscribe((event) => {
+      this.setCalendarLocale(event.lang);
+      this.pageTitleService.setTitle(this.translateService.instant('CALENDAR_PAGE.TITLE'));
+    });
+  }
+
+  ngOnDestroy() {
+    this.langChangeSub?.unsubscribe();
+  }
+
+  private setCalendarLocale(lang: string): void {
+    this.currentLocale = lang;
+    this.calendarOptions = {
+      ...this.calendarOptions,
+      locale: this.localeMap[lang] || 'en'
+    };
   }
 
   loadEvents() {

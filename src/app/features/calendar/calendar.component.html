@@ -21,8 +21,8 @@
                   <div class="d-flex align-items-center p-3 bg-light rounded event-card">
                     <div [ngClass]="{'isholiday': isHoliday(item)}" class="event-icon me-2">
                       <div class="icon-circle d-flex flex-column align-items-center justify-content-center">
-                        <div class="day">{{ getItemDateTime(item) | date:'d' }}</div>
-                        <div class="month">{{ getItemDateTime(item) | date:'MMM' }}</div>
+                        <div class="day">{{ getItemDateTime(item) | date:'d':'':currentLocale }}</div>
+                        <div class="month">{{ getItemDateTime(item) | date:'MMM':'':currentLocale }}</div>
                       </div>
                     </div>
                     <div class="event-content flex-grow-1">
@@ -37,7 +37,7 @@
 
                         <small class="text-muted date-type">
                           <span class="me-2" ><i class="bi bi-calendar2-event"></i> {{ isEvent(item) ? item.type : ('CALENDAR_PAGE.HOLIDAY' | translate) }} </span>
-                          <span><i class="bi bi-clock-history"></i> {{ getItemDateTime(item) | date:'shortTime' }}</span>
+                          <span><i class="bi bi-clock-history"></i> {{ getItemDateTime(item) | date:'shortTime':'':currentLocale }}</span>
                         </small>
                         </div>
                       </div>
@@ -82,11 +82,11 @@
           <h5 class="mb-0">{{ 'CALENDAR_PAGE.SELECTED_DATES' | translate }}</h5>
         </div>
         <div class="card-body">
-          <p class="mb-1 selected-event_day"><strong>{{ 'CALENDAR_PAGE.DATE' | translate }}</strong> {{ selectedDate | date:'fullDate' }}</p>
+          <p class="mb-1 selected-event_day"><strong>{{ 'CALENDAR_PAGE.DATE' | translate }}</strong> {{ selectedDate | date:'fullDate':'':currentLocale }}</p>
           <div *ngIf="getEventsForDate(selectedDate).length > 0; else noEvents">
             <div *ngFor="let event of getEventsForDate(selectedDate)" class="mb-2 p-2 bg-light rounded">
               <strong class="selected-event_day">{{ event.name }}</strong><br>
-              <small class="selected-event_time">{{ event.type }} - {{ event.time | date:'shortTime' }}</small>
+              <small class="selected-event_time">{{ event.type }} - {{ event.time | date:'shortTime':'':currentLocale }}</small>
             </div>
           </div>
           <ng-template #noEvents>
@@ -109,8 +109,8 @@
                 <span *ngIf="isHoliday(item)">🎉 </span>{{ item.name }}
               </strong>
               <small class="text-muted d-block time">
-                {{ getItemDateTime(item) | date:'MMM d, y' }}
-                <span *ngIf="isEvent(item)"> {{ 'CALENDAR_PAGE.AT' | translate }} {{ getItemDateTime(item) | date:'shortTime' }}</span>
+                {{ getItemDateTime(item) | date:'MMM d, y':'':currentLocale }}
+                <span *ngIf="isEvent(item)"> {{ 'CALENDAR_PAGE.AT' | translate }} {{ getItemDateTime(item) | date:'shortTime':'':currentLocale }}</span>
               </small>
               <small class="text-muted type">{{ isEvent(item) ? item.type : ('CALENDAR_PAGE.HOLIDAY' | translate) }}</small>
             </div>
@@ -135,8 +135,8 @@
       </div>
       <div class="modal-body">
         <p><strong>{{ 'CALENDAR_PAGE.TYPE' | translate }}</strong> {{ selectedEvent.type }}</p>
-        <p><strong>{{ 'CALENDAR_PAGE.DATE' | translate }}</strong> {{ selectedEvent.time | date:'fullDate' }}</p>
-        <p><strong>{{ 'CALENDAR_PAGE.TIME' | translate }}</strong> {{ selectedEvent.time | date:'shortTime' }}</p>
+        <p><strong>{{ 'CALENDAR_PAGE.DATE' | translate }}</strong> {{ selectedEvent.time | date:'fullDate':'':currentLocale }}</p>
+        <p><strong>{{ 'CALENDAR_PAGE.TIME' | translate }}</strong> {{ selectedEvent.time | date:'shortTime':'':currentLocale }}</p>
         <p *ngIf="selectedEvent.description"><strong>{{ 'CALENDAR_PAGE.DESCRIPTION' | translate }}</strong> {{ selectedEvent.description }}</p>
       </div>
       <div class="modal-footer">
@@ -152,7 +152,7 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">{{ 'CALENDAR_PAGE.EVENTS_ON' | translate }} {{ selectedDate | date:'fullDate' }}</h5>
+        <h5 class="modal-title">{{ 'CALENDAR_PAGE.EVENTS_ON' | translate }} {{ selectedDate | date:'fullDate':'':currentLocale }}</h5>
         <button type="button" class="btn-close" (click)="closeDateEventsModal()"></button>
       </div>
       <div class="modal-body">
@@ -163,7 +163,7 @@
         <div *ngFor="let event of selectedDateEvents" class="mb-3 p-3 border rounded" (click)="selectedEvent = event; showDateEventsModal = false" style="cursor: pointer;">
           <h6 class="mb-2">{{ event.name }}</h6>
           <p class="mb-1"><strong>{{ 'CALENDAR_PAGE.TYPE' | translate }}</strong> {{ event.type }}</p>
-          <p class="mb-0"><strong>{{ 'CALENDAR_PAGE.TIME' | translate }}</strong> {{ event.time | date:'shortTime' }}</p>
+          <p class="mb-0"><strong>{{ 'CALENDAR_PAGE.TIME' | translate }}</strong> {{ event.time | date:'shortTime':'':currentLocale }}</p>
         </div>
       </div>
       <div class="modal-footer">
@@ -184,7 +184,7 @@
       </div>
       <div class="modal-body text-center">
         <i class="bi bi-calendar-x icon-3x mb-3 opacity-25"></i>
-        <p>{{ 'CALENDAR_PAGE.NO_EVENT_ON_DATE' | translate }} {{ selectedDate | date:'fullDate' }}</p>
+        <p>{{ 'CALENDAR_PAGE.NO_EVENT_ON_DATE' | translate }} {{ selectedDate | date:'fullDate':'':currentLocale }}</p>
       </div>
       <div class="modal-footer">
         <button type="button" class="custom-btn-2 btn-cancel-2" (click)="closeNoEventsModal()">{{ 'CALENDAR_PAGE.CLOSE' | translate }}</button>

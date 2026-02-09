@@ -16,6 +16,7 @@ import { Capacitor } from '@capacitor/core';
 export class Landing implements OnInit, OnDestroy {
   currentYear = new Date().getFullYear();
   showLanguageDropdown = false;
+  isMobileMenuOpen = false;
   private clickListener?: (e: Event) => void;
 
   constructor(
@@ -61,6 +62,16 @@ export class Landing implements OnInit, OnDestroy {
 
   toggleLanguageDropdown(): void {
     this.showLanguageDropdown = !this.showLanguageDropdown;
+  }
+
+  toggleMobileMenu(): void {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+    document.body.style.overflow = this.isMobileMenuOpen ? 'hidden' : '';
+  }
+
+  closeMobileMenu(): void {
+    this.isMobileMenuOpen = false;
+    document.body.style.overflow = '';
   }
 
   selectLanguage(langCode: string): void {

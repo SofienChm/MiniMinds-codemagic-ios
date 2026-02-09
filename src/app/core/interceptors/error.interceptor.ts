@@ -40,22 +40,18 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         // Server-side error
         switch (error.status) {
           case 0:
-            // Network error
-            // For GET requests, cache interceptor handles it. Only show error for write operations.
-            if (isGetRequest) {
-              // Silent fail for GET requests - cache interceptor would have handled it if data was available
-              console.log(`[Error] Network error for GET request (cache miss): ${cleanReq.url}`);
-              return throwError(() => error);
+            // Network error - could be no internet, wrong URL, CORS, or server down
+            {
+              const urlPath = cleanReq.url.replace(/https?:\/\/[^/]+/, '');
+              errorMessage = `Could not reach server. URL: ${cleanReq.url}`;
+              console.error(`[Error] Network error (status 0) for ${cleanReq.method} ${cleanReq.url}`);
+              Swal.fire({
+                icon: 'error',
+                title: 'Connection Error',
+                html: `<p>Could not connect to the server.</p><p style="font-size:12px;color:#888;word-break:break-all;margin-top:8px;"><b>URL:</b> ${cleanReq.url}</p>`,
+                confirmButtonColor: '#506EE4'
+              });
             }
-
-            // For write operations (POST/PUT/DELETE), show error
-            errorMessage = 'No internet connection. Please check your network.';
-            Swal.fire({
-              icon: 'error',
-              title: 'Connection Error',
-              text: errorMessage,
-              confirmButtonColor: '#506EE4'
-            });
             break;
 
           case 400:

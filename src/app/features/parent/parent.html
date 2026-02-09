@@ -1,7 +1,7 @@
 <div class="container-fluid mt-4">
-  <app-title-page 
-    title="Parents Management" 
-    subtitle="Manage parent information and details"
+  <app-title-page
+    [title]="'PARENTS.TITLE' | translate"
+    [subtitle]="'PARENTS.SUBTITLE' | translate"
     icon="bi bi-people-fill"
     [breadcrumbs]="breadcrumbs"
     [actions]="titleActions">
@@ -9,7 +9,7 @@
 
   <!-- View Controls -->
   <div class="bg-white p-3 border d-flex align-items-center justify-content-between flex-wrap mb-4 rounded-1">
-    <h4 class="title-filter">Parents Grid</h4>
+    <h4 class="title-filter">{{ 'PARENTS.GRID_TITLE' | translate }}</h4>
     <div class="d-flex align-items-center flex-wrap gap-2">
       <!-- Search Input -->
       <div class="search-box">
@@ -17,7 +17,7 @@
         <input
           type="text"
           class="form-control search-input"
-          placeholder="Search parents..."
+          [placeholder]="'PARENTS.SEARCH_PLACEHOLDER' | translate"
           [(ngModel)]="searchTerm"
           (input)="onSearch()">
       </div>
@@ -29,7 +29,7 @@
         [items]="sortOptions"
         bindLabel="label"
         bindValue="value"
-        placeholder="Sort by"
+        [placeholder]="'COMMON.SORT_BY' | translate"
         [clearable]="false"
         [searchable]="false"
         (change)="onSortChange()">
@@ -64,18 +64,18 @@
   <!-- Loading -->
   <div *ngIf="loading" class="text-center">
     <div class="spinner-border" role="status">
-      <span class="visually-hidden">Loading...</span>
+      <span class="visually-hidden">{{ 'COMMON.LOADING' | translate }}</span>
     </div>
   </div>
 
   <!-- Grid View -->
   <div class="row" *ngIf="viewMode === 'grid' && !loading">
-    
+
     <div *ngFor="let parent of displayedParents; trackBy: trackById" class="col-xl-4 col-md-6 d-flex">
       <div class="card flex-fill card-general mb-3">
         <div class="card-header d-flex align-items-center justify-content-between">
           <span class="badge" [class.bg-success]="parent.isActive" [class.bg-danger]="!parent.isActive">
-            {{ parent.isActive ? 'Active' : 'Inactive' }}
+            {{ parent.isActive ? ('PARENTS.ACTIVE' | translate) : ('PARENTS.INACTIVE' | translate) }}
           </span>
           <div class="d-flex align-items-center">
             <div class="dropdown">
@@ -85,18 +85,18 @@
               <ul class="dropdown-menu dropdown-menu-end p-3">
                 <li>
                   <a class="dropdown-item rounded-1" href="javascript:void(0);" (click)="editParent(parent)">
-                    <i class="bi bi-pencil-square me-2"></i>Edit
+                    <i class="bi bi-pencil-square me-2"></i>{{ 'COMMON.EDIT' | translate }}
                   </a>
                 </li>
                 <li *ngIf="isAdmin">
                   <a class="dropdown-item rounded-1" href="javascript:void(0);" (click)="toggleParentStatus(parent)">
                     <i class="bi me-2" [class.bi-pause-fill]="parent.isActive" [class.bi-play-fill]="!parent.isActive"></i>
-                    {{ parent.isActive ? 'Deactivate' : 'Activate' }}
+                    {{ parent.isActive ? ('COMMON.DEACTIVATE' | translate) : ('COMMON.ACTIVATE' | translate) }}
                   </a>
                 </li>
                 <li>
                   <a class="dropdown-item rounded-1" href="javascript:void(0);" (click)="deleteParent(parent.id!)">
-                    <i class="bi bi-trash3 me-2"></i>Delete
+                    <i class="bi bi-trash3 me-2"></i>{{ 'COMMON.DELETE' | translate }}
                   </a>
                 </li>
               </ul>
@@ -119,18 +119,18 @@
           </div>
           <div class="d-flex align-items-center justify-content-between body-information">
             <div>
-              <p class="mb-0 information-title">Email</p>
+              <p class="mb-0 information-title">{{ 'PARENTS.EMAIL' | translate }}</p>
               <p class="text-dark information-description">{{ parent.email }}</p>
             </div>
             <div>
-              <p class="mb-0 information-title">Phone</p>
+              <p class="mb-0 information-title">{{ 'PARENTS.PHONE' | translate }}</p>
               <p class="text-dark information-description">{{ parent.phoneNumber }}</p>
             </div>
           </div>
         </div>
         <div class="card-footer d-flex align-items-center justify-content-between">
           <div class="d-flex align-items-center">
-            <span class="text-muted me-1">Children : </span>
+            <span class="text-muted me-1">{{ 'PARENTS.CHILDREN' | translate }} : </span>
             <div class="d-flex align-items-center" style="margin-left: -5px;">
               <ng-container *ngIf="parent.children && parent.children.length > 0; else noChildren">
                 <img *ngFor="let child of parent.children"
@@ -145,17 +145,17 @@
                      (click)="viewChildDetails(child.id); $event.stopPropagation()">
               </ng-container>
               <ng-template #noChildren>
-                <span class="text-muted">None</span>
+                <span class="text-muted">{{ 'PARENTS.NONE' | translate }}</span>
               </ng-template>
             </div>
           </div>
-          <button class="btn btn-light btn-sm btn-footer" (click)="viewDetails(parent)">View Details</button>
+          <button class="btn btn-light btn-sm btn-footer" (click)="viewDetails(parent)">{{ 'PARENTS.VIEW_DETAILS' | translate }}</button>
         </div>
       </div>
     </div>
-    
+
     <div *ngIf="displayedParents.length === 0 && !loading" class="col-12 text-center">
-      <p>No parents found</p>
+      <p>{{ 'PARENTS.NO_PARENTS_FOUND' | translate }}</p>
     </div>
   </div>
 
@@ -165,7 +165,7 @@
       <div class="card-header d-flex align-items-center justify-content-between">
         <h5>
           <i class="bi bi-list-task"></i>
-          Parents List
+          {{ 'PARENTS.LIST_TITLE' | translate }}
         </h5>
       </div>
       <div class="card-body">
@@ -173,12 +173,12 @@
           <table class="table table-hover mb-0">
             <thead class="table-light">
               <tr>
-                <th>Photo</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Address</th>
-                <th>Actions</th>
+                <th>{{ 'PARENTS.PHOTO' | translate }}</th>
+                <th>{{ 'PARENTS.NAME' | translate }}</th>
+                <th>{{ 'PARENTS.EMAIL' | translate }}</th>
+                <th>{{ 'PARENTS.PHONE' | translate }}</th>
+                <th>{{ 'PARENTS.ADDRESS' | translate }}</th>
+                <th>{{ 'PARENTS.ACTIONS' | translate }}</th>
               </tr>
             </thead>
             <tbody>
@@ -192,7 +192,7 @@
                 </td>
                 <td>{{ parent.email }}</td>
                 <td>{{ parent.phoneNumber }}</td>
-                <td>{{ parent.address || 'N/A' }}</td>
+                <td>{{ parent.address || ('COMMON.NA' | translate) }}</td>
                 <td>
                   <div class="d-flex gap-1" (click)="$event.stopPropagation()">
                     <button class="btn btn-sm btn-view" (click)="viewDetails(parent)">
@@ -201,10 +201,10 @@
                     <button class="btn btn-sm btn-edit" (click)="editParent(parent)">
                       <i class="bi bi-pencil-square"></i>
                     </button>
-                    <button 
-                      *ngIf="isAdmin" 
-                      class="btn btn-sm btn-active" 
-                      [class.btn-]="parent.isActive" 
+                    <button
+                      *ngIf="isAdmin"
+                      class="btn btn-sm btn-active"
+                      [class.btn-]="parent.isActive"
                       [class.btn-]="!parent.isActive"
                       (click)="toggleParentStatus(parent)">
                       <i class="bi" [class.bi-pause-fill]="parent.isActive" [class.bi-play-fill]="!parent.isActive"></i>
@@ -217,7 +217,7 @@
               </tr>
               <tr *ngIf="displayedParents.length === 0">
                 <td colspan="6" class="text-center py-4">
-                  No parents found
+                  {{ 'PARENTS.NO_PARENTS_FOUND' | translate }}
                 </td>
               </tr>
             </tbody>
@@ -225,17 +225,17 @@
         </div>
       </div>
       <div class="card-footer d-flex align-items-center justify-content-between">
-        <span class="text-muted">Total: {{ displayedParents.length }} parent(s)</span>
+        <span class="text-muted">{{ 'PARENTS.TOTAL_COUNT' | translate: { count: displayedParents.length } }}</span>
       </div>
     </div>
   </div>
-  
+
   <!-- Load More -->
   <div class="row" *ngIf="hasMoreItems && !loading">
     <div class="col-md-12">
       <div class="load-more text-center d-flex justify-content-center mt-4">
         <button class="custom-btn-2 btn-add-border mb-4" (click)="loadMore()">
-          <i class="bi bi-plus-circle me-2"></i> Load More
+          <i class="bi bi-plus-circle me-2"></i> {{ 'PARENTS.LOAD_MORE' | translate }}
         </button>
       </div>
     </div>

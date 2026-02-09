@@ -79,16 +79,16 @@
 
   <!-- Loaded Content -->
   <div *ngIf="parent && !loading" class="parent-detailchild font-inter">
-    <app-parent-child-header title="Parent profile" [children]="[parent]" [currentChildIndex]="0"
+    <app-parent-child-header [title]="'PARENTS.PARENT_PROFILE' | translate" [children]="[parent]" [currentChildIndex]="0"
       [hasCustomContent]="true" (onBack)="back()" [showEdit]="true" (onEdit)="editParent()">
       <div headerCard>
         <span class="badge logout d-inline-flex align-items-center mb-2">
           <i class="bi bi-box-arrow-left" (click)="logout()" style="cursor: pointer;"></i>
-          Logout
+          {{ 'PARENTS.LOGOUT' | translate }}
         </span>
         <div>
-          <div class="info-title">Registration Date</div>
-          <div class="info-desc">{{ parent.createdAt | date:'yy/MM/dd' }}</div>
+          <div class="info-title">{{ 'PARENTS.REGISTRATION_DATE' | translate }}</div>
+          <div class="info-desc">{{ parent.createdAt | date:'yy/MM/dd':'':currentLocale }}</div>
         </div>
       </div>
     </app-parent-child-header>
@@ -98,27 +98,27 @@
           <div class="icon-box">
             <i class="bi bi-person-circle"></i>
           </div>
-          <h5>Personal Information</h5>
+          <h5>{{ 'PARENTS.PERSONAL_INFO' | translate }}</h5>
         </div>
-        
+
         <div class="info-row">
-            <div class="info-label">Full Name</div>
+            <div class="info-label">{{ 'PARENTS.FULL_NAME' | translate }}</div>
             <div class="info-value">{{ parent.firstName }} {{ parent.lastName }}</div>
         </div>
-        
+
         <div class="info-row">
-            <div class="info-label">Email</div>
+            <div class="info-label">{{ 'PARENTS.EMAIL' | translate }}</div>
             <div class="info-value">{{ parent.email }}</div>
         </div>
-        
+
         <div class="info-row">
-            <div class="info-label">Phone</div>
+            <div class="info-label">{{ 'PARENTS.PHONE' | translate }}</div>
             <div class="info-value">{{ parent.phoneNumber }}</div>
         </div>
-        
+
         <div class="info-row">
-            <div class="info-label">Relation</div>
-            <div class="info-value">{{ parent.parentType }}</div>
+            <div class="info-label">{{ 'PARENTS.RELATION' | translate }}</div>
+            <div class="info-value">{{ translateParentType(parent.parentType) }}</div>
         </div>
       </div>
       <div class="info-card card-mobile card mb-3">
@@ -126,21 +126,21 @@
           <div class="icon-box">
             <i class="bi-info-circle"></i>
           </div>
-          <h5>Other Information</h5>
+          <h5>{{ 'PARENTS.OTHER_INFO' | translate }}</h5>
         </div>
-        
+
         <div class="info-row">
-            <div class="info-label">Work</div>
+            <div class="info-label">{{ 'PARENTS.WORK' | translate }}</div>
             <div class="info-value">{{ parent.work }}</div>
         </div>
-        
+
         <div class="info-row">
-            <div class="info-label">Emergency</div>
+            <div class="info-label">{{ 'PARENTS.EMERGENCY_CONTACT' | translate }}</div>
             <div class="info-value">{{ parent.emergencyContact }}</div>
         </div>
         <div class="info-row">
-            <div class="info-label">Birthday</div>
-            <div class="info-value">{{ parent.dateOfBirth | date:'yy/MM/dd' }}</div>
+            <div class="info-label">{{ 'PARENTS.BIRTHDAY' | translate }}</div>
+            <div class="info-value">{{ parent.dateOfBirth | date:'yy/MM/dd':'':currentLocale }}</div>
         </div>
       </div>
       <div class="info-card card-mobile card mb-3">
@@ -148,22 +148,22 @@
           <div class="icon-box">
             <i class="bi bi-geo-alt"></i>
           </div>
-          <h5>Address</h5>
+          <h5>{{ 'PARENTS.ADDRESS' | translate }}</h5>
         </div>
-        
+
         <div class="info-row">
-            <div class="info-label">Address</div>
+            <div class="info-label">{{ 'PARENTS.ADDRESS' | translate }}</div>
             <div class="info-value">{{ parent.address }}</div>
         </div>
-        
+
         <div class="info-row">
-            <div class="info-label">Zip Code</div>
+            <div class="info-label">{{ 'PARENTS.ZIP_CODE' | translate }}</div>
             <div class="info-value">{{ parent.zipCode }}</div>
         </div>
       </div>
       <div class="other-information">
         <h5 class="title-body">
-          Children Information
+          {{ 'PARENTS.CHILDREN_INFO' | translate }}
         </h5>
         <div *ngFor="let child of parent.children" class="profile-info-card_parent mb-3">
           <div class="d-flex gap-3 align-items-center" (click)="viewChildDetails(child.id)">
@@ -174,16 +174,16 @@
               <div class="info-title">{{ child.firstName }} {{ child.lastName }}</div>
                         @if( calculateAge(child.dateOfBirth).years > 0){
                           <div class="info-desc">
-                            {{ calculateAge(child.dateOfBirth).years }} years old
+                            {{ calculateAge(child.dateOfBirth).years }} {{ 'PARENTS.YEARS_OLD' | translate }}
                           </div>
                         }
                         @if( calculateAge(child.dateOfBirth).years  <= 0){
                           <div class="info-desc">
-                            {{ calculateAge(child.dateOfBirth).months }} months old
+                            {{ calculateAge(child.dateOfBirth).months }} {{ 'PARENTS.MONTHS_OLD' | translate }}
                           </div>
                         }
 
-              
+
             </div>
             <div class="link">
               <i class="bi bi-chevron-right"></i>
@@ -197,15 +197,15 @@
 </div>
 
 <div class="container-fluid mt-4">
-  <app-title-page *ngIf="!isParent" [title]="'Parent Details'" [breadcrumbs]="[
-    { label: 'Parents', url: '/parents' },
-    { label: 'Details' }
+  <app-title-page *ngIf="!isParent" [title]="'PARENTS.PARENT_DETAILS' | translate" [breadcrumbs]="[
+    { label: ('PARENTS.TITLE' | translate), url: '/parents' },
+    { label: ('PARENTS.DETAILS' | translate) }
   ]" [actions]="getActions()">
   </app-title-page>
 
   <div *ngIf="loading" class="text-center">
     <div class="spinner-border" role="status">
-      <span class="visually-hidden">Loading...</span>
+      <span class="visually-hidden">{{ 'COMMON.LOADING' | translate }}</span>
     </div>
   </div>
 
@@ -223,13 +223,13 @@
               <img loading="lazy" [src]="getProfilePictureUrl(parent) || 'assets/default-avatar.svg'" class="img-fluid"
                 alt="Parent Photo">
               <span *ngIf="parent.isActive" class="badge badge-active d-inline-flex align-items-center mb-2"><i
-                  class="ti ti-circle-filled fs-5 me-1"></i>Active</span>
+                  class="ti ti-circle-filled fs-5 me-1"></i>{{ 'PARENTS.ACTIVE' | translate }}</span>
               <span *ngIf="!parent.isActive" class="badge badge-inactive d-inline-flex align-items-center mb-2"><i
-                  class="ti ti-circle-filled fs-5 me-1"></i>Inactive</span>
+                  class="ti ti-circle-filled fs-5 me-1"></i>{{ 'PARENTS.INACTIVE' | translate }}</span>
             </div>
             <div class="overflow-hidden">
               <h5 class="mb-1 text-truncate name-user">{{ parent.firstName }} {{ parent.lastName }}</h5>
-              <p class="age">Parent</p>
+              <p class="age">{{ 'PARENTS.PARENT_LABEL' | translate }}</p>
             </div>
           </div>
         </div>
@@ -237,40 +237,40 @@
         <!-- Basic Information grouped into three sections -->
         <div class="card-body grouped-card-body">
           <div class="info-group">
-            <h6 class="mb-1 title-body">Basic Information</h6>
+            <h6 class="mb-1 title-body">{{ 'PARENTS.BASIC_INFO' | translate }}</h6>
             <div class="row">
-              <dt class="col-6 title-dt-body-card">Full name</dt>
+              <dt class="col-6 title-dt-body-card">{{ 'PARENTS.FULL_NAME' | translate }}</dt>
               <dd class="col-6 description-dt-body-card">{{ parent.firstName }} {{ parent.lastName }}</dd>
-              <dt class="col-6 title-dt-body-card">Gender</dt>
-              <dd class="col-6 description-dt-body-card">{{ parent.gender || 'N/A' }}</dd>
-              <dt class="col-6 title-dt-body-card">Date Of Birth</dt>
-              <dd class="col-6 description-dt-body-card">{{ parent.dateOfBirth ? (parent.dateOfBirth | date:'yy/MM/dd')
-                : 'N/A' }}</dd>
-              <dt class="col-6 title-dt-body-card">Registration Date</dt>
+              <dt class="col-6 title-dt-body-card">{{ 'PARENTS.GENDER' | translate }}</dt>
+              <dd class="col-6 description-dt-body-card">{{ parent.gender ? translateGender(parent.gender) : ('COMMON.NA' | translate) }}</dd>
+              <dt class="col-6 title-dt-body-card">{{ 'PARENTS.DATE_OF_BIRTH' | translate }}</dt>
+              <dd class="col-6 description-dt-body-card">{{ parent.dateOfBirth ? (parent.dateOfBirth | date:'yy/MM/dd':'':currentLocale)
+                : ('COMMON.NA' | translate) }}</dd>
+              <dt class="col-6 title-dt-body-card">{{ 'PARENTS.REGISTRATION_DATE' | translate }}</dt>
               <dd class="col-6 description-dt-body-card">{{ formatDate(parent.createdAt) }}</dd>
             </div>
           </div>
 
           <div class="info-group">
-            <h6 class="mb-1 title-body">Contact</h6>
+            <h6 class="mb-1 title-body">{{ 'PARENTS.CONTACT' | translate }}</h6>
             <div class="row">
-              <dt class="col-6 title-dt-body-card">Email</dt>
+              <dt class="col-6 title-dt-body-card">{{ 'PARENTS.EMAIL' | translate }}</dt>
               <dd class="col-6 description-dt-body-card">{{ parent.email }}</dd>
-              <dt class="col-6 title-dt-body-card">Phone Number</dt>
+              <dt class="col-6 title-dt-body-card">{{ 'PARENTS.PHONE_NUMBER' | translate }}</dt>
               <dd class="col-6 description-dt-body-card">{{ parent.phoneNumber }}</dd>
             </div>
           </div>
 
           <div class="info-group mb-0" *ngIf="parent.address || parent.zipCode">
-            <h6 class="mb-1 title-body">Address</h6>
+            <h6 class="mb-1 title-body">{{ 'PARENTS.ADDRESS' | translate }}</h6>
             <div class="row">
               <div *ngIf="parent.address">
-                <dt class="col-6 title-dt-body-card">Address</dt>
-                <dd class="col-6 description-dt-body-card">{{ parent.address || 'N/A' }}</dd>
+                <dt class="col-6 title-dt-body-card">{{ 'PARENTS.ADDRESS' | translate }}</dt>
+                <dd class="col-6 description-dt-body-card">{{ parent.address || ('COMMON.NA' | translate) }}</dd>
               </div>
               <div *ngIf="parent.zipCode">
-                <dt class="col-6 title-dt-body-card">Zip Code</dt>
-                <dd class="col-6 description-dt-body-card">{{ parent.zipCode || 'N/A' }}</dd>
+                <dt class="col-6 title-dt-body-card">{{ 'PARENTS.ZIP_CODE' | translate }}</dt>
+                <dd class="col-6 description-dt-body-card">{{ parent.zipCode || ('COMMON.NA' | translate) }}</dd>
               </div>
             </div>
           </div>
@@ -282,15 +282,15 @@
     <div class="col-md-6" id="children-detail-section">
       <div class="card card-general card-children-info shodown-effect">
         <div class="card-header d-flex justify-content-between align-items-center">
-          <h5 class="mb-0">Children Information</h5>
+          <h5 class="mb-0">{{ 'PARENTS.CHILDREN_INFO' | translate }}</h5>
           <button class="custom-btn-2 btn-add-border" (click)="addChild()">
 
-            <i class="bi bi-plus-square me-1"></i>Add Child
+            <i class="bi bi-plus-square me-1"></i>{{ 'PARENTS.ADD_CHILD' | translate }}
           </button>
         </div>
         <div class="card-body">
           <div *ngIf="!parent.children || parent.children.length === 0" class="text-center text-muted">
-            <p>No children registered yet.</p>
+            <p>{{ 'PARENTS.NO_CHILDREN_YET' | translate }}</p>
           </div>
 
           <!-- If there are multiple children, display only the currently selected child in this column -->
@@ -305,10 +305,10 @@
                         alt="Child Photo">
                       <span class="badge badge-age d-inline-flex align-items-center mb-2">
                         @if( calculateAge(currentChild!.dateOfBirth).years  > 0){
-                        {{ calculateAge(currentChild!.dateOfBirth).years}} years old
+                        {{ calculateAge(currentChild!.dateOfBirth).years}} {{ 'PARENTS.YEARS_OLD' | translate }}
                         }
                         @if( calculateAge(currentChild!.dateOfBirth).years  <= 0){
-                        {{ calculateAge(currentChild!.dateOfBirth).months}} months old
+                        {{ calculateAge(currentChild!.dateOfBirth).months}} {{ 'PARENTS.MONTHS_OLD' | translate }}
                         }
                       </span>
                     </div>
@@ -319,21 +319,21 @@
                   </div>
                 </div>
                 <div class="card-body">
-                  <h5 class="mb-3 title-body">Basic Information</h5>
+                  <h5 class="mb-3 title-body">{{ 'PARENTS.BASIC_INFO' | translate }}</h5>
                   <dl class="row mb-0 table">
-                    <dt class="col-6 title-dt-body-card mb-2">Date of Birth</dt>
+                    <dt class="col-6 title-dt-body-card mb-2">{{ 'PARENTS.DATE_OF_BIRTH' | translate }}</dt>
                     <dd class="col-6 description-dt-body-card mb-2">{{ formatDate(currentChild?.dateOfBirth) }}</dd>
-                    <dt class="col-6 title-dt-body-card mb-2">Gender</dt>
-                    <dd class="col-6 description-dt-body-card mb-2">{{ currentChild?.gender }}</dd>
-                    <dt class="col-6 title-dt-body-card mb-2">Allergies</dt>
+                    <dt class="col-6 title-dt-body-card mb-2">{{ 'PARENTS.GENDER' | translate }}</dt>
+                    <dd class="col-6 description-dt-body-card mb-2">{{ translateGender(currentChild?.gender) }}</dd>
+                    <dt class="col-6 title-dt-body-card mb-2">{{ 'PARENTS.ALLERGIES' | translate }}</dt>
                     <dd class="col-6 description-dt-body-card mb-2">{{ (currentChild?.allergies?.length ?? 0) > 1 ?
-                      currentChild?.allergies : 'Nothing' }}</dd>
-                    <dt class="col-6 title-dt-body-card mb-2">Medical note</dt>
+                      currentChild?.allergies : ('PARENTS.NOTHING' | translate) }}</dd>
+                    <dt class="col-6 title-dt-body-card mb-2">{{ 'PARENTS.MEDICAL_NOTE' | translate }}</dt>
                     <dd class="col-6 description-dt-body-card mb-2">{{ (currentChild?.medicalNotes?.length ?? 0) > 1 ?
-                      currentChild?.medicalNotes : 'Nothing' }}</dd>
-                    <dt class="col-6 title-dt-body-card mb-2">emergency Contact</dt>
+                      currentChild?.medicalNotes : ('PARENTS.NOTHING' | translate) }}</dd>
+                    <dt class="col-6 title-dt-body-card mb-2">{{ 'PARENTS.EMERGENCY_CONTACT' | translate }}</dt>
                     <dd class="col-6 description-dt-body-card mb-2">{{ parent.emergencyContact }}</dd>
-                    <dt class="col-6 title-dt-body-card mb-3">Registration Date</dt>
+                    <dt class="col-6 title-dt-body-card mb-3">{{ 'PARENTS.REGISTRATION_DATE' | translate }}</dt>
                     <dd class="col-6 description-dt-body-card mb-3">{{ formatDate(parent.createdAt) }}</dd>
                   </dl>
                 </div>
@@ -352,10 +352,10 @@
                         alt="Child Photo">
                       <span class="badge badge-age d-inline-flex align-items-center mb-2">
                         @if( calculateAge(child.dateOfBirth).years  > 0){
-                        {{ calculateAge(child.dateOfBirth).years}} years old
+                        {{ calculateAge(child.dateOfBirth).years}} {{ 'PARENTS.YEARS_OLD' | translate }}
                         }
                         @if( calculateAge(child.dateOfBirth).years  <= 0){
-                        {{ calculateAge(child.dateOfBirth).months}} months old
+                        {{ calculateAge(child.dateOfBirth).months}} {{ 'PARENTS.MONTHS_OLD' | translate }}
                         }
                       </span>
                     </div>
@@ -365,21 +365,21 @@
                   </div>
                 </div>
                 <div class="card-body">
-                  <h5 class="mb-3 title-body">Basic Information</h5>
+                  <h5 class="mb-3 title-body">{{ 'PARENTS.BASIC_INFO' | translate }}</h5>
                   <dl class="row mb-0 table">
-                    <dt class="col-6 title-dt-body-card mb-2">Date of Birth</dt>
+                    <dt class="col-6 title-dt-body-card mb-2">{{ 'PARENTS.DATE_OF_BIRTH' | translate }}</dt>
                     <dd class="col-6 description-dt-body-card mb-2">{{ formatDate(child.dateOfBirth) }}</dd>
-                    <dt class="col-6 title-dt-body-card mb-2">Gender</dt>
-                    <dd class="col-6 description-dt-body-card mb-2">{{ child.gender }}</dd>
-                    <dt class="col-6 title-dt-body-card mb-2">Allergies</dt>
+                    <dt class="col-6 title-dt-body-card mb-2">{{ 'PARENTS.GENDER' | translate }}</dt>
+                    <dd class="col-6 description-dt-body-card mb-2">{{ translateGender(child.gender) }}</dd>
+                    <dt class="col-6 title-dt-body-card mb-2">{{ 'PARENTS.ALLERGIES' | translate }}</dt>
                     <dd class="col-6 description-dt-body-card mb-2">{{ (child.allergies?.length ?? 0) > 1 ?
-                      child.allergies : 'Nothing' }}</dd>
-                    <dt class="col-6 title-dt-body-card mb-2">Medical note</dt>
+                      child.allergies : ('PARENTS.NOTHING' | translate) }}</dd>
+                    <dt class="col-6 title-dt-body-card mb-2">{{ 'PARENTS.MEDICAL_NOTE' | translate }}</dt>
                     <dd class="col-6 description-dt-body-card mb-2">{{ (child.medicalNotes?.length ?? 0) > 1 ?
-                      child.medicalNotes : 'Nothing' }}</dd>
-                    <dt class="col-6 title-dt-body-card mb-2">emergency Contact</dt>
+                      child.medicalNotes : ('PARENTS.NOTHING' | translate) }}</dd>
+                    <dt class="col-6 title-dt-body-card mb-2">{{ 'PARENTS.EMERGENCY_CONTACT' | translate }}</dt>
                     <dd class="col-6 description-dt-body-card mb-2">{{ parent.emergencyContact }}</dd>
-                    <dt class="col-6 title-dt-body-card mb-3">Registration Date</dt>
+                    <dt class="col-6 title-dt-body-card mb-3">{{ 'PARENTS.REGISTRATION_DATE' | translate }}</dt>
                     <dd class="col-6 description-dt-body-card mb-3">{{ formatDate(parent.createdAt) }}</dd>
                   </dl>
                 </div>
@@ -403,18 +403,29 @@
               </ng-container>
             </div>
 
-            <div class="d-flex align-items-center gap-2">
+            <div class="d-flex align-items-center gap-2 desktop-only d-none d-md-flex">
               <button class="custom-btn-2 btn-remove-2" (click)="removeChildFromParent(currentChild?.id!, (currentChild?.firstName || '') + ' ' + (currentChild?.lastName || ''))">
                 <i class="bi bi-trash me-2"></i>
-                Remove
+                {{ 'PARENTS.REMOVE' | translate }}
               </button>
               <button class="custom-btn-2 btn-add-global-2" (click)="addFeeForChild(currentChild?.id!, (currentChild?.firstName || '') + ' ' + (currentChild?.lastName || ''))">
                 <i class="bi bi-plus-circle-dotted me-2"></i>
-                Add Fees
+                {{ 'PARENTS.ADD_FEES' | translate }}
               </button>
               <button class="custom-btn-2 btn-view-global-2" (click)="viewChildDetails(currentChild?.id!)">
                 <i class="bi bi-eye me-2"></i>
-                View Details
+                {{ 'PARENTS.VIEW_DETAILS' | translate }}
+              </button>
+            </div>
+            <div class="d-flex align-items-center gap-2 mobile-only d-md-none">
+              <button class="btn btn-sm btn-remove" (click)="removeChildFromParent(currentChild?.id!, (currentChild?.firstName || '') + ' ' + (currentChild?.lastName || ''))">
+                <i class="bi bi-trash"></i>
+              </button>
+              <button class="btn btn-sm btn-edit" (click)="addFeeForChild(currentChild?.id!, (currentChild?.firstName || '') + ' ' + (currentChild?.lastName || ''))">
+                <i class="bi bi-plus-circle-dotted"></i>
+              </button> 
+              <button class="btn btn-sm btn-view" (click)="viewChildDetails(currentChild?.id!)">
+                <i class="bi bi-eye"></i>
               </button>
             </div>
           </div>
@@ -429,16 +440,16 @@
     <div class="modal-dialog modal-lg modal-dialog-centered sweet-center" (click)="$event.stopPropagation()">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Select Existing Child</h5>
+          <h5 class="modal-title">{{ 'PARENTS.SELECT_EXISTING_CHILD' | translate }}</h5>
           <button type="button" class="btn-close" (click)="closeSelectChildModal()"></button>
         </div>
         <div class="modal-body">
           <div class="mb-3">
-            <input type="text" class="form-control" placeholder="Search by name..." [(ngModel)]="searchTerm"
+            <input type="text" class="form-control" [placeholder]="'PARENTS.SEARCH_BY_NAME' | translate" [(ngModel)]="searchTerm"
               (ngModelChange)="filterChildren()">
           </div>
           <div *ngIf="filteredChildren.length === 0" class="text-center text-muted py-4">
-            <p>No available children found</p>
+            <p>{{ 'PARENTS.NO_AVAILABLE_CHILDREN' | translate }}</p>
           </div>
           <div class="list-group" style="max-height: 400px; overflow-y: auto;">
             <button *ngFor="let child of filteredChildren" type="button" class="list-group-item list-group-item-action"
@@ -449,7 +460,7 @@
                   class="rounded-circle me-3" style="width: 50px; height: 50px;" alt="Child Photo">
                 <div class="flex-grow-1">
                   <h6 class="mb-0">{{ child.firstName }} {{ child.lastName }}</h6>
-                  <small class="text-muted">DOB: {{ formatDate(child.dateOfBirth) }} | Gender: {{ child.gender
+                  <small class="text-muted">{{ 'PARENTS.DOB' | translate }}: {{ formatDate(child.dateOfBirth) }} | {{ 'PARENTS.GENDER' | translate }}: {{ translateGender(child.gender)
                     }}</small>
                 </div>
               </div>
@@ -465,44 +476,44 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Add Fee</h5>
+          <h5 class="modal-title">{{ 'PARENTS.ADD_FEE' | translate }}</h5>
           <button type="button" class="btn-close" (click)="cancelAddFee()"></button>
         </div>
         <div class="modal-body">
           <form (ngSubmit)="saveFee()">
             <div class="mb-3">
-              <label class="form-label">Amount *</label>
+              <label class="form-label">{{ 'PARENTS.AMOUNT' | translate }} *</label>
               <input type="number" class="form-control" [(ngModel)]="newFee.amount" name="amount" required min="0"
                 step="0.01">
             </div>
             <div class="mb-3">
-              <label class="form-label">Description *</label>
+              <label class="form-label">{{ 'PARENTS.DESCRIPTION' | translate }} *</label>
               <input type="text" class="form-control" [(ngModel)]="newFee.description" name="description" required>
             </div>
             <div class="mb-3">
-              <label class="form-label">Due Date *</label>
+              <label class="form-label">{{ 'PARENTS.DUE_DATE' | translate }} *</label>
               <input type="date" class="form-control" [(ngModel)]="newFee.dueDate" name="dueDate" required>
             </div>
             <div class="mb-3">
-              <label class="form-label">Fee Type</label>
+              <label class="form-label">{{ 'PARENTS.FEE_TYPE' | translate }}</label>
               <select class="form-select" [(ngModel)]="newFee.feeType" name="feeType">
-                <option value="monthly">Monthly</option>
-                <option value="one-time">One-time</option>
-                <option value="late-fee">Late Fee</option>
+                <option value="monthly">{{ 'PARENTS.MONTHLY' | translate }}</option>
+                <option value="one-time">{{ 'PARENTS.ONE_TIME' | translate }}</option>
+                <option value="late-fee">{{ 'PARENTS.LATE_FEE' | translate }}</option>
               </select>
             </div>
             <div class="mb-3">
-              <label class="form-label">Notes</label>
+              <label class="form-label">{{ 'PARENTS.NOTES' | translate }}</label>
               <textarea class="form-control" [(ngModel)]="newFee.notes" name="notes" rows="3"></textarea>
             </div>
           </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" (click)="cancelAddFee()"
-            [disabled]="savingFee">Cancel</button>
+            [disabled]="savingFee">{{ 'COMMON.CANCEL' | translate }}</button>
           <button type="button" class="btn btn-primary" (click)="saveFee()" [disabled]="savingFee">
             <span *ngIf="savingFee" class="spinner-border spinner-border-sm me-2"></span>
-            {{ savingFee ? 'Adding...' : 'Add Fee' }}
+            {{ savingFee ? ('PARENTS.ADDING' | translate) : ('PARENTS.ADD_FEE' | translate) }}
           </button>
         </div>
       </div>

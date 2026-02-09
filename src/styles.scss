@@ -212,6 +212,10 @@ ion-content {
         font-size: 14px;
         color: #333;
         transition: all 0.2s ease;
+        @media screen and (max-width: 576px) {
+          padding: 10px 14px;
+          font-size: 13px;
+        }
 
         &.ng-option-marked {
           background: rgba(125, 211, 192, 0.1);
@@ -237,6 +241,9 @@ ion-content {
           display: flex;
           align-items: center;
           gap: 12px;
+          @media screen and (max-width: 576px) {
+            gap: 10px;
+          }
 
           .option-image {
             width: 32px;
@@ -590,6 +597,7 @@ h1, h2, h3, h4, h5, h6{
         font-size: 34px;
         margin-bottom: 0 !important;
         line-height: 1;
+        padding-bottom: 6px;
       }
       .badge{
         position: absolute;

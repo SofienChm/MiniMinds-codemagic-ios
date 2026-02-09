@@ -156,7 +156,7 @@
           <div class="card-banner">
             <div class="d-flex action-edit-add" *ngIf="canEdit() || canDelete()">
                 <div class="dropdown">
-                  <a href="#" class="btn btn-white btn-icon btn-sm d-flex align-items-center justify-content-center p-0" data-bs-toggle="dropdown">
+                  <a class="btn btn-white btn-icon btn-sm d-flex align-items-center justify-content-center p-0" data-bs-toggle="dropdown" (click)="$event.stopPropagation(); $event.preventDefault()">
                     <i class="bi bi-three-dots-vertical icon-action"></i>
                   </a>
                   <ul class="dropdown-menu dropdown-menu-end p-3">

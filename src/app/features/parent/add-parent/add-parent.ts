@@ -332,11 +332,29 @@ export class AddParentComponent implements OnInit, OnDestroy {
     Object.values(this.parentForm.controls).forEach(control => {
       control.markAsTouched();
     });
+    setTimeout(() => {
+      const firstInvalid = document.querySelector('.is-invalid') as HTMLElement;
+      if (firstInvalid) {
+        const formGroup = firstInvalid.closest('.form-group') as HTMLElement;
+        (formGroup || firstInvalid).scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (firstInvalid.tagName === 'INPUT' || firstInvalid.tagName === 'TEXTAREA') {
+          firstInvalid.focus();
+        }
+      }
+    });
   }
 
   // Getter methods for easy access in template
   get formControls() {
     return this.parentForm.controls;
+  }
+
+  dismissKeyboard(event: Event): void {
+    const target = event.target as HTMLElement;
+    const tag = target.tagName;
+    if (tag !== 'INPUT' && tag !== 'TEXTAREA' && tag !== 'SELECT' && !target.closest('ng-select')) {
+      (document.activeElement as HTMLElement)?.blur();
+    }
   }
 
   isFieldInvalid(fieldName: string): boolean {

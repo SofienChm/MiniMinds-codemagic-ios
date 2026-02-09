@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ApiConfig } from '../config/api.config';
 import { Capacitor } from '@capacitor/core';
+import { SKIP_ERROR_HANDLER } from '../interceptors/error.interceptor';
 
 export interface DeviceTokenInfo {
   id: number;
@@ -37,20 +38,22 @@ export class DeviceTokenService {
     // Auto-detect platform if not provided
     const detectedPlatform = platform || Capacitor.getPlatform();
 
+    const headers = new HttpHeaders().set(SKIP_ERROR_HANDLER, 'true');
     return this.http.post<RegisterTokenResponse>(`${this.apiUrl}/register`, {
       token,
       platform: detectedPlatform,
       deviceModel: deviceModel || this.getDeviceModel(),
-    });
+    }, { headers });
   }
 
   /**
    * Unregister a device token (e.g., on logout)
    */
   unregisterToken(token: string): Observable<{ message: string }> {
+    const headers = new HttpHeaders().set(SKIP_ERROR_HANDLER, 'true');
     return this.http.post<{ message: string }>(`${this.apiUrl}/unregister`, {
       token,
-    });
+    }, { headers });
   }
 
   /**

@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment.development';
+import { ApiConfig } from '../../core/config/api.config';
 import { Attendance, AttendanceStats } from './attendance.interface';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AttendanceService {
-  private apiUrl = `${environment.apiUrl}/attendance`;
+  private apiUrl = ApiConfig.ENDPOINTS.ATTENDANCE;
 
   constructor(private http: HttpClient) {}
 

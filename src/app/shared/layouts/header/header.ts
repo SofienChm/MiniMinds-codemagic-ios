@@ -241,6 +241,12 @@ export class Header implements OnInit, OnDestroy {
     this.showQuickLinks = false;
   }
 
+  closeAllDropdowns(): void {
+    this.showQuickLinks = false;
+    this.showNotifications = false;
+    this.showUserMenu = false;
+  }
+
   @HostListener('document:click', ['$event'])
   handleClickOutside(event: MouseEvent): void {
     const target = event.target as HTMLElement;

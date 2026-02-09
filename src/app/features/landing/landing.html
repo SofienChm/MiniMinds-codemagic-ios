@@ -35,8 +35,40 @@
           </button>
         </div>
       </div>
+      <!-- Burger Menu Button -->
+      <button class="burger-menu" (click)="toggleMobileMenu()" [class.active]="isMobileMenuOpen">
+        <span class="burger-line"></span>
+        <span class="burger-line"></span>
+        <span class="burger-line"></span>
+      </button>
     </div>
   </nav>
+
+  <!-- Mobile Menu Overlay -->
+  <div class="mobile-menu-overlay" *ngIf="isMobileMenuOpen" (click)="closeMobileMenu()"></div>
+  <div class="mobile-menu" [class.open]="isMobileMenuOpen">
+    <div class="mobile-menu-links">
+      <a class="page-scroll" href="#features" (click)="closeMobileMenu()">{{ 'LANDING.NAV.FEATURES' | translate }}</a>
+      <a class="page-scroll" href="#how-it-works" (click)="closeMobileMenu()">{{ 'LANDING.NAV.HOW_IT_WORKS' | translate }}</a>
+      <a class="page-scroll" href="#roles" (click)="closeMobileMenu()">{{ 'LANDING.NAV.ROLES' | translate }}</a>
+      <a routerLink="/about" (click)="closeMobileMenu()">{{ 'LANDING.NAV.ABOUT' | translate }}</a>
+      <a class="page-scroll" href="#download" (click)="closeMobileMenu()">{{ 'LANDING.NAV.DOWNLOAD' | translate }}</a>
+    </div>
+    <div class="mobile-menu-actions">
+      <a routerLink="/request-demo" class="btn-nav btn-demo-nav" (click)="closeMobileMenu()">{{ 'LANDING.NAV.REQUEST_DEMO' | translate }}</a>
+      <a *ngIf="!isLoggedIn" routerLink="/login" class="btn-nav btn-login-nav" (click)="closeMobileMenu()">{{ 'LANDING.NAV.SIGN_IN' | translate }}</a>
+      <a *ngIf="isLoggedIn" routerLink="/dashboard" class="btn-nav btn-login-nav" (click)="closeMobileMenu()">{{ 'LANDING.NAV.GO_TO_DASHBOARD' | translate }}</a>
+    </div>
+    <div class="mobile-language-selector">
+      <button
+        *ngFor="let lang of availableLanguages"
+        class="mobile-lang-option"
+        [class.active]="lang.code === currentLang"
+        (click)="selectLanguage(lang.code)">
+        <span class="lang-name">{{ lang.nativeName }}</span>
+      </button>
+    </div>
+  </div>
 
   <!-- Hero Section -->
   <section class="hero-section">

@@ -1,4 +1,4 @@
-<div class="add-event-container">
+<div class="add-event-container" (click)="dismissKeyboard($event)">
   <div class="container-fluid mt-4 mb-4">
     <app-title-page
       [title]="'ADD_EVENT.TITLE' | translate"
@@ -83,7 +83,7 @@
           </div>
           <div class="form-grid">
             <div class="form-group">
-              <label class="form-label">{{ 'ADD_EVENT.PRICE' | translate }} {{ 'ADD_EVENT.REQUIRED' | translate }}</label>
+              <label class="form-label">{{ 'ADD_EVENT.PRICE' | translate }}</label>
               <div class="input-with-icon">
                 <i class="bi bi-currency-dollar input-icon"></i>
                 <input type="number" class="form-input" [class.is-invalid]="isFieldInvalid('price')" formControlName="price" min="0" step="0.01" [placeholder]="'ADD_EVENT.PRICE_PLACEHOLDER' | translate">
@@ -199,7 +199,7 @@
             <i class="bi bi-x-circle"></i>
             {{ 'ADD_EVENT.CANCEL' | translate }}
           </button>
-          <button type="submit" class="custom-btn-2 btn-add-global-2" [disabled]="saving || eventForm.invalid">
+          <button type="submit" class="custom-btn-2 btn-add-global-2" [disabled]="saving">
             <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
             <i *ngIf="!saving" class="bi bi-check-circle"></i>
             {{ saving ? ('ADD_EVENT.CREATING' | translate) : ('ADD_EVENT.CREATE_EVENT' | translate) }}

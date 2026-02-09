@@ -1,7 +1,14 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { CommonModule, registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
+import localeIt from '@angular/common/locales/it';
+import localeAr from '@angular/common/locales/ar';
 import { FormsModule } from '@angular/forms';
+
+registerLocaleData(localeFr);
+registerLocaleData(localeIt);
+registerLocaleData(localeAr);
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 import { ParentService } from '../parent.service';
@@ -45,7 +52,13 @@ export class ParentDetail implements OnInit, OnDestroy {
   linkingChild = false;
   isAdmin = true; // TODO: Get from auth service
   breadcrumbs: Breadcrumb[] = [];
+  currentLocale = 'en';
   private langChangeSub?: Subscription;
+  private readonly localeMapping: Record<string, string> = {
+    'fr': 'fr-FR',
+    'it': 'it-IT',
+    'ar': 'ar-SA'
+  };
 
   get isParent(): boolean {
     return this.authService.isParent();
@@ -74,6 +87,7 @@ export class ParentDetail implements OnInit, OnDestroy {
   ngOnInit(): void {
     const user = this.authService.getCurrentUser();
     this.currentUserProfilePicture = user?.profilePicture || '';
+    this.currentLocale = this.translate.currentLang ?? this.translate.defaultLang ?? 'en';
     this.pageTitleService.setTitle(this.translate.instant('PARENTS.PARENT_DETAILS'));
     this.setupBreadcrumbs();
     const id = this.route.snapshot.paramMap.get('id');
@@ -81,7 +95,8 @@ export class ParentDetail implements OnInit, OnDestroy {
       this.loadParentDetails(+id);
     }
 
-    this.langChangeSub = this.translate.onLangChange.subscribe(() => {
+    this.langChangeSub = this.translate.onLangChange.subscribe((event) => {
+      this.currentLocale = event.lang;
       this.pageTitleService.setTitle(this.translate.instant('PARENTS.PARENT_DETAILS'));
       this.setupBreadcrumbs();
     });
@@ -168,11 +183,26 @@ export class ParentDetail implements OnInit, OnDestroy {
   formatDate(dateString?: string): string {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+    const locale = this.localeMapping[this.currentLocale] || 'en-US';
+    return date.toLocaleDateString(locale, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     });
+  }
+
+  translateParentType(type?: string): string {
+    if (!type) return '';
+    const key = `PARENTS.${type.toUpperCase()}`;
+    const translated = this.translate.instant(key);
+    return translated !== key ? translated : type;
+  }
+
+  translateGender(gender?: string): string {
+    if (!gender) return '';
+    const key = `COMMON.${gender.toUpperCase()}`;
+    const translated = this.translate.instant(key);
+    return translated !== key ? translated : gender;
   }
 
   goBack(): void {

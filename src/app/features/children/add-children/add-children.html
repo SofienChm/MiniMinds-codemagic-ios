@@ -1,4 +1,4 @@
-<div class="add-child-container">
+<div class="add-child-container" (click)="dismissKeyboard($event)">
   <!-- Image Cropper Modal -->
   <app-image-cropper-modal
     #imageCropper
@@ -213,7 +213,7 @@
             <i class="bi bi-x-circle"></i>
             {{ 'ADD_CHILD.CANCEL' | translate }}
           </button>
-          <button type="submit" class="custom-btn-2 btn-add-global-2" [disabled]="saving || childForm.invalid">
+          <button type="submit" class="custom-btn-2 btn-add-global-2" [disabled]="saving">
             <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
             <i *ngIf="!saving" class="bi bi-check-circle"></i>
             {{ saving ? ('ADD_CHILD.SAVING' | translate) : ('ADD_CHILD.SAVE_CHILD' | translate) }}

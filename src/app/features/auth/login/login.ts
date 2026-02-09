@@ -39,6 +39,13 @@ export class Login {
     this.showWelcomeScreen = false;
   }
 
+  dismissKeyboard(event: Event): void {
+    const target = event.target as HTMLElement;
+    if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
+      (document.activeElement as HTMLElement)?.blur();
+    }
+  }
+
   // Fix for Samsung keyboard composing mode issue
   onInputChange(event: Event, field: 'email' | 'password'): void {
     const input = event.target as HTMLInputElement;

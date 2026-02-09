@@ -16,7 +16,7 @@
             <small>{{ 'ATTENDANCE_PAGE.LIVE' | translate }}</small>
           </div>
           <h4 class="mb-0">{{ getCurrentTime() }}</h4>
-          <small class="text-muted">{{ currentTime | date:'fullDate' }}</small>
+          <small class="text-muted">{{ currentTime | date:'fullDate':'':currentLocale }}</small>
         </div>
       </div>
     </div>

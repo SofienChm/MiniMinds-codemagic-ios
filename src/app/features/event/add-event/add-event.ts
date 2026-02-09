@@ -107,7 +107,7 @@ export class AddEvent implements OnInit, OnDestroy {
       type: ['', [Validators.required]],
       description: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(1000)]],
       includeAllChildren: [false],
-      price: [0, [Validators.required, Validators.min(0)]],
+      price: [0, [Validators.min(0)]],
       capacity: [1, [Validators.required, Validators.min(1)]],
       ageFrom: [0, [Validators.required, Validators.min(0), Validators.max(18)]],
       ageTo: [18, [Validators.required, Validators.min(0), Validators.max(18)]],
@@ -306,10 +306,28 @@ export class AddEvent implements OnInit, OnDestroy {
     Object.values(this.eventForm.controls).forEach(control => {
       control.markAsTouched();
     });
+    setTimeout(() => {
+      const firstInvalid = document.querySelector('.is-invalid') as HTMLElement;
+      if (firstInvalid) {
+        const formGroup = firstInvalid.closest('.form-group') as HTMLElement;
+        (formGroup || firstInvalid).scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (firstInvalid.tagName === 'INPUT' || firstInvalid.tagName === 'TEXTAREA') {
+          firstInvalid.focus();
+        }
+      }
+    });
   }
 
   get formControls() {
     return this.eventForm.controls;
+  }
+
+  dismissKeyboard(event: Event): void {
+    const target = event.target as HTMLElement;
+    const tag = target.tagName;
+    if (tag !== 'INPUT' && tag !== 'TEXTAREA' && tag !== 'SELECT' && !target.closest('ng-select')) {
+      (document.activeElement as HTMLElement)?.blur();
+    }
   }
 
   isFieldInvalid(fieldName: string): boolean {

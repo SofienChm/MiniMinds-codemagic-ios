@@ -298,10 +298,28 @@ export class AddChildren implements OnInit {
     Object.values(this.childForm.controls).forEach(control => {
       control.markAsTouched();
     });
+    setTimeout(() => {
+      const firstInvalid = document.querySelector('.is-invalid') as HTMLElement;
+      if (firstInvalid) {
+        const formGroup = firstInvalid.closest('.form-group') as HTMLElement;
+        (formGroup || firstInvalid).scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (firstInvalid.tagName === 'INPUT' || firstInvalid.tagName === 'TEXTAREA') {
+          firstInvalid.focus();
+        }
+      }
+    });
   }
 
   get formControls() {
     return this.childForm.controls;
+  }
+
+  dismissKeyboard(event: Event): void {
+    const target = event.target as HTMLElement;
+    const tag = target.tagName;
+    if (tag !== 'INPUT' && tag !== 'TEXTAREA' && tag !== 'SELECT' && !target.closest('ng-select')) {
+      (document.activeElement as HTMLElement)?.blur();
+    }
   }
 
   isFieldInvalid(fieldName: string): boolean {

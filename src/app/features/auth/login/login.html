@@ -1,5 +1,5 @@
 <ng-container *ngIf="isMobile()" class="font-inter">
-  <div class="welcome-screen" [class.show-login]="!showWelcomeScreen">
+  <div class="welcome-screen" [class.show-login]="!showWelcomeScreen" (click)="dismissKeyboard($event)">
     <!-- Blue wave background -->
     <div class="welcome-top-section">
       <svg
@@ -58,8 +58,11 @@
                 [ngModel]="credentials.email"
                 (ngModelChange)="credentials.email = $event"
                 (input)="onInputChange($event, 'email')"
+                (keyup.enter)="passwordInput.focus()"
                 required
                 email
+                inputmode="email"
+                enterkeyhint="next"
                 autocomplete="username"
                 autocapitalize="off"
                 autocorrect="off"
@@ -73,6 +76,7 @@
             <div class="input-wrapper">
               <i class="bi bi-lock"></i>
               <input
+                #passwordInput
                 [type]="showPassword ? 'text' : 'password'"
                 id="password"
                 name="password"
@@ -80,6 +84,7 @@
                 (ngModelChange)="credentials.password = $event"
                 (input)="onInputChange($event, 'password')"
                 required
+                enterkeyhint="go"
                 autocomplete="current-password"
                 autocapitalize="off"
                 autocorrect="off"
