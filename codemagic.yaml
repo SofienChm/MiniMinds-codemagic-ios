@@ -3,12 +3,15 @@ workflows:
     name: iOS Build
     max_build_duration: 60
     instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: Codemagic
     environment:
       node: 20
       xcode: latest
       cocoapods: default
-      groups:
-        - appstore_credentials
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.miniminds.app
     scripts:
       - name: Install npm dependencies
         script: |
@@ -26,21 +29,8 @@ workflows:
         script: |
           cd ios/App
           pod install
-      - name: Fetch signing files
-        script: |
-          app-store-connect fetch-signing-files com.miniminds.app \
-            --type IOS_APP_STORE \
-            --create
       - name: Set up code signing
         script: |
-          keychain initialize
-          app-store-connect certificates list \
-            --type IOS_DISTRIBUTION \
-            --save || \
-          app-store-connect certificates create \
-            --type IOS_DISTRIBUTION \
-            --save
-          keychain add-certificates
           xcode-project use-profiles
       - name: Build iOS app
         script: |
@@ -62,7 +52,5 @@ workflows:
       - ios/App/build/*.ipa
     publishing:
       app_store_connect:
-        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
-        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
-        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+        auth: integration
         submit_to_testflight: true
