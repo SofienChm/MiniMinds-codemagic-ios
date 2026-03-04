@@ -29,17 +29,12 @@ workflows:
       - name: Create distribution certificate and provisioning profile
         script: |
           keychain initialize
-          app-store-connect certificates create \
-            --type IOS_DISTRIBUTION \
-            --save
           app-store-connect fetch-signing-files \
             com.miniminds.app \
             --type IOS_APP_STORE \
-            --create \
-            --save
+            --create
           keychain add-certificates
-          xcode-project use-profiles \
-            --profile-dir ~/Library/MobileDevice/Provisioning\ Profiles
+          xcode-project use-profiles
       - name: Build iOS app
         script: |
           cd ios/App
