@@ -26,35 +26,39 @@ workflows:
         script: |
           cd ios/App
           pod install
-      - name: Create distribution certificate and provisioning profile
+      - name: Initialize keychain
         script: |
           keychain initialize
-          app-store-connect fetch-signing-files \
-            com.miniminds.app \
+      - name: Fetch signing files
+        script: |
+          app-store-connect fetch-signing-files com.miniminds.app \
             --type IOS_APP_STORE \
             --create
+      - name: Add certificates to keychain
+        script: |
           keychain add-certificates
+      - name: Apply provisioning profiles
+        script: |
           xcode-project use-profiles
       - name: Build iOS app
         script: |
-          cd ios/App
-          xcodebuild -workspace App.xcworkspace \
+          xcodebuild \
+            -workspace ios/App/App.xcworkspace \
             -scheme App \
             -configuration Release \
             -sdk iphoneos \
-            -archivePath build/App.xcarchive \
-            DEVELOPMENT_TEAM=TK6V4R8SY5 \
-            CODE_SIGN_STYLE=Manual \
+            -archivePath "$CM_BUILD_DIR/App.xcarchive" \
+            OTHER_CODE_SIGN_FLAGS="--keychain ~/Library/Keychains/login.keychain-db" \
             archive
       - name: Create signed IPA
         script: |
           xcode-project build-ipa \
             --workspace ios/App/App.xcworkspace \
             --scheme App \
-            --archive-path ios/App/build/App.xcarchive
+            --archive-path "$CM_BUILD_DIR/App.xcarchive"
     artifacts:
-      - build/ios/ipa/*.ipa
-      - ios/App/build/*.ipa
+      - $CM_BUILD_DIR/build/ios/ipa/*.ipa
+      - $CM_BUILD_DIR/*.ipa
     publishing:
       app_store_connect:
         auth: integration
