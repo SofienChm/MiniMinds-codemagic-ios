@@ -43,6 +43,8 @@ workflows:
             -configuration Release \
             -sdk iphoneos \
             -archivePath build/App.xcarchive \
+            DEVELOPMENT_TEAM=TK6V4R8SY5 \
+            CODE_SIGN_STYLE=Manual \
             archive
       - name: Create signed IPA
         script: |
