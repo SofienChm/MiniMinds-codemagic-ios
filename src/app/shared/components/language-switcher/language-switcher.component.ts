@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateService } from '@ngx-translate/core';
+import { LanguageService } from '../../../core/services/langauge-service';
 
 @Component({
   selector: 'app-language-switcher',
@@ -8,8 +9,8 @@ import { TranslateService } from '@ngx-translate/core';
   imports: [CommonModule],
   template: `
     <div class="language-switcher">
-      <button 
-        *ngFor="let lang of languages" 
+      <button
+        *ngFor="let lang of languages"
         (click)="switchLanguage(lang.code)"
         [class.active]="currentLang === lang.code"
         class="btn btn-sm btn-outline-secondary btn-cancel-global mx-1">
@@ -30,11 +31,13 @@ import { TranslateService } from '@ngx-translate/core';
 })
 export class LanguageSwitcherComponent {
   private translate = inject(TranslateService);
-  
+  private languageService = inject(LanguageService);
+
   languages = [
     { code: 'en', name: 'EN', flag: '🇪🇳' },
     { code: 'fr', name: 'FR', flag: '🇫🇷' },
-    { code: 'it', name: 'IT', flag: '🇮🇹' }
+    { code: 'it', name: 'IT', flag: '🇮🇹' },
+    { code: 'ar', name: 'AR', flag: '🇸🇦' }
   ];
 
   get currentLang(): string {
@@ -42,7 +45,6 @@ export class LanguageSwitcherComponent {
   }
 
   switchLanguage(lang: string): void {
-    this.translate.use(lang);
-    localStorage.setItem('lang', lang);
+    this.languageService.use(lang);
   }
 }

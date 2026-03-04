@@ -44,7 +44,8 @@ export class SettingsComponent implements OnInit, OnDestroy {
   languages = [
     { code: 'en', name: 'English', flag: '/assets/images/us.png', label: '🇪🇳 English' },
     { code: 'fr', name: 'Français', flag: '/assets/images/fr.png', label: '🇫🇷 Français' },
-    { code: 'it', name: 'Italiano', flag: '/assets/images/it.png', label: '🇮🇹 Italiano' }
+    { code: 'it', name: 'Italiano', flag: '/assets/images/it.png', label: '🇮🇹 Italiano' },
+    { code: 'ar', name: 'العربية', flag: '/assets/images/tn.png', label: '🇸🇦 العربية' }
   ];
 
   currencies = this.currencyService.getCurrencies();
@@ -126,7 +127,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
   }
 
   switchLanguage(lang: string): void {
-    this.translate.use(lang);
+    this.languageService.use(lang);
   }
 
   onCurrencyChange(): void {

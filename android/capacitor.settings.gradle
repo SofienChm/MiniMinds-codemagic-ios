@@ -2,6 +2,9 @@
 include ':capacitor-android'
 project(':capacitor-android').projectDir = new File('../node_modules/@capacitor/android/capacitor')
 
+include ':capacitor-community-media'
+project(':capacitor-community-media').projectDir = new File('../node_modules/@capacitor-community/media/android')
+
 include ':capacitor-mlkit-barcode-scanning'
 project(':capacitor-mlkit-barcode-scanning').projectDir = new File('../node_modules/@capacitor-mlkit/barcode-scanning/android')
 
@@ -10,6 +13,12 @@ project(':capacitor-app').projectDir = new File('../node_modules/@capacitor/app/
 
 include ':capacitor-camera'
 project(':capacitor-camera').projectDir = new File('../node_modules/@capacitor/camera/android')
+
+include ':capacitor-filesystem'
+project(':capacitor-filesystem').projectDir = new File('../node_modules/@capacitor/filesystem/android')
+
+include ':capacitor-geolocation'
+project(':capacitor-geolocation').projectDir = new File('../node_modules/@capacitor/geolocation/android')
 
 include ':capacitor-haptics'
 project(':capacitor-haptics').projectDir = new File('../node_modules/@capacitor/haptics/android')
@@ -26,6 +35,9 @@ project(':capacitor-preferences').projectDir = new File('../node_modules/@capaci
 include ':capacitor-push-notifications'
 project(':capacitor-push-notifications').projectDir = new File('../node_modules/@capacitor/push-notifications/android')
 
+include ':capacitor-share'
+project(':capacitor-share').projectDir = new File('../node_modules/@capacitor/share/android')
+
 include ':capacitor-splash-screen'
 project(':capacitor-splash-screen').projectDir = new File('../node_modules/@capacitor/splash-screen/android')
 
@@ -34,3 +46,6 @@ project(':capacitor-status-bar').projectDir = new File('../node_modules/@capacit
 
 include ':capawesome-capacitor-badge'
 project(':capawesome-capacitor-badge').projectDir = new File('../node_modules/@capawesome/capacitor-badge/android')
+
+include ':notnotsamuel-capacitor-swipe-back'
+project(':notnotsamuel-capacitor-swipe-back').projectDir = new File('../node_modules/@notnotsamuel/capacitor-swipe-back/android')

@@ -13,7 +13,7 @@ export class LanguageSelector {
   private readonly languageService = inject(LanguageService);
   private readonly elementRef = inject(ElementRef);
 
-  availableLanguages = ['en', 'fr', 'it'];
+  availableLanguages = ['en', 'fr', 'it', 'ar'];
   showMenu = signal(false);
 
   toggleMenu() {
@@ -37,6 +37,7 @@ export class LanguageSelector {
       en: '/assets/images/us.png',
       fr: '/assets/images/fr.png',
       it: '/assets/images/it.png',
+      ar: '/assets/images/tn.png',
     };
     return map[lang] ?? '/assets/images/us.png';
   }

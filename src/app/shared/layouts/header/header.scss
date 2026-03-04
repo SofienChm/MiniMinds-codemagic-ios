@@ -403,6 +403,7 @@ header {
   background-color: var(--primary-color);
 }
 .profile-header{
+  z-index: 1000;
   button{
     display: flex;
     align-items: center;

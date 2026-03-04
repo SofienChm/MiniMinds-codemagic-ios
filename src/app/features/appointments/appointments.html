@@ -123,14 +123,14 @@
                   <ng-container *ngIf="isAdmin || isTeacher">
                     <!-- Approve (only pending) -->
                     <button *ngIf="apt.status === 'Pending'"
-                            class="btn btn-sm btn-success"
+                            class="btn btn-sm btn-view"
                             (click)="approve(apt)"
                             [title]="'APPOINTMENTS_PAGE.APPROVE' | translate">
                       <i class="bi bi-check-lg"></i>
                     </button>
                     <!-- Reject (only pending) -->
                     <button *ngIf="apt.status === 'Pending'"
-                            class="btn btn-sm btn-danger"
+                            class="btn btn-sm btn-remove"
                             (click)="reject(apt)"
                             [title]="'APPOINTMENTS_PAGE.REJECT' | translate">
                       <i class="bi bi-x-lg"></i>

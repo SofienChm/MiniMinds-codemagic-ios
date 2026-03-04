@@ -259,111 +259,113 @@
     </span>
   </div>
 
-  <!-- Detail Modal -->
-  <div class="modal-overlay" *ngIf="showDetailModal" (click)="closeModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h2>Demo Request Details</h2>
-        <button class="close-btn" (click)="closeModal()">
-          <i class="bi bi-x-lg"></i>
-        </button>
+
+</div>
+
+<!-- Detail Modal -->
+<div class="modal-overlay" *ngIf="showDetailModal" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Demo Request Details</h2>
+      <button class="close-btn" (click)="closeModal()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <div class="modal-body" *ngIf="selectedRequest">
+      <div class="detail-section">
+        <h3>Contact Information</h3>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <label>Full Name</label>
+            <span>{{ selectedRequest.fullName }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Email</label>
+            <a [href]="'mailto:' + selectedRequest.email">{{ selectedRequest.email }}</a>
+          </div>
+          <div class="detail-item">
+            <label>Phone</label>
+            <a [href]="'tel:' + selectedRequest.phone">{{ selectedRequest.phone }}</a>
+          </div>
+        </div>
       </div>
 
-      <div class="modal-body" *ngIf="selectedRequest">
-        <div class="detail-section">
-          <h3>Contact Information</h3>
-          <div class="detail-grid">
-            <div class="detail-item">
-              <label>Full Name</label>
-              <span>{{ selectedRequest.fullName }}</span>
-            </div>
-            <div class="detail-item">
-              <label>Email</label>
-              <a [href]="'mailto:' + selectedRequest.email">{{ selectedRequest.email }}</a>
-            </div>
-            <div class="detail-item">
-              <label>Phone</label>
-              <a [href]="'tel:' + selectedRequest.phone">{{ selectedRequest.phone }}</a>
-            </div>
+      <div class="detail-section">
+        <h3>Center Details</h3>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <label>Center Name</label>
+            <span>{{ selectedRequest.centerName }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Role</label>
+            <span>{{ selectedRequest.jobTitle }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Country</label>
+            <span>{{ selectedRequest.country }}</span>
+          </div>
+          <div class="detail-item">
+            <label>Number of Children</label>
+            <span>{{ selectedRequest.numberOfChildren }}</span>
           </div>
         </div>
+      </div>
 
-        <div class="detail-section">
-          <h3>Center Details</h3>
-          <div class="detail-grid">
-            <div class="detail-item">
-              <label>Center Name</label>
-              <span>{{ selectedRequest.centerName }}</span>
-            </div>
-            <div class="detail-item">
-              <label>Role</label>
-              <span>{{ selectedRequest.jobTitle }}</span>
-            </div>
-            <div class="detail-item">
-              <label>Country</label>
-              <span>{{ selectedRequest.country }}</span>
-            </div>
-            <div class="detail-item">
-              <label>Number of Children</label>
-              <span>{{ selectedRequest.numberOfChildren }}</span>
-            </div>
+      <div class="detail-section">
+        <h3>Additional Info</h3>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <label>How they heard about us</label>
+            <span>{{ selectedRequest.hearAboutUs }}</span>
+          </div>
+          <div class="detail-item full-width" *ngIf="selectedRequest.comments">
+            <label>Comments</label>
+            <p class="comments-text">{{ selectedRequest.comments }}</p>
           </div>
         </div>
+      </div>
 
-        <div class="detail-section">
-          <h3>Additional Info</h3>
-          <div class="detail-grid">
-            <div class="detail-item">
-              <label>How they heard about us</label>
-              <span>{{ selectedRequest.hearAboutUs }}</span>
-            </div>
-            <div class="detail-item full-width" *ngIf="selectedRequest.comments">
-              <label>Comments</label>
-              <p class="comments-text">{{ selectedRequest.comments }}</p>
-            </div>
+      <div class="detail-section">
+        <h3>Status & Timeline</h3>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <label>Current Status</label>
+            <span class="status-badge" [style.background-color]="getStatusColor(selectedRequest.status)">
+              <i [class]="getStatusIcon(selectedRequest.status)"></i>
+              {{ selectedRequest.statusName }}
+            </span>
+          </div>
+          <div class="detail-item">
+            <label>Submitted</label>
+            <span>{{ formatDate(selectedRequest.createdAt) }}</span>
+          </div>
+          <div class="detail-item" *ngIf="selectedRequest.contactedAt">
+            <label>First Contacted</label>
+            <span>{{ formatDate(selectedRequest.contactedAt) }}</span>
+          </div>
+          <div class="detail-item" *ngIf="selectedRequest.completedAt">
+            <label>Completed</label>
+            <span>{{ formatDate(selectedRequest.completedAt) }}</span>
           </div>
         </div>
+      </div>
 
-        <div class="detail-section">
-          <h3>Status & Timeline</h3>
-          <div class="detail-grid">
-            <div class="detail-item">
-              <label>Current Status</label>
-              <span class="status-badge" [style.background-color]="getStatusColor(selectedRequest.status)">
-                <i [class]="getStatusIcon(selectedRequest.status)"></i>
-                {{ selectedRequest.statusName }}
-              </span>
-            </div>
-            <div class="detail-item">
-              <label>Submitted</label>
-              <span>{{ formatDate(selectedRequest.createdAt) }}</span>
-            </div>
-            <div class="detail-item" *ngIf="selectedRequest.contactedAt">
-              <label>First Contacted</label>
-              <span>{{ formatDate(selectedRequest.contactedAt) }}</span>
-            </div>
-            <div class="detail-item" *ngIf="selectedRequest.completedAt">
-              <label>Completed</label>
-              <span>{{ formatDate(selectedRequest.completedAt) }}</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="status-actions">
-          <label>Update Status:</label>
-          <div class="status-buttons">
-            <button
-              *ngFor="let option of statusOptions.slice(1)"
-              class="status-btn"
-              [class.active]="selectedRequest.status === option.value"
-              [style.border-color]="option.color"
-              [style.color]="selectedRequest.status === option.value ? '#fff' : option.color"
-              [style.background-color]="selectedRequest.status === option.value ? option.color : 'transparent'"
-              (click)="updateStatus(selectedRequest, option.value!)">
-              <i [class]="option.icon"></i>
-              {{ option.label }}
-            </button>
-          </div>
+      <div class="status-actions">
+        <label>Update Status:</label>
+        <div class="status-buttons">
+          <button
+            *ngFor="let option of statusOptions.slice(1)"
+            class="status-btn"
+            [class.active]="selectedRequest.status === option.value"
+            [style.border-color]="option.color"
+            [style.color]="selectedRequest.status === option.value ? '#fff' : option.color"
+            [style.background-color]="selectedRequest.status === option.value ? option.color : 'transparent'"
+            (click)="updateStatus(selectedRequest, option.value!)">
+            <i [class]="option.icon"></i>
+            {{ option.label }}
+          </button>
         </div>
       </div>
     </div>

@@ -3,10 +3,17 @@ workflows:
     name: iOS Build
     max_build_duration: 60
     instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: Codemagic
     environment:
       node: 20
       xcode: latest
       cocoapods: default
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.miniminds.app
+      groups:
+        - appstore_credentials
     scripts:
       - name: Install npm dependencies
         script: |
@@ -24,6 +31,9 @@ workflows:
         script: |
           cd ios/App
           pod install
+      - name: Set up code signing
+        script: |
+          xcode-project use-profiles
       - name: Build iOS app
         script: |
           cd ios/App
@@ -32,16 +42,17 @@ workflows:
             -configuration Release \
             -sdk iphoneos \
             -archivePath build/App.xcarchive \
-            archive \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
-      - name: Create unsigned IPA
+            archive
+      - name: Create signed IPA
         script: |
-          cd ios/App
-          mkdir -p build/Payload
-          cp -r build/App.xcarchive/Products/Applications/App.app build/Payload/
-          cd build
-          zip -r miniminds-unsigned.ipa Payload
+          xcode-project build-ipa \
+            --workspace ios/App/App.xcworkspace \
+            --scheme App \
+            --archive-path ios/App/build/App.xcarchive
     artifacts:
+      - build/ios/ipa/*.ipa
       - ios/App/build/*.ipa
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true

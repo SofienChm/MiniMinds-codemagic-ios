@@ -15,7 +15,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-
+    background-color: #7db9ff !important;
+    color: #ffffff !important;
     i {
       font-size: 1.5rem;
     }
@@ -31,26 +32,6 @@
     font-size: 0.85rem;
     color: #6c757d;
   }
-}
-
-.bg-success-light {
-  background-color: rgba(40, 167, 69, 0.1);
-  color: #28a745;
-}
-
-.bg-warning-light {
-  background-color: rgba(255, 193, 7, 0.1);
-  color: #ffc107;
-}
-
-.bg-primary-light {
-  background-color: rgba(0, 123, 255, 0.1);
-  color: #007bff;
-}
-
-.bg-danger-light {
-  background-color: rgba(220, 53, 69, 0.1);
-  color: #dc3545;
 }
 
 // Search box
