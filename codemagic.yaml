@@ -29,8 +29,20 @@ workflows:
         script: |
           cd ios/App
           pod install
-      - name: Set up code signing
+      - name: Initialize keychain and fetch signing files
         script: |
+          keychain initialize
+          app-store-connect fetch-signing-files \
+            com.miniminds.app \
+            --type IOS_APP_STORE \
+            --create
+          app-store-connect certificates list \
+            --type IOS_DISTRIBUTION \
+            --save || \
+          app-store-connect certificates create \
+            --type IOS_DISTRIBUTION \
+            --save
+          keychain add-certificates
           xcode-project use-profiles
       - name: Build iOS app
         script: |
