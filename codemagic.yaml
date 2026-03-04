@@ -9,9 +9,6 @@ workflows:
       node: 20
       xcode: latest
       cocoapods: default
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.miniminds.app
     scripts:
       - name: Install npm dependencies
         script: |
@@ -29,21 +26,20 @@ workflows:
         script: |
           cd ios/App
           pod install
-      - name: Initialize keychain and fetch signing files
+      - name: Create distribution certificate and provisioning profile
         script: |
           keychain initialize
-          app-store-connect fetch-signing-files \
-            com.miniminds.app \
-            --type IOS_APP_STORE \
-            --create
-          app-store-connect certificates list \
-            --type IOS_DISTRIBUTION \
-            --save || \
           app-store-connect certificates create \
             --type IOS_DISTRIBUTION \
             --save
+          app-store-connect fetch-signing-files \
+            com.miniminds.app \
+            --type IOS_APP_STORE \
+            --create \
+            --save
           keychain add-certificates
-          xcode-project use-profiles
+          xcode-project use-profiles \
+            --profile-dir ~/Library/MobileDevice/Provisioning\ Profiles
       - name: Build iOS app
         script: |
           cd ios/App
