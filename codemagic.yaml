@@ -42,25 +42,13 @@ workflows:
       - name: Apply provisioning profiles
         script: |
           xcode-project use-profiles
-      - name: Build iOS app
-        script: |
-          xcodebuild \
-            -workspace ios/App/App.xcworkspace \
-            -scheme App \
-            -configuration Release \
-            -sdk iphoneos \
-            -archivePath "$CM_BUILD_DIR/App.xcarchive" \
-            OTHER_CODE_SIGN_FLAGS="--keychain ~/Library/Keychains/login.keychain-db" \
-            archive
-      - name: Create signed IPA
+      - name: Build and export signed IPA
         script: |
           xcode-project build-ipa \
             --workspace ios/App/App.xcworkspace \
-            --scheme App \
-            --archive-path "$CM_BUILD_DIR/App.xcarchive"
+            --scheme App
     artifacts:
-      - $CM_BUILD_DIR/build/ios/ipa/*.ipa
-      - $CM_BUILD_DIR/*.ipa
+      - build/ios/ipa/*.ipa
     publishing:
       app_store_connect:
         auth: integration
