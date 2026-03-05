@@ -24,6 +24,10 @@ workflows:
       - name: Sync Capacitor iOS
         script: |
           npx cap sync ios
+      - name: Set build number
+        script: |
+          cd ios/App
+          agvtool new-version -all $BUILD_NUMBER
       - name: Install CocoaPods dependencies
         script: |
           cd ios/App
