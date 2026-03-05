@@ -31,11 +31,10 @@ workflows:
           keychain initialize
       - name: Fetch signing files
         script: |
-          PRIVATE_KEY=$(openssl genrsa 2048)
           app-store-connect fetch-signing-files com.miniminds.app \
             --type IOS_APP_STORE \
             --create \
-            --certificate-key "$PRIVATE_KEY"
+            --certificate-key "$CERTIFICATE_PRIVATE_KEY"
       - name: Add certificates to keychain
         script: |
           keychain add-certificates
