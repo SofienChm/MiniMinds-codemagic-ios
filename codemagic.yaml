@@ -9,6 +9,8 @@ workflows:
       node: 20
       xcode: latest
       cocoapods: default
+      groups:
+        - default
     scripts:
       - name: Install npm dependencies
         script: |
