@@ -7,6 +7,7 @@ import {
   ActionPerformed,
   Token,
 } from '@capacitor/push-notifications';
+import { Preferences } from '@capacitor/preferences';
 import { BehaviorSubject } from 'rxjs';
 import { DeviceTokenService } from './device-token.service';
 
@@ -81,14 +82,31 @@ export class FcmPushNotificationService {
    * Set up push notification listeners
    */
   private setupListeners(): void {
-    // On registration success - receive FCM token
+    // On registration success
     PushNotifications.addListener('registration', async (token: Token) => {
-      console.log('FCM Token received:', token.value);
-      this.fcmToken = token.value;
-      this.fcmTokenSubject.next(token.value);
+      let registrationToken: string;
+
+      if (Capacitor.getPlatform() === 'ios') {
+        // On iOS, token.value is the raw APNs device token (NOT an FCM token).
+        // Firebase Messaging exchanges it for an FCM token asynchronously.
+        // AppDelegate stores the FCM token in UserDefaults via Capacitor Preferences key.
+        const fcmToken = await this.waitForFcmToken();
+        if (!fcmToken) {
+          console.error('Could not retrieve FCM token on iOS');
+          return;
+        }
+        registrationToken = fcmToken;
+      } else {
+        // On Android, token.value is already the FCM registration token
+        registrationToken = token.value;
+      }
+
+      console.log('FCM Token ready:', registrationToken);
+      this.fcmToken = registrationToken;
+      this.fcmTokenSubject.next(registrationToken);
 
       // Register token with backend
-      await this.registerTokenWithBackend(token.value);
+      await this.registerTokenWithBackend(registrationToken);
     });
 
     // On registration error
@@ -170,6 +188,21 @@ export class FcmPushNotificationService {
         this.router.navigate(['/notifications']);
         break;
     }
+  }
+
+  /**
+   * Wait for Firebase to generate and store the FCM token in Preferences.
+   * AppDelegate stores it under key 'FCMToken' after receiving it from Firebase Messaging.
+   */
+  private async waitForFcmToken(maxRetries = 10, delayMs = 1500): Promise<string | null> {
+    for (let i = 0; i < maxRetries; i++) {
+      const { value } = await Preferences.get({ key: 'FCMToken' });
+      if (value) {
+        return value;
+      }
+      await new Promise(resolve => setTimeout(resolve, delayMs));
+    }
+    return null;
   }
 
   /**
