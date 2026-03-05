@@ -38,7 +38,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // Manually forward APNs token to Firebase so it can generate FCM token
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         Messaging.messaging().apnsToken = deviceToken
-        ApplicationDelegateProxy.shared.application(application, didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
     }
 }
 
