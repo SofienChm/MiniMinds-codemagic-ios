@@ -35,16 +35,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     // Required when FirebaseAppDelegateProxyEnabled = false:
-    // Manually forward APNs token to Firebase so it can generate FCM token
-    // AND forward to Capacitor so the `registration` event fires in JavaScript
+    // Manually forward APNs token to Firebase so it can generate FCM token.
+    // Also notify Capacitor's PushNotifications plugin via NotificationCenter
+    // (Capacitor 7 uses NotificationCenter instead of ApplicationDelegateProxy for APNs).
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         Messaging.messaging().apnsToken = deviceToken
-        ApplicationDelegateProxy.shared.application(application, didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
+        NotificationCenter.default.post(
+            name: .capacitorDidRegisterForRemoteNotifications,
+            object: deviceToken
+        )
     }
 
-    // Forward registration failures to Capacitor so `registrationError` event fires
+    // Forward registration failures to Capacitor so `registrationError` event fires in JavaScript
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        ApplicationDelegateProxy.shared.application(application, didFailToRegisterForRemoteNotificationsWithError: error)
+        NotificationCenter.default.post(
+            name: .capacitorDidFailToRegisterForRemoteNotifications,
+            object: error
+        )
     }
 }
 
