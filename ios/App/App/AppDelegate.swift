@@ -36,8 +36,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     // Required when FirebaseAppDelegateProxyEnabled = false:
     // Manually forward APNs token to Firebase so it can generate FCM token
+    // AND forward to Capacitor so the `registration` event fires in JavaScript
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         Messaging.messaging().apnsToken = deviceToken
+        ApplicationDelegateProxy.shared.application(application, didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
+    }
+
+    // Forward registration failures to Capacitor so `registrationError` event fires
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        ApplicationDelegateProxy.shared.application(application, didFailToRegisterForRemoteNotificationsWithError: error)
     }
 }
 

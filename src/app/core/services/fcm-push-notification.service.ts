@@ -66,11 +66,11 @@ export class FcmPushNotificationService {
         return;
       }
 
+      // Set up listeners BEFORE register() so no events are missed
+      this.setupListeners();
+
       // Register with FCM
       await PushNotifications.register();
-
-      // Set up listeners
-      this.setupListeners();
 
       console.log('Push notifications initialized successfully');
     } catch (error) {
