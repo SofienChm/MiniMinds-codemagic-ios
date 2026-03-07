@@ -22,6 +22,8 @@ export class FcmPushNotificationService {
   private notificationReceivedSubject = new BehaviorSubject<PushNotificationSchema | null>(null);
   public notificationReceived$ = this.notificationReceivedSubject.asObservable();
 
+  private initialized = false;
+
   constructor(
     private router: Router,
     private deviceTokenService: DeviceTokenService
@@ -50,6 +52,12 @@ export class FcmPushNotificationService {
       console.log('Push notifications not supported on this platform');
       return;
     }
+
+    if (this.initialized) {
+      console.log('Push notifications already initialized');
+      return;
+    }
+    this.initialized = true;
 
     try {
       // Request permission
@@ -194,7 +202,7 @@ export class FcmPushNotificationService {
    * Wait for Firebase to generate and store the FCM token in Preferences.
    * AppDelegate stores it under key 'FCMToken' after receiving it from Firebase Messaging.
    */
-  private async waitForFcmToken(maxRetries = 10, delayMs = 1500): Promise<string | null> {
+  private async waitForFcmToken(maxRetries = 20, delayMs = 2000): Promise<string | null> {
     for (let i = 0; i < maxRetries; i++) {
       const { value } = await Preferences.get({ key: 'FCMToken' });
       if (value) {

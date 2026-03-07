@@ -13,6 +13,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         FirebaseApp.configure()
         // Set Firebase Messaging delegate to receive FCM tokens
         Messaging.messaging().delegate = self
+        // If Firebase already has a cached FCM token from a previous session, store it now
+        // so waitForFcmToken() finds it immediately without waiting
+        if let cachedToken = Messaging.messaging().fcmToken {
+            UserDefaults.standard.set(cachedToken, forKey: "CapacitorStorage.FCMToken")
+        }
         return true
     }
 
