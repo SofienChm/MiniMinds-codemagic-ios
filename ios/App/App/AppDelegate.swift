@@ -45,6 +45,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // (Capacitor 7 uses NotificationCenter instead of ApplicationDelegateProxy for APNs).
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         Messaging.messaging().apnsToken = deviceToken
+        // Eagerly store any FCM token Firebase already has before notifying Capacitor,
+        // so waitForFcmToken() finds it on the first try instead of waiting
+        if let fcmToken = Messaging.messaging().fcmToken {
+            UserDefaults.standard.set(fcmToken, forKey: "CapacitorStorage.FCMToken")
+        }
         NotificationCenter.default.post(
             name: .capacitorDidRegisterForRemoteNotifications,
             object: deviceToken
