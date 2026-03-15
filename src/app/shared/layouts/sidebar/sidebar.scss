@@ -11,6 +11,10 @@
 }
 
 @media (max-width: 991.98px) {
+  [dir=rtl] .sidebar {
+    transform: translateX(100%) !important;
+  }
+
   .sidebar {
     transform: translateX(-100%);
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);

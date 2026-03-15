@@ -30,7 +30,7 @@
             {{ 'APPOINTMENTS_PAGE.APPOINTMENT_INFO' | translate }}
           </h5>
           <span class="badge" [ngClass]="getStatusBadgeClass(appointment.status)">
-            {{ appointment.status }}
+            {{ 'APPOINTMENTS_PAGE.' + appointment.status.toUpperCase() | translate }}
           </span>
         </div>
         <div class="card-body">
@@ -43,7 +43,7 @@
               <label class="detail-label">{{ 'APPOINTMENTS_PAGE.TYPE' | translate }}</label>
               <p>
                 <span class="badge" [ngClass]="getTypeBadgeClass(appointment.type)">
-                  {{ appointment.type }}
+                  {{ 'APPOINTMENTS_PAGE.TYPE_' + appointment.type.toUpperCase() | translate }}
                 </span>
               </p>
             </div>
@@ -169,7 +169,7 @@
                    [class.bg-secondary]="appointment.status === 'Cancelled'">
               </div>
               <div class="timeline-content">
-                <p class="timeline-label">{{ appointment.status }}</p>
+                <p class="timeline-label">{{ 'APPOINTMENTS_PAGE.' + appointment.status.toUpperCase() | translate }}</p>
                 <p class="timeline-date">{{ appointment.processedAt | date:'medium' }}</p>
               </div>
             </div>

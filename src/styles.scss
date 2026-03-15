@@ -1652,8 +1652,12 @@ input.form-control {
 
   // Sidebar mobile
   @media (max-width: 991.98px) {
+    .mobile-open .sidebar {
+      transform: translateX(0%) !important;
+    }
+
     .sidebar {
-      transform: translateX(100%);
+      transform: translateX(100%) !important;
     }
     .sidebar.mobile-open {
       transform: translateX(0);
@@ -1832,6 +1836,8 @@ input.form-control {
   // Dropdowns
   .dropdown-menu {
     text-align: right;
+    left: 0 !important;
+    right: inherit !important;
   }
 
   // Quick links dropdown

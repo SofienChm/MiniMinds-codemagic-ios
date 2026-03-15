@@ -82,14 +82,14 @@
               </td>
               <td>
                 <span class="badge" [ngClass]="getTypeBadgeClass(apt.type)">
-                  {{ apt.type }}
+                  {{ 'APPOINTMENTS_PAGE.TYPE_' + apt.type.toUpperCase() | translate }}
                 </span>
               </td>
               <td>{{ apt.appointmentDate | date:'mediumDate' }}</td>
               <td>{{ apt.startTime }} - {{ apt.endTime }}</td>
               <td>
                 <span class="badge" [ngClass]="getStatusBadgeClass(apt.status)">
-                  {{ apt.status }}
+                  {{ 'APPOINTMENTS_PAGE.' + apt.status.toUpperCase() | translate }}
                 </span>
               </td>
               <td>
@@ -162,7 +162,7 @@
   </div>
   <!-- Add Appointments -->
   <button *ngIf="isParent" class="action-btn btn-add-global-2 custom-btn-2 mx-auto" (click)="navigateToAdd()">
-    <i class="bi bi-plus-lg me-2"></i>{{ 'STATIC_FEES_PAGE.ADD_FIRST_FEE' | translate }}
+    <i class="bi bi-plus-lg me-2"></i>{{ 'APPOINTMENTS_PAGE.BOOK_APPOINTMENT' | translate }}
   </button>
   <!-- Load More Button -->
   <div *ngIf="hasMore()" class="text-center d-flex justify-content-center mt-3">
