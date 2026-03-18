@@ -269,6 +269,7 @@ export class FcmPushNotificationService {
 
       this.fcmToken = null;
       this.fcmTokenSubject.next(null);
+      this.initialized = false; // Allow re-initialization on next login
 
       console.log('Push notifications unregistered');
     } catch (error) {
