@@ -5,13 +5,27 @@ import FirebaseMessaging
 
 // Sends debug logs to the server so we can trace the native push flow without Xcode
 func swiftDebugLog(_ step: String, _ message: String) {
-    guard let url = URL(string: "https://app-miniminds.com/api/devicetokens/debug-log") else { return }
+    guard let url = URL(string: "https://app-miniminds.com/api/devicetokens/debug-log") else {
+        print("[MiniMinds] swiftDebugLog: invalid URL")
+        return
+    }
     var request = URLRequest(url: url)
     request.httpMethod = "POST"
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    request.timeoutInterval = 10
     let body: [String: String] = ["step": "swift-\(step)", "message": message]
-    request.httpBody = try? JSONSerialization.data(withJSONObject: body)
-    URLSession.shared.dataTask(with: request).resume()
+    guard let bodyData = try? JSONSerialization.data(withJSONObject: body) else {
+        print("[MiniMinds] swiftDebugLog: JSON serialization failed")
+        return
+    }
+    request.httpBody = bodyData
+    URLSession.shared.dataTask(with: request) { _, response, error in
+        if let error = error {
+            print("[MiniMinds] swiftDebugLog HTTP error: \(error.localizedDescription)")
+        } else if let http = response as? HTTPURLResponse {
+            print("[MiniMinds] swiftDebugLog \(step): HTTP \(http.statusCode)")
+        }
+    }.resume()
 }
 
 @UIApplicationMain
@@ -64,12 +78,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // (Capacitor 7 uses NotificationCenter instead of ApplicationDelegateProxy for APNs).
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         let hexToken = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
+        print("[MiniMinds] ✅ APNs token received: \(hexToken.prefix(20))...")
         swiftDebugLog("apns-token", "APNs token received: \(hexToken.prefix(20))...")
         Messaging.messaging().apnsToken = deviceToken
-        swiftDebugLog("apns-token", "Set Messaging.apnsToken. Current fcmToken: \(Messaging.messaging().fcmToken?.prefix(20) ?? "nil")")
-        if let fcmToken = Messaging.messaging().fcmToken {
-            UserDefaults.standard.set(fcmToken, forKey: "CapacitorStorage.FCMToken")
-            swiftDebugLog("apns-token", "FCM already cached — stored to UserDefaults")
+        // Proactively request FCM token — more reliable than waiting for delegate callback alone
+        Messaging.messaging().token { token, error in
+            if let error = error {
+                print("[MiniMinds] ❌ FCM token fetch error: \(error.localizedDescription)")
+                swiftDebugLog("fcm-fetch-error", error.localizedDescription)
+            } else if let token = token {
+                print("[MiniMinds] ✅ FCM token fetched: \(token.prefix(20))...")
+                swiftDebugLog("fcm-fetch-success", "token=\(token.prefix(20))...")
+                UserDefaults.standard.set(token, forKey: "CapacitorStorage.FCMToken")
+            }
         }
         NotificationCenter.default.post(
             name: .capacitorDidRegisterForRemoteNotifications,
