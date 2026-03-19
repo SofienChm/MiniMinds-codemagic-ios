@@ -3,6 +3,17 @@ import Capacitor
 import Firebase
 import FirebaseMessaging
 
+// Sends debug logs to the server so we can trace the native push flow without Xcode
+func swiftDebugLog(_ step: String, _ message: String) {
+    guard let url = URL(string: "https://app-miniminds.com/api/devicetokens/debug-log") else { return }
+    var request = URLRequest(url: url)
+    request.httpMethod = "POST"
+    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    let body: [String: String] = ["step": "swift-\(step)", "message": message]
+    request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+    URLSession.shared.dataTask(with: request).resume()
+}
+
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
@@ -13,17 +24,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         FirebaseApp.configure()
         // Set Firebase Messaging delegate to receive FCM tokens
         Messaging.messaging().delegate = self
+        swiftDebugLog("app-launch", "Firebase configured, delegate set")
         // If Firebase already has a cached FCM token from a previous session, store it now
         // so waitForFcmToken() finds it immediately without waiting
         if let cachedToken = Messaging.messaging().fcmToken {
             UserDefaults.standard.set(cachedToken, forKey: "CapacitorStorage.FCMToken")
+            swiftDebugLog("app-launch", "Cached FCM token stored: \(cachedToken.prefix(20))...")
         }
         // Register with APNs so iOS issues a device token.
         // Required because FirebaseAppDelegateProxyEnabled = false disables automatic registration.
-        // Without this, didRegisterForRemoteNotificationsWithDeviceToken never fires,
-        // Firebase never gets the APNs token, and no FCM token is generated.
         DispatchQueue.main.async {
             application.registerForRemoteNotifications()
+            swiftDebugLog("apns-register", "registerForRemoteNotifications called")
         }
         return true
     }
@@ -51,15 +63,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // Also notify Capacitor's PushNotifications plugin via NotificationCenter
     // (Capacitor 7 uses NotificationCenter instead of ApplicationDelegateProxy for APNs).
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        print("[MiniMinds] ✅ APNs token received — forwarding to Firebase")
+        let hexToken = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
+        swiftDebugLog("apns-token", "APNs token received: \(hexToken.prefix(20))...")
         Messaging.messaging().apnsToken = deviceToken
-        // Eagerly store any FCM token Firebase already has before notifying Capacitor,
-        // so waitForFcmToken() finds it on the first try instead of waiting
+        swiftDebugLog("apns-token", "Set Messaging.apnsToken. Current fcmToken: \(Messaging.messaging().fcmToken?.prefix(20) ?? "nil")")
         if let fcmToken = Messaging.messaging().fcmToken {
-            print("[MiniMinds] ✅ FCM token already available: \(fcmToken.prefix(20))...")
             UserDefaults.standard.set(fcmToken, forKey: "CapacitorStorage.FCMToken")
-        } else {
-            print("[MiniMinds] ⏳ FCM token not yet available — waiting for didReceiveRegistrationToken")
+            swiftDebugLog("apns-token", "FCM already cached — stored to UserDefaults")
         }
         NotificationCenter.default.post(
             name: .capacitorDidRegisterForRemoteNotifications,
@@ -67,9 +77,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         )
     }
 
-    // Forward registration failures to Capacitor so `registrationError` event fires in JavaScript
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        print("[MiniMinds] ❌ APNs registration failed: \(error.localizedDescription)")
+        swiftDebugLog("apns-error", "APNs registration FAILED: \(error.localizedDescription)")
         NotificationCenter.default.post(
             name: .capacitorDidFailToRegisterForRemoteNotifications,
             object: error
@@ -81,11 +90,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 extension AppDelegate: MessagingDelegate {
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         guard let token = fcmToken else {
-            print("[MiniMinds] ❌ FCM token is nil")
+            swiftDebugLog("fcm-token", "messaging delegate called but token is nil")
             return
         }
-        print("[MiniMinds] ✅ FCM token received: \(token.prefix(20))...")
-        // Store FCM token where Capacitor Preferences can read it (key prefix = "CapacitorStorage.")
+        swiftDebugLog("fcm-token", "FCM token received! \(token.prefix(20))...")
         UserDefaults.standard.set(token, forKey: "CapacitorStorage.FCMToken")
+        swiftDebugLog("fcm-token", "Stored to CapacitorStorage.FCMToken in UserDefaults")
     }
 }
