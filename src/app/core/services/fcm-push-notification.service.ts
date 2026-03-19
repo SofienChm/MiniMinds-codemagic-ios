@@ -118,7 +118,10 @@ export class FcmPushNotificationService {
         this.debugLog('6-waiting-fcm', 'Waiting for Firebase to generate FCM token...');
         const fcmToken = await this.waitForFcmToken();
         if (!fcmToken) {
-          this.debugLog('6-fcm-timeout', 'FCM token never arrived after 40s — Firebase/APNs exchange failed');
+          // Read native Swift logs from UserDefaults fallback to diagnose the failure
+          const swiftLogs = (await Preferences.get({ key: 'SwiftLogs' })).value ?? '(empty)';
+          const swiftNetError = (await Preferences.get({ key: 'SwiftNetError' })).value ?? '(none)';
+          this.debugLog('6-fcm-timeout', `FCM token never arrived after 40s. SwiftLogs: ${swiftLogs} | NetError: ${swiftNetError}`);
           console.error('Could not retrieve FCM token on iOS');
           return;
         }

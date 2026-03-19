@@ -3,25 +3,36 @@ import Capacitor
 import Firebase
 import FirebaseMessaging
 
-// Sends debug logs to the server so we can trace the native push flow without Xcode
+// Sends debug logs to the server AND persists them in UserDefaults.
+// UserDefaults fallback (key CapacitorStorage.SwiftLogs) lets TypeScript read native logs
+// via Preferences.get({ key: 'SwiftLogs' }) even when URLSession fails silently.
 func swiftDebugLog(_ step: String, _ message: String) {
-    guard let url = URL(string: "https://app-miniminds.com/api/devicetokens/debug-log") else {
-        print("[MiniMinds] swiftDebugLog: invalid URL")
-        return
-    }
+    let fullStep = "swift-\(step)"
+    print("[MiniMinds] \(fullStep): \(message)")
+
+    // --- Fallback 1: Persist to UserDefaults so TypeScript can read it ---
+    let entry = "[\(fullStep)] \(message)\n"
+    let key = "CapacitorStorage.SwiftLogs"
+    var existing = UserDefaults.standard.string(forKey: key) ?? ""
+    // Keep last 4 KB to avoid bloat
+    if existing.count > 4000 { existing = String(existing.suffix(3000)) }
+    UserDefaults.standard.set(existing + entry, forKey: key)
+
+    // --- Fallback 2: HTTP POST (best-effort, errors are non-fatal) ---
+    guard let url = URL(string: "https://app-miniminds.com/api/devicetokens/debug-log") else { return }
     var request = URLRequest(url: url)
     request.httpMethod = "POST"
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
     request.timeoutInterval = 10
-    let body: [String: String] = ["step": "swift-\(step)", "message": message]
-    guard let bodyData = try? JSONSerialization.data(withJSONObject: body) else {
-        print("[MiniMinds] swiftDebugLog: JSON serialization failed")
-        return
-    }
+    let body: [String: String] = ["step": fullStep, "message": message]
+    guard let bodyData = try? JSONSerialization.data(withJSONObject: body) else { return }
     request.httpBody = bodyData
     URLSession.shared.dataTask(with: request) { _, response, error in
         if let error = error {
-            print("[MiniMinds] swiftDebugLog HTTP error: \(error.localizedDescription)")
+            // Persist the URLSession error so TypeScript sees it too
+            let errKey = "CapacitorStorage.SwiftNetError"
+            UserDefaults.standard.set("[\(fullStep)] URLSession error: \(error.localizedDescription)", forKey: errKey)
+            print("[MiniMinds] swiftDebugLog HTTP error for \(step): \(error.localizedDescription)")
         } else if let http = response as? HTTPURLResponse {
             print("[MiniMinds] swiftDebugLog \(step): HTTP \(http.statusCode)")
         }
