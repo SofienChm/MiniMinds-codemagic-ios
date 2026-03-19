@@ -47,6 +47,11 @@ workflows:
       - name: Apply provisioning profiles
         script: |
           xcode-project use-profiles
+      - name: Clean Xcode build
+        script: |
+          xcodebuild clean \
+            -workspace ios/App/App.xcworkspace \
+            -scheme App
       - name: Build and export signed IPA
         script: |
           xcode-project build-ipa \
