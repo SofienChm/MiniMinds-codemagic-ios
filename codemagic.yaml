@@ -47,11 +47,14 @@ workflows:
       - name: Apply provisioning profiles
         script: |
           xcode-project use-profiles
-      - name: Verify aps-environment in provisioning profile
+      - name: Find provisioning profiles and verify aps-environment
         script: |
-          for f in ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision; do
-            echo "=== Profile: $f ==="
-            security cms -D -i "$f" | grep -A2 "aps-environment" && echo "✅ aps-environment FOUND" || echo "❌ aps-environment MISSING"
+          echo "=== All .mobileprovision files on build machine ==="
+          find /Users/builder -name "*.mobileprovision" 2>/dev/null
+          echo "=== Checking each profile for aps-environment ==="
+          find /Users/builder -name "*.mobileprovision" 2>/dev/null | while read f; do
+            echo "--- $f ---"
+            security cms -D -i "$f" 2>/dev/null | grep -A2 "aps-environment" && echo "✅ FOUND" || echo "❌ MISSING"
           done
       - name: Clean Xcode build
         script: |
@@ -63,6 +66,18 @@ workflows:
           xcode-project build-ipa \
             --workspace ios/App/App.xcworkspace \
             --scheme App
+      - name: Verify aps-environment in built IPA
+        script: |
+          IPA=$(find build/ios/ipa -name "*.ipa" 2>/dev/null | head -1)
+          echo "=== IPA: $IPA ==="
+          mkdir -p /tmp/ipa_check
+          unzip -q "$IPA" -d /tmp/ipa_check
+          APP=$(find /tmp/ipa_check/Payload -name "*.app" -maxdepth 1 | head -1)
+          echo "=== Embedded profile entitlements ==="
+          security cms -D -i "$APP/embedded.mobileprovision" 2>/dev/null | grep -A2 "aps-environment" && echo "✅ aps-environment in profile" || echo "❌ aps-environment MISSING from profile"
+          echo "=== Binary code signature entitlements ==="
+          codesign -d --entitlements - "$APP" 2>/dev/null | grep -A2 "aps-environment" && echo "✅ aps-environment in binary" || echo "❌ aps-environment MISSING from binary"
+          rm -rf /tmp/ipa_check
     artifacts:
       - build/ios/ipa/*.ipa
     publishing:
