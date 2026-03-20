@@ -47,6 +47,12 @@ workflows:
       - name: Apply provisioning profiles
         script: |
           xcode-project use-profiles
+      - name: Verify aps-environment in provisioning profile
+        script: |
+          for f in ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision; do
+            echo "=== Profile: $f ==="
+            security cms -D -i "$f" | grep -A2 "aps-environment" && echo "✅ aps-environment FOUND" || echo "❌ aps-environment MISSING"
+          done
       - name: Clean Xcode build
         script: |
           xcodebuild clean \
