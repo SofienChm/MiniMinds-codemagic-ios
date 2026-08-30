@@ -6,6 +6,12 @@
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   }
 }
+.modal-footer {
+  .btn-sm {
+    width: 36px;
+    height: 36px;
+  }
+}
 
 .photo-container {
   cursor: pointer;

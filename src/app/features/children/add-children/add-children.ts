@@ -13,6 +13,7 @@ import { TitlePage, Breadcrumb, TitleAction } from '../../../shared/layouts/titl
 import { ImageCropperModalComponent } from '../../../shared/components/image-cropper-modal/image-cropper-modal.component';
 import { SimpleToastService } from '../../../core/services/simple-toast.service';
 import Swal from 'sweetalert2';
+import { showSuccessToast } from '../../../shared/utils/swal.util';
 
 @Component({
   selector: 'app-add-children',
@@ -147,35 +148,20 @@ export class AddChildren implements OnInit {
           this.childrenService.uploadChildProfilePicture(createdChild.id, this.selectedImageFile).subscribe({
             next: () => {
               this.saving = false;
-              Swal.fire({
-                icon: 'success',
-                title: this.translate.instant('MESSAGES.SUCCESS'),
-                text: this.translate.instant('MESSAGES.CHILD_CREATED')
-              }).then(() => {
-                this.router.navigate(['/children']);
-              });
+              showSuccessToast(this.translate.instant('MESSAGES.SUCCESS'));
+              this.router.navigate(['/children']);
             },
             error: () => {
               // Child created but profile picture upload failed
               this.saving = false;
-              Swal.fire({
-                icon: 'success',
-                title: this.translate.instant('MESSAGES.SUCCESS'),
-                text: this.translate.instant('MESSAGES.CHILD_CREATED')
-              }).then(() => {
-                this.router.navigate(['/children']);
-              });
+              showSuccessToast(this.translate.instant('MESSAGES.SUCCESS'));
+              this.router.navigate(['/children']);
             }
           });
         } else {
           this.saving = false;
-          Swal.fire({
-            icon: 'success',
-            title: this.translate.instant('MESSAGES.SUCCESS'),
-            text: this.translate.instant('MESSAGES.CHILD_CREATED')
-          }).then(() => {
-            this.router.navigate(['/children']);
-          });
+          showSuccessToast(this.translate.instant('MESSAGES.SUCCESS'));
+          this.router.navigate(['/children']);
         }
       },
       error: (error) => {

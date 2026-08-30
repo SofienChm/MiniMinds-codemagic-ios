@@ -10,6 +10,7 @@ import { TenantFeature, TenantFeaturesResponse, FeatureToggle } from '../../../.
 import { TitlePage, TitleAction, Breadcrumb } from '../../../../shared/layouts/title-page/title-page';
 import { HeaderSuperadminComponent } from '../../header-superadmin/header';
 import Swal from 'sweetalert2';
+import { showSuccessToast } from '../../../../shared/utils/swal.util';
 
 @Component({
   selector: 'app-tenant-features',
@@ -174,14 +175,7 @@ export class TenantFeatures implements OnInit, OnDestroy {
         this.pendingChanges.clear();
         this.hasChanges = false;
         this.saving = false;
-
-        Swal.fire({
-          title: this.translate.instant('MESSAGES.SUCCESS'),
-          text: this.translate.instant('SUPER_ADMIN.FEATURES_UPDATED'),
-          icon: 'success',
-          timer: 2000,
-          showConfirmButton: false
-        });
+        showSuccessToast(this.translate.instant('MESSAGES.SUCCESS'));
       },
       error: (err) => {
         console.error('Error saving features:', err);

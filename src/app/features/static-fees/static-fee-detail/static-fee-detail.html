@@ -1,0 +1,173 @@
+<div class="container-fluid mt-4">
+  <app-title-page
+    [title]="'STATIC_FEES_PAGE.FEE_RECEIPT' | translate"
+    [subtitle]="'STATIC_FEES_PAGE.VIEW_FEE_DETAILS' | translate"
+    icon="bi bi-receipt"
+    [breadcrumbs]="breadcrumbs"
+    [actions]="getActions()">
+  </app-title-page>
+</div>
+
+<div class="container-fluid mt-4">
+
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">{{ 'STATIC_FEES_PAGE.LOADING' | translate }}</span>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && fee" class="card">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="white-box">
+
+            <h6>
+              <b>{{ 'STATIC_FEES_PAGE.RECEIPT' | translate }}</b>
+              <span class="float-end">#{{ fee.id }}</span>
+            </h6>
+            <hr>
+
+            <div class="row detailfee">
+
+              <!-- Bill From / Bill To -->
+              <div class="col-12">
+                <address class="from-to">
+                  <div class="row">
+                    <div class="col-6">
+                      <p class="font-bold from">{{ 'STATIC_FEES_PAGE.BILL_FROM' | translate }} :</p>
+                    </div>
+                    <div class="col-6">
+                      <p class="addr-font-h3 font-bold to">{{ 'STATIC_FEES_PAGE.BILL_TO' | translate }} :</p>
+                      <p class="addr-font-h3 font-bold to">
+                        {{ fee.payerName || fee.parentName || '-' }}
+                      </p>
+                    </div>
+                  </div>
+                </address>
+              </div>
+
+              <!-- Logo + Status -->
+              <div class="col-md-12">
+                <div class="logo-detail">
+                  <div class="row">
+                    <div class="col-6 left">
+                      <div class="logo">
+                        <img loading="lazy" src="assets/images/invoice_logo.png" alt="logo" class="logo-default" style="max-width: 150px;">
+                        <p class="text-muted m-l-5">{{ daycareName }}</p>
+                      </div>
+                    </div>
+                    <div class="col-6 right">
+                      <p class="m-t-30">
+                        <b>{{ 'STATIC_FEES_PAGE.FEE_DATE' | translate }} :</b>
+                        {{ fee.feeDate | date:'mediumDate':'':currentLocale }}
+                      </p>
+                      <p>
+                        <span [class]="getStatusBadgeClass(fee.status)">
+                          <b>{{ 'STATIC_FEES_PAGE.STATUS' | translate }} :</b> {{ translateStatus(fee.status) }}
+                        </span>
+                      </p>
+                      <p *ngIf="fee.paidDate">
+                        <b>{{ 'STATIC_FEES_PAGE.PAID_DATE' | translate }} :</b>
+                        {{ fee.paidDate | date:'mediumDate':'':currentLocale }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Payer info -->
+                <div class="float-end text-end">
+                  <address>
+                    <p class="font-bold addr-font-h4">{{ fee.payerName || fee.parentName }}</p>
+                    <p *ngIf="fee.payerEmail" class="text-muted m-l-30">{{ fee.payerEmail }}</p>
+                    <p *ngIf="fee.payerPhone" class="text-muted m-l-30">{{ fee.payerPhone }}</p>
+                    <p *ngIf="fee.childName" class="text-muted m-l-30">
+                      <i class="bi bi-person-fill me-1"></i>{{ fee.childName }}
+                    </p>
+                  </address>
+                </div>
+              </div>
+
+              <!-- Fee Table -->
+              <div class="col-md-12">
+                <div class="clearfix"></div>
+                <hr>
+                <div class="table-responsive m-t-40">
+                  <table class="table table-hover">
+                    <thead>
+                      <tr>
+                        <th>{{ 'STATIC_FEES_PAGE.FEE_TITLE' | translate }}</th>
+                        <th>{{ 'STATIC_FEES_PAGE.DESCRIPTION' | translate }}</th>
+                        <th>{{ 'STATIC_FEES_PAGE.CATEGORY' | translate }}</th>
+                        <th>{{ 'STATIC_FEES_PAGE.PAYMENT_METHOD' | translate }}</th>
+                        <th class="text-end">{{ 'STATIC_FEES_PAGE.AMOUNT' | translate }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>{{ fee.title }}</td>
+                        <td>{{ fee.description || '-' }}</td>
+                        <td>
+                          <span *ngIf="fee.category" [class]="getCategoryBadgeClass(fee.category)">
+                            {{ translateCategory(fee.category) }}
+                          </span>
+                          <span *ngIf="!fee.category">-</span>
+                        </td>
+                        <td>
+                          <i class="bi {{ getPaymentMethodIcon(fee.paymentMethod) }} me-1"></i>
+                          {{ translatePaymentMethod(fee.paymentMethod) }}
+                        </td>
+                        <td class="text-end">{{ fee.amount | appCurrency }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- Total -->
+                <div class="float-end m-t-30 text-end">
+                  <h6 class="total">
+                    <b>{{ 'STATIC_FEES_PAGE.TOTAL' | translate }} :</b> {{ fee.amount | appCurrency }}
+                  </h6>
+                </div>
+
+                <!-- Reference -->
+                <div *ngIf="fee.referenceNumber" class="mb-3">
+                  <strong>{{ 'STATIC_FEES_PAGE.REFERENCE_NUMBER' | translate }}:</strong>
+                  <span class="text-muted ms-1">{{ fee.referenceNumber }}</span>
+                </div>
+
+                <!-- Notes -->
+                <div *ngIf="fee.notes" class="mb-3">
+                  <strong>{{ 'STATIC_FEES_PAGE.NOTES' | translate }}:</strong>
+                  <p class="text-muted">{{ fee.notes }}</p>
+                </div>
+
+                <!-- Created by -->
+                <div *ngIf="fee.createdByUserName" class="mb-3 text-muted small">
+                  <i class="bi bi-person me-1"></i>
+                  {{ 'STATIC_FEES_PAGE.CREATED_BY' | translate }}: {{ fee.createdByUserName }}
+                  <span *ngIf="fee.createdAt"> — {{ fee.createdAt | date:'mediumDate':'':currentLocale }}</span>
+                </div>
+
+              </div>
+
+              <!-- Print button (visible on screen, hidden on print) -->
+              <div class="col-md-12">
+                <div class="d-flex justify-content-end gap-2 mt-3 no-print">
+                  <button class="action-btn custom-btn-2 btn-cancel-2 back" (click)="goBack()">
+                    <i class="bi bi-arrow-left me-2"></i>{{ 'STATIC_FEES_PAGE.BACK_TO_LIST' | translate }}
+                  </button>
+                  <button class="action-btn custom-btn-2 btn-edit-global-2" (click)="print()">
+                    <i class="bi bi-printer me-2"></i>{{ 'STATIC_FEES_PAGE.PRINT' | translate }}
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

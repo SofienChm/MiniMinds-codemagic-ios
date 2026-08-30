@@ -12,6 +12,8 @@ export interface Reclamation {
   content: string;
   response?: string;
   isResolved: boolean;
+  isReadByParent?: boolean;
+  readByParentAt?: string | Date;
   sentAt?: string | Date;
   resolvedAt?: string | Date;
   sender?: any;

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, tap, of, catchError } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, tap, of, catchError } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Notification } from '../interfaces/notification.interface';
@@ -20,6 +20,14 @@ export class NotificationService {
   private hubConnection?: signalR.HubConnection;
   private notificationReceivedSubject = new BehaviorSubject<Notification | null>(null);
   public notificationReceived$ = this.notificationReceivedSubject.asObservable();
+  private chatMessageReceivedSubject = new Subject<any>();
+  public chatMessageReceived$ = this.chatMessageReceivedSubject.asObservable();
+  private messageReadSubject = new Subject<any>();
+  public messageRead$ = this.messageReadSubject.asObservable();
+  private typingSubject = new Subject<any>();
+  public typing$ = this.typingSubject.asObservable();
+  private groupMessageReceivedSubject = new Subject<any>();
+  public groupMessageReceived$ = this.groupMessageReceivedSubject.asObservable();
 
   constructor(
     private http: HttpClient,
@@ -142,6 +150,9 @@ export class NotificationService {
     });
 
     this.hubConnection.on('ReceiveNewMessage', (data: any) => {
+      console.log('[SignalR] ReceiveNewMessage', data);
+      this.chatMessageReceivedSubject.next(data);
+
       if (this.pushNotificationService.getPermission() === 'granted') {
         this.pushNotificationService.showNotification('New Message', {
           body: `${data.senderName}: ${data.subject}`,
@@ -153,13 +164,35 @@ export class NotificationService {
       }
     });
 
+    this.hubConnection.on('ReceiveMessagesRead', (data: any) => {
+      console.log('[SignalR] ReceiveMessagesRead', data);
+      this.messageReadSubject.next(data);
+    });
+
+    this.hubConnection.on('ReceiveTyping', (data: any) => {
+      this.typingSubject.next(data);
+    });
+
+    this.hubConnection.on('ReceiveGroupMessage', (data: any) => {
+      console.log('[SignalR] ReceiveGroupMessage', data);
+      this.groupMessageReceivedSubject.next(data);
+    });
+
     this.hubConnection
       .start()
-      .then(() => this.hubConnection?.invoke('JoinUserGroup', userId))
-      .catch(err => console.error('SignalR connection error:', err));
+      .then(() => {
+        console.log('[SignalR] Connected');
+        return this.hubConnection?.invoke('JoinUserGroup', userId);
+      })
+      .then(() => console.log('[SignalR] Joined group User_' + userId))
+      .catch(err => console.error('[SignalR] connection error:', err));
   }
 
   stopConnection(): void {
     this.hubConnection?.stop();
+  }
+
+  sendTyping(userId: string, isTyping: boolean): void {
+    this.hubConnection?.invoke('SendTyping', userId, isTyping).catch(() => {});
   }
 }

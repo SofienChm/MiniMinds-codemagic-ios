@@ -1,5 +1,8 @@
 import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
+import localeIt from '@angular/common/locales/it';
+import localeAr from '@angular/common/locales/ar';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
@@ -10,13 +13,15 @@ import { ChildrenService } from '../children/children.service';
 import { FeeModel, FeesSummary, CreateFeeModel } from './fee.interface';
 import { ChildModel } from '../children/children.interface';
 import Swal from 'sweetalert2';
+import { showSuccessToast } from '../../shared/utils/swal.util';
 import { Location } from '@angular/common';
 import { AuthService } from '../../core/services/auth';
 import { PermissionService } from '../../core/services/permission.service';
 import { ParentChildHeaderSimpleComponent } from '../../shared/components/parent-child-header-simple/parent-child-header-simple.component';
 import { AppCurrencyPipe } from '../../core/services/currency/currency.pipe';
 import { PageTitleService } from '../../core/services/page-title.service';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
+import { StaticFeesService, StaticFeeModel } from '../static-fees/static-fees.service';
 
 @Component({
   selector: 'app-fee',
@@ -29,6 +34,7 @@ export class FeeComponent implements OnInit, AfterViewInit, OnDestroy {
   private langChangeSub?: Subscription;
   fees: FeeModel[] = [];
   displayedFees: FeeModel[] = [];
+  staticFees: StaticFeeModel[] = [];
   children: ChildModel[] = [];
   summary: FeesSummary | null = null;
   loading = false;
@@ -79,12 +85,17 @@ export class FeeComponent implements OnInit, AfterViewInit, OnDestroy {
     private router: Router,
     private feeService: FeeService,
     private childrenService: ChildrenService,
+    private staticFeesService: StaticFeesService,
     private location: Location,
     private authService: AuthService,
     private permissionService: PermissionService,
     private translateService: TranslateService,
     private pageTitleService: PageTitleService
-  ) {}
+  ) {
+    registerLocaleData(localeFr);
+    registerLocaleData(localeIt);
+    registerLocaleData(localeAr);
+  }
 
   ngOnInit() {
     this.pageTitleService.setTitle(this.translateService.instant('FEES_PAGE.TITLE'));
@@ -170,14 +181,48 @@ export class FeeComponent implements OnInit, AfterViewInit, OnDestroy {
 
   loadData() {
     this.loading = true;
-    Promise.all([
-      this.loadFees(),
-      this.loadChildren(),
-      this.loadSummary()
-    ]).finally(() => {
+    const tasks = [this.loadFees(), this.loadChildren(), this.loadSummary()];
+    if (this.isParent) tasks.push(this.loadStaticFees());
+    Promise.all(tasks).finally(() => {
       this.loading = false;
       this.initTooltips();
     });
+  }
+
+  async loadStaticFees(): Promise<void> {
+    try {
+      this.staticFees = await firstValueFrom(this.staticFeesService.getMyStaticFees());
+    } catch {
+      this.staticFees = [];
+    }
+  }
+
+  viewStaticFeeDetail(id: number): void {
+    this.router.navigate(['/static-fees', id]);
+  }
+
+  get combinedFees(): Array<{ id: number; type: string; title: string; amount: number; date: string; status: string; statusClass: string; navigate: () => void }> {
+    const normal = this.fees.map(f => ({
+      id: f.id!,
+      type: 'Fee',
+      title: f.description || f.childName || '',
+      amount: f.amount,
+      date: f.dueDate,
+      status: f.status,
+      statusClass: this.getStatusClass(f.status),
+      navigate: () => this.navigateToDetail(f.id!)
+    }));
+    const staticItems = this.staticFees.map(s => ({
+      id: s.id,
+      type: 'Invoice',
+      title: s.title,
+      amount: s.amount,
+      date: s.feeDate,
+      status: s.status,
+      statusClass: s.status === 'Paid' ? 'badge bg-success-2' : 'badge bg-warning-2',
+      navigate: () => this.viewStaticFeeDetail(s.id)
+    }));
+    return [...normal, ...staticItems].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }
 
   loadFees() {
@@ -310,11 +355,7 @@ export class FeeComponent implements OnInit, AfterViewInit, OnDestroy {
         next: (result) => {
           this.showBulkFeeModal = false;
           this.loadData();
-          Swal.fire(
-            this.translateService.instant('FEES_PAGE.SUCCESS'),
-            this.translateService.instant('FEES_PAGE.BULK_FEES_CREATED', { count: result.count }),
-            'success'
-          );
+          showSuccessToast(this.translateService.instant('FEES_PAGE.SUCCESS'));
         },
         error: (error) => {
           console.error('Error creating bulk fees:', error);
@@ -361,11 +402,7 @@ export class FeeComponent implements OnInit, AfterViewInit, OnDestroy {
         this.feeService.updateOverdueFees().subscribe({
           next: (result) => {
             this.loadData();
-            Swal.fire(
-              this.translateService.instant('FEES_PAGE.UPDATED'),
-              this.translateService.instant('FEES_PAGE.FEES_MARKED_OVERDUE', { count: result.count }),
-              'success'
-            );
+            showSuccessToast(this.translateService.instant('FEES_PAGE.UPDATED'));
           },
           error: (error) => {
             console.error('Error updating overdue fees:', error);
@@ -395,11 +432,7 @@ export class FeeComponent implements OnInit, AfterViewInit, OnDestroy {
         this.feeService.deleteFee(fee.id!).subscribe({
           next: () => {
             this.loadData();
-            Swal.fire(
-              this.translateService.instant('FEES_PAGE.DELETED'),
-              this.translateService.instant('FEES_PAGE.FEE_DELETED_SUCCESS'),
-              'success'
-            );
+            showSuccessToast(this.translateService.instant('FEES_PAGE.DELETED'));
           },
           error: (error) => {
             console.error('Error deleting fee:', error);
@@ -429,6 +462,60 @@ export class FeeComponent implements OnInit, AfterViewInit, OnDestroy {
       case 'one-time': return 'badge bg-info';
       case 'late-fee': return 'badge bg-danger';
       default: return 'badge bg-secondary';
+    }
+  }
+
+  get currentLocale(): string {
+    return this.translateService.currentLang || this.translateService.defaultLang || 'en';
+  }
+
+  translateStatus(status: string): string {
+    switch (status) {
+      case 'paid': return this.translateService.instant('FEES_PAGE.PAID');
+      case 'pending': return this.translateService.instant('FEES_PAGE.PENDING');
+      case 'overdue': return this.translateService.instant('FEES_PAGE.OVERDUE');
+      case 'Paid': return this.translateService.instant('STATIC_FEES_PAGE.PAID');
+      case 'Pending': return this.translateService.instant('STATIC_FEES_PAGE.PENDING');
+      default: return status;
+    }
+  }
+
+  translateFeeType(feeType: string): string {
+    switch (feeType) {
+      case 'monthly': return this.translateService.instant('FEES_PAGE.MONTHLY_FEE');
+      case 'one-time': return this.translateService.instant('FEES_PAGE.ONE_TIME');
+      case 'late-fee': return this.translateService.instant('FEES_PAGE.LATE_FEE');
+      case 'Monthly': return this.translateService.instant('STATIC_FEES_PAGE.CATEGORY_TUITION');
+      default: return feeType;
+    }
+  }
+
+  translateType(type: string): string {
+    return this.translateService.instant('FEES_PAGE.TYPE_' + type.toUpperCase());
+  }
+
+  translateCategory(category: string | undefined): string {
+    switch (category) {
+      case 'Tuition': return this.translateService.instant('STATIC_FEES_PAGE.CATEGORY_TUITION');
+      case 'Supplies': return this.translateService.instant('STATIC_FEES_PAGE.CATEGORY_SUPPLIES');
+      case 'Events': return this.translateService.instant('STATIC_FEES_PAGE.CATEGORY_EVENTS');
+      case 'Meals': return this.translateService.instant('STATIC_FEES_PAGE.CATEGORY_MEALS');
+      case 'Transportation': return this.translateService.instant('STATIC_FEES_PAGE.CATEGORY_TRANSPORTATION');
+      case 'Registration': return this.translateService.instant('STATIC_FEES_PAGE.CATEGORY_REGISTRATION');
+      case 'Late Pickup': return this.translateService.instant('STATIC_FEES_PAGE.CATEGORY_LATE_PICKUP');
+      case 'Other': return this.translateService.instant('STATIC_FEES_PAGE.CATEGORY_OTHER');
+      case 'Monthly': return this.translateService.instant('FEES_PAGE.MONTHLY_FEE');
+      default: return category || '';
+    }
+  }
+
+  translatePaymentMethod(method: string | undefined): string {
+    switch (method) {
+      case 'Cash': return this.translateService.instant('STATIC_FEES_PAGE.METHOD_CASH');
+      case 'Check': return this.translateService.instant('STATIC_FEES_PAGE.METHOD_CHECK');
+      case 'BankTransfer': return this.translateService.instant('STATIC_FEES_PAGE.METHOD_BANK_TRANSFER');
+      case 'Other': return this.translateService.instant('STATIC_FEES_PAGE.METHOD_OTHER');
+      default: return method || '';
     }
   }
 

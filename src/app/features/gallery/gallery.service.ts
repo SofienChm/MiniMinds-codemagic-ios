@@ -8,7 +8,8 @@ import {
   PhotosResponse,
   PhotosByChildResponse,
   UpdatePhotoRequest,
-  MultipleUploadResponse
+  MultipleUploadResponse,
+  TaggedChild
 } from './gallery.interface';
 
 @Injectable({
@@ -67,7 +68,7 @@ export class GalleryService {
 
   uploadPhoto(
     file: File,
-    childId: number,
+    childId?: number,
     title?: string,
     description?: string,
     category: string = 'Memory',
@@ -76,9 +77,11 @@ export class GalleryService {
   ): Observable<Photo> {
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('childId', childId.toString());
     formData.append('category', category);
 
+    if (childId) {
+      formData.append('childId', childId.toString());
+    }
     if (title) {
       formData.append('title', title);
     }
@@ -97,7 +100,7 @@ export class GalleryService {
 
   uploadMultiplePhotos(
     files: File[],
-    childId: number,
+    childId?: number,
     category: string = 'Memory',
     description?: string
   ): Observable<MultipleUploadResponse> {
@@ -106,7 +109,9 @@ export class GalleryService {
     files.forEach(file => {
       formData.append('files', file);
     });
-    formData.append('childId', childId.toString());
+    if (childId) {
+      formData.append('childId', childId.toString());
+    }
     formData.append('category', category);
 
     if (description) {
@@ -114,6 +119,14 @@ export class GalleryService {
     }
 
     return this.http.post<MultipleUploadResponse>(`${this.apiUrl}/upload-multiple`, formData);
+  }
+
+  getPhotoTags(id: number): Observable<TaggedChild[]> {
+    return this.http.get<TaggedChild[]>(`${this.apiUrl}/${id}/tags`);
+  }
+
+  setPhotoTags(id: number, childIds: number[]): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}/tags`, { childIds });
   }
 
   updatePhoto(id: number, data: UpdatePhotoRequest): Observable<any> {

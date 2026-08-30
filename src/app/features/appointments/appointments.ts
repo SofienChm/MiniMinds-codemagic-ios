@@ -11,6 +11,7 @@ import { PageTitleService } from '../../core/services/page-title.service';
 import { ParentChildHeaderSimpleComponent } from '../../shared/components/parent-child-header-simple/parent-child-header-simple.component';   
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
+import { showSuccessToast } from '../../shared/utils/swal.util';
 
 @Component({
   selector: 'app-appointments',
@@ -157,13 +158,7 @@ export class Appointments implements OnInit, OnDestroy {
       if (result.isConfirmed) {
         this.appointmentsService.approveAppointment(appointment.id).subscribe({
           next: () => {
-            Swal.fire({
-              icon: 'success',
-              title: this.translateService.instant('APPOINTMENTS_PAGE.APPROVED'),
-              text: this.translateService.instant('APPOINTMENTS_PAGE.APPOINTMENT_APPROVED'),
-              timer: 2000,
-              showConfirmButton: false
-            });
+            showSuccessToast(this.translateService.instant('APPOINTMENTS_PAGE.APPROVED'));
             this.loadAppointments();
           },
           error: (err) => {
@@ -192,13 +187,7 @@ export class Appointments implements OnInit, OnDestroy {
       if (result.isConfirmed) {
         this.appointmentsService.rejectAppointment(appointment.id, { rejectionReason: result.value }).subscribe({
           next: () => {
-            Swal.fire({
-              icon: 'success',
-              title: this.translateService.instant('APPOINTMENTS_PAGE.REJECTED'),
-              text: this.translateService.instant('APPOINTMENTS_PAGE.APPOINTMENT_REJECTED'),
-              timer: 2000,
-              showConfirmButton: false
-            });
+            showSuccessToast(this.translateService.instant('APPOINTMENTS_PAGE.REJECTED'));
             this.loadAppointments();
           },
           error: (err) => {
@@ -226,13 +215,7 @@ export class Appointments implements OnInit, OnDestroy {
       if (result.isConfirmed) {
         this.appointmentsService.completeAppointment(appointment.id, { notes: result.value }).subscribe({
           next: () => {
-            Swal.fire({
-              icon: 'success',
-              title: this.translateService.instant('APPOINTMENTS_PAGE.COMPLETED'),
-              text: this.translateService.instant('APPOINTMENTS_PAGE.APPOINTMENT_COMPLETED'),
-              timer: 2000,
-              showConfirmButton: false
-            });
+            showSuccessToast(this.translateService.instant('APPOINTMENTS_PAGE.COMPLETED'));
             this.loadAppointments();
           },
           error: (err) => {
@@ -261,13 +244,7 @@ export class Appointments implements OnInit, OnDestroy {
       if (result.isConfirmed) {
         this.appointmentsService.cancelMyAppointment(appointment.id).subscribe({
           next: () => {
-            Swal.fire({
-              icon: 'success',
-              title: this.translateService.instant('APPOINTMENTS_PAGE.CANCELLED'),
-              text: this.translateService.instant('APPOINTMENTS_PAGE.APPOINTMENT_CANCELLED'),
-              timer: 2000,
-              showConfirmButton: false
-            });
+            showSuccessToast(this.translateService.instant('APPOINTMENTS_PAGE.CANCELLED'));
             this.loadAppointments();
           },
           error: (err) => {

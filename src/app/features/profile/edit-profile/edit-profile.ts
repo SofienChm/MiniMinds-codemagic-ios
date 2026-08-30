@@ -15,6 +15,7 @@ import { ImageCropperModalComponent } from '../../../shared/components/image-cro
 import { Location } from '@angular/common';
 import { SimpleToastService } from '../../../core/services/simple-toast.service';
 import Swal from 'sweetalert2';
+import { showSuccessToast } from '../../../shared/utils/swal.util';
 
 @Component({
   selector: 'app-edit-profile',
@@ -43,9 +44,10 @@ export class EditProfile implements OnInit {
 
   // Language options
   languages = [
-    { code: 'en', name: 'English', flag: '🇬🇧' },
+    { code: 'en', name: 'English', flag: '🇪🇳' },
     { code: 'fr', name: 'Français', flag: '🇫🇷' },
-    { code: 'it', name: 'Italiano', flag: '🇮🇹' }
+    { code: 'it', name: 'Italiano', flag: '🇮🇹' },
+    { code: 'ar', name: 'العربية', flag: '🇸🇦' }
   ];
 
   breadcrumbs: Breadcrumb[] = [];
@@ -91,7 +93,13 @@ export class EditProfile implements OnInit {
           lastName: user.lastName,
           email: user.email
         });
-        this.imagePreview = user.profilePicture || null;
+        if (user.profilePictureUrl) {
+          this.imagePreview = user.profilePictureUrl.startsWith('/')
+            ? environment.apiUrl.replace('/api', '') + user.profilePictureUrl
+            : user.profilePictureUrl;
+        } else {
+          this.imagePreview = user.profilePicture || null;
+        }
       }
     }
   }
@@ -120,7 +128,7 @@ export class EditProfile implements OnInit {
         },
         error: (err) => {
           console.error('Failed to load parent data:', err);
-          this.errorMessage = 'Failed to load profile data';
+          this.errorMessage = this.translate.instant('EDIT_PROFILE.LOAD_ERROR');
         }
       });
     }
@@ -212,13 +220,13 @@ export class EditProfile implements OnInit {
               this.saving = false;
             },
             error: (error) => {
-              this.errorMessage = error.error?.message || 'Failed to update profile';
+              this.errorMessage = error.error?.message || this.translate.instant('EDIT_PROFILE.UPDATE_ERROR');
               this.saving = false;
             }
           });
         },
         error: (error) => {
-          this.errorMessage = 'Failed to load profile data';
+          this.errorMessage = this.translate.instant('EDIT_PROFILE.LOAD_ERROR');
           this.saving = false;
         }
       });
@@ -243,17 +251,12 @@ export class EditProfile implements OnInit {
               profilePicture: updatedData.profilePicture || currentUser.profilePicture
             });
           }
-          Swal.fire({
-            icon: 'success',
-            title: this.translate.instant('EDIT_PROFILE.SUCCESS'),
-            timer: 2000,
-            showConfirmButton: false
-          });
+          showSuccessToast(this.translate.instant('EDIT_PROFILE.SUCCESS'));
           this.router.navigate(['/dashboard']);
           this.saving = false;
         },
         error: (error) => {
-          this.errorMessage = error.error?.message || 'Failed to update profile';
+          this.errorMessage = error.error?.message || this.translate.instant('EDIT_PROFILE.UPDATE_ERROR');
           this.saving = false;
         }
       });

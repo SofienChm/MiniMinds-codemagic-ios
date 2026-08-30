@@ -9,6 +9,7 @@ import { ChildrenService } from '../../children/children.service';
 import { FeeModel } from '../fee.interface';
 import { ChildModel } from '../../children/children.interface';
 import Swal from 'sweetalert2';
+import { showSuccessToast } from '../../../shared/utils/swal.util';
 import { PageTitleService } from '../../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
 import { TitlePage, Breadcrumb, TitleAction } from '../../../shared/layouts/title-page/title-page';
@@ -169,13 +170,8 @@ export class FeeEditComponent implements OnInit, OnDestroy {
     this.feeService.updateFee(this.feeId, feeData).subscribe({
       next: () => {
         this.saving = false;
-        Swal.fire({
-          icon: 'success',
-          title: this.translate.instant('MESSAGES.SUCCESS'),
-          text: this.translate.instant('EDIT_FEE.UPDATE_SUCCESS')
-        }).then(() => {
-          this.router.navigate(['/fees']);
-        });
+        showSuccessToast(this.translate.instant('MESSAGES.SUCCESS'));
+        this.router.navigate(['/fees']);
       },
       error: (error) => {
         this.saving = false;

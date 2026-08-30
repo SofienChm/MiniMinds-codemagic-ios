@@ -9,6 +9,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { PageTitleService } from '../../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
+import { showSuccessToast } from '../../../shared/utils/swal.util';
 import { HttpClient } from '@angular/common/http';
 import { ApiConfig } from '../../../core/config/api.config';
 
@@ -21,6 +22,11 @@ interface ParentOption {
 interface ChildOption {
   id: number;
   fullName: string;
+}
+
+interface OptionItem {
+  value: string;
+  label: string;
 }
 
 @Component({
@@ -38,17 +44,19 @@ export class AddStaticFeeComponent implements OnInit, OnDestroy {
   staticFeeForm!: FormGroup;
   submitting = false;
   loading = false;
+  generatingRef = false;
   errorMessage = '';
 
   // Options for dropdowns
   parents: ParentOption[] = [];
   children: ChildOption[] = [];
-  categories: string[] = [];
-  paymentMethods: string[] = [];
-  statusOptions = [
-    { value: 'Pending', label: 'Pending' },
-    { value: 'Paid', label: 'Paid' }
-  ];
+  filteredChildren: ChildOption[] = [];
+  loadingChildren = false;
+  categories: OptionItem[] = [];
+  paymentMethods: OptionItem[] = [];
+  statusOptions: OptionItem[] = [];
+  private rawCategories: string[] = [];
+  private rawPaymentMethods: string[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -62,6 +70,7 @@ export class AddStaticFeeComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.pageTitleService.setTitle(this.translateService.instant('STATIC_FEES_PAGE.ADD_STATIC_FEE'));
     this.initForm();
+    this.generateReference();
     this.loadDropdownData();
     this.updateTranslatedContent();
 
@@ -93,7 +102,7 @@ export class AddStaticFeeComponent implements OnInit, OnDestroy {
       feeDate: [today, Validators.required],
       paidDate: [null],
       notes: ['', [Validators.maxLength(1000)]],
-      category: [null]
+      category: ['Monthly']
     });
 
     // Watch status to enable/disable paidDate
@@ -110,14 +119,26 @@ export class AddStaticFeeComponent implements OnInit, OnDestroy {
 
     // Load categories
     this.staticFeesService.getCategories().subscribe({
-      next: (cats) => this.categories = cats,
-      error: () => this.categories = []
+      next: (cats) => {
+        this.rawCategories = cats.includes('Monthly') ? cats : ['Monthly', ...cats];
+        this.categories = this.rawCategories.map(cat => this.toCategoryOption(cat));
+      },
+      error: () => {
+        this.rawCategories = ['Monthly', 'Tuition', 'Supplies', 'Events', 'Meals', 'Transportation', 'Registration', 'Late Pickup', 'Other'];
+        this.categories = this.defaultCategoryOptions();
+      }
     });
 
     // Load payment methods
     this.staticFeesService.getPaymentMethods().subscribe({
-      next: (methods) => this.paymentMethods = methods,
-      error: () => this.paymentMethods = ['Cash', 'Check', 'BankTransfer', 'Other']
+      next: (methods) => {
+        this.rawPaymentMethods = methods;
+        this.paymentMethods = this.rawPaymentMethods.map(m => this.toPaymentMethodOption(m));
+      },
+      error: () => {
+        this.rawPaymentMethods = ['Cash', 'Check', 'BankTransfer', 'Other'];
+        this.paymentMethods = this.defaultPaymentMethodOptions();
+      }
     });
 
     // Load parents
@@ -168,6 +189,50 @@ export class AddStaticFeeComponent implements OnInit, OnDestroy {
       { value: 'Pending', label: this.translateService.instant('STATIC_FEES_PAGE.PENDING') },
       { value: 'Paid', label: this.translateService.instant('STATIC_FEES_PAGE.PAID') }
     ];
+
+    if (this.rawCategories.length) {
+      this.categories = this.rawCategories.map(cat => this.toCategoryOption(cat));
+    }
+    if (this.rawPaymentMethods.length) {
+      this.paymentMethods = this.rawPaymentMethods.map(m => this.toPaymentMethodOption(m));
+    }
+  }
+
+  private toCategoryOption(category: string): OptionItem {
+    const keys: Record<string, string> = {
+      'Monthly': 'CATEGORY_MONTHLY',
+      'Tuition': 'CATEGORY_TUITION',
+      'Supplies': 'CATEGORY_SUPPLIES',
+      'Events': 'CATEGORY_EVENTS',
+      'Meals': 'CATEGORY_MEALS',
+      'Transportation': 'CATEGORY_TRANSPORTATION',
+      'Registration': 'CATEGORY_REGISTRATION',
+      'Late Pickup': 'CATEGORY_LATE_PICKUP',
+      'Other': 'CATEGORY_OTHER'
+    };
+    const key = keys[category];
+    return { value: category, label: key ? this.translateService.instant(`STATIC_FEES_PAGE.${key}`) : category };
+  }
+
+  private toPaymentMethodOption(method: string): OptionItem {
+    const keys: Record<string, string> = {
+      'Cash': 'METHOD_CASH',
+      'Check': 'METHOD_CHECK',
+      'BankTransfer': 'METHOD_BANK_TRANSFER',
+      'Other': 'METHOD_OTHER'
+    };
+    const key = keys[method];
+    return { value: method, label: key ? this.translateService.instant(`STATIC_FEES_PAGE.${key}`) : method };
+  }
+
+  private defaultCategoryOptions(): OptionItem[] {
+    return ['Monthly', 'Tuition', 'Supplies', 'Events', 'Meals', 'Transportation', 'Registration', 'Late Pickup', 'Other']
+      .map(cat => this.toCategoryOption(cat));
+  }
+
+  private defaultPaymentMethodOptions(): OptionItem[] {
+    return ['Cash', 'Check', 'BankTransfer', 'Other']
+      .map(m => this.toPaymentMethodOption(m));
   }
 
   cancel(): void {
@@ -219,15 +284,8 @@ export class AddStaticFeeComponent implements OnInit, OnDestroy {
 
     this.staticFeesService.createStaticFee(dto).subscribe({
       next: () => {
-        Swal.fire({
-          icon: 'success',
-          title: this.translateService.instant('STATIC_FEES_PAGE.SUCCESS'),
-          text: this.translateService.instant('STATIC_FEES_PAGE.FEE_CREATED'),
-          timer: 2000,
-          showConfirmButton: false
-        }).then(() => {
-          this.router.navigate(['/static-fees']);
-        });
+        showSuccessToast(this.translateService.instant('STATIC_FEES_PAGE.SUCCESS'));
+        this.router.navigate(['/static-fees']);
       },
       error: (err) => {
         this.errorMessage = err.error?.message || this.translateService.instant('STATIC_FEES_PAGE.FAILED_TO_CREATE');
@@ -269,9 +327,24 @@ export class AddStaticFeeComponent implements OnInit, OnDestroy {
     return '';
   }
 
+  generateReference(): void {
+    this.generatingRef = true;
+    this.staticFeesService.generateReference().subscribe({
+      next: (res) => {
+        this.staticFeeForm.patchValue({ referenceNumber: res.reference });
+        this.generatingRef = false;
+      },
+      error: () => { this.generatingRef = false; }
+    });
+  }
+
   onParentChange(parentId: number | null): void {
-    // Auto-fill payer info from parent
+    // Reset child selection
+    this.staticFeeForm.patchValue({ childId: null });
+    this.filteredChildren = [];
+
     if (parentId) {
+      // Auto-fill payer info
       const parent = this.parents.find(p => p.id === parentId);
       if (parent) {
         this.staticFeeForm.patchValue({
@@ -279,6 +352,22 @@ export class AddStaticFeeComponent implements OnInit, OnDestroy {
           payerEmail: parent.email || ''
         });
       }
+
+      // Load children for this parent
+      this.loadingChildren = true;
+      this.http.get<any[]>(`${ApiConfig.ENDPOINTS.CHILDREN}/ByParent/${parentId}`).subscribe({
+        next: (list) => {
+          this.filteredChildren = list.map(c => ({
+            id: c.id,
+            fullName: `${c.firstName} ${c.lastName}`
+          }));
+          this.loadingChildren = false;
+        },
+        error: () => {
+          this.filteredChildren = [];
+          this.loadingChildren = false;
+        }
+      });
     }
   }
 }

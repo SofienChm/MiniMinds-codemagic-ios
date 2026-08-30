@@ -10,6 +10,7 @@ import { TitlePage, Breadcrumb, TitleAction } from '../../../shared/layouts/titl
 import { PageTitleService } from '../../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
+import { showSuccessToast } from '../../../shared/utils/swal.util';
 
 @Component({
   selector: 'app-add-event',
@@ -175,13 +176,8 @@ export class AddEvent implements OnInit, OnDestroy {
     this.eventService.addEvent(eventData).subscribe({
       next: () => {
         this.saving = false;
-        Swal.fire({
-          icon: 'success',
-          title: this.translate.instant('MESSAGES.SUCCESS'),
-          text: this.translate.instant('MESSAGES.EVENT_CREATED')
-        }).then(() => {
-          this.router.navigate(['/events']);
-        });
+        showSuccessToast(this.translate.instant('MESSAGES.SUCCESS'));
+        this.router.navigate(['/events']);
       },
       error: (error) => {
         this.saving = false;

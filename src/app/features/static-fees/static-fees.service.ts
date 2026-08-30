@@ -151,6 +151,23 @@ export class StaticFeesService {
     );
   }
 
+  // Get static fees for the logged-in parent
+  getMyStaticFees(): Observable<StaticFeeModel[]> {
+    return this.http.get<StaticFeeModel[]>(`${this.apiUrl}/my-fees`);
+  }
+
+  // Generate a unique reference number
+  generateReference(): Observable<{ reference: string }> {
+    return this.http.get<{ reference: string }>(`${this.apiUrl}/generate-reference`);
+  }
+
+  // Create bulk monthly fees for all parents
+  createBulkMonthlyFees(data: { title: string; description?: string; amount: number; feeDate: string; paymentMethod?: string; category?: string }): Observable<{ count: number }> {
+    return this.http.post<{ count: number }>(`${this.apiUrl}/bulk-monthly`, data).pipe(
+      tap(() => this.refreshData())
+    );
+  }
+
   // Get categories
   getCategories(): Observable<string[]> {
     return this.http.get<string[]>(`${this.apiUrl}/categories`);

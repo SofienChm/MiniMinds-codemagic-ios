@@ -1,8 +1,15 @@
 import { Component, Input, Output, EventEmitter, OnChanges, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
+import localeIt from '@angular/common/locales/it';
+import localeAr from '@angular/common/locales/ar';
 import { Holiday } from '../../../features/holiday/holiday.interface';
 import { AppCurrencyPipe } from '../../../core/services/currency/currency.pipe';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+
+registerLocaleData(localeFr);
+registerLocaleData(localeIt);
+registerLocaleData(localeAr);
 
 @Component({
   selector: 'app-calendar',
@@ -90,9 +97,12 @@ export class CalendarComponent implements OnChanges {
     return date.getMonth() === this.currentMonth.getMonth();
   }
 
+  get currentLocale(): string {
+    return this.translateService.currentLang || this.translateService.defaultLang || 'en';
+  }
+
   getMonthYear(): string {
-    const locale = this.translateService.currentLang || 'en';
-    return this.currentMonth.toLocaleDateString(locale, {
+    return this.currentMonth.toLocaleDateString(this.currentLocale, {
       month: 'long',
       year: 'numeric'
     });

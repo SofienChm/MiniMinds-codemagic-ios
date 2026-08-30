@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild, ElementRef, OnDestroy } from '@angular/co
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { NgSelectModule } from '@ng-select/ng-select';
 import { Photo, PhotosResponse, PHOTO_CATEGORIES } from './gallery.interface';
 import { GalleryService } from './gallery.service';
 import { ChildrenService } from '../children/children.service';
@@ -14,6 +15,7 @@ import { ApiConfig } from '../../core/config/api.config';
 import { PageTitleService } from '../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
+import { showSuccessToast } from '../../shared/utils/swal.util';
 import { ParentChildHeaderSimpleComponent } from '../../shared/components/parent-child-header-simple/parent-child-header-simple.component';
 import { Capacitor } from '@capacitor/core';
 import { PullToRefreshComponent } from '../../shared/components/pull-to-refresh/pull-to-refresh.component';
@@ -36,7 +38,8 @@ const IMAGE_QUALITY = 0.8; // 80% quality - good balance between size and qualit
     TranslateModule,
     ParentChildHeaderSimpleComponent,
     PullToRefreshComponent,
-    SkeletonPhotoGridComponent
+    SkeletonPhotoGridComponent,
+    NgSelectModule
   ],
   templateUrl: './gallery.html',
   styleUrl: './gallery.scss'
@@ -76,6 +79,12 @@ export class Gallery implements OnInit, OnDestroy {
   // Preview modal
   showPreviewModal = false;
   selectedPhoto: Photo | null = null;
+
+  // Tag people modal
+  showTagModal = false;
+  tagPhoto: Photo | null = null;
+  tagChildIds: number[] = [];
+  tagSaving = false;
 
   // Edit modal
   showEditModal = false;
@@ -171,8 +180,8 @@ export class Gallery implements OnInit, OnDestroy {
         console.error('Error loading children:', error);
         Swal.fire({
           icon: 'error',
-          title: 'Error',
-          text: 'Failed to load children list'
+          title: this.translate.instant('GALLERY.ERROR'),
+          text: this.translate.instant('GALLERY.FAILED_TO_LOAD_CHILDREN')
         });
       }
     });
@@ -197,8 +206,8 @@ export class Gallery implements OnInit, OnDestroy {
         this.loading = false;
         Swal.fire({
           icon: 'error',
-          title: 'Error',
-          text: 'Failed to load photos'
+          title: this.translate.instant('GALLERY.ERROR'),
+          text: this.translate.instant('GALLERY.FAILED_TO_LOAD_PHOTOS')
         });
       }
     });
@@ -263,11 +272,11 @@ export class Gallery implements OnInit, OnDestroy {
   }
 
   uploadPhotos() {
-    if (!this.uploadChildId || this.uploadFiles.length === 0) {
+    if (this.uploadFiles.length === 0) {
       Swal.fire({
         icon: 'warning',
-        title: 'Missing Information',
-        text: 'Please select a child and at least one photo'
+        title: this.translate.instant('GALLERY.MISSING_INFO'),
+        text: this.translate.instant('GALLERY.SELECT_AT_LEAST_ONE_PHOTO')
       });
       return;
     }
@@ -278,7 +287,7 @@ export class Gallery implements OnInit, OnDestroy {
       // Single file upload
       this.galleryService.uploadPhoto(
         this.uploadFiles[0],
-        this.uploadChildId,
+        this.uploadChildId || undefined,
         this.uploadTitle || undefined,
         this.uploadDescription || undefined,
         this.uploadCategory
@@ -287,21 +296,15 @@ export class Gallery implements OnInit, OnDestroy {
           this.uploading = false;
           this.closeUploadModal();
           this.loadPhotos();
-          Swal.fire({
-            icon: 'success',
-            title: 'Success',
-            text: 'Photo uploaded successfully!',
-            timer: 2000,
-            showConfirmButton: false
-          });
+          showSuccessToast(this.translate.instant('GALLERY.SUCCESS'));
         },
         error: (error) => {
           console.error('Error uploading photo:', error);
           this.uploading = false;
           Swal.fire({
             icon: 'error',
-            title: 'Upload Failed',
-            text: 'Error uploading photo. Please try again.'
+            title: this.translate.instant('GALLERY.UPLOAD_FAILED'),
+            text: this.translate.instant('GALLERY.UPLOAD_PHOTO_ERROR')
           });
         }
       });
@@ -309,7 +312,7 @@ export class Gallery implements OnInit, OnDestroy {
       // Multiple files upload
       this.galleryService.uploadMultiplePhotos(
         this.uploadFiles,
-        this.uploadChildId,
+        this.uploadChildId || undefined,
         this.uploadCategory,
         this.uploadDescription || undefined
       ).subscribe({
@@ -320,17 +323,11 @@ export class Gallery implements OnInit, OnDestroy {
           if (response.errors && response.errors.length > 0) {
             Swal.fire({
               icon: 'warning',
-              title: 'Partial Upload',
-              html: `Uploaded ${response.uploaded.length} photos.<br>Errors: ${response.errors.join(', ')}`
+              title: this.translate.instant('GALLERY.PARTIAL_UPLOAD'),
+              html: `${this.translate.instant('GALLERY.UPLOADED_PHOTOS_COUNT', { count: response.uploaded.length })}<br>${this.translate.instant('GALLERY.ERRORS')}: ${response.errors.join(', ')}`
             });
           } else {
-            Swal.fire({
-              icon: 'success',
-              title: 'Success',
-              text: `${response.uploaded.length} photos uploaded successfully!`,
-              timer: 2000,
-              showConfirmButton: false
-            });
+            showSuccessToast(this.translate.instant('GALLERY.SUCCESS'));
           }
         },
         error: (error) => {
@@ -338,8 +335,8 @@ export class Gallery implements OnInit, OnDestroy {
           this.uploading = false;
           Swal.fire({
             icon: 'error',
-            title: 'Upload Failed',
-            text: 'Error uploading photos. Please try again.'
+            title: this.translate.instant('GALLERY.UPLOAD_FAILED'),
+            text: this.translate.instant('GALLERY.UPLOAD_PHOTOS_ERROR')
           });
         }
       });
@@ -382,8 +379,8 @@ export class Gallery implements OnInit, OnDestroy {
     if (!isSecure) {
       Swal.fire({
         icon: 'warning',
-        title: 'Secure Connection Required',
-        html: 'Camera access requires a secure connection (HTTPS).<br><br>Please use HTTPS or access from localhost.',
+        title: this.translate.instant('GALLERY.SECURE_CONNECTION_REQUIRED'),
+        html: this.translate.instant('GALLERY.SECURE_CONNECTION_DETAILS'),
       });
       return;
     }
@@ -392,8 +389,8 @@ export class Gallery implements OnInit, OnDestroy {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       Swal.fire({
         icon: 'error',
-        title: 'Camera Not Supported',
-        text: 'Your browser does not support camera access. Please use a modern browser like Chrome, Firefox, or Safari.'
+        title: this.translate.instant('GALLERY.CAMERA_NOT_SUPPORTED'),
+        text: this.translate.instant('GALLERY.CAMERA_NOT_SUPPORTED_DETAILS')
       });
       return;
     }
@@ -452,23 +449,20 @@ export class Gallery implements OnInit, OnDestroy {
       }
     } catch (error: any) {
       console.error('Error accessing camera:', error);
-      let errorMessage = 'Could not access camera.';
-      let errorTitle = 'Camera Error';
+      let errorMessage = this.translate.instant('GALLERY.CAMERA_COULD_NOT_ACCESS');
+      let errorTitle = this.translate.instant('GALLERY.CAMERA_ERROR');
 
       if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-        errorTitle = 'Permission Denied';
-        errorMessage = 'Camera permission was denied. Please follow these steps:\n\n' +
-          '1. Click the camera/lock icon in your browser address bar\n' +
-          '2. Allow camera access for this site\n' +
-          '3. Refresh the page and try again';
+        errorTitle = this.translate.instant('GALLERY.CAMERA_PERMISSION_DENIED');
+        errorMessage = this.translate.instant('GALLERY.CAMERA_PERMISSION_DENIED_DETAILS');
       } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
-        errorMessage = 'No camera found on this device.';
+        errorMessage = this.translate.instant('GALLERY.CAMERA_NOT_FOUND');
       } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
-        errorMessage = 'Camera is already in use by another application. Please close other apps using the camera.';
+        errorMessage = this.translate.instant('GALLERY.CAMERA_IN_USE');
       } else if (error.name === 'OverconstrainedError') {
-        errorMessage = 'Camera settings not supported. Please try a different browser.';
+        errorMessage = this.translate.instant('GALLERY.CAMERA_SETTINGS_NOT_SUPPORTED');
       } else if (error.name === 'SecurityError') {
-        errorMessage = 'Camera access blocked due to security settings. Please use HTTPS.';
+        errorMessage = this.translate.instant('GALLERY.CAMERA_SECURITY_BLOCKED');
       } else if (error.message) {
         errorMessage = error.message;
       }
@@ -558,11 +552,11 @@ export class Gallery implements OnInit, OnDestroy {
   }
 
   async saveCapturedPhoto() {
-    if (!this.capturedImage || !this.cameraChildId) {
+    if (!this.capturedImage) {
       Swal.fire({
         icon: 'warning',
-        title: 'Missing Information',
-        text: 'Please capture a photo and select a child'
+        title: this.translate.instant('GALLERY.MISSING_INFO'),
+        text: this.translate.instant('GALLERY.CAPTURE_A_PHOTO')
       });
       return;
     }
@@ -575,7 +569,7 @@ export class Gallery implements OnInit, OnDestroy {
 
       this.galleryService.uploadPhoto(
         file,
-        this.cameraChildId,
+        this.cameraChildId || undefined,
         this.cameraTitle || undefined,
         this.cameraDescription || undefined,
         this.cameraCategory
@@ -584,21 +578,15 @@ export class Gallery implements OnInit, OnDestroy {
           this.uploading = false;
           this.closeCameraModal();
           this.loadPhotos();
-          Swal.fire({
-            icon: 'success',
-            title: 'Success',
-            text: 'Photo captured and saved successfully!',
-            timer: 2000,
-            showConfirmButton: false
-          });
+          showSuccessToast(this.translate.instant('GALLERY.SUCCESS'));
         },
         error: (error) => {
           console.error('Error saving captured photo:', error);
           this.uploading = false;
           Swal.fire({
             icon: 'error',
-            title: 'Save Failed',
-            text: 'Error saving photo. Please try again.'
+            title: this.translate.instant('GALLERY.SAVE_FAILED'),
+            text: this.translate.instant('GALLERY.SAVE_PHOTO_ERROR')
           });
         }
       });
@@ -607,8 +595,8 @@ export class Gallery implements OnInit, OnDestroy {
       this.uploading = false;
       Swal.fire({
         icon: 'error',
-        title: 'Processing Error',
-        text: 'Error processing photo. Please try again.'
+        title: this.translate.instant('GALLERY.PROCESSING_ERROR'),
+        text: this.translate.instant('GALLERY.PROCESSING_PHOTO_ERROR')
       });
     }
   }
@@ -823,35 +811,96 @@ export class Gallery implements OnInit, OnDestroy {
       next: () => {
         this.closeEditModal();
         this.loadPhotos();
-        Swal.fire({
-          icon: 'success',
-          title: 'Updated',
-          text: 'Photo details updated successfully!',
-          timer: 2000,
-          showConfirmButton: false
-        });
+        showSuccessToast(this.translate.instant('GALLERY.SUCCESS'));
       },
       error: (error) => {
         console.error('Error updating photo:', error);
         Swal.fire({
           icon: 'error',
-          title: 'Update Failed',
-          text: 'Error updating photo. Please try again.'
+          title: this.translate.instant('GALLERY.UPDATE_FAILED'),
+          text: this.translate.instant('GALLERY.UPDATE_PHOTO_ERROR')
         });
       }
     });
   }
 
+  // Tag people
+  openTagModal(photo: Photo) {
+    this.tagPhoto = photo;
+    this.tagSaving = false;
+    this.tagChildIds = (photo.taggedChildren || []).map(t => t.childId);
+    this.showTagModal = true;
+
+    // Refresh tags from server to ensure accuracy
+    this.galleryService.getPhotoTags(photo.id).subscribe({
+      next: (tags) => {
+        this.tagChildIds = tags.map(t => t.childId);
+      },
+      error: (error) => console.error('Error loading photo tags:', error)
+    });
+  }
+
+  closeTagModal() {
+    this.showTagModal = false;
+    this.tagPhoto = null;
+    this.tagChildIds = [];
+  }
+
+  saveTags() {
+    if (!this.tagPhoto) return;
+
+    const photoId = this.tagPhoto.id;
+    const childIds = this.tagChildIds;
+
+    this.tagSaving = true;
+    this.galleryService.setPhotoTags(photoId, childIds).subscribe({
+      next: () => {
+        this.tagSaving = false;
+        this.closeTagModal();
+        this.loadPhotos();
+        if (this.selectedPhoto && this.selectedPhoto.id === photoId) {
+          this.selectedPhoto.taggedChildren = childIds.map(id => {
+            const child = this.children.find(c => c.id === id);
+            return { childId: id, firstName: child?.firstName, lastName: child?.lastName };
+          });
+        }
+        showSuccessToast(this.translate.instant('GALLERY.SUCCESS'));
+      },
+      error: (error) => {
+        console.error('Error saving tags:', error);
+        this.tagSaving = false;
+        Swal.fire({
+          icon: 'error',
+          title: this.translate.instant('GALLERY.UPDATE_FAILED'),
+          text: this.translate.instant('GALLERY.UPDATE_TAGS_ERROR')
+        });
+      }
+    });
+  }
+
+  getTaggedNames(photo: Photo): string {
+    const tags = photo.taggedChildren || [];
+    if (tags.length > 0) {
+      return tags.map(t => `${t.firstName || ''} ${t.lastName || ''}`.trim()).filter(Boolean).join(', ');
+    }
+    return photo.childName || '';
+  }
+
+  hasTaggedPeople(photo: Photo): boolean {
+    return (photo.taggedChildren && photo.taggedChildren.length > 0) || !!photo.childName;
+  }
+
   // Delete photo
   deletePhoto(photo: Photo) {
     Swal.fire({
-      title: 'Delete Photo?',
-      text: 'Are you sure you want to delete this photo? This action cannot be undone.',
+      title: this.translate.instant('GALLERY.DELETE_CONFIRM_TITLE'),
+      text: this.translate.instant('GALLERY.DELETE_CONFIRM_TEXT'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
       cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Yes, delete it!'
+      confirmButtonText: this.translate.instant('GALLERY.YES_DELETE'),
+      cancelButtonText: this.translate.instant('GALLERY.CANCEL')
     }).then((result) => {
       if (result.isConfirmed) {
         this.galleryService.deletePhoto(photo.id).subscribe({
@@ -860,20 +909,14 @@ export class Gallery implements OnInit, OnDestroy {
             if (this.showPreviewModal) {
               this.closePreview();
             }
-            Swal.fire({
-              icon: 'success',
-              title: 'Deleted',
-              text: 'Photo has been deleted.',
-              timer: 2000,
-              showConfirmButton: false
-            });
+            showSuccessToast(this.translate.instant('GALLERY.SUCCESS'));
           },
           error: (error) => {
             console.error('Error deleting photo:', error);
             Swal.fire({
               icon: 'error',
-              title: 'Delete Failed',
-              text: 'Error deleting photo. Please try again.'
+              title: this.translate.instant('GALLERY.DELETE_FAILED'),
+              text: this.translate.instant('GALLERY.DELETE_PHOTO_ERROR')
             });
           }
         });

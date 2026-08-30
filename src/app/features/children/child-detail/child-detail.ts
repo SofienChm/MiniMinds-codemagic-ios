@@ -11,6 +11,7 @@ import { AuthService } from '../../../core/services/auth';
 import { TitlePage, TitleAction, Breadcrumb } from '../../../shared/layouts/title-page/title-page';
 import { HttpClient } from '@angular/common/http';
 import Swal from 'sweetalert2';
+import { showSuccessToast } from '../../../shared/utils/swal.util';
 import { ApiConfig } from '../../../core/config/api.config';
 import { ParentChildHeaderComponent } from '../../../shared/components/parent-child-header/parent-child-header.component';
 import { Location } from '@angular/common';
@@ -320,13 +321,7 @@ export class ChildDetail implements OnInit, OnDestroy {
       next: () => {
         this.closeAddParentModal();
         this.loadChild();
-        Swal.fire({
-          icon: 'success',
-          title: this.translate.instant('MESSAGES.SUCCESS'),
-          text: this.translate.instant('CHILD_DETAIL.PARENT_ADDED_SUCCESS'),
-          timer: 2000,
-          showConfirmButton: false
-        });
+        showSuccessToast(this.translate.instant('MESSAGES.SUCCESS'));
       },
       error: (error) => {
         console.error('Error adding parent:', error);
@@ -354,13 +349,7 @@ export class ChildDetail implements OnInit, OnDestroy {
         this.http.delete(`${ApiConfig.ENDPOINTS.CHILDREN}/remove-parent/${childParentId}`).subscribe({
           next: () => {
             this.loadChild();
-            Swal.fire({
-              icon: 'success',
-              title: this.translate.instant('CHILD_DETAIL.REMOVED_TITLE'),
-              text: this.translate.instant('CHILD_DETAIL.PARENT_REMOVED_SUCCESS'),
-              timer: 2000,
-              showConfirmButton: false
-            });
+            showSuccessToast(this.translate.instant('CHILD_DETAIL.REMOVED_TITLE'));
           },
           error: (error) => {
             console.error('Error removing parent:', error);

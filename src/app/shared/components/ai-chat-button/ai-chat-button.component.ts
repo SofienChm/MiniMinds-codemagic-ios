@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { AuthService } from '../../../core/services/auth';
+import { TenantFeatureService } from '../../../core/services/tenant-feature.service';
 
 @Component({
   selector: 'app-ai-chat-button',
@@ -68,19 +70,25 @@ import { AuthService } from '../../../core/services/auth';
     }
   `]
 })
-export class AIChatButtonComponent implements OnInit {
+export class AIChatButtonComponent implements OnInit, OnDestroy {
   showButton = false;
+  private subs: Subscription[] = [];
 
   constructor(
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private tenantFeatureService: TenantFeatureService
   ) {}
 
   ngOnInit(): void {
-    // Only show for admin users
-    this.authService.currentUser$.subscribe(() => {
-      this.showButton = this.authService.isAdmin();
+    const sub = this.tenantFeatureService.enabledFeatures$.subscribe(features => {
+      this.showButton = this.authService.isAdmin() && features.includes('ai_assistant');
     });
+    this.subs.push(sub);
+  }
+
+  ngOnDestroy(): void {
+    this.subs.forEach(s => s.unsubscribe());
   }
 
   openAIAssistant(): void {

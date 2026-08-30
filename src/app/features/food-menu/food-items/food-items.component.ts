@@ -9,6 +9,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { PageTitleService } from '../../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
+import { showSuccessToast } from '../../../shared/utils/swal.util';
 
 @Component({
   selector: 'app-food-items',
@@ -196,13 +197,7 @@ export class FoodItemsComponent implements OnInit, OnDestroy {
       }
       this.closeForm();
       this.loadFoodItems();
-      Swal.fire({
-        icon: 'success',
-        title: this.translate.instant('COMMON.SUCCESS'),
-        text: this.editingItem ? this.translate.instant('FOOD_MENU.ITEM_UPDATED') : this.translate.instant('FOOD_MENU.ITEM_CREATED'),
-        confirmButtonColor: '#7dd3c0',
-        timer: 2000
-      });
+      showSuccessToast(this.translate.instant('COMMON.SUCCESS'));
     } catch (error) {
       console.error('Error saving food item:', error);
       Swal.fire({
@@ -232,13 +227,7 @@ export class FoodItemsComponent implements OnInit, OnDestroy {
       try {
         await this.foodMenuService.deleteFoodItem(item.id!).toPromise();
         this.loadFoodItems();
-        Swal.fire({
-          icon: 'success',
-          title: this.translate.instant('COMMON.SUCCESS'),
-          text: this.translate.instant('FOOD_MENU.ITEM_DELETED'),
-          confirmButtonColor: '#7dd3c0',
-          timer: 2000
-        });
+        showSuccessToast(this.translate.instant('COMMON.SUCCESS'));
       } catch (error) {
         console.error('Error deleting food item:', error);
         Swal.fire({
@@ -255,14 +244,7 @@ export class FoodItemsComponent implements OnInit, OnDestroy {
     try {
       await this.foodMenuService.toggleFoodItemStatus(item.id!).toPromise();
       this.loadFoodItems();
-      Swal.fire({
-        icon: 'success',
-        title: this.translate.instant('COMMON.SUCCESS'),
-        text: this.translate.instant('FOOD_MENU.STATUS_UPDATED'),
-        confirmButtonColor: '#7dd3c0',
-        timer: 1500,
-        showConfirmButton: false
-      });
+      showSuccessToast(this.translate.instant('COMMON.SUCCESS'));
     } catch (error) {
       console.error('Error toggling status:', error);
       Swal.fire({

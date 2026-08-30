@@ -78,7 +78,7 @@ export class AddClassComponent implements OnInit, OnDestroy {
     this.saving = true;
     this.classesService.createClass(this.classData).subscribe({
       next: () => {
-        this.simpleToastService.success(this.translate.instant('Class created successfully'));
+        this.simpleToastService.success(this.translate.instant('CLASSES.CREATE_SUCCESS'));
         setTimeout(() => {
           this.router.navigate(['/classes']);
         }, 200);
@@ -86,7 +86,7 @@ export class AddClassComponent implements OnInit, OnDestroy {
       error: (error) => {
         console.error('Error creating class:', error);
         this.saving = false;
-        this.simpleToastService.error(this.translate.instant('Failed to create class'));
+        this.simpleToastService.error(this.translate.instant('CLASSES.CREATE_ERROR'));
       }
     });
   }

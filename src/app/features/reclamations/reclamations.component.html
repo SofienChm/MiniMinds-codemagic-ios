@@ -70,7 +70,7 @@
     <!-- Reclamation Cards -->
     <div class="nd-message-card"
          *ngFor="let reclamation of activeReclamations"
-         [class.unread]="!reclamation.isResolved"
+         [class.unread]="activeTab !== 'sent' ? !reclamation.isResolved : (reclamation.isResolved && !reclamation.isReadByParent)"
          [class.selected]="isSelected(reclamation)"
          (click)="selectReclamation(reclamation)">
       <div class="nd-card-checkbox" (click)="$event.stopPropagation()">
@@ -81,9 +81,13 @@
           <span class="nd-card-sender">{{ getUserName(activeTab === 'sent' ? reclamation.recipientId : reclamation.senderId) }}</span>
           <span class="nd-card-time">{{ formatDate(reclamation.sentAt) }}</span>
           <span class="nd-unread-dot" *ngIf="!reclamation.isResolved && activeTab !== 'sent'"></span>
+          <span class="nd-unread-dot nd-new-response-dot" *ngIf="activeTab === 'sent' && reclamation.isResolved && !reclamation.isReadByParent"></span>
         </div>
         <div class="nd-card-subject">{{ reclamation.subject }}</div>
         <div class="nd-card-preview">{{ reclamation.content.substring(0, 80) }}{{ reclamation.content.length > 80 ? '...' : '' }}</div>
+        <div class="nd-card-response-badge" *ngIf="activeTab === 'sent' && reclamation.isResolved && !reclamation.isReadByParent">
+          <i class="bi bi-reply-fill"></i> {{ 'RECLAMATIONS_PAGE.NEW_RESPONSE' | translate }}
+        </div>
       </div>
     </div>
   </div>
@@ -118,6 +122,10 @@
       <h3 class="nd-section-title">{{ 'RECLAMATIONS_PAGE.RESPONSE' | translate }}</h3>
       <div class="nd-reply-card">
         <div class="nd-reply-content">{{ selectedReclamation.response }}</div>
+      </div>
+      <div class="nd-seen-indicator" *ngIf="selectedReclamation.isReadByParent && selectedReclamation.readByParentAt">
+        <i class="bi bi-check2-all"></i>
+        {{ 'RECLAMATIONS_PAGE.SEEN' | translate }} · {{ formatDate(selectedReclamation.readByParentAt) }}
       </div>
     </div>
 
@@ -266,6 +274,8 @@
                   <th>{{ 'RECLAMATIONS_PAGE.SUBJECT' | translate }}</th>
                   <th>{{ 'RECLAMATIONS_PAGE.CONTENT' | translate }}</th>
                   <th>{{ 'RECLAMATIONS_PAGE.DATE' | translate }}</th>
+                  <th *ngIf="activeTab === 'inbox'">{{ 'RECLAMATIONS_PAGE.SEEN_BY_PARENT' | translate }}</th>
+                  <th *ngIf="activeTab === 'sent'">{{ 'RECLAMATIONS_PAGE.STATUS' | translate }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -277,6 +287,30 @@
                   <td class="subject-cell" (click)="selectReclamation(reclamation)">{{ reclamation.subject }}</td>
                   <td class="content-cell" (click)="selectReclamation(reclamation)">{{ reclamation.content.substring(0, 50) }}{{ reclamation.content.length > 50 ? '...' : '' }}</td>
                   <td class="date-cell" (click)="selectReclamation(reclamation)">{{ formatDate(reclamation.sentAt) }}</td>
+                  <td *ngIf="activeTab === 'inbox'" class="seen-cell" (click)="selectReclamation(reclamation)">
+                    <span *ngIf="reclamation.isResolved" class="seen-badge" [class.seen]="reclamation.isReadByParent" [class.not-seen]="!reclamation.isReadByParent">
+                      <i class="bi" [class.bi-eye]="reclamation.isReadByParent" [class.bi-eye-slash]="!reclamation.isReadByParent"></i>
+                      {{ reclamation.isReadByParent ? ('RECLAMATIONS_PAGE.SEEN' | translate) : ('RECLAMATIONS_PAGE.NOT_SEEN' | translate) }}
+                    </span>
+                    <span *ngIf="!reclamation.isResolved" class="seen-badge pending">
+                      <i class="bi bi-hourglass-split"></i>
+                      {{ 'RECLAMATIONS_PAGE.PENDING_RESPONSE' | translate }}
+                    </span>
+                  </td>
+                  <td *ngIf="activeTab === 'sent'" class="seen-cell" (click)="selectReclamation(reclamation)">
+                    <span *ngIf="!reclamation.isResolved" class="seen-badge pending">
+                      <i class="bi bi-hourglass-split"></i>
+                      {{ 'RECLAMATIONS_PAGE.PENDING_RESPONSE' | translate }}
+                    </span>
+                    <span *ngIf="reclamation.isResolved && !reclamation.isReadByParent" class="seen-badge not-seen">
+                      <i class="bi bi-eye-slash"></i>
+                      {{ 'RECLAMATIONS_PAGE.NOT_SEEN' | translate }}
+                    </span>
+                    <span *ngIf="reclamation.isResolved && reclamation.isReadByParent" class="seen-badge seen">
+                      <i class="bi bi-eye"></i>
+                      {{ 'RECLAMATIONS_PAGE.SEEN' | translate }}
+                    </span>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -305,6 +339,13 @@
                   <span class="info-label">{{ 'RECLAMATIONS_PAGE.STATUS' | translate }}:</span>
                   <span class="status-badge" [class.open]="!selectedReclamation.isResolved" [class.resolved]="selectedReclamation.isResolved">
                     {{ selectedReclamation.isResolved ? ('RECLAMATIONS_PAGE.RESOLVED' | translate) : ('RECLAMATIONS_PAGE.OPEN' | translate) }}
+                  </span>
+                </div>
+                <div class="info-item" *ngIf="activeTab === 'inbox' && selectedReclamation.isResolved">
+                  <span class="info-label">{{ 'RECLAMATIONS_PAGE.SEEN_BY_PARENT' | translate }}:</span>
+                  <span class="seen-badge" [class.seen]="selectedReclamation.isReadByParent" [class.not-seen]="!selectedReclamation.isReadByParent">
+                    <i class="bi" [class.bi-eye]="selectedReclamation.isReadByParent" [class.bi-eye-slash]="!selectedReclamation.isReadByParent"></i>
+                    {{ selectedReclamation.isReadByParent ? ('RECLAMATIONS_PAGE.SEEN' | translate) : ('RECLAMATIONS_PAGE.NOT_SEEN' | translate) }}
                   </span>
                 </div>
               </div>

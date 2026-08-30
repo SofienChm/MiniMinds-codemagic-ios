@@ -99,7 +99,7 @@
 .btn-view {
   background-color: #e7f1ff;
   border-color: #e7f1ff;
-  color: #0d6efd;
+  color: #fff;
 
   &:hover {
     background-color: #0d6efd;
@@ -225,6 +225,51 @@
 .modal-footer {
   border-top: 1px solid #dee2e6;
   padding: 1rem 1.5rem;
+}
+
+// Date filter
+.date-filter-group {
+  .date-picker-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    .date-icon {
+      position: absolute;
+      left: 10px;
+      color: #6c757d;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .date-input {
+      padding-left: 32px;
+      padding-right: 28px;
+      border-radius: 8px;
+      min-width: 160px;
+      font-size: 14px;
+    }
+
+    .date-clear-btn {
+      position: absolute;
+      right: 6px;
+      background: none;
+      border: none;
+      padding: 0;
+      line-height: 1;
+      color: #6c757d;
+      cursor: pointer;
+      font-size: 16px;
+
+      &:hover { color: #dc3545; }
+    }
+  }
+
+  .form-check-label {
+    font-size: 13px;
+    color: #495057;
+    cursor: pointer;
+  }
 }
 
 // Responsive

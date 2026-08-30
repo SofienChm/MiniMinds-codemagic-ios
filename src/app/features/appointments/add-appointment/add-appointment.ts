@@ -12,6 +12,7 @@ import { PageTitleService } from '../../../core/services/page-title.service';
 import { ParentChildHeaderSimpleComponent } from '../../../shared/components/parent-child-header-simple/parent-child-header-simple.component';   
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
+import { showSuccessToast } from '../../../shared/utils/swal.util';
 
 interface ChildOption {
   id: number;
@@ -218,15 +219,8 @@ export class AddAppointment implements OnInit, OnDestroy {
 
     this.appointmentsService.requestAppointment(dto).subscribe({
       next: () => {
-        Swal.fire({
-          icon: 'success',
-          title: this.translateService.instant('APPOINTMENTS_PAGE.SUCCESS'),
-          text: this.translateService.instant('APPOINTMENTS_PAGE.APPOINTMENT_CREATED'),
-          timer: 2000,
-          showConfirmButton: false
-        }).then(() => {
-          this.router.navigate(['/appointments']);
-        });
+        showSuccessToast(this.translateService.instant('APPOINTMENTS_PAGE.SUCCESS'));
+        this.router.navigate(['/appointments']);
       },
       error: (err) => {
         this.errorMessage = err.error?.message || this.translateService.instant('APPOINTMENTS_PAGE.FAILED_TO_CREATE');

@@ -11,6 +11,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { PageTitleService } from '../../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
+import { showSuccessToast } from '../../../shared/utils/swal.util';
 
 interface ChildOption {
   id: number;
@@ -267,15 +268,8 @@ export class EditAppointment implements OnInit, OnDestroy {
 
     this.appointmentsService.updateMyAppointment(this.appointmentId, dto).subscribe({
       next: () => {
-        Swal.fire({
-          icon: 'success',
-          title: this.translateService.instant('APPOINTMENTS_PAGE.SUCCESS'),
-          text: this.translateService.instant('APPOINTMENTS_PAGE.APPOINTMENT_UPDATED'),
-          timer: 2000,
-          showConfirmButton: false
-        }).then(() => {
-          this.router.navigate(['/appointments']);
-        });
+        showSuccessToast(this.translateService.instant('APPOINTMENTS_PAGE.SUCCESS'));
+        this.router.navigate(['/appointments']);
       },
       error: (err) => {
         this.errorMessage = err.error?.message || this.translateService.instant('APPOINTMENTS_PAGE.FAILED_TO_UPDATE');

@@ -80,6 +80,8 @@
                 <ng-select
                   formControlName="category"
                   [items]="categories"
+                  bindLabel="label"
+                  bindValue="value"
                   [clearable]="true"
                   [placeholder]="'STATIC_FEES_PAGE.SELECT_CATEGORY' | translate">
                 </ng-select>
@@ -162,11 +164,13 @@
                 </label>
                 <ng-select
                   formControlName="childId"
-                  [items]="children"
+                  [items]="filteredChildren"
                   bindLabel="fullName"
                   bindValue="id"
                   [clearable]="true"
-                  [placeholder]="'STATIC_FEES_PAGE.SELECT_CHILD' | translate">
+                  [loading]="loadingChildren"
+                  [disabled]="!staticFeeForm.get('parentId')?.value"
+                  [placeholder]="staticFeeForm.get('parentId')?.value ? ('STATIC_FEES_PAGE.SELECT_CHILD' | translate) : ('STATIC_FEES_PAGE.SELECT_PARENT_FIRST' | translate)">
                   <ng-template ng-option-tmp let-item="item">
                     <div class="d-flex align-items-center">
                       <i class="bi bi-person-fill me-2"></i>
@@ -251,6 +255,8 @@
                 <ng-select
                   formControlName="paymentMethod"
                   [items]="paymentMethods"
+                  bindLabel="label"
+                  bindValue="value"
                   [clearable]="false"
                   [searchable]="false">
                 </ng-select>
@@ -261,11 +267,17 @@
                 <label class="form-label">
                   {{ 'STATIC_FEES_PAGE.REFERENCE_NUMBER' | translate }}
                 </label>
-                <input
-                  type="text"
-                  class="form-control"
-                  formControlName="referenceNumber"
-                  [placeholder]="'STATIC_FEES_PAGE.REFERENCE_PLACEHOLDER' | translate">
+                <div class="input-group">
+                  <input
+                    type="text"
+                    class="form-control"
+                    formControlName="referenceNumber"
+                    [placeholder]="generatingRef ? ('STATIC_FEES_PAGE.GENERATING' | translate) : ('STATIC_FEES_PAGE.REFERENCE_PLACEHOLDER' | translate)"
+                    [readonly]="generatingRef">
+                  <span *ngIf="generatingRef" class="input-group-text">
+                    <span class="spinner-border spinner-border-sm text-secondary"></span>
+                  </span>
+                </div>
                 <small class="text-muted">{{ 'STATIC_FEES_PAGE.REFERENCE_HINT' | translate }}</small>
               </div>
             </div>
@@ -305,10 +317,10 @@
 
             <!-- Form Actions -->
             <div class="d-flex justify-content-end gap-2">
-              <button type="button" class="btn btn-secondary" (click)="cancel()">
+              <button type="button" class="action-btn custom-btn-2 btn-cancel-2" (click)="cancel()">
                 <i class="bi bi-x-lg me-2"></i>{{ 'STATIC_FEES_PAGE.CANCEL' | translate }}
               </button>
-              <button type="submit" class="btn btn-primary" [disabled]="submitting">
+              <button type="submit" class="action-btn custom-btn-2 btn-add-global-2" [disabled]="submitting">
                 <span *ngIf="submitting" class="spinner-border spinner-border-sm me-2"></span>
                 <i *ngIf="!submitting" class="bi bi-check-lg me-2"></i>
                 {{ submitting ? ('STATIC_FEES_PAGE.CREATING' | translate) : ('STATIC_FEES_PAGE.CREATE_FEE' | translate) }}

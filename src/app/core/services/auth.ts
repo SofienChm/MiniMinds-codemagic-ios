@@ -2,7 +2,7 @@ import { Injectable, Injector } from '@angular/core';
 import { AuthResponse } from '../interfaces/dto/auth-response-dto';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, tap, throwError, firstValueFrom } from 'rxjs';
 import { LoginRequest } from '../interfaces/dto/login-request-dto';
 import { RegisterRequest } from '../interfaces/dto/register-request-dto';
 import { ApiConfig } from '../../core/config/api.config';
@@ -33,8 +33,12 @@ export class AuthService {
   login(credentials: LoginRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials).pipe(
       tap(async response => {
+        // Store token and user FIRST (synchronously) so the auth guard passes on navigation
         localStorage.setItem('currentUser', JSON.stringify(response));
         localStorage.setItem('token', response.token);
+        if (response.refreshToken) {
+          localStorage.setItem('refreshToken', response.refreshToken);
+        }
 
         // Extract and store userId from JWT token
         try {
@@ -49,6 +53,20 @@ export class AuthService {
         }
 
         this.currentUserSubject.next(response);
+
+        // Unregister FCM if switching accounts (e.g. parent → admin without explicit logout)
+        const existingUser = this.getCurrentUser();
+        if (existingUser) {
+          try {
+            const { FcmPushNotificationService } = await import('./fcm-push-notification.service');
+            const fcmService = this.injector.get(FcmPushNotificationService);
+            if (fcmService.isSupported()) {
+              await fcmService.unregister();
+            }
+          } catch (error) {
+            console.error('Error unregistering FCM on account switch:', error);
+          }
+        }
 
         // Pre-load tenant features for non-SuperAdmin users
         // This ensures features are loaded before navigation and sidebar rendering
@@ -74,6 +92,16 @@ export class AuthService {
   }
 
   async logout(): Promise<void> {
+    // Revoke the refresh token server-side (best-effort)
+    const refreshToken = this.getRefreshToken();
+    if (refreshToken) {
+      try {
+        await firstValueFrom(this.http.post(`${this.apiUrl}/logout`, { refreshToken }));
+      } catch (error) {
+        console.error('Error revoking refresh token:', error);
+      }
+    }
+
     // Unregister FCM push notifications before logout
     try {
       const { FcmPushNotificationService } = await import('./fcm-push-notification.service');
@@ -96,6 +124,7 @@ export class AuthService {
 
     localStorage.removeItem('currentUser');
     localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
     localStorage.removeItem('userId');
     this.currentUserSubject.next(null);
     this.router.navigate(['/login']);
@@ -105,23 +134,52 @@ export class AuthService {
     return localStorage.getItem('token');
   }
 
+  getRefreshToken(): string | null {
+    return localStorage.getItem('refreshToken');
+  }
+
+  /**
+   * Exchange the refresh token for a new access + refresh token pair.
+   * Called by the auth interceptor when the access token is expired or a 401 is received.
+   */
+  refreshSession(): Observable<AuthResponse> {
+    const refreshToken = this.getRefreshToken();
+    if (!refreshToken) {
+      return throwError(() => new Error('No refresh token available'));
+    }
+    return this.http.post<AuthResponse>(`${this.apiUrl}/refresh`, { refreshToken }).pipe(
+      tap(response => {
+        localStorage.setItem('currentUser', JSON.stringify(response));
+        localStorage.setItem('token', response.token);
+        if (response.refreshToken) {
+          localStorage.setItem('refreshToken', response.refreshToken);
+        }
+        this.currentUserSubject.next(response);
+      })
+    );
+  }
+
   isAuthenticated(): boolean {
     const token = this.getToken();
-    if (!token) return false;
+    if (token) {
+      try {
+        // Decode the payload (middle part of JWT)
+        const payload = JSON.parse(atob(token.split('.')[1]));
 
-    try {
-      // Decode the payload (middle part of JWT)
-      const payload = JSON.parse(atob(token.split('.')[1]));
+        // exp is in seconds, Date.now() is in milliseconds
+        const expiryTime = payload.exp * 1000;
 
-      // exp is in seconds, Date.now() is in milliseconds
-      const expiryTime = payload.exp * 1000;
-
-      // Check if token expires in the future (with 60 second buffer)
-      return expiryTime > (Date.now() + 60000);
-    } catch {
-      // If token is malformed, consider it invalid
-      return false;
+        // Check if token expires in the future (with 60 second buffer)
+        if (expiryTime > (Date.now() + 60000)) {
+          return true;
+        }
+      } catch {
+        // If token is malformed, fall through to the refresh-token check below
+      }
     }
+
+    // Access token is missing/expired, but a refresh token can silently renew the session
+    return !!this.getRefreshToken();
   }
 
   getCurrentUser(): AuthResponse | null {
@@ -233,6 +291,7 @@ export class AuthService {
         // Clear all local data
         localStorage.removeItem('currentUser');
         localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
         localStorage.removeItem('userId');
         localStorage.removeItem('lang');
         this.currentUserSubject.next(null);

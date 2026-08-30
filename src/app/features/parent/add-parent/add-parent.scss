@@ -25,6 +25,25 @@ textarea.form-input {
   margin-top: 4px;
 }
 
+.toggle-password-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  padding: 4px;
+  font-size: 16px;
+  z-index: 2;
+  line-height: 1;
+
+  &:hover {
+    color: var(--primary-color);
+  }
+}
+
 // Validation styles
 .form-input.is-invalid {
   border-color: #dc3545;

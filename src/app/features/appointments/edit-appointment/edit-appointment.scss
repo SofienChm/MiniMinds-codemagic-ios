@@ -34,26 +34,6 @@
   }
 }
 
-.btn-primary {
-  background-color: #7dd3c0;
-  border-color: #7dd3c0;
-
-  &:hover {
-    background-color: #6bc4b0;
-    border-color: #6bc4b0;
-  }
-
-  &:disabled {
-    background-color: #a8e0d3;
-    border-color: #a8e0d3;
-  }
-}
-
-.btn-secondary {
-  background-color: #6c757d;
-  border-color: #6c757d;
-}
-
 .invalid-feedback {
   font-size: 0.85rem;
 }

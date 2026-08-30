@@ -15,6 +15,7 @@ import { SKIP_ERROR_HANDLER } from '../../core/interceptors/error.interceptor';
 import { SimpleToastService } from '../../core/services/simple-toast.service';
 import { NotificationPreferencesService, NotificationPreference } from '../../core/services/notification-preferences.service';
 import Swal from 'sweetalert2';
+import { showSuccessToast } from '../../shared/utils/swal.util';
 
 @Component({
   selector: 'app-settings',
@@ -54,7 +55,8 @@ export class SettingsComponent implements OnInit, OnDestroy {
     { code: 'US', name: 'United States', flag: '/assets/images/us.png', label: '🇺🇸 United States' },
     { code: 'FR', name: 'France', flag: '/assets/images/fr.png', label: '🇫🇷 France' },
     { code: 'IT', name: 'Italy', flag: '/assets/images/it.png', label: '🇮🇹 Italy' },
-    { code: 'CA', name: 'Canada', flag: '/assets/images/ca.png', label: '🇨🇦 Canada' }
+    { code: 'CA', name: 'Canada', flag: '/assets/images/ca.png', label: '🇨🇦 Canada' },
+    { code: 'TN', name: 'Tunisia', flag: '/assets/images/tn.png', label: '🇹🇳 Tunisia' }
   ];
 
   selectedCurrency: string = this.currencyService.getSelectedCurrencyCode();
@@ -73,6 +75,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
     this.setupBreadcrumbs();
     if (this.isAdmin) {
       this.loadLeaveSettings();
+      this.loadRegionalSettings();
     }
     this.loadNotificationPreferences();
 
@@ -138,6 +141,51 @@ export class SettingsComponent implements OnInit, OnDestroy {
     localStorage.setItem('selectedCountry', this.selectedCountry);
   }
 
+  loadRegionalSettings(): void {
+    const silentHeaders = new HttpHeaders().set(SKIP_ERROR_HANDLER, 'true');
+    const load = (key: string, apply: (value: string) => void) => {
+      this.http.get<any>(`${ApiConfig.ENDPOINTS.SETTINGS}/${key}`, { headers: silentHeaders }).subscribe({
+        next: (setting) => {
+          if (setting?.value) {
+            apply(setting.value);
+          }
+        },
+        error: () => {}
+      });
+    };
+
+    load('Country', (value) => {
+      this.selectedCountry = value;
+      localStorage.setItem('selectedCountry', value);
+    });
+    load('Currency', (value) => {
+      if (this.currencies.some(c => c.code === value)) {
+        this.selectedCurrency = value;
+        this.currencyService.setSelectedCurrency(value);
+      }
+    });
+    load('Language', (value) => {
+      if (this.languages.some(l => l.code === value)) {
+        this.selectedLanguage = value;
+      }
+    });
+  }
+
+  saveRegionalSettings(): void {
+    if (!this.isAdmin) {
+      return;
+    }
+    this.http.put(`${ApiConfig.ENDPOINTS.SETTINGS}/Country`, { value: this.selectedCountry }).subscribe({
+      error: () => {}
+    });
+    this.http.put(`${ApiConfig.ENDPOINTS.SETTINGS}/Currency`, { value: this.selectedCurrency }).subscribe({
+      error: () => {}
+    });
+    this.http.put(`${ApiConfig.ENDPOINTS.SETTINGS}/Language`, { value: this.selectedLanguage }).subscribe({
+      error: () => {}
+    });
+  }
+
   onPrefixChange(type: string): void {
     if (type === 'child') localStorage.setItem('childPrefix', this.childPrefix);
     if (type === 'parent') localStorage.setItem('parentPrefix', this.parentPrefix);
@@ -145,9 +193,10 @@ export class SettingsComponent implements OnInit, OnDestroy {
   }
 
   saveLanguage(): void {
-    this.languageService.use(this.currentLang);
+    this.languageService.use(this.selectedLanguage);
+    this.saveRegionalSettings();
 
-    this.authService.updateLanguage(this.currentLang)
+    this.authService.updateLanguage(this.selectedLanguage)
       .subscribe({
         next: () => {
         this.simpleToastService.success(
@@ -156,7 +205,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
         },
         error: () => {
         this.simpleToastService.warning(
-          this.translate.instant('sETTINGS.LANGUAGE_SAVE_LOCALLY')
+          this.translate.instant('SETTINGS.LANGUAGE_SAVED_LOCALLY')
         );
         }
       });
@@ -168,13 +217,8 @@ export class SettingsComponent implements OnInit, OnDestroy {
     this.prefixService.setChildPrefix(this.childPrefix);
     this.prefixService.setParentPrefix(this.parentPrefix);
     this.prefixService.setEducatorPrefix(this.educatorPrefix);
-    Swal.fire({
-      icon: 'success',
-      title: this.translate.instant('SETTINGS.SUCCESS'),
-      text: this.translate.instant('SETTINGS.SETTINGS_SAVED'),
-      timer: 2000,
-      showConfirmButton: false
-    });
+    this.saveRegionalSettings();
+    showSuccessToast(this.translate.instant('SETTINGS.SUCCESS'));
   }
 
   confirmDeleteAccount(): void {
@@ -216,13 +260,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
     this.authService.deleteAccount().subscribe({
       next: () => {
-        Swal.fire({
-          icon: 'success',
-          title: this.translate.instant('SETTINGS.ACCOUNT_DELETED'),
-          text: this.translate.instant('SETTINGS.ACCOUNT_DELETED_DESC'),
-          timer: 3000,
-          showConfirmButton: false
-        });
+        showSuccessToast(this.translate.instant('SETTINGS.ACCOUNT_DELETED'));
       },
       error: (error) => {
         this.deletingAccount = false;

@@ -16,7 +16,7 @@
   <div class="content-header">
     <div class="profile-card">
       <a routerLink="/profile/edit">
-        <img [src]="currentUser?.profilePicture || 'assets/default-avatar.svg'"
+        <img [src]="getProfilePictureUrl()"
           [alt]="currentUser?.firstName"
           class="profile-image">
       </a>

@@ -10,6 +10,8 @@ import { TitlePage, Breadcrumb, TitleAction } from '../../../shared/layouts/titl
 import { PageTitleService } from '../../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
+import { showSuccessToast } from '../../../shared/utils/swal.util';
+import { ApiConfig } from '../../../core/config/api.config';
 
 @Component({
   selector: 'app-edit-event',
@@ -199,7 +201,13 @@ export class EditEvent implements OnInit, OnDestroy {
           this.onIncludeAllChildrenChange();
         }
 
-        this.imagePreview = event.image || null;
+        if (event.imageUrl) {
+          this.imagePreview = event.imageUrl.startsWith('http')
+            ? event.imageUrl
+            : ApiConfig.HUB_URL + event.imageUrl;
+        } else {
+          this.imagePreview = event.image || null;
+        }
         this.loading = false;
       },
       error: (error) => {
@@ -252,19 +260,14 @@ export class EditEvent implements OnInit, OnDestroy {
       ageTo: formValue.includeAllChildren ? 99 : formValue.ageTo,
       time: combinedDateTime,
       place: formValue.place,
-      image: formValue.image || this.imagePreview || undefined
+      image: (formValue.image && formValue.image.startsWith('data:')) ? formValue.image : undefined
     };
 
     this.eventService.updateEvent(eventData).subscribe({
       next: () => {
         this.saving = false;
-        Swal.fire({
-          icon: 'success',
-          title: this.translate.instant('MESSAGES.SUCCESS'),
-          text: this.translate.instant('EDIT_EVENT.UPDATE_SUCCESS')
-        }).then(() => {
-          this.router.navigate(['/events']);
-        });
+        showSuccessToast(this.translate.instant('MESSAGES.SUCCESS'));
+        this.router.navigate(['/events']);
       },
       error: (error) => {
         this.saving = false;

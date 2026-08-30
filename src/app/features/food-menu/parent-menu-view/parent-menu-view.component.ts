@@ -10,6 +10,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { PageTitleService } from '../../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
+import { showSuccessToast } from '../../../shared/utils/swal.util';
 import { SkeletonComponent } from '../../../shared/components/skeleton/skeleton.component';
 
 @Component({
@@ -167,13 +168,7 @@ export class ParentMenuViewComponent implements OnInit, OnDestroy {
         selections: selectionsArray
       }).toPromise();
 
-      Swal.fire({
-        icon: 'success',
-        title: this.translate.instant('COMMON.SUCCESS'),
-        text: 'Meal preferences saved successfully!',
-        timer: 2000,
-        showConfirmButton: false
-      });
+      showSuccessToast(this.translate.instant('COMMON.SUCCESS'));
       this.loadChildMenuView();
     } catch (error) {
       console.error('Error saving selections:', error);

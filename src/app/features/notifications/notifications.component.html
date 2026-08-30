@@ -58,7 +58,7 @@
               </div>
               <p class="notification-message">{{ getTranslatedMessage(notification) }}</p>
               <div *ngIf="notification.type" class="notification-tag">
-                {{ notification.type }}
+                {{ getNotificationTypeLabel(notification.type) }}
               </div>
             </div>
             <div *ngIf="notification.isRead" class="read-check">
@@ -126,7 +126,7 @@
           </div>
           <p class="notification-message">{{ getTranslatedMessage(notification) }}</p>
           <div *ngIf="notification.type" class="notification-tag">
-            {{ notification.type }}
+            {{ getNotificationTypeLabel(notification.type) }}
           </div>
         </div>
         <div *ngIf="notification.isRead" class="read-check">

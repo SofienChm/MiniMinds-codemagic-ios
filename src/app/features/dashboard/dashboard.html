@@ -19,7 +19,7 @@
               </div>
             </div>
           </div>
-          <div class="col-xl-4">
+          <div class="col-xl-4" *ngIf="userRole === 'Admin'">
             <div class="card stat-card shadow-sm">
               <div class="card-body d-flex align-items-center p-3">
                 <div class="stat-icon-wrapper me-3">
@@ -32,7 +32,7 @@
               </div>
             </div>
           </div>
-          <div class="col-xl-4">
+          <div class="col-xl-4" *ngIf="userRole === 'Admin'">
             <div class="card stat-card shadow-sm">
               <div class="card-body d-flex align-items-center p-3">
                 <div class="stat-icon-wrapper me-3">
@@ -137,7 +137,7 @@
                           <td><img loading="lazy" [src]="getChildProfilePictureUrl(child)"
                               alt="student" class="img-fluid img-student"></td>
                           <td class="text-nowrap name-last">{{ child.firstName }} {{child.lastName }}</td>
-                          <td class="text-nowrap">{{ child.gender }}</td>
+                          <td class="text-nowrap">{{ translateGender(child.gender) }}</td>
                           <td class="text-nowrap">{{ child.parentName || '-' }}</td>
                           <td>{{ child.parentPhoneNumber || '-' }}</td>
                           <td class="action-recenttly">
@@ -348,9 +348,9 @@
                     <tr *ngFor="let fee of unpaidChildren; trackBy: trackById">
                       <td class="text-nowrap">
                         <img loading="lazy" src="assets/child.png" alt="child" class="img-fluid img-student me-2" style="width: 30px; height: 30px; border-radius: 50%;">
-                        {{ fee.child?.firstName }} {{ fee.child?.lastName }}
+                        {{ fee.name }}
                       </td>
-                      <td class="text-nowrap fw-bold">{{ fee.amount | currency }}</td>
+                      <td class="text-nowrap fw-bold">{{ fee.amount | appCurrency }}</td>
                       <td class="text-nowrap">{{ fee.dueDate | date:'MMM d, yyyy' }}</td>
                       <td>
                         <span class="badge" [ngClass]="{'bg-warning text-dark': fee.status === 'pending', 'bg-danger': fee.status === 'overdue'}">
@@ -379,7 +379,7 @@
   <!-- New Design -->
   <div class="parent-dashboard-new">
     <!-- Header Section -->
-    <div class="dashboard-header">
+    <div class="dashboard-header safe-area-top">
         <div class="header-content">
           <div class="row welcome-text">
             <div class="col-10 text-dash">

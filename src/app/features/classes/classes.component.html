@@ -1,18 +1,8 @@
 <div class="container-fluid mt-4">
-  <app-title-page 
-    [title]="'Classes Management'"
-    [breadcrumbs]="[
-      { label: 'Dashboard', url: '/dashboard' },
-      { label: 'Classes' }
-    ]"
-    [actions]="[
-      {
-        label: 'Add Class',
-        icon: 'bi bi-plus-square',
-        class: 'btn-add-global-2',
-        action: addClass
-      }
-    ]">
+  <app-title-page
+    [title]="'CLASSES.TITLE' | translate"
+    [breadcrumbs]="breadcrumbs"
+    [actions]="titleActions">
   </app-title-page>
 
   <div class="row">
@@ -20,30 +10,30 @@
       <div class="card card-general">
         <div class="card-header">
           <i class="bi bi-backpack2"></i>
-          <h5 class="mb-0">All Classes</h5>
+          <h5 class="mb-0">{{ 'CLASSES.ALL_CLASSES' | translate }}</h5>
         </div>
         <div class="card-body">
           <div class="table-responsive custom-table">
             <table class="table">
               <thead>
                 <tr>
-                  <th>Class Name</th>
-                  <th>Age Group</th>
-                  <th>Capacity</th>
-                  <th>Teacher</th>
-                  <th>Status</th>
-                  <th>Actions</th>
+                  <th>{{ 'CLASSES.CLASS_NAME' | translate }}</th>
+                  <th>{{ 'CLASSES.AGE_GROUP' | translate }}</th>
+                  <th>{{ 'CLASSES.CAPACITY' | translate }}</th>
+                  <th>{{ 'CLASSES.TEACHER' | translate }}</th>
+                  <th>{{ 'CLASSES.STATUS' | translate }}</th>
+                  <th>{{ 'CLASSES.ACTIONS' | translate }}</th>
                 </tr>
               </thead>
               <tbody>
                 <tr *ngFor="let class of classes">
                   <td class="name-last">{{ class.name }}</td>
-                  <td>{{ class.ageGroupMin }} - {{ class.ageGroupMax }} years</td>
+                  <td>{{ class.ageGroupMin }} - {{ class.ageGroupMax }} {{ 'CLASSES.YEARS' | translate }}</td>
                   <td>{{ class.enrollmentCount || 0 }} / {{ class.capacity }}</td>
-                  <td>{{ class.teacher ? class.teacher.firstName + ' ' + class.teacher.lastName : 'Not assigned' }}</td>
+                  <td>{{ class.teacher ? class.teacher.firstName + ' ' + class.teacher.lastName : ('CLASSES.NOT_ASSIGNED' | translate) }}</td>
                   <td>
                     <span class="badge" [class]="class.isActive ? 'badge-success' : 'badge-secondary'">
-                      {{ class.isActive ? 'Active' : 'Inactive' }}
+                      {{ class.isActive ? ('CLASSES.ACTIVE' | translate) : ('CLASSES.INACTIVE' | translate) }}
                     </span>
                   </td>
                   <td>
@@ -82,28 +72,28 @@
       </div>
       <div class="modal-body" *ngIf="selectedClass">
         <div class="row mb-3">
-          <div class="col-6"><strong>Age Group:</strong></div>
-          <div class="col-6">{{ selectedClass.ageGroupMin }} - {{ selectedClass.ageGroupMax }} years</div>
+          <div class="col-6"><strong>{{ 'CLASSES.AGE_GROUP' | translate }}:</strong></div>
+          <div class="col-6">{{ selectedClass.ageGroupMin }} - {{ selectedClass.ageGroupMax }} {{ 'CLASSES.YEARS' | translate }}</div>
         </div>
         <div class="row mb-3">
-          <div class="col-6"><strong>Capacity:</strong></div>
-          <div class="col-6">{{ selectedClass.capacity }} students</div>
+          <div class="col-6"><strong>{{ 'CLASSES.CAPACITY' | translate }}:</strong></div>
+          <div class="col-6">{{ selectedClass.capacity }} {{ 'CLASSES.STUDENTS' | translate }}</div>
         </div>
         <div class="row mb-3">
-          <div class="col-6"><strong>Status:</strong></div>
-          <div class="col-6">{{ selectedClass.isActive ? 'Active' : 'Inactive' }}</div>
+          <div class="col-6"><strong>{{ 'CLASSES.STATUS' | translate }}:</strong></div>
+          <div class="col-6">{{ selectedClass.isActive ? ('CLASSES.ACTIVE' | translate) : ('CLASSES.INACTIVE' | translate) }}</div>
         </div>
         <div class="row mb-3" *ngIf="selectedClass.schedule">
-          <div class="col-6"><strong>Schedule:</strong></div>
+          <div class="col-6"><strong>{{ 'CLASSES.SCHEDULE' | translate }}:</strong></div>
           <div class="col-6">{{ selectedClass.schedule }}</div>
         </div>
         <div class="row mb-3" *ngIf="selectedClass.description">
-          <div class="col-12"><strong>Description:</strong></div>
+          <div class="col-12"><strong>{{ 'CLASSES.DESCRIPTION' | translate }}:</strong></div>
           <div class="col-12">{{ selectedClass.description }}</div>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="custom-btn-2 btn-cancel-2" (click)="closeModal()">Close</button>
+        <button type="button" class="custom-btn-2 btn-cancel-2" (click)="closeModal()">{{ 'CLASSES.CLOSE' | translate }}</button>
       </div>
     </div>
   </div>
@@ -115,59 +105,59 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Edit Class</h5>
+        <h5 class="modal-title">{{ 'CLASSES.EDIT_CLASS' | translate }}</h5>
         <button type="button" class="btn-close" (click)="closeEditModal()"></button>
       </div>
       <form [formGroup]="classForm" (ngSubmit)="onSubmit()">
         <div class="modal-body">
           <div class="row">
             <div class="col-md-6 mb-3">
-              <label class="form-label">Class Name *</label>
+              <label class="form-label">{{ 'CLASSES.CLASS_NAME' | translate }} *</label>
               <input type="text" class="form-control" formControlName="name">
             </div>
             <div class="col-md-6 mb-3">
-              <label class="form-label">Capacity *</label>
+              <label class="form-label">{{ 'CLASSES.CAPACITY' | translate }} *</label>
               <input type="number" class="form-control" formControlName="capacity">
             </div>
           </div>
           <div class="row">
             <div class="col-md-6 mb-3">
-              <label class="form-label">Min Age *</label>
+              <label class="form-label">{{ 'CLASSES.AGE_GROUP_MIN' | translate }} *</label>
               <input type="number" class="form-control" formControlName="ageGroupMin">
             </div>
             <div class="col-md-6 mb-3">
-              <label class="form-label">Max Age *</label>
+              <label class="form-label">{{ 'CLASSES.AGE_GROUP_MAX' | translate }} *</label>
               <input type="number" class="form-control" formControlName="ageGroupMax">
             </div>
           </div>
           <div class="row">
             <div class="col-md-12 mb-3">
-              <label class="form-label">Assign Teacher (Optional)</label>
+              <label class="form-label">{{ 'CLASSES.ASSIGN_TEACHER_OPTIONAL' | translate }}</label>
               <select class="form-select" formControlName="teacherId">
-                <option [ngValue]="null">-- No Teacher Assigned --</option>
+                <option [ngValue]="null">{{ 'CLASSES.NO_TEACHER_ASSIGNED' | translate }}</option>
                 <option *ngFor="let educator of educators" [ngValue]="educator.id">
                   {{ educator.firstName }} {{ educator.lastName }} ({{ educator.email }})
                 </option>
               </select>
-              <small class="form-text text-muted">Children can only be assigned to classes that have a teacher.</small>
+              <small class="form-text text-muted">{{ 'CLASSES.TEACHER_HINT' | translate }}</small>
             </div>
           </div>
           <div class="mb-3">
-            <label class="form-label">Schedule</label>
-            <input type="text" class="form-control" formControlName="schedule" placeholder="e.g., Mon-Fri 9:00 AM - 3:00 PM">
+            <label class="form-label">{{ 'CLASSES.SCHEDULE' | translate }}</label>
+            <input type="text" class="form-control" formControlName="schedule" [placeholder]="'CLASSES.SCHEDULE_PLACEHOLDER' | translate">
           </div>
           <div class="mb-3">
-            <label class="form-label">Description</label>
+            <label class="form-label">{{ 'CLASSES.DESCRIPTION' | translate }}</label>
             <textarea class="form-control" formControlName="description" rows="3"></textarea>
           </div>
           <div class="form-check">
             <input class="form-check-input" type="checkbox" formControlName="isActive" id="isActive">
-            <label class="form-check-label" for="isActive">Active</label>
+            <label class="form-check-label" for="isActive">{{ 'CLASSES.ACTIVE' | translate }}</label>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="custom-btn-2 btn-cancel-2" (click)="closeEditModal()">Cancel</button>
-          <button type="submit" class="custom-btn-2 btn-add-global-2" [disabled]="classForm.invalid">Update Class</button>
+          <button type="button" class="custom-btn-2 btn-cancel-2" (click)="closeEditModal()">{{ 'CLASSES.CANCEL' | translate }}</button>
+          <button type="submit" class="custom-btn-2 btn-add-global-2" [disabled]="classForm.invalid">{{ 'CLASSES.UPDATE_CLASS' | translate }}</button>
         </div>
       </form>
     </div>

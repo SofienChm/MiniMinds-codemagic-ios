@@ -177,6 +177,9 @@ ion-content.parent-reclamations {
     .header-info{
         margin-bottom: 35px !important;
     }
+    .parent-menu{
+        display: none !important;
+    }
     .float-btn{
         position: fixed;
         bottom: 80px;
@@ -464,6 +467,36 @@ ion-content.parent-reclamations {
     background-color: #ea580c;
     border-radius: 50%;
     flex-shrink: 0;
+
+    &.nd-new-response-dot {
+        background-color: #16a34a;
+    }
+}
+
+.nd-card-response-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #16a34a;
+    background-color: #dcfce7;
+    border-radius: 10px;
+    padding: 2px 8px;
+
+    i { font-size: 11px; }
+}
+
+.nd-seen-indicator {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #6B7280;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    i { color: #16a34a; font-size: 14px; }
 }
 
 .nd-card-subject {

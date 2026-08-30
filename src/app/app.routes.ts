@@ -8,6 +8,7 @@ import { FeatureCodes } from './core/interfaces/dto/tenant-dto';
 // Role guards for routes
 const ADMIN_ONLY = roleGuard('Admin');
 const ADMIN_TEACHER = roleGuard('Admin', 'Teacher');
+const ADMIN_TEACHER_PARENT = roleGuard('Admin', 'Teacher', 'Parent');
 const SUPER_ADMIN_ONLY = roleGuard('SuperAdmin');
 
 // Feature guards for optional features
@@ -23,6 +24,7 @@ const RECLAMATIONS_FEATURE = featureGuard(FeatureCodes.RECLAMATIONS);
 const LEARNING_GAMES_FEATURE = featureGuard(FeatureCodes.LEARNING_GAMES);
 const AI_ASSISTANT_FEATURE = featureGuard(FeatureCodes.AI_ASSISTANT);
 const BASIC_AI_FEATURE = featureGuard(FeatureCodes.BASIC_AI);
+const CHAT_FEATURE = featureGuard(FeatureCodes.CHAT);
 
 export const routes: Routes = [
     {
@@ -204,22 +206,22 @@ export const routes: Routes = [
       {
         path: 'fees',
         loadComponent: () => import('./features/fee/fee.component').then(m => m.FeeComponent),
-        canActivate: [FEES_FEATURE]
+        canActivate: [roleGuard('Admin', 'Parent'), FEES_FEATURE]
       },
       {
         path: 'fees/add',
         loadComponent: () => import('./features/fee/add-fee/add-fee.component').then(m => m.AddFeeComponent),
-        canActivate: [FEES_FEATURE]
+        canActivate: [roleGuard('Admin', 'Parent'), FEES_FEATURE]
       },
       {
         path: 'fees/edit/:id',
         loadComponent: () => import('./features/fee/fee-edit/fee-edit.component').then(m => m.FeeEditComponent),
-        canActivate: [FEES_FEATURE]
+        canActivate: [roleGuard('Admin', 'Parent'), FEES_FEATURE]
       },
       {
         path: 'fees/detail/:id',
         loadComponent: () => import('./features/fee/fee-detail/fee-detail.component').then(m => m.FeeDetailComponent),
-        canActivate: [FEES_FEATURE]
+        canActivate: [roleGuard('Admin', 'Parent'), FEES_FEATURE]
       },
       // Educator routes - Admin & Teacher only
       {
@@ -259,6 +261,11 @@ export const routes: Routes = [
       {
         path: 'messages',
         loadComponent: () => import('./features/messages/messages.component').then(m => m.MessagesComponent)
+      },
+      {
+        path: 'chat',
+        loadComponent: () => import('./features/chat/chat.component').then(m => m.ChatComponent),
+        canActivate: [CHAT_FEATURE]
       },
       {
         path: 'profile/edit',
@@ -315,16 +322,21 @@ export const routes: Routes = [
         path: 'appointments/detail/:id',
         loadComponent: () => import('./features/appointments/appointment-detail/appointment-detail').then(m => m.AppointmentDetail)
       },
-      // Static Fees routes - Admin & Teacher only (for tracking offline payments)
+      // Static Fees routes - Admin & Parent only
       {
         path: 'static-fees',
         loadComponent: () => import('./features/static-fees/static-fees').then(m => m.StaticFeesComponent),
-        canActivate: [ADMIN_TEACHER, FEES_FEATURE]
+        canActivate: [roleGuard('Admin', 'Parent'), FEES_FEATURE]
       },
       {
         path: 'static-fees/add',
         loadComponent: () => import('./features/static-fees/add-static-fee/add-static-fee').then(m => m.AddStaticFeeComponent),
-        canActivate: [ADMIN_TEACHER, FEES_FEATURE]
+        canActivate: [roleGuard('Admin', 'Parent'), FEES_FEATURE]
+      },
+      {
+        path: 'static-fees/:id',
+        loadComponent: () => import('./features/static-fees/static-fee-detail/static-fee-detail').then(m => m.StaticFeeDetailComponent),
+        canActivate: [roleGuard('Admin', 'Parent'), FEES_FEATURE]
       },
       {
         path: 'gallery',

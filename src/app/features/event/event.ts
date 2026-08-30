@@ -14,8 +14,10 @@ import { AppCurrencyPipe } from '../../core/services/currency/currency.pipe';
 import { PageTitleService } from '../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
+import { showSuccessToast } from '../../shared/utils/swal.util';
 import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
+import { ApiConfig } from '../../core/config/api.config';
 
 @Component({
   selector: 'app-event',
@@ -178,11 +180,7 @@ export class Event implements OnInit, OnDestroy {
       if (result.isConfirmed) {
         this.eventService.deleteEvent(id).subscribe({
           next: () => {
-            Swal.fire({
-              icon: 'success',
-              title: this.translate.instant('MESSAGES.SUCCESS'),
-              text: this.translate.instant('EVENTS.DELETE_SUCCESS')
-            });
+            showSuccessToast(this.translate.instant('MESSAGES.SUCCESS'));
             this.loadEvents();
           },
           error: (error) => {
@@ -349,6 +347,25 @@ export class Event implements OnInit, OnDestroy {
   // TrackBy function for ngFor performance optimization
   trackById(index: number, item: EventModel): number | undefined {
     return item.id;
+  }
+
+  /**
+   * Get the event banner image URL, preferring file-based URL over Base64
+   */
+  getEventImageUrl(event: EventModel): string {
+    if (event.imageUrl && event.imageUrl.trim() !== '') {
+      return this.getFullUrl(event.imageUrl);
+    }
+    if (event.image && event.image.trim() !== '') {
+      return this.getFullUrl(event.image);
+    }
+    return 'assets/dark.png';
+  }
+
+  private getFullUrl(path: string): string {
+    if (!path) return '';
+    if (path.startsWith('http') || path.startsWith('data:')) return path;
+    return `${ApiConfig.HUB_URL}${path.startsWith('/') ? '' : '/'}${path}`;
   }
 
   // Pull-to-refresh handler for Ionic refresher

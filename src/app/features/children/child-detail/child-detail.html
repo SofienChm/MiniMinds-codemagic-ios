@@ -99,9 +99,9 @@
           </span>
           <div>
             <div class="info-title status">{{ 'CHILD_DETAIL.TODAY_STATS' | translate }}</div>
-            <div class="info-desc" *ngIf="attendanceStatus === 'CHECKED_IN'">Checked In <span *ngIf="attendanceTime">at {{ attendanceTime }}</span></div>
-            <div class="info-desc" *ngIf="attendanceStatus === 'CHECKED_OUT'">Checked Out <span *ngIf="attendanceTime">at {{ attendanceTime }}</span></div>
-            <div class="info-desc" *ngIf="attendanceStatus === 'NOT_CHECKED_IN'">Not Checked In</div>
+            <div class="info-desc" *ngIf="attendanceStatus === 'CHECKED_IN'">{{ 'CHILD_DETAIL.CHECKED_IN' | translate }} <span *ngIf="attendanceTime">{{ 'CHILD_DETAIL.AT' | translate }} {{ attendanceTime }}</span></div>
+            <div class="info-desc" *ngIf="attendanceStatus === 'CHECKED_OUT'">{{ 'CHILD_DETAIL.CHECKED_OUT' | translate }} <span *ngIf="attendanceTime">{{ 'CHILD_DETAIL.AT' | translate }} {{ attendanceTime }}</span></div>
+            <div class="info-desc" *ngIf="attendanceStatus === 'NOT_CHECKED_IN'">{{ 'CHILD_DETAIL.NOT_CHECKED_IN' | translate }}</div>
           </div>
         </div>
       </div>
@@ -112,15 +112,15 @@
           <div class="icon-box">
             <i class="bi bi-person-circle"></i>
           </div>
-          <h5>Personal Information</h5>
+          <h5>{{ 'CHILD_DETAIL.PERSONAL_INFO' | translate }}</h5>
         </div>
 
         <div class="info-row">
-          <div class="info-label">Full Name</div>
+          <div class="info-label">{{ 'CHILD_DETAIL.FULL_NAME' | translate }}</div>
           <div class="info-value">{{ child.firstName }} {{ child.lastName }}</div>
         </div>
         <div class="info-row">
-          <div class="info-label">Age </div>
+          <div class="info-label">{{ 'CHILD_DETAIL.AGE' | translate }}</div>
           <div class="info-value">
             @if( calculateAge(child.dateOfBirth).years > 0){
             {{ calculateAge(child.dateOfBirth).years}} {{ 'CHILD_DETAIL.YEARS_OLD' | translate }}
@@ -129,11 +129,11 @@
               {{ 'CHILD_DETAIL.MONTHS_OLD' | translate }} } </div>
           </div>
           <div class="info-row">
-            <div class="info-label">Birthday</div>
+            <div class="info-label">{{ 'CHILD_DETAIL.BIRTHDAY' | translate }}</div>
             <div class="info-value">{{ child.dateOfBirth | date:'yyyy/MM/dd' }}</div>
           </div>
           <div class="info-row">
-            <div class="info-label">Gender</div>
+            <div class="info-label">{{ 'CHILD_DETAIL.GENDER' | translate }}</div>
             <div class="info-value">{{ child.gender}}</div>
           </div>
         </div>
@@ -142,15 +142,15 @@
             <div class="icon-box">
               <i class="bi bi-heart-pulse"></i>
             </div>
-            <h5>Health Information</h5>
+            <h5>{{ 'CHILD_DETAIL.HEALTH_INFO' | translate }}</h5>
           </div>
 
           <div class="info-row">
-            <div class="info-label">Medical Notes</div>
+            <div class="info-label">{{ 'CHILD_DETAIL.MEDICAL_NOTES' | translate }}</div>
             <div class="info-value">{{ child.medicalNotes }}</div>
           </div>
           <div class="info-row">
-            <div class="info-label">Allergies </div>
+            <div class="info-label">{{ 'CHILD_DETAIL.ALLERGIES' | translate }}</div>
             <div class="info-value">{{ child.allergies }}</div>
           </div>
         </div>
@@ -159,15 +159,15 @@
             <div class="icon-box">
               <i class="bi bi-person-lines-fill"></i>
             </div>
-            <h5>Emergency Contact</h5>
+            <h5>{{ 'CHILD_DETAIL.EMERGENCY_CONTACT' | translate }}</h5>
           </div>
 
           <div class="info-row">
-            <div class="info-label">Emergency name</div>
+            <div class="info-label">{{ 'CHILD_DETAIL.EMERGENCY_NAME' | translate }}</div>
             <div class="info-value">{{child.parent.firstName}} {{child.parent.lastName}}</div>
           </div>
           <div class="info-row">
-            <div class="info-label">Phone </div>
+            <div class="info-label">{{ 'CHILD_DETAIL.PHONE' | translate }}</div>
             <div class="info-value">{{child.parent.emergencyContact}}</div>
         </div>
       </div>
@@ -248,7 +248,7 @@
               <dd class="col-6 description-dt-body-card mb-2">{{ child.enrollmentDate | date:'yy/MM/dd' }}</dd>
             </dl>
             <div *ngIf="child.medicalNotes || child.allergies">
-              <h5 class="mb-3 title-body">Medical Information</h5>
+              <h5 class="mb-3 title-body">{{ 'CHILD_DETAIL.MEDICAL_INFO' | translate }}</h5>
               <div *ngIf="child.medicalNotes">
                 <dt class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.MEDICAL_NOTES' | translate }}</dt>
                 <dd class="col-6 description-dt-body-card mb-2">{{ child.medicalNotes }}</dd>

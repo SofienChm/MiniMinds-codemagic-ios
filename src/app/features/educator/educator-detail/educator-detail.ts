@@ -13,6 +13,7 @@ import { HttpClient } from '@angular/common/http';
 import { ApiConfig } from '../../../core/config/api.config';
 import { AppCurrencyPipe } from '../../../core/services/currency/currency.pipe';
 import Swal from 'sweetalert2';
+import { showSuccessToast } from '../../../shared/utils/swal.util';
 
 @Component({
   selector: 'app-educator-detail',
@@ -128,6 +129,26 @@ export class EducatorDetail implements OnInit {
     return age;
   }
 
+  /**
+   * Get the profile picture URL for an educator, preferring file-based URL over Base64
+   */
+  getProfilePictureUrl(educator: EducatorModel | null | undefined): string | null {
+    if (!educator) return null;
+    if (educator.profilePictureUrl && educator.profilePictureUrl.trim() !== '') {
+      return this.getFullUrl(educator.profilePictureUrl);
+    }
+    if (educator.profilePicture && educator.profilePicture.trim() !== '') {
+      return this.getFullUrl(educator.profilePicture);
+    }
+    return null;
+  }
+
+  private getFullUrl(path: string): string {
+    if (!path) return '';
+    if (path.startsWith('http') || path.startsWith('data:')) return path;
+    return `${ApiConfig.HUB_URL}${path.startsWith('/') ? '' : '/'}${path}`;
+  }
+
   goBack() {
     this.router.navigate(['/educators']);
   }
@@ -178,13 +199,7 @@ export class EducatorDetail implements OnInit {
         this.assigningChild = false;
         this.closeAddChildModal();
         this.loadAssignedChildren();
-        Swal.fire({
-          icon: 'success',
-          title: this.translate.instant('MESSAGES.SUCCESS'),
-          text: this.translate.instant('EDUCATOR_DETAIL.CHILD_ASSIGNED_SUCCESS'),
-          timer: 2000,
-          showConfirmButton: false
-        });
+        showSuccessToast(this.translate.instant('MESSAGES.SUCCESS'));
       },
       error: (error) => {
         this.assigningChild = false;
@@ -214,13 +229,7 @@ export class EducatorDetail implements OnInit {
         this.http.delete(`${ApiConfig.ENDPOINTS.EDUCATORS}/${this.educatorId}/remove-child/${childId}`).subscribe({
           next: () => {
             this.loadAssignedChildren();
-            Swal.fire({
-              icon: 'success',
-              title: this.translate.instant('MESSAGES.SUCCESS'),
-              text: this.translate.instant('EDUCATOR_DETAIL.CHILD_REMOVED_SUCCESS'),
-              timer: 2000,
-              showConfirmButton: false
-            });
+            showSuccessToast(this.translate.instant('MESSAGES.SUCCESS'));
           },
           error: (error) => {
             console.error('Error removing child:', error);

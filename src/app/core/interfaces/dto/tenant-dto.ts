@@ -9,6 +9,7 @@ export interface Tenant {
   timezone?: string;
   currency?: string;
   language?: string;
+  country?: string;
   subscriptionPlan: string;
   subscriptionExpiresAt?: Date;
   isActive: boolean;
@@ -26,6 +27,7 @@ export interface CreateTenantRequest {
   timezone?: string;
   currency?: string;
   language?: string;
+  country?: string;
   adminFirstName: string;
   adminLastName: string;
   adminEmail: string;
@@ -42,6 +44,7 @@ export interface UpdateTenantRequest {
   timezone?: string;
   currency?: string;
   language?: string;
+  country?: string;
   subscriptionPlan?: string;
   isActive?: boolean;
 }
@@ -116,7 +119,8 @@ export const FeatureCodes = {
   LEARNING_GAMES: 'learning_games',
   AI_ASSISTANT: 'ai_assistant',
   BASIC_AI: 'basic_ai',
-  APPOINTMENTS: 'appointments'
+  APPOINTMENTS: 'appointments',
+  CHAT: 'chat'
 } as const;
 
 export type FeatureCode = typeof FeatureCodes[keyof typeof FeatureCodes];

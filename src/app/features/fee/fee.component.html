@@ -5,6 +5,7 @@
   </app-parent-child-header-simple>
   <div class="body container-fluid">
     <div class="main-information">
+
       <div class="row mb-1 mb-md4 fee-tab g-2" *ngIf="summary">
         <div class="col-xl-3 col-md-6 col-6 mb-1 mb-md-3">
           <div class="card border-0 shadow-sm">
@@ -217,8 +218,50 @@
     </div>
   </div>
 
-  <!-- Fees Table -->
-  <div class="card" *ngIf="!loading">
+  <!-- Combined Fees Table (Parent view) -->
+  <div class="card" *ngIf="!loading && isParent">
+    <div class="card-body">
+      <div *ngIf="combinedFees.length === 0" class="text-center p-4">
+        <i class="bi bi-currency-dollar fs-1 text-muted"></i>
+        <h4 class="mt-3">{{ 'FEES_PAGE.NO_FEES_FOUND' | translate }}</h4>
+        <p class="text-muted">{{ 'FEES_PAGE.NO_FEES_MESSAGE' | translate }}</p>
+      </div>
+      <div *ngIf="combinedFees.length > 0" class="table-responsive custom-table">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>{{ 'FEES_PAGE.DUE_DATE' | translate }}</th>
+              <th>{{ 'FEES_PAGE.DESCRIPTION' | translate }}</th>
+              <th>{{ 'FEES_PAGE.AMOUNT' | translate }}</th>
+              <th>{{ 'FEES_PAGE.STATUS' | translate }}</th>
+              <th>{{ 'FEES_PAGE.ACTIONS' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of combinedFees">
+              <td>{{ item.date | date:'mediumDate':'':currentLocale }}</td>
+              <td>
+                {{ item.title }}
+                <span class="badge bg-secondary ms-1" style="font-size:0.65rem;">{{ translateType(item.type) }}</span>
+              </td>
+              <td><span class="fw-bold">{{ item.amount | appCurrency }}</span></td>
+              <td>
+                <span [class]="item.statusClass">{{ translateStatus(item.status) }}</span>
+              </td>
+              <td>
+                <button type="button" class="btn btn-sm btn-view" (click)="item.navigate()">
+                  <i class="bi bi-eye"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fees Table (Admin/Teacher view) -->
+  <div class="card" *ngIf="!loading && !isParent">
     <div class="card-body">
       <div *ngIf="filteredFees.length === 0" class="text-center p-4">
         <i class="bi bi-currency-dollar fs-1 text-muted"></i>
@@ -251,19 +294,19 @@
                 <span class="fw-bold">{{ fee.amount | appCurrency }}</span>
               </td>
               <td>
-                <div>{{ fee.dueDate | date:'mediumDate' }}</div>
+                <div>{{ fee.dueDate | date:'mediumDate':'':currentLocale }}</div>
                 <small class="text-danger" *ngIf="fee.daysOverdue && fee.daysOverdue > 0">
                   {{ fee.daysOverdue }} {{ 'FEES_PAGE.DAYS_OVERDUE' | translate }}
                 </small>
               </td>
               <td>
-                <span [class]="getStatusClass(fee.status)">{{ fee.status | titlecase }}</span>
+                <span [class]="getStatusClass(fee.status)">{{ translateStatus(fee.status) }}</span>
                 <div *ngIf="fee.paidDate" class="small text-muted mt-1">
-                  {{ 'FEES_PAGE.PAID_DATE' | translate }}: {{ fee.paidDate | date:'shortDate' }}
+                  {{ 'FEES_PAGE.PAID_DATE' | translate }}: {{ fee.paidDate | date:'shortDate':'':currentLocale }}
                 </div>
               </td>
               <td>
-                <span [class]="getFeeTypeClass(fee.feeType)">{{ fee.feeType | titlecase }}</span>
+                <span [class]="getFeeTypeClass(fee.feeType)">{{ translateFeeType(fee.feeType) }}</span>
               </td>
               <td>
 

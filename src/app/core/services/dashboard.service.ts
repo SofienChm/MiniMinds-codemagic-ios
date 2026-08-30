@@ -113,6 +113,10 @@ export class DashboardService {
     return this.http.get<AdminDashboardData>(`${this.apiUrl}/admin`);
   }
 
+  getTeacherDashboard(): Observable<AdminDashboardData> {
+    return this.http.get<AdminDashboardData>(`${this.apiUrl}/teacher`);
+  }
+
   getParentDashboard(): Observable<ParentDashboardData> {
     return this.http.get<ParentDashboardData>(`${this.apiUrl}/parent`);
   }

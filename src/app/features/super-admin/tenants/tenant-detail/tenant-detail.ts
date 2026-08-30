@@ -11,6 +11,7 @@ import { HeaderSuperadminComponent } from '../../header-superadmin/header';
 import { Location } from '@angular/common';
 
 import Swal from 'sweetalert2';
+import { showSuccessToast } from '../../../../shared/utils/swal.util';
 
 @Component({
   selector: 'app-tenant-detail',
@@ -176,7 +177,7 @@ export class TenantDetail implements OnInit, OnDestroy {
             const successMsg = isActive
               ? this.translate.instant('SUPER_ADMIN.DAYCARE_DEACTIVATED')
               : this.translate.instant('SUPER_ADMIN.DAYCARE_ACTIVATED');
-            Swal.fire(this.translate.instant('MESSAGES.SUCCESS'), successMsg, 'success');
+            showSuccessToast(this.translate.instant('MESSAGES.SUCCESS'));
           },
           error: () => {
             Swal.fire(
@@ -206,13 +207,8 @@ export class TenantDetail implements OnInit, OnDestroy {
       if (result.isConfirmed) {
         this.tenantService.deleteTenant(this.tenant!.id).subscribe({
           next: () => {
-            Swal.fire(
-              this.translate.instant('MESSAGES.SUCCESS'),
-              this.translate.instant('SUPER_ADMIN.DAYCARE_DELETED'),
-              'success'
-            ).then(() => {
-              this.router.navigate(['/super-admin/tenants']);
-            });
+            showSuccessToast(this.translate.instant('MESSAGES.SUCCESS'));
+            this.router.navigate(['/super-admin/tenants']);
           },
           error: () => {
             Swal.fire(

@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
+import localeIt from '@angular/common/locales/it';
+import localeAr from '@angular/common/locales/ar';
 import { Router, RouterModule } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -13,6 +16,10 @@ import { TitleAction } from '../../shared/layouts/title-page/title-page';
 import Swal from 'sweetalert2';
 import { PageTitleService } from '../../core/services/page-title.service';
 import { SimpleToastService } from '../../core/services/simple-toast.service';
+
+registerLocaleData(localeFr);
+registerLocaleData(localeIt);
+registerLocaleData(localeAr);
 
 @Component({
   selector: 'app-holiday',
@@ -33,6 +40,10 @@ export class HolidayComponent implements OnInit {
   selectedCountry: string = localStorage.getItem('selectedCountry') || 'US';
   titleActions: TitleAction[] = [];
   private holidaySub?: Subscription;
+
+  get currentLocale(): string {
+    return this.translateService.currentLang || this.translateService.defaultLang || 'en';
+  }
 
   constructor(
     private holidayService: HolidayService,

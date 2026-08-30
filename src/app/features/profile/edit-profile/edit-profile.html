@@ -12,13 +12,13 @@
       <!-- Personal Info Tab -->
       <div class="card card-general">
         <div class="card-header">
-          <h5>Personal Information</h5>
+          <h5>{{ 'EDIT_PROFILE.PERSONAL_INFO' | translate }}</h5>
         </div>
         <div class="card-body">
           <form [formGroup]="profileForm" (ngSubmit)="updateProfile()">
             <div class="row">
               <div class="col-md-6 mb-3">
-                <label class="form-label">First Name *</label>
+                <label class="form-label">{{ 'EDIT_PROFILE.FIRST_NAME' | translate }} {{ 'EDIT_PROFILE.REQUIRED' | translate }}</label>
                 <input type="text" class="form-control" formControlName="firstName" 
                        [class.is-invalid]="firstName.invalid && firstName.touched">
                 <div class="invalid-feedback" *ngIf="firstName.invalid && firstName.touched">
@@ -26,7 +26,7 @@
                 </div>
               </div>
               <div class="col-md-6 mb-3">
-                <label class="form-label">Last Name *</label>
+                <label class="form-label">{{ 'EDIT_PROFILE.LAST_NAME' | translate }} {{ 'EDIT_PROFILE.REQUIRED' | translate }}</label>
                 <input type="text" class="form-control" formControlName="lastName"
                        [class.is-invalid]="lastName.invalid && lastName.touched">
                 <div class="invalid-feedback" *ngIf="lastName.invalid && lastName.touched">
@@ -34,7 +34,7 @@
                 </div>
               </div>
               <div class="col-md-6 mb-3">
-                <label class="form-label">Email *</label>
+                <label class="form-label">{{ 'EDIT_PROFILE.EMAIL' | translate }} {{ 'EDIT_PROFILE.REQUIRED' | translate }}</label>
                 <input type="email" class="form-control" formControlName="email"
                        [class.is-invalid]="email.invalid && email.touched">
                 <div class="invalid-feedback" *ngIf="email.invalid && email.touched">
@@ -42,7 +42,7 @@
                 </div>
               </div>
               <div class="col-md-6 mb-3" *ngIf="isParent()">
-                <label class="form-label">Phone Number *</label>
+                <label class="form-label">{{ 'EDIT_PROFILE.PHONE' | translate }} {{ 'EDIT_PROFILE.REQUIRED' | translate }}</label>
                 <input type="number" class="form-control" formControlName="phoneNumber"
                        [class.is-invalid]="phoneNumber.invalid && phoneNumber.touched">
                 <div class="invalid-feedback" *ngIf="phoneNumber.invalid && phoneNumber.touched">
@@ -50,20 +50,20 @@
                 </div>
               </div>
               <div class="col-md-6 mb-3" *ngIf="isParent()">
-                <label class="form-label">Address</label>
+                <label class="form-label">{{ 'EDIT_PROFILE.ADDRESS' | translate }}</label>
                 <input type="text" class="form-control" formControlName="address">
               </div>
               <div class="col-md-6 mb-3" *ngIf="isParent()">
-                <label class="form-label">Emergency Contact</label>
+                <label class="form-label">{{ 'EDIT_PROFILE.EMERGENCY_CONTACT' | translate }}</label>
                 <input type="text" class="form-control" formControlName="emergencyContact">
               </div>
               <div class="col-md-6 mb-3" *ngIf="!isParent()">
-                <label class="form-label">Role</label>
+                <label class="form-label">{{ 'EDIT_PROFILE.ROLE' | translate }}</label>
                 <input type="text" class="form-control" [value]="userRole" disabled>
-                <small class="text-muted">Role cannot be changed</small>
+                <small class="text-muted">{{ 'EDIT_PROFILE.ROLE_HINT' | translate }}</small>
               </div>
               <div class="col-md-6 mb-3">
-                <label class="form-label">Profile Picture</label>
+                <label class="form-label">{{ 'EDIT_PROFILE.PROFILE_PICTURE' | translate }}</label>
                 <input type="file" class="form-control" (change)="onImageSelect($event)" accept="image/*">
               </div>
             </div>
@@ -73,9 +73,9 @@
             <div class="d-flex gap-2 justify-content-end">
               <button type="submit" class="action-btn custom-btn-2 btn-add-global-2" [disabled]="saving || profileForm.invalid">
                 <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
-                {{ saving ? 'Updating...' : 'Update Profile' }}
+                {{ saving ? ('EDIT_PROFILE.UPDATING' | translate) : ('EDIT_PROFILE.UPDATE_PROFILE' | translate) }}
               </button>
-              <button type="button" class="btn btn-secondary btn-cancel-global" (click)="cancel()" [disabled]="saving">Cancel</button>
+              <button type="button" class="btn btn-secondary btn-cancel-global" (click)="cancel()" [disabled]="saving">{{ 'EDIT_PROFILE.CANCEL' | translate }}</button>
             </div>
           </form>
         </div>
@@ -84,39 +84,39 @@
       <!-- Security Tab -->
       <div class="card card-general">
         <div class="card-header">
-          <h5>Security Settings</h5>
+          <h5>{{ 'EDIT_PROFILE.SECURITY_SETTINGS' | translate }}</h5>
         </div>
         <div class="card-body">
-          <p class="text-muted">Change your password and manage security settings</p>
+          <p class="text-muted">{{ 'EDIT_PROFILE.SECURITY_DESC' | translate }}</p>
           <form [formGroup]="securityForm" (ngSubmit)="updatePassword()">
             <div class="mb-3">
-              <label class="form-label">Current Password *</label>
+              <label class="form-label">{{ 'EDIT_PROFILE.CURRENT_PASSWORD' | translate }} {{ 'EDIT_PROFILE.REQUIRED' | translate }}</label>
               <input type="password" class="form-control" formControlName="currentPassword"
                      [class.is-invalid]="securityForm.get('currentPassword')?.invalid && securityForm.get('currentPassword')?.touched"
-                     placeholder="Enter current password">
+                     [placeholder]="'EDIT_PROFILE.CURRENT_PASSWORD_PLACEHOLDER' | translate">
               <div class="invalid-feedback" *ngIf="securityForm.get('currentPassword')?.invalid && securityForm.get('currentPassword')?.touched">
                 {{ getErrorMessage(securityForm, 'currentPassword') }}
               </div>
             </div>
             <div class="mb-3">
-              <label class="form-label">New Password *</label>
+              <label class="form-label">{{ 'EDIT_PROFILE.NEW_PASSWORD' | translate }} {{ 'EDIT_PROFILE.REQUIRED' | translate }}</label>
               <input type="password" class="form-control" formControlName="newPassword"
                      [class.is-invalid]="securityForm.get('newPassword')?.invalid && securityForm.get('newPassword')?.touched"
-                     placeholder="Enter new password">
+                     [placeholder]="'EDIT_PROFILE.NEW_PASSWORD_PLACEHOLDER' | translate">
               <div class="invalid-feedback" *ngIf="securityForm.get('newPassword')?.invalid && securityForm.get('newPassword')?.touched">
                 {{ getErrorMessage(securityForm, 'newPassword') }}
               </div>
             </div>
             <div class="mb-3">
-              <label class="form-label">Confirm Password *</label>
+              <label class="form-label">{{ 'EDIT_PROFILE.CONFIRM_PASSWORD' | translate }} {{ 'EDIT_PROFILE.REQUIRED' | translate }}</label>
               <input type="password" class="form-control" formControlName="confirmPassword"
                      [class.is-invalid]="securityForm.get('confirmPassword')?.invalid && securityForm.get('confirmPassword')?.touched"
-                     placeholder="Confirm new password">
+                     [placeholder]="'EDIT_PROFILE.CONFIRM_PASSWORD_PLACEHOLDER' | translate">
               <div class="invalid-feedback" *ngIf="securityForm.get('confirmPassword')?.invalid && securityForm.get('confirmPassword')?.touched">
                 {{ getErrorMessage(securityForm, 'confirmPassword') }}
               </div>
             </div>
-            <button type="submit" class="float-right action-btn custom-btn-2 btn-add-global-2" [disabled]="securityForm.invalid">Update Password</button>
+            <button type="submit" class="float-right action-btn custom-btn-2 btn-add-global-2" [disabled]="securityForm.invalid">{{ 'EDIT_PROFILE.UPDATE_PASSWORD' | translate }}</button>
           </form>
         </div>
       </div>
@@ -124,28 +124,26 @@
       <!-- Preferences Tab -->
       <div class="card card-general">
         <div class="card-header">
-          <h5>Preferences</h5>
+          <h5>{{ 'EDIT_PROFILE.PREFERENCES' | translate }}</h5>
         </div>
         <div class="card-body">
-          <p class="text-muted">Customize your experience</p>
+          <p class="text-muted">{{ 'EDIT_PROFILE.PREFERENCES_DESC' | translate }}</p>
           <form [formGroup]="preferencesForm" (ngSubmit)="updatePreferences()">
             <div class="mb-3">
-              <label class="form-label">Language</label>
+              <label class="form-label">{{ 'EDIT_PROFILE.LANGUAGE' | translate }}</label>
               <select class="form-select" formControlName="language">
-                <option value="en">English</option>
-                <option value="fr">French</option>
-                <option value="es">Spanish</option>
+                <option *ngFor="let lang of languages" [value]="lang.code">{{ lang.flag }} {{ lang.name }}</option>
               </select>
             </div>
             <div class="mb-3">
-              <label class="form-label">Timezone</label>
+              <label class="form-label">{{ 'EDIT_PROFILE.TIMEZONE' | translate }}</label>
               <select class="form-select" formControlName="timezone">
                 <option value="UTC">UTC</option>
                 <option value="EST">EST</option>
                 <option value="PST">PST</option>
               </select>
             </div>
-            <button type="submit" class="action-btn custom-btn-2 btn-add-global-2 float-right">Save Preferences</button>
+            <button type="submit" class="action-btn custom-btn-2 btn-add-global-2 float-right">{{ 'EDIT_PROFILE.SAVE_PREFERENCES' | translate }}</button>
           </form>
         </div>
       </div>

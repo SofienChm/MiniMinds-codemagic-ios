@@ -19,6 +19,7 @@ export class ApiConfig {
     DAILY_ACTIVITIES: `${ApiConfig.BASE_URL}/dailyactivities`,
     NOTIFICATIONS: `${ApiConfig.BASE_URL}/notifications`,
     MESSAGES: `${ApiConfig.BASE_URL}/messages`,
+    CHAT_GROUPS: `${ApiConfig.BASE_URL}/chatgroups`,
     MAIL: `${ApiConfig.BASE_URL}/mail`,
     CLASSES: `${ApiConfig.BASE_URL}/classes`,
     SETTINGS: `${ApiConfig.BASE_URL}/settings`,

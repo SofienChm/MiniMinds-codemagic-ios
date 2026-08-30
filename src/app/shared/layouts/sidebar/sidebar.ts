@@ -108,6 +108,7 @@ export class Sidebar implements OnInit, OnDestroy {
     const mainItems: MenuItem[] = [
       { path: '/dashboard', icon: 'bi-speedometer2', label: 'SIDEBAR.MENU.DASHBOARD', featureCode: FeatureCodes.DASHBOARD },
       { path: '/messages', icon: 'bi-envelope', label: 'SIDEBAR.MENU.MESSAGES', featureCode: FeatureCodes.MESSAGES },
+      { path: '/chat', icon: 'bi-chat-dots', label: 'SIDEBAR.MENU.CHAT', featureCode: FeatureCodes.CHAT },
       { path: '/appointments', icon: 'bi-calendar-plus', label: 'SIDEBAR.MENU.APPOINTMENTS', featureCode: FeatureCodes.APPOINTMENTS },
       { path: '/reclamations', icon: 'bi-exclamation-circle', label: 'SIDEBAR.MENU.RECLAMATIONS', featureCode: FeatureCodes.RECLAMATIONS },
       { path: '/calendar', icon: 'bi-calendar', label: 'SIDEBAR.MENU.CALENDAR', featureCode: FeatureCodes.CALENDAR }
@@ -117,7 +118,7 @@ export class Sidebar implements OnInit, OnDestroy {
     // Principal items - role-based
     const principalItems: MenuItem[] = [
       { path: '/holidays', icon: 'bi-calendar-heart', label: 'SIDEBAR.MENU.HOLIDAYS', featureCode: FeatureCodes.HOLIDAYS },
-      { path: '/fees', icon: 'bi-currency-dollar', label: 'SIDEBAR.MENU.FEES', featureCode: FeatureCodes.FEES },
+      ...(!isTeacher ? [{ path: '/fees', icon: 'bi-currency-dollar', label: 'SIDEBAR.MENU.FEES', featureCode: FeatureCodes.FEES }] : []),
       { path: '/events', icon: 'bi-calendar-event', label: 'SIDEBAR.MENU.EVENTS', featureCode: FeatureCodes.EVENTS }
     ];
 
@@ -126,12 +127,13 @@ export class Sidebar implements OnInit, OnDestroy {
       principalItems.splice(1, 0, { path: '/leaves', icon: 'bi-person-raised-hand', label: 'SIDEBAR.MENU.LEAVES', featureCode: FeatureCodes.LEAVES });
     }
 
-    // Static Fees - Admin & Teacher only (for tracking offline payments)
-    if (!isParent) {
-      // Find the index of Fees and insert Static Fees right after it
+    // Static Fees - Admin & Parent only
+    if (!isTeacher) {
       const feesIndex = principalItems.findIndex(item => item.path === '/fees');
       if (feesIndex !== -1) {
         principalItems.splice(feesIndex + 1, 0, { path: '/static-fees', icon: 'bi-cash-coin', label: 'SIDEBAR.MENU.STATIC_FEES', featureCode: FeatureCodes.STATIC_FEES });
+      } else {
+        principalItems.push({ path: '/static-fees', icon: 'bi-cash-coin', label: 'SIDEBAR.MENU.STATIC_FEES', featureCode: FeatureCodes.STATIC_FEES });
       }
     }
     this.menuItemsPrincipal = this.filterByFeatures(principalItems);

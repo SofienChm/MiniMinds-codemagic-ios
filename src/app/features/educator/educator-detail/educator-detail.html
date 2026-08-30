@@ -23,7 +23,7 @@
         <div class="d-flex align-items-center mb-4">
           <div class="position-relative me-3">
             <img loading="lazy"
-                [src]="educator.profilePicture || 'assets/default-avatar.svg'"
+                [src]="getProfilePictureUrl(educator) || 'assets/default-avatar.svg'"
                 class="rounded-circle"
                 width="100"
                 height="100"

@@ -56,9 +56,9 @@
                       </div>
                     </div>
                     <div class="col-6 right">
-                      <p class="m-t-30"><b>{{ 'FEES_PAGE.DUE_DATE' | translate }} :</b> {{ fee.dueDate | date:'mediumDate' }}</p>
-                      <p  [class]="'badge ' + (fee.status === 'paid' ? 'bg-success' : fee.status === 'overdue' ? 'bg-danger' : 'bg-warning')"><b>{{ 'FEES_PAGE.STATUS' | translate }} :</b><span>{{ fee.status | titlecase }}</span></p>
-                      <p *ngIf="fee.paidDate"><b>{{ 'FEES_PAGE.PAID_DATE' | translate }} :</b> {{ fee.paidDate | date:'mediumDate' }}</p>
+                      <p class="m-t-30"><b>{{ 'FEES_PAGE.DUE_DATE' | translate }} :</b> {{ fee.dueDate | date:'mediumDate':'':currentLocale }}</p>
+                      <p  [class]="'badge ' + (fee.status === 'paid' ? 'bg-success' : fee.status === 'overdue' ? 'bg-danger' : 'bg-warning')"><b>{{ 'FEES_PAGE.STATUS' | translate }} :</b><span>{{ translateStatus(fee.status) }}</span></p>
+                      <p *ngIf="fee.paidDate"><b>{{ 'FEES_PAGE.PAID_DATE' | translate }} :</b> {{ fee.paidDate | date:'mediumDate':'':currentLocale }}</p>
                     </div>
                   </div>
                 </div>
@@ -90,7 +90,7 @@
                       <tr>
                         <td>{{ fee.child?.firstName }} {{ fee.child?.lastName }}</td>
                         <td>{{ fee.description }}</td>
-                        <td><span [class]="'badge ' + (fee.feeType === 'monthly' ? 'bg-primary' : fee.feeType === 'one-time' ? 'bg-info' : 'bg-danger')">{{ fee.feeType | titlecase }}</span></td>
+                        <td><span [class]="'badge ' + (fee.feeType === 'monthly' ? 'bg-primary' : fee.feeType === 'one-time' ? 'bg-info' : 'bg-danger')">{{ translateFeeType(fee.feeType) }}</span></td>
                         <td class="text-end">{{ fee.amount | appCurrency }}</td>
                       </tr>
                     </tbody>
@@ -110,13 +110,13 @@
               </div>
               <div class="col-md-12" *ngIf="isParent">
                 <div class="text-end">
-                  <button class="btn btn-secondary back me-2" (click)="goBack()">
+                  <button class="action-btn custom-btn-2 btn-cancel-2 back me-2" (click)="goBack()">
                     <i class="bi bi-arrow-left me-2"></i>{{ 'FEES_PAGE.BACK' | translate }}
                   </button>
                   <button *ngIf="fee.status === 'pending'" class="btn btn-success pay me-2" (click)="payOnline()" [disabled]="loading">
                     <i class="bi bi-credit-card me-2"></i>{{ 'FEES_PAGE.PAY_ONLINE' | translate }}
                   </button>
-                  <button class="btn btn-info print me-2" (click)="print()">
+                  <button class="action-btn custom-btn-2 btn-edit-global-2 me-2" (click)="print()">
                     <i class="bi bi-printer me-2"></i>{{ 'FEES_PAGE.PRINT' | translate }}
                   </button>
                 </div>

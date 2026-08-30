@@ -89,7 +89,8 @@
               <label class="form-label">{{ 'ADD_EDUCATOR.PASSWORD' | translate }} {{ 'ADD_EDUCATOR.REQUIRED' | translate }}</label>
               <div class="input-with-icon">
                 <i class="bi bi-key input-icon"></i>
-                <input type="password" class="form-input" [class.is-invalid]="isFieldInvalid('password')" formControlName="password" [placeholder]="'ADD_EDUCATOR.PASSWORD_PLACEHOLDER' | translate">
+                <input [type]="showPassword ? 'text' : 'password'" class="form-input" [class.is-invalid]="isFieldInvalid('password')" formControlName="password" [placeholder]="'ADD_EDUCATOR.PASSWORD_PLACEHOLDER' | translate">
+                <i [class]="showPassword ? 'bi bi-eye toggle-password' : 'bi bi-eye-slash toggle-password'" (click)="togglePasswordVisibility()" style="cursor: pointer;"></i>
               </div>
               <small class="form-hint">{{ 'ADD_EDUCATOR.PASSWORD_HINT' | translate }}</small>
               <div *ngIf="isFieldInvalid('password')" class="error-message">

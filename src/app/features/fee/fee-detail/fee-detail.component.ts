@@ -1,5 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
+import localeIt from '@angular/common/locales/it';
+import localeAr from '@angular/common/locales/ar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { TitlePage, Breadcrumb, TitleAction } from '../../../shared/layouts/title-page/title-page';
@@ -37,7 +40,11 @@ export class FeeDetailComponent implements OnInit, OnDestroy {
     private location: Location,
     private translateService: TranslateService,
     private pageTitleService: PageTitleService
-  ) {}
+  ) {
+    registerLocaleData(localeFr);
+    registerLocaleData(localeIt);
+    registerLocaleData(localeAr);
+  }
 
   ngOnInit() {
     this.pageTitleService.setTitle(this.translateService.instant('FEES_PAGE.FEE_RECEIPT'));
@@ -138,5 +145,27 @@ export class FeeDetailComponent implements OnInit, OnDestroy {
 
   get isParent(): boolean {
     return this.authService.isParent();
+  }
+
+  get currentLocale(): string {
+    return this.translateService.currentLang || this.translateService.defaultLang || 'en';
+  }
+
+  translateStatus(status: string): string {
+    switch (status) {
+      case 'paid': return this.translateService.instant('FEES_PAGE.PAID');
+      case 'pending': return this.translateService.instant('FEES_PAGE.PENDING');
+      case 'overdue': return this.translateService.instant('FEES_PAGE.OVERDUE');
+      default: return status;
+    }
+  }
+
+  translateFeeType(feeType: string): string {
+    switch (feeType) {
+      case 'monthly': return this.translateService.instant('FEES_PAGE.MONTHLY_FEE');
+      case 'one-time': return this.translateService.instant('FEES_PAGE.ONE_TIME');
+      case 'late-fee': return this.translateService.instant('FEES_PAGE.LATE_FEE');
+      default: return feeType;
+    }
   }
 }

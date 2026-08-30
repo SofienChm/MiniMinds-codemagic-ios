@@ -177,6 +177,22 @@
               </ng-select>
             </div>
           </div>
+
+          <!-- Country -->
+          <div class="form-group">
+            <label class="form-label">{{ 'SUPER_ADMIN.COUNTRY' | translate }}</label>
+            <div class="input-with-icon">
+              <i class="bi bi-globe input-icon"></i>
+              <ng-select
+                class="form-input"
+                formControlName="country"
+                [items]="countries"
+                bindLabel="label"
+                bindValue="value"
+                [clearable]="false">
+              </ng-select>
+            </div>
+          </div>
         </div>
       </div>
 

@@ -188,10 +188,10 @@
 
         <!-- Form Actions -->
         <div class="d-flex justify-content-end gap-2">
-          <button type="button" class="btn btn-secondary" (click)="cancel()">
+          <button type="button" class="action-btn btn-cancel-global custom-btn-2" (click)="cancel()">
             <i class="bi bi-x-lg me-2"></i>{{ 'APPOINTMENTS_PAGE.CANCEL' | translate }}
           </button>
-          <button type="submit" class="btn btn-primary" [disabled]="submitting">
+          <button type="submit" class="action-btn btn-add-global-2 custom-btn-2" [disabled]="submitting">
             <span *ngIf="submitting" class="spinner-border spinner-border-sm me-2"></span>
             <i *ngIf="!submitting" class="bi bi-check-lg me-2"></i>
             {{ submitting ? ('APPOINTMENTS_PAGE.SAVING' | translate) : ('APPOINTMENTS_PAGE.SAVE_CHANGES' | translate) }}

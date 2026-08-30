@@ -7,6 +7,9 @@ import Swal from 'sweetalert2';
 // Custom header to skip error interceptor UI (popups/logging)
 export const SKIP_ERROR_HANDLER = 'X-Skip-Error-Handler';
 
+// Prevent duplicate "Session Expired" popups when several requests 401 at once
+let sessionExpiredShowing = false;
+
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
 
@@ -71,6 +74,8 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
             // These should handle their own 401 errors (wrong credentials)
             const isAuthEndpoint = cleanReq.url.includes('/api/auth/login') ||
                                    cleanReq.url.includes('/api/auth/register') ||
+                                   cleanReq.url.includes('/api/auth/refresh') ||
+                                   cleanReq.url.includes('/api/auth/logout') ||
                                    cleanReq.url.includes('/api/passwordreset');
 
             if (isAuthEndpoint) {
@@ -80,14 +85,21 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
             // For other endpoints, this is a session expiry
             errorMessage = 'Your session has expired. Please login again.';
+            if (sessionExpiredShowing) {
+              return throwError(() => error);
+            }
+            sessionExpiredShowing = true;
             Swal.fire({
               icon: 'warning',
               title: 'Session Expired',
               text: errorMessage,
               confirmButtonColor: '#506EE4'
             }).then(() => {
+              sessionExpiredShowing = false;
               localStorage.removeItem('currentUser');
               localStorage.removeItem('token');
+              localStorage.removeItem('refreshToken');
+              localStorage.removeItem('userId');
               router.navigate(['/login']);
             });
             break;

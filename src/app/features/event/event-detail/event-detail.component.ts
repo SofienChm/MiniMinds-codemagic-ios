@@ -14,6 +14,7 @@ import { AuthService } from '../../../core/services/auth';
 import { Location } from '@angular/common';
 import { AppCurrencyPipe } from '../../../core/services/currency/currency.pipe';
 import { PageTitleService } from '../../../core/services/page-title.service';
+import { ApiConfig } from '../../../core/config/api.config';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
 import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
@@ -157,6 +158,26 @@ export class EventDetailComponent implements OnInit, OnDestroy {
     return this.event ? this.event.price * this.registeredCount : 0;
   }
 
+  /**
+   * Get the event banner image URL, preferring file-based URL over Base64
+   */
+  getEventImageUrl(): string {
+    if (!this.event) return 'assets/dark.png';
+    if (this.event.imageUrl && this.event.imageUrl.trim() !== '') {
+      return this.getFullUrl(this.event.imageUrl);
+    }
+    if (this.event.image && this.event.image.trim() !== '') {
+      return this.getFullUrl(this.event.image);
+    }
+    return 'assets/dark.png';
+  }
+
+  private getFullUrl(path: string): string {
+    if (!path) return '';
+    if (path.startsWith('http') || path.startsWith('data:')) return path;
+    return `${ApiConfig.HUB_URL}${path.startsWith('/') ? '' : '/'}${path}`;
+  }
+
   triggerImageUpload(): void {
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
     fileInput?.click();
@@ -184,6 +205,7 @@ export class EventDetailComponent implements OnInit, OnDestroy {
     this.eventService.updateEvent(updatedEvent).subscribe({
       next: () => {
         this.event!.image = imageBase64;
+        this.event!.imageUrl = undefined; // new image is Base64 (local preview)
         this.uploading = false;
       },
       error: (error) => {

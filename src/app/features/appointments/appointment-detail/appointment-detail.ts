@@ -1,5 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
+import localeIt from '@angular/common/locales/it';
+import localeAr from '@angular/common/locales/ar';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { TitlePage, Breadcrumb, TitleAction } from '../../../shared/layouts/title-page/title-page';
@@ -8,6 +11,11 @@ import { AppointmentsService, AppointmentModel } from '../appointments.service';
 import { PageTitleService } from '../../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
+import { showSuccessToast } from '../../../shared/utils/swal.util';
+
+registerLocaleData(localeFr);
+registerLocaleData(localeIt);
+registerLocaleData(localeAr);
 
 @Component({
   selector: 'app-appointment-detail',
@@ -29,6 +37,10 @@ export class AppointmentDetail implements OnInit, OnDestroy {
   isAdmin = false;
   isTeacher = false;
   isParent = false;
+
+  get currentLocale(): string {
+    return this.translateService.currentLang || this.translateService.defaultLang || 'en';
+  }
 
   constructor(
     private route: ActivatedRoute,
@@ -153,13 +165,7 @@ export class AppointmentDetail implements OnInit, OnDestroy {
       if (result.isConfirmed && this.appointment) {
         this.appointmentsService.approveAppointment(this.appointment.id).subscribe({
           next: () => {
-            Swal.fire({
-              icon: 'success',
-              title: this.translateService.instant('APPOINTMENTS_PAGE.APPROVED'),
-              text: this.translateService.instant('APPOINTMENTS_PAGE.APPOINTMENT_APPROVED'),
-              timer: 2000,
-              showConfirmButton: false
-            });
+            showSuccessToast(this.translateService.instant('APPOINTMENTS_PAGE.APPROVED'));
             this.loadAppointment(this.appointment!.id);
           },
           error: (err) => {
@@ -190,13 +196,7 @@ export class AppointmentDetail implements OnInit, OnDestroy {
       if (result.isConfirmed && this.appointment) {
         this.appointmentsService.rejectAppointment(this.appointment.id, { rejectionReason: result.value }).subscribe({
           next: () => {
-            Swal.fire({
-              icon: 'success',
-              title: this.translateService.instant('APPOINTMENTS_PAGE.REJECTED'),
-              text: this.translateService.instant('APPOINTMENTS_PAGE.APPOINTMENT_REJECTED'),
-              timer: 2000,
-              showConfirmButton: false
-            });
+            showSuccessToast(this.translateService.instant('APPOINTMENTS_PAGE.REJECTED'));
             this.loadAppointment(this.appointment!.id);
           },
           error: (err) => {
@@ -226,13 +226,7 @@ export class AppointmentDetail implements OnInit, OnDestroy {
       if (result.isConfirmed && this.appointment) {
         this.appointmentsService.completeAppointment(this.appointment.id, { notes: result.value }).subscribe({
           next: () => {
-            Swal.fire({
-              icon: 'success',
-              title: this.translateService.instant('APPOINTMENTS_PAGE.COMPLETED'),
-              text: this.translateService.instant('APPOINTMENTS_PAGE.APPOINTMENT_COMPLETED'),
-              timer: 2000,
-              showConfirmButton: false
-            });
+            showSuccessToast(this.translateService.instant('APPOINTMENTS_PAGE.COMPLETED'));
             this.loadAppointment(this.appointment!.id);
           },
           error: (err) => {
@@ -262,13 +256,7 @@ export class AppointmentDetail implements OnInit, OnDestroy {
       if (result.isConfirmed && this.appointment) {
         this.appointmentsService.cancelMyAppointment(this.appointment.id).subscribe({
           next: () => {
-            Swal.fire({
-              icon: 'success',
-              title: this.translateService.instant('APPOINTMENTS_PAGE.CANCELLED'),
-              text: this.translateService.instant('APPOINTMENTS_PAGE.APPOINTMENT_CANCELLED'),
-              timer: 2000,
-              showConfirmButton: false
-            });
+            showSuccessToast(this.translateService.instant('APPOINTMENTS_PAGE.CANCELLED'));
             this.loadAppointment(this.appointment!.id);
           },
           error: (err) => {

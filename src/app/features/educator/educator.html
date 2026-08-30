@@ -78,7 +78,7 @@
           </span>
           <div class="d-flex align-items-center">
             <div class="dropdown">
-              <span class="btn btn-white btn-icon btn-sm d-flex align-items-center justify-content-center rounded-circle p-0" data-bs-toggle="dropdown">
+              <span class="btn border-0 btn-white btn-icon btn-sm d-flex align-items-center justify-content-center rounded-circle p-0" data-bs-toggle="dropdown">
                 <i class="bi bi-three-dots-vertical"></i>
               </span>
               <ul class="dropdown-menu dropdown-menu-end p-3">
@@ -105,7 +105,7 @@
           <div class="bg-light rounded-2 p-3 mb-3">
             <div class="d-flex align-items-center">
               <a href="#" class="avatar avatar-lg flex-shrink-0" (click)="viewDetails(educator); $event.preventDefault()">
-                <img loading="lazy" [src]="educator.profilePicture || 'assets/default-avatar.svg'" class="img-fluid rounded-circle" alt="Educator" width="80" height="80">
+                <img loading="lazy" [src]="getProfilePictureUrl(educator) || 'assets/default-avatar.svg'" class="img-fluid rounded-circle" alt="Educator" width="80" height="80">
               </a>
               <div class="ms-2">
                 <h6 class="text-dark text-truncate mb-0 title-card__name">
@@ -185,7 +185,7 @@
             <tbody>
               <tr *ngFor="let educator of displayedEducators; trackBy: trackById" (click)="viewDetails(educator)" style="cursor: pointer;">
                 <td>
-                  <img loading="lazy" [src]="educator.profilePicture || 'assets/default-avatar.svg'"
+                  <img loading="lazy" [src]="getProfilePictureUrl(educator) || 'assets/default-avatar.svg'"
                        class="rounded-circle" width="40" height="40" alt="Educator">
                 </td>
                 <td class="name-last">

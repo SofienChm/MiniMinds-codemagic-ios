@@ -11,6 +11,7 @@ import { TitlePage, TitleAction, Breadcrumb } from '../../shared/layouts/title-p
 import { ExportUtil } from '../../shared/utils/export.util';
 import Swal from 'sweetalert2';
 import { SimpleToastService } from '../../core/services/simple-toast.service';
+import { ApiConfig } from '../../core/config/api.config';
 
 @Component({
   selector: 'app-educator',
@@ -283,6 +284,26 @@ export class Educator implements OnInit, OnDestroy {
   // TrackBy function for ngFor performance optimization
   trackById(index: number, item: EducatorModel): number | undefined {
     return item.id;
+  }
+
+  /**
+   * Get the profile picture URL for an educator, preferring file-based URL over Base64
+   */
+  getProfilePictureUrl(educator: EducatorModel | null | undefined): string | null {
+    if (!educator) return null;
+    if (educator.profilePictureUrl && educator.profilePictureUrl.trim() !== '') {
+      return this.getFullUrl(educator.profilePictureUrl);
+    }
+    if (educator.profilePicture && educator.profilePicture.trim() !== '') {
+      return this.getFullUrl(educator.profilePicture);
+    }
+    return null;
+  }
+
+  private getFullUrl(path: string): string {
+    if (!path) return '';
+    if (path.startsWith('http') || path.startsWith('data:')) return path;
+    return `${ApiConfig.HUB_URL}${path.startsWith('/') ? '' : '/'}${path}`;
   }
 
   /**

@@ -11,6 +11,7 @@ import { HeaderSuperadminComponent } from '../../header-superadmin/header';
 import { Location } from '@angular/common';
 
 import Swal from 'sweetalert2';
+import { showSuccessToast } from '../../../../shared/utils/swal.util';
 
 @Component({
   selector: 'app-billing-detail',
@@ -98,12 +99,7 @@ export class BillingDetail implements OnInit, OnDestroy {
         this.billingService.updateStatus(billing.id, newStatus).subscribe({
           next: () => {
             billing.status = newStatus;
-            Swal.fire({
-              icon: 'success',
-              title: this.translate.instant('BILLING.STATUS_UPDATED'),
-              showConfirmButton: false,
-              timer: 1500
-            });
+            showSuccessToast(this.translate.instant('BILLING.STATUS_UPDATED'));
           },
           error: (err) => {
             console.error('Error updating status:', err);
@@ -132,12 +128,7 @@ export class BillingDetail implements OnInit, OnDestroy {
         this.billingService.delete(billing.id).subscribe({
           next: () => {
             this.loadData();
-            Swal.fire({
-              icon: 'success',
-              title: this.translate.instant('BILLING.DELETED'),
-              showConfirmButton: false,
-              timer: 1500
-            });
+            showSuccessToast(this.translate.instant('BILLING.DELETED'));
           },
           error: (err) => {
             console.error('Error deleting billing:', err);

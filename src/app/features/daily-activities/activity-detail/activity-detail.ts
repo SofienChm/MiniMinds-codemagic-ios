@@ -13,6 +13,7 @@ import { PageTitleService } from '../../../core/services/page-title.service';
 import { ImageDownloadService } from '../../../core/services/image-download.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
+import { showSuccessToast } from '../../../shared/utils/swal.util';
 import { ParentChildHeaderSimpleComponent } from "../../../shared/components/parent-child-header-simple/parent-child-header-simple.component";
 
 interface ActivityComment {
@@ -480,13 +481,7 @@ export class ActivityDetail implements OnInit, OnDestroy {
         const result = await this.imageDownloadService.downloadImage(imageData, fileName);
 
         if (result.success) {
-          Swal.fire({
-            icon: 'success',
-            title: this.translate.instant('GALLERY.SUCCESS'),
-            text: this.translate.instant('GALLERY.IMAGE_DOWNLOADED'),
-            timer: 2000,
-            showConfirmButton: false
-          });
+          showSuccessToast(this.translate.instant('GALLERY.SUCCESS'));
         } else {
           Swal.fire({
             icon: 'error',

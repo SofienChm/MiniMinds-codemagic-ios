@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Capacitor } from '@capacitor/core';
 import {
@@ -11,7 +10,6 @@ import {
 import { Preferences } from '@capacitor/preferences';
 import { BehaviorSubject } from 'rxjs';
 import { DeviceTokenService } from './device-token.service';
-import { ApiConfig } from '../config/api.config';
 
 @Injectable({
   providedIn: 'root',
@@ -29,14 +27,7 @@ export class FcmPushNotificationService {
   constructor(
     private router: Router,
     private deviceTokenService: DeviceTokenService,
-    private http: HttpClient
   ) {}
-
-  private debugLog(step: string, message: string): void {
-    console.log(`[Push Debug] ${step}: ${message}`);
-    this.http.post(`${ApiConfig.ENDPOINTS.DEVICE_TOKENS}/debug-log`, { step, message })
-      .subscribe({ error: () => {} });
-  }
 
   /**
    * Check if push notifications are supported (native mobile only)
@@ -70,17 +61,13 @@ export class FcmPushNotificationService {
     try {
       // Request permission
       const permissionStatus = await PushNotifications.checkPermissions();
-      this.debugLog('1-permission-check', `status=${permissionStatus.receive}`);
 
       if (permissionStatus.receive === 'prompt') {
         const result = await PushNotifications.requestPermissions();
-        this.debugLog('2-permission-request', `result=${result.receive}`);
         if (result.receive !== 'granted') {
-          this.debugLog('2-permission-denied', 'User denied push notifications');
           return;
         }
       } else if (permissionStatus.receive !== 'granted') {
-        this.debugLog('2-permission-not-granted', `status=${permissionStatus.receive} — go to Settings to enable`);
         return;
       }
 
@@ -90,14 +77,10 @@ export class FcmPushNotificationService {
       // Set up listeners BEFORE register() so no events are missed
       this.setupListeners();
 
-      this.debugLog('3-registering', 'Calling PushNotifications.register()');
       // Register with FCM
       await PushNotifications.register();
-
-      this.debugLog('4-register-called', 'PushNotifications.register() returned');
     } catch (error) {
       this.initialized = false; // Allow retry on next launch
-      this.debugLog('error', `Exception: ${error}`);
       console.error('Error initializing push notifications:', error);
     }
   }
@@ -108,24 +91,17 @@ export class FcmPushNotificationService {
   private setupListeners(): void {
     // On registration success
     PushNotifications.addListener('registration', async (token: Token) => {
-      this.debugLog('5-registration-event', `platform=${Capacitor.getPlatform()} rawToken=${token.value.substring(0, 20)}...`);
       let registrationToken: string;
 
       if (Capacitor.getPlatform() === 'ios') {
         // On iOS, token.value is the raw APNs device token (NOT an FCM token).
         // Firebase Messaging exchanges it for an FCM token asynchronously.
         // AppDelegate stores the FCM token in UserDefaults via Capacitor Preferences key.
-        this.debugLog('6-waiting-fcm', 'Waiting for Firebase to generate FCM token...');
         const fcmToken = await this.waitForFcmToken();
         if (!fcmToken) {
-          // Read native Swift logs from UserDefaults fallback to diagnose the failure
-          const swiftLogs = (await Preferences.get({ key: 'SwiftLogs' })).value ?? '(empty)';
-          const swiftNetError = (await Preferences.get({ key: 'SwiftNetError' })).value ?? '(none)';
-          this.debugLog('6-fcm-timeout', `FCM token never arrived after 40s. SwiftLogs: ${swiftLogs} | NetError: ${swiftNetError}`);
           console.error('Could not retrieve FCM token on iOS');
           return;
         }
-        this.debugLog('6-fcm-found', `FCM token obtained: ${fcmToken.substring(0, 20)}...`);
         registrationToken = fcmToken;
       } else {
         // On Android, token.value is already the FCM registration token
@@ -142,7 +118,6 @@ export class FcmPushNotificationService {
 
     // On registration error
     PushNotifications.addListener('registrationError', (error: any) => {
-      this.debugLog('5-registration-error', `${JSON.stringify(error)}`);
       console.error('Push notification registration error:', error);
     });
 
@@ -152,9 +127,6 @@ export class FcmPushNotificationService {
       (notification: PushNotificationSchema) => {
         console.log('Push notification received in foreground:', notification);
         this.notificationReceivedSubject.next(notification);
-
-        // You can show an in-app notification here if desired
-        // The notification is automatically displayed by the system on Android
       }
     );
 
@@ -169,13 +141,11 @@ export class FcmPushNotificationService {
         // Navigate to the appropriate page based on notification data
         if (data?.redirectUrl) {
           let url = data.redirectUrl as string;
-          console.log('Navigating to redirectUrl:', url);
 
           // Handle /reclamations/:id - convert to /reclamations?id=:id since there's no detail page
           const reclamationMatch = url.match(/^\/reclamations\/(\d+)$/);
           if (reclamationMatch) {
             url = `/reclamations?id=${reclamationMatch[1]}`;
-            console.log('Converted reclamation URL to:', url);
           }
 
           // Use navigateByUrl for full path navigation (handles /path/to/page, /page?id=123, etc.)
@@ -243,12 +213,9 @@ export class FcmPushNotificationService {
   private async registerTokenWithBackend(token: string): Promise<void> {
     try {
       const platform = this.getPlatform();
-      this.debugLog('7-register-backend', `Sending ${platform} token to backend`);
       await this.deviceTokenService.registerToken(token, platform).toPromise();
-      this.debugLog('8-register-success', `Token registered successfully on ${platform}`);
       console.log('FCM token registered with backend successfully');
     } catch (error: any) {
-      this.debugLog('8-register-failed', `HTTP ${error?.status}: ${JSON.stringify(error?.error)}`);
       console.error('Failed to register FCM token with backend:', JSON.stringify(error));
     }
   }

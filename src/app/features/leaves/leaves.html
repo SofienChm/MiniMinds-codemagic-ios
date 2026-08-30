@@ -105,8 +105,8 @@
                     {{ l.leaveType }}
                   </span>
                 </td>
-                <td>{{ l.startDate | date:'mediumDate' }}</td>
-                <td>{{ l.endDate | date:'mediumDate' }}</td>
+                <td>{{ l.startDate | date:'mediumDate':'':currentLocale }}</td>
+                <td>{{ l.endDate | date:'mediumDate':'':currentLocale }}</td>
                 <td><span class="badge bg-leave">{{ l.days }} {{ 'LEAVES_PAGE.DAYS_COUNT' | translate }}</span></td>
                 <td>
                   <span class="badge" 
@@ -117,7 +117,7 @@
                   </span>
                 </td>
                 <td>{{ l.reason || ('LEAVES_PAGE.NA' | translate) }}</td>
-                <td>{{ l.requestedAt | date:'short' }}</td>
+                <td>{{ l.requestedAt | date:'short':'':currentLocale }}</td>
               </tr>
             </tbody>
           </table>
@@ -234,8 +234,8 @@
                     {{ l.leaveType }}
                   </span>
                 </td>
-                <td>{{ l.startDate | date:'mediumDate' }}</td>
-                <td>{{ l.endDate | date:'mediumDate' }}</td>
+                <td>{{ l.startDate | date:'mediumDate':'':currentLocale }}</td>
+                <td>{{ l.endDate | date:'mediumDate':'':currentLocale }}</td>
                 <td><span class="badge bg-leave">{{ l.days }} {{ 'LEAVES_PAGE.DAYS_COUNT' | translate }}</span></td>
                 <td>
                   <span class="badge" 
@@ -246,7 +246,7 @@
                   </span>
                 </td>
                 <td>{{ l.reason || ('LEAVES_PAGE.NA' | translate) }}</td>
-                <td>{{ l.requestedAt | date:'short' }}</td>
+                <td>{{ l.requestedAt | date:'short':'':currentLocale }}</td>
                 <td>
                   <div class="d-flex gap-1">
                     <button class="btn btn-sm" 

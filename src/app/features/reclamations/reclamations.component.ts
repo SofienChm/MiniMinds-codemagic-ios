@@ -164,10 +164,25 @@ export class ReclamationsComponent implements OnInit, OnDestroy {
   }
 
   selectReclamation(reclamation: Reclamation): void {
+    const wasInSentTab = this.activeTab === 'sent';
     this.selectedReclamation = reclamation;
     this.showModal = true;
     this.showNewReclamationModal = false;
     this.activeTab = null;
+
+    // When parent opens a resolved reclamation they sent, call the API to mark it as read by parent
+    if (this.isParent && wasInSentTab && reclamation.isResolved && !reclamation.isReadByParent && reclamation.id) {
+      this.reclamationsService.getReclamation(reclamation.id).subscribe({
+        next: (updated) => {
+          this.selectedReclamation = updated;
+          const idx = this.sentReclamations.findIndex(r => r.id === updated.id);
+          if (idx > -1) {
+            this.sentReclamations[idx] = updated;
+          }
+        },
+        error: (err) => console.error('Error marking reclamation as read:', err)
+      });
+    }
   }
 
   closeModal(): void {

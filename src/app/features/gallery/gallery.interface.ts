@@ -1,3 +1,9 @@
+export interface TaggedChild {
+  childId: number;
+  firstName?: string;
+  lastName?: string;
+}
+
 export interface Photo {
   id: number;
   fileName: string;
@@ -9,8 +15,9 @@ export interface Photo {
   category: string;
   relatedEntityType?: string;
   relatedEntityId?: number;
-  childId: number;
+  childId?: number;
   childName?: string;
+  taggedChildren?: TaggedChild[];
   uploadedById?: string;
   uploadedByName?: string;
   // File-based URLs (preferred)
@@ -37,7 +44,7 @@ export interface PhotosByChildResponse extends PhotosResponse {
 
 export interface UploadPhotoRequest {
   file: File;
-  childId: number;
+  childId?: number;
   title?: string;
   description?: string;
   category?: string;

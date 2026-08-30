@@ -10,6 +10,7 @@ export interface EducatorModel {
   specialization?: string;
   salary: number;
   profilePicture?: string;
+  profilePictureUrl?: string; // File-based URL (preferred)
   isActive?: boolean;
   password?: string; // Only used for creation
 }

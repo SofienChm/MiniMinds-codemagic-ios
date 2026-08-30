@@ -43,7 +43,7 @@
             >
             <div class="event-upper">
               <div class="event-avatar" >
-                <img loading="lazy" class="banner-img img-fluid" [src]="event.image || 'assets/dark.png'" alt="">
+                <img loading="lazy" class="banner-img img-fluid" [src]="getEventImageUrl(event)" alt="">
               </div>
               <div class="eventparent-content">
                 <div class="eventparent-header">
@@ -186,7 +186,7 @@
             <button class="link-to-event" (click)="viewEventDetail(event)">
 
               <p class="category-tag popular">{{ event.type }}</p>
-              <img loading="lazy" class="banner-img" [src]="event.image || 'assets/dark.png'" alt="">
+              <img loading="lazy" class="banner-img" [src]="getEventImageUrl(event)" alt="">
             </button>
           </div>
           <div class="card-body">

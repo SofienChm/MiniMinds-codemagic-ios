@@ -307,6 +307,7 @@
                   <th>{{ 'MESSAGES_PAGE.SUBJECT' | translate }}</th>
                   <th>{{ 'MESSAGES_PAGE.CONTENT' | translate }}</th>
                   <th>{{ 'MESSAGES_PAGE.DATE' | translate }}</th>
+                  <th *ngIf="activeTab === 'sent'">{{ 'MESSAGES_PAGE.SEEN' | translate }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -318,6 +319,12 @@
                   <td class="subject-cell" (click)="selectMessage(message)">{{ message.subject }}</td>
                   <td class="content-cell" (click)="selectMessage(message)">{{ message.content.substring(0, 50) }}{{ message.content.length > 50 ? '...' : '' }}</td>
                   <td class="date-cell" (click)="selectMessage(message)">{{ formatDate(message.sentAt) }}</td>
+                  <td *ngIf="activeTab === 'sent'" class="seen-cell" (click)="selectMessage(message)">
+                    <span class="seen-badge" [class.seen]="message.isRead" [class.not-seen]="!message.isRead">
+                      <i class="bi" [class.bi-eye]="message.isRead" [class.bi-eye-slash]="!message.isRead"></i>
+                      {{ message.isRead ? ('MESSAGES_PAGE.SEEN' | translate) : ('MESSAGES_PAGE.NOT_SEEN' | translate) }}
+                    </span>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -345,7 +352,8 @@
                 <div class="info-item">
                   <span class="info-label">{{ 'MESSAGES_PAGE.STATUS' | translate }}:</span>
                   <span class="status-badge" [class.unread]="!selectedMessage.isRead" [class.read]="selectedMessage.isRead">
-                    {{ selectedMessage.isRead ? ('MESSAGES_PAGE.READ' | translate) : ('MESSAGES_PAGE.UNREAD' | translate) }}
+                    <i class="bi" [class.bi-eye]="selectedMessage.isRead" [class.bi-eye-slash]="!selectedMessage.isRead"></i>
+                    {{ selectedMessage.isRead ? ('MESSAGES_PAGE.SEEN' | translate) : ('MESSAGES_PAGE.NOT_SEEN' | translate) }}
                   </span>
                 </div>
               </div>

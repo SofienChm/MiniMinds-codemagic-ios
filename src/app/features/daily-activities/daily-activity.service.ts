@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { DailyActivity } from './daily-activity.interface';
 import { ApiConfig } from '../../core/config/api.config';
 
@@ -21,15 +20,10 @@ export class DailyActivityService {
   }
 
   getActivitiesByChild(childId: number, date?: string): Observable<DailyActivity[]> {
-    if (date) {
-      return this.http.get<DailyActivity[]>(`${this.apiUrl}/ByDate?date=${date}`)
-        .pipe(
-          map((activities: DailyActivity[]) => 
-            activities.filter(a => a.childId === childId)
-          )
-        );
-    }
-    return this.http.get<DailyActivity[]>(`${this.apiUrl}/ByChild/${childId}`);
+    const url = date
+      ? `${this.apiUrl}/ByChild/${childId}?date=${date}`
+      : `${this.apiUrl}/ByChild/${childId}`;
+    return this.http.get<DailyActivity[]>(url);
   }
 
   getActivity(id: number): Observable<DailyActivity> {

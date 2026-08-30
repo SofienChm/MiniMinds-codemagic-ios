@@ -1,71 +1,67 @@
 <div class="container-fluid mt-4">
-  <app-title-page 
-    title="Add New Class" 
-    subtitle="Create a new class"
+  <app-title-page
+    [title]="'CLASSES.ADD_NEW_CLASS' | translate"
+    [subtitle]="'CLASSES.ADD_SUBTITLE' | translate"
     icon="bi bi-plus-square"
-    [breadcrumbs]="[
-      { label: 'Dashboard', url: '/dashboard' },
-      { label: 'Classes', url: '/classes' },
-      { label: 'Add Class' }
-    ]">
+    [breadcrumbs]="breadcrumbs">
   </app-title-page>
 
   <div class="card card-general">
     <div class="card-header">
-      <h5>Class Information</h5>
+      <h5>{{ 'CLASSES.CLASS_INFORMATION' | translate }}</h5>
     </div>
     <div class="card-body">
       <form (ngSubmit)="onSubmit()">
         <div class="row">
           <div class="col-md-6 mb-3">
-            <label class="form-label">Class Name *</label>
+            <label class="form-label">{{ 'CLASSES.CLASS_NAME' | translate }} *</label>
             <input type="text" class="form-control" [(ngModel)]="classData.name" name="name" required>
           </div>
           <div class="col-md-6 mb-3">
-            <label class="form-label">Capacity *</label>
+            <label class="form-label">{{ 'CLASSES.CAPACITY' | translate }} *</label>
             <input type="number" class="form-control" [(ngModel)]="classData.capacity" name="capacity" required min="1">
           </div>
         </div>
         <div class="row">
           <div class="col-md-6 mb-3">
-            <label class="form-label">Minimum Age *</label>
+            <label class="form-label">{{ 'CLASSES.AGE_GROUP_MIN' | translate }} *</label>
             <input type="number" class="form-control" [(ngModel)]="classData.ageGroupMin" name="ageGroupMin" required min="0">
           </div>
           <div class="col-md-6 mb-3">
-            <label class="form-label">Maximum Age *</label>
+            <label class="form-label">{{ 'CLASSES.AGE_GROUP_MAX' | translate }} *</label>
             <input type="number" class="form-control" [(ngModel)]="classData.ageGroupMax" name="ageGroupMax" required min="0">
           </div>
         </div>
         <div class="row">
           <div class="col-md-12 mb-3">
-            <label class="form-label">Assign Teacher (Optional)</label>
+            <label class="form-label">{{ 'CLASSES.ASSIGN_TEACHER_OPTIONAL' | translate }}</label>
             <select class="form-select" [(ngModel)]="classData.teacherId" name="teacherId">
-              <option [ngValue]="null">-- No Teacher Assigned --</option>
+              <option [ngValue]="null">{{ 'CLASSES.NO_TEACHER_ASSIGNED' | translate }}</option>
               <option *ngFor="let educator of educators" [ngValue]="educator.id">
                 {{ educator.firstName }} {{ educator.lastName }} ({{ educator.email }})
               </option>
             </select>
-            <small class="form-text text-muted">You can assign a teacher now or later. Children can only be assigned to classes that have a teacher.</small>
+            <small class="form-text text-muted">{{ 'CLASSES.TEACHER_HINT_ADD' | translate }}</small>
           </div>
         </div>
         <div class="mb-3">
-          <label class="form-label">Schedule</label>
-          <input type="text" class="form-control" [(ngModel)]="classData.schedule" name="schedule" placeholder="e.g., Mon-Fri 9:00 AM - 3:00 PM">
+          <label class="form-label">{{ 'CLASSES.SCHEDULE' | translate }}</label>
+          <input type="text" class="form-control" [(ngModel)]="classData.schedule" name="schedule" [placeholder]="'CLASSES.SCHEDULE_PLACEHOLDER' | translate">
         </div>
         <div class="mb-3">
-          <label class="form-label">Description</label>
-          <textarea class="form-control" [(ngModel)]="classData.description" name="description" rows="3" placeholder="Enter class description"></textarea>
+          <label class="form-label">{{ 'CLASSES.DESCRIPTION' | translate }}</label>
+          <textarea class="form-control" [(ngModel)]="classData.description" name="description" rows="3" [placeholder]="'CLASSES.DESCRIPTION_PLACEHOLDER' | translate"></textarea>
         </div>
         <div class="form-check mb-3">
           <input class="form-check-input" type="checkbox" [(ngModel)]="classData.isActive" name="isActive" id="isActive">
-          <label class="form-check-label" for="isActive">Active</label>
+          <label class="form-check-label" for="isActive">{{ 'CLASSES.ACTIVE' | translate }}</label>
         </div>
         <div class="d-flex gap-2">
           <button type="submit" class="custom-btn-2 btn-add-global-2" [disabled]="saving">
             <span *ngIf="saving" class="spinner-border spinner-border-sm me-2"></span>
-            {{ saving ? 'Creating...' : 'Create Class' }}
+            {{ saving ? ('CLASSES.CREATING' | translate) : ('CLASSES.CREATE_CLASS' | translate) }}
           </button>
-          <button type="button" class="btn custom-btn-2 btn-cancel-2" (click)="cancel()" [disabled]="saving">Cancel</button>
+          <button type="button" class="btn custom-btn-2 btn-cancel-2" (click)="cancel()" [disabled]="saving">{{ 'CLASSES.CANCEL' | translate }}</button>
         </div>
       </form>
     </div>

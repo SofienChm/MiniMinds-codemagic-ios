@@ -111,6 +111,30 @@ export class NotificationsComponent implements OnInit {
     });
   }
 
+  private readonly NOTIFICATION_TYPE_KEYS: Record<string, string> = {
+    'general': 'NOTIFICATIONS_PAGE.TYPES.GENERAL',
+    'event': 'NOTIFICATIONS_PAGE.TYPES.EVENT',
+    'message': 'NOTIFICATIONS_PAGE.TYPES.MESSAGE',
+    'payment': 'NOTIFICATIONS_PAGE.TYPES.PAYMENT',
+    'feepayment': 'NOTIFICATIONS_PAGE.TYPES.PAYMENT',
+    'fee': 'NOTIFICATIONS_PAGE.TYPES.FEE',
+    'system': 'NOTIFICATIONS_PAGE.TYPES.SYSTEM',
+    'dailyactivity': 'NOTIFICATIONS_PAGE.TYPES.DAILY_ACTIVITY',
+    'attendance': 'NOTIFICATIONS_PAGE.TYPES.ATTENDANCE',
+    'activities': 'NOTIFICATIONS_PAGE.TYPES.ACTIVITY',
+    'reclamation': 'NOTIFICATIONS_PAGE.TYPES.RECLAMATION'
+  };
+
+  getNotificationTypeLabel(type: string): string {
+    if (!type) return '';
+    const key = this.NOTIFICATION_TYPE_KEYS[type.toLowerCase()];
+    if (key) {
+      const translated = this.translate.instant(key);
+      return translated === key ? type : translated;
+    }
+    return type;
+  }
+
   getNotificationIcon(type: string): string {
     const icons: { [key: string]: string } = {
       'info': 'bi bi-info-circle-fill',

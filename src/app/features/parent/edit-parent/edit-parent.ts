@@ -15,6 +15,7 @@ import { Breadcrumb, TitleAction, TitlePage } from '../../../shared/layouts/titl
 import { ImageCropperModalComponent } from '../../../shared/components/image-cropper-modal/image-cropper-modal.component';
 import { PageTitleService } from '../../../core/services/page-title.service';
 import Swal from 'sweetalert2';
+import { showSuccessToast } from '../../../shared/utils/swal.util';
 import { SimpleToastService } from '../../../core/services/simple-toast.service';
 
 @Component({
@@ -460,13 +461,7 @@ export class EditParent implements OnInit, OnDestroy {
           this.parentService.deleteParentProfilePicture(this.parentId).subscribe({
             next: () => {
               this.resetFileInput();
-              Swal.fire({
-                icon: 'success',
-                title: this.translate.instant('MESSAGES.SUCCESS'),
-                text: this.translate.instant('MESSAGES.PROFILE_PICTURE_DELETED'),
-                timer: 2000,
-                showConfirmButton: false
-              });
+              showSuccessToast(this.translate.instant('MESSAGES.SUCCESS'));
             },
             error: (error) => {
               const sanitizedMessage = this.sanitizeLogMessage(error?.message);
@@ -639,14 +634,8 @@ export class EditParent implements OnInit, OnDestroy {
         this.authService.deleteAccount().subscribe({
           next: () => {
             this.deleting = false;
-            Swal.fire({
-              icon: 'success',
-              title: this.translate.instant('SETTINGS.ACCOUNT_DELETED'),
-              text: this.translate.instant('SETTINGS.ACCOUNT_DELETED_DESC'),
-              allowOutsideClick: false
-            }).then(() => {
-              this.router.navigate(['/login']);
-            });
+            showSuccessToast(this.translate.instant('SETTINGS.ACCOUNT_DELETED'));
+            this.router.navigate(['/login']);
           },
           error: (error) => {
             this.deleting = false;

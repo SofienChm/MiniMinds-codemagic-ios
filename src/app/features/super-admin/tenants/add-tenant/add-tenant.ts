@@ -52,6 +52,7 @@ export class AddTenant implements OnInit {
     { value: 'EUR', label: 'EUR (\u20AC)' },
     { value: 'GBP', label: 'GBP (\u00A3)' },
     { value: 'CAD', label: 'CAD ($)' },
+    { value: 'TND', label: 'TND (\u062F.\u062A)' },
     { value: 'AUD', label: 'AUD ($)' },
     { value: 'JPY', label: 'JPY (\u00A5)' }
   ];
@@ -62,6 +63,14 @@ export class AddTenant implements OnInit {
     { value: 'es', label: 'Espa\u00F1ol' },
     { value: 'de', label: 'Deutsch' },
     { value: 'ar', label: '\u0627\u0644\u0639\u0631\u0628\u064A\u0629' }
+  ];
+
+  countries = [
+    { value: 'US', label: 'United States' },
+    { value: 'FR', label: 'France' },
+    { value: 'IT', label: 'Italy' },
+    { value: 'CA', label: 'Canada' },
+    { value: 'TN', label: 'Tunisia' }
   ];
 
   constructor(
@@ -123,7 +132,8 @@ export class AddTenant implements OnInit {
       email: tenant.email || '',
       timezone: tenant.timezone || 'UTC',
       currency: tenant.currency || 'USD',
-      language: tenant.language || 'en'
+      language: tenant.language || 'en',
+      country: tenant.country || 'US'
     });
   }
 
@@ -137,7 +147,8 @@ export class AddTenant implements OnInit {
       email: ['', [Validators.email, Validators.maxLength(255)]],
       timezone: ['UTC'],
       currency: ['USD'],
-      language: ['en']
+      language: ['en'],
+      country: ['US']
     };
 
     // Only add admin fields in create mode

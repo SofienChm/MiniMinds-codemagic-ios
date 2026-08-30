@@ -11,6 +11,7 @@ import { EducatorService } from '../educator/educator.service';
 import { EducatorModel } from '../educator/educator.interface';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
+import { showSuccessToast } from '../../shared/utils/swal.util';
 
 @Component({
   selector: 'app-classes',
@@ -138,20 +139,14 @@ export class ClassesComponent implements OnInit, OnDestroy {
         next: () => {
           this.closeEditModal();
           this.loadClasses();
-          Swal.fire({
-            icon: 'success',
-            title: 'Success!',
-            text: 'Class updated successfully',
-            timer: 2000,
-            showConfirmButton: false
-          });
+          showSuccessToast(this.translate.instant('CLASSES.UPDATE_SUCCESS'));
         },
         error: (error) => {
           console.error('Error updating class:', error);
           Swal.fire({
             icon: 'error',
-            title: 'Error!',
-            text: 'Failed to update class'
+            title: this.translate.instant('MESSAGES.ERROR'),
+            text: this.translate.instant('CLASSES.UPDATE_ERROR')
           });
         }
       });
@@ -160,13 +155,14 @@ export class ClassesComponent implements OnInit, OnDestroy {
 
   deleteClass(id: number) {
     Swal.fire({
-      title: 'Are you sure?',
-      text: 'Do you want to delete this class?',
+      title: this.translate.instant('COMMON.ARE_YOU_SURE'),
+      text: this.translate.instant('CLASSES.DELETE_CONFIRM_TEXT'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
       cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Yes, delete it!'
+      confirmButtonText: this.translate.instant('CLASSES.YES_DELETE'),
+      cancelButtonText: this.translate.instant('CLASSES.CANCEL')
     }).then((result) => {
       if (result.isConfirmed) {
         this.classesService.deleteClass(id).subscribe({
@@ -174,8 +170,8 @@ export class ClassesComponent implements OnInit, OnDestroy {
             this.loadClasses();
             Swal.fire({
               icon: 'success',
-              title: 'Deleted!',
-              text: 'Class has been deleted',
+              title: this.translate.instant('CLASSES.DELETED'),
+              text: this.translate.instant('CLASSES.DELETE_SUCCESS'),
               timer: 2000,
               showConfirmButton: false
             });
@@ -184,8 +180,8 @@ export class ClassesComponent implements OnInit, OnDestroy {
             console.error('Error deleting class:', error);
             Swal.fire({
               icon: 'error',
-              title: 'Error!',
-              text: 'Failed to delete class'
+              title: this.translate.instant('MESSAGES.ERROR'),
+              text: this.translate.instant('CLASSES.DELETE_ERROR')
             });
           }
         });

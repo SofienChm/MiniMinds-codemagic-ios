@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { PasswordResetService } from '../../../core/services/password-reset.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import Swal from 'sweetalert2';
+import { showSuccessToast } from '../../../shared/utils/swal.util';
 
 @Component({
   selector: 'app-reset-password',
@@ -61,11 +62,7 @@ export class ResetPasswordComponent implements OnInit {
       this.passwordResetService.resetPassword(this.email, newPassword)
         .subscribe({
           next: (response) => {
-            Swal.fire(
-              this.translate.instant('RESET_PASSWORD.SUCCESS_TITLE'),
-              this.translate.instant('RESET_PASSWORD.SUCCESS_MESSAGE'),
-              'success'
-            );
+            showSuccessToast(this.translate.instant('RESET_PASSWORD.SUCCESS_TITLE'));
             this.router.navigate(['/login']);
           },
           error: (error) => {

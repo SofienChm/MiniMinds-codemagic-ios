@@ -1,7 +1,7 @@
 <div class="container-fluid mt-4">
-  <app-title-page 
-    title="Class Details" 
-    subtitle="View class information"
+  <app-title-page
+    [title]="'CLASSES.CLASS_DETAILS' | translate"
+    [subtitle]="'CLASSES.CLASS_DETAILS_SUBTITLE' | translate"
     icon="bi bi-backpack2"
     [breadcrumbs]="breadcrumbs"
     [actions]="titleActions">
@@ -9,7 +9,7 @@
 
   <div *ngIf="loading" class="text-center">
     <div class="spinner-border" role="status">
-      <span class="visually-hidden">Loading...</span>
+      <span class="visually-hidden">{{ 'CLASSES.LOADING' | translate }}</span>
     </div>
   </div>
 
@@ -18,30 +18,30 @@
       <div class="card card-general card-detail_pages border-white">
         <div class="card-header">
           <div class="d-flex align-items-center flex-wrap row-gap-3">
-            
+
             <div class="overflow-hidden">
               <span class="badge d-inline-flex align-items-center mb-2" [class.badge-active]="classData.isActive" [class.badge-inactive]="!classData.isActive">
-                <i class="ti ti-circle-filled fs-5 me-1"></i>{{ classData.isActive ? 'Active' : 'Inactive' }}
+                <i class="ti ti-circle-filled fs-5 me-1"></i>{{ classData.isActive ? ('CLASSES.ACTIVE' | translate) : ('CLASSES.INACTIVE' | translate) }}
               </span>
               <h5 class="mb-1 text-truncate">{{ classData.name }}</h5>
-              <p class="age">Age: {{ classData.ageGroupMin }} - {{ classData.ageGroupMax }} years</p>
+              <p class="age">{{ 'CLASSES.AGE' | translate }}: {{ classData.ageGroupMin }} - {{ classData.ageGroupMax }} {{ 'CLASSES.YEARS' | translate }}</p>
             </div>
           </div>
         </div>
 
         <div class="card-body">
-          <h5 class="mb-3 title-body">Basic Information</h5>
+          <h5 class="mb-3 title-body">{{ 'CLASSES.BASIC_INFO' | translate }}</h5>
           <dl class="row mb-0 table">
-            <dt class="col-6 fw-medium text-dark mb-3">Class Name</dt>
+            <dt class="col-6 fw-medium text-dark mb-3">{{ 'CLASSES.CLASS_NAME' | translate }}</dt>
             <dd class="col-6 mb-3">{{ classData.name }}</dd>
-            <dt class="col-6 fw-medium text-dark mb-3">Age Group</dt>
-            <dd class="col-6 mb-3">{{ classData.ageGroupMin }} - {{ classData.ageGroupMax }} years</dd>
-            <dt class="col-6 fw-medium text-dark mb-3">Capacity</dt>
-            <dd class="col-6 mb-3">{{ classData.capacity }} students</dd>
-            <dt class="col-6 fw-medium text-dark mb-3">Enrolled</dt>
-            <dd class="col-6 mb-3">{{ classData.enrollmentCount || 0 }} students</dd>
-            <dt class="col-6 fw-medium text-dark mb-3">Status</dt>
-            <dd class="col-6 mb-3">{{ classData.isActive ? 'Active' : 'Inactive' }}</dd>
+            <dt class="col-6 fw-medium text-dark mb-3">{{ 'CLASSES.AGE_GROUP' | translate }}</dt>
+            <dd class="col-6 mb-3">{{ classData.ageGroupMin }} - {{ classData.ageGroupMax }} {{ 'CLASSES.YEARS' | translate }}</dd>
+            <dt class="col-6 fw-medium text-dark mb-3">{{ 'CLASSES.CAPACITY' | translate }}</dt>
+            <dd class="col-6 mb-3">{{ classData.capacity }} {{ 'CLASSES.STUDENTS' | translate }}</dd>
+            <dt class="col-6 fw-medium text-dark mb-3">{{ 'CLASSES.ENROLLED' | translate }}</dt>
+            <dd class="col-6 mb-3">{{ classData.enrollmentCount || 0 }} {{ 'CLASSES.STUDENTS' | translate }}</dd>
+            <dt class="col-6 fw-medium text-dark mb-3">{{ 'CLASSES.STATUS' | translate }}</dt>
+            <dd class="col-6 mb-3">{{ classData.isActive ? ('CLASSES.ACTIVE' | translate) : ('CLASSES.INACTIVE' | translate) }}</dd>
           </dl>
         </div>
       </div>
@@ -50,11 +50,11 @@
     <div class="col-md-8">
       <div class="card card-general">
         <div class="card-header">
-          <h5>Class Information</h5>
+          <h5>{{ 'CLASSES.CLASS_INFORMATION' | translate }}</h5>
         </div>
         <div class="card-body">
           <div class="row mb-3">
-            <div class="col-sm-4"><strong>Teachers:</strong></div>
+            <div class="col-sm-4"><strong>{{ 'CLASSES.TEACHERS' | translate }}:</strong></div>
             <div class="col-sm-8">
               <div *ngIf="assignedTeachers.length > 0">
                 <div *ngFor="let teacher of assignedTeachers" class="d-inline-block me-2 mb-2">
@@ -65,20 +65,20 @@
                 </div>
               </div>
               <button class="action-btn custom-btn-2 btn-add-global-2" (click)="openAssignTeacherModal()">
-                <i class="bi bi-plus-square me-1"></i>{{ assignedTeachers.length > 0 ? 'Add More' : 'Assign Teachers' }}
+                <i class="bi bi-plus-square me-1"></i>{{ assignedTeachers.length > 0 ? ('CLASSES.ADD_MORE' | translate) : ('CLASSES.ASSIGN_TEACHERS' | translate) }}
               </button>
             </div>
           </div>
           <div class="row mb-3" *ngIf="classData.schedule">
-            <div class="col-sm-4"><strong>Schedule:</strong></div>
+            <div class="col-sm-4"><strong>{{ 'CLASSES.SCHEDULE' | translate }}:</strong></div>
             <div class="col-sm-8">{{ classData.schedule }}</div>
           </div>
           <div class="row mb-3" *ngIf="classData.description">
-            <div class="col-sm-4"><strong>Description:</strong></div>
+            <div class="col-sm-4"><strong>{{ 'CLASSES.DESCRIPTION' | translate }}:</strong></div>
             <div class="col-sm-8">{{ classData.description }}</div>
           </div>
           <div class="row mb-3">
-            <div class="col-sm-4"><strong>Available Spots:</strong></div>
+            <div class="col-sm-4"><strong>{{ 'CLASSES.AVAILABLE_SPOTS' | translate }}:</strong></div>
             <div class="col-sm-8">{{ classData.capacity - (classData.enrollmentCount || 0) }}</div>
           </div>
         </div>
@@ -86,9 +86,9 @@
 
       <div class="card card-general mt-3">
         <div class="card-header d-flex justify-content-between align-items-center">
-          <h5>Enrolled Children</h5>
+          <h5>{{ 'CLASSES.ENROLLED_CHILDREN' | translate }}</h5>
           <button class="action-btn custom-btn-2 btn-add-global-2" (click)="openAddChildModal()">
-            <i class="bi bi-plus-square me-1"></i>Add Child
+            <i class="bi bi-plus-square me-1"></i>{{ 'CLASSES.ADD_CHILD' | translate }}
           </button>
         </div>
         <div class="card-body">
@@ -102,45 +102,45 @@
                   </div>
                   <div>
                     <h6 class="mb-1">{{ child.firstName }} {{ child.lastName }}</h6>
-                    <p class="text-muted mb-0">Age: {{ child.dateOfBirth | date:'yyyy' }}</p>
+                    <p class="text-muted mb-0">{{ 'CLASSES.AGE' | translate }}: {{ child.dateOfBirth | date:'yyyy' }}</p>
                   </div>
                 </div>
                 <div class="col-md-4 text-end">
                   <button class="action-btn custom-btn-2 btn-remove-2" (click)="removeChild(child.id)">
-                    <i class="bi bi-trash3"></i> Remove
+                    <i class="bi bi-trash3"></i> {{ 'CLASSES.REMOVE' | translate }}
                   </button>
                 </div>
               </div>
             </div>
           </div>
           <div *ngIf="enrolledChildren.length === 0" class="text-muted text-center py-3">
-            <p>No children enrolled yet</p>
+            <p>{{ 'CLASSES.NO_CHILDREN' | translate }}</p>
           </div>
         </div>
       </div>
 
       <div class="card card-general mt-3">
         <div class="card-header">
-          <h5>Statistics</h5>
+          <h5>{{ 'CLASSES.STATISTICS' | translate }}</h5>
         </div>
         <div class="card-body">
           <div class="row text-center">
             <div class="col-md-4">
               <div class="p-3">
                 <h3 class="text-primary">{{ classData.enrollmentCount || 0 }}</h3>
-                <p class="text-muted mb-0">Enrolled Students</p>
+                <p class="text-muted mb-0">{{ 'CLASSES.ENROLLED_STUDENTS' | translate }}</p>
               </div>
             </div>
             <div class="col-md-4">
               <div class="p-3">
                 <h3 class="text-success">{{ classData.capacity }}</h3>
-                <p class="text-muted mb-0">Total Capacity</p>
+                <p class="text-muted mb-0">{{ 'CLASSES.TOTAL_CAPACITY' | translate }}</p>
               </div>
             </div>
             <div class="col-md-4">
               <div class="p-3">
                 <h3 class="text-info">{{ classData.capacity - (classData.enrollmentCount || 0) }}</h3>
-                <p class="text-muted mb-0">Available Spots</p>
+                <p class="text-muted mb-0">{{ 'CLASSES.AVAILABLE_SPOTS' | translate }}</p>
               </div>
             </div>
           </div>
@@ -155,18 +155,20 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Add Child to Class</h5>
+        <h5 class="modal-title">{{ 'CLASSES.ADD_CHILD_TO_CLASS' | translate }}</h5>
         <button type="button" class="btn-close" (click)="closeAddChildModal()"></button>
       </div>
       <div class="modal-body" style="overflow: visible;">
         <div class="mb-3">
-          <label class="form-label">Select Child</label>
+          <label class="form-label">{{ 'CLASSES.SELECT_CHILDREN' | translate }}</label>
           <ng-select
             [items]="availableChildren"
+            [multiple]="true"
+            [closeOnSelect]="false"
             bindLabel="firstName"
             bindValue="id"
-            [(ngModel)]="selectedChildId"
-            [placeholder]="'Choose a child...'"
+            [(ngModel)]="selectedChildIds"
+            [placeholder]="'CLASSES.CHOOSE_CHILDREN' | translate"
             [searchable]="true"
             [clearable]="true">
             <ng-template ng-label-tmp let-item="item">
@@ -194,8 +196,8 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="action-btn custom-btn-2 btn-cancel-2" (click)="closeAddChildModal()">Cancel</button>
-        <button type="button" class="action-btn custom-btn-2 btn-view-global-2" (click)="addChildToClass()" [disabled]="!selectedChildId">Add Child</button>
+        <button type="button" class="action-btn custom-btn-2 btn-cancel-2" (click)="closeAddChildModal()">{{ 'CLASSES.CANCEL' | translate }}</button>
+        <button type="button" class="action-btn custom-btn-2 btn-view-global-2" (click)="addChildToClass()" [disabled]="selectedChildIds.length === 0">{{ 'CLASSES.ADD_CHILD' | translate }}</button>
       </div>
     </div>
   </div>
@@ -207,19 +209,19 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Assign Teacher</h5>
+        <h5 class="modal-title">{{ 'CLASSES.ASSIGN_TEACHER' | translate }}</h5>
         <button type="button" class="btn-close" (click)="closeAssignTeacherModal()"></button>
       </div>
       <div class="modal-body" style="overflow: visible;">
         <div class="mb-3">
-          <label class="form-label">Select Teachers (Multiple)</label>
+          <label class="form-label">{{ 'CLASSES.SELECT_TEACHERS_MULTIPLE' | translate }}</label>
           <ng-select
             [items]="availableTeachers"
             [multiple]="true"
             bindLabel="firstName"
             bindValue="id"
             [(ngModel)]="selectedTeacherIds"
-            [placeholder]="'Select teachers...'"
+            [placeholder]="'CLASSES.SELECT_TEACHERS' | translate"
             [closeOnSelect]="false"
             [searchable]="true"
             [clearable]="true">
@@ -248,8 +250,8 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="action-btn custom-btn-2 btn-cancel-2" (click)="closeAssignTeacherModal()">Cancel</button>
-        <button type="button" class="action-btn custom-btn-2 btn-view-global-2" (click)="assignTeacher()" [disabled]="selectedTeacherIds.length === 0">Assign Teachers</button>
+        <button type="button" class="action-btn custom-btn-2 btn-cancel-2" (click)="closeAssignTeacherModal()">{{ 'CLASSES.CANCEL' | translate }}</button>
+        <button type="button" class="action-btn custom-btn-2 btn-view-global-2" (click)="assignTeacher()" [disabled]="selectedTeacherIds.length === 0">{{ 'CLASSES.ASSIGN_TEACHERS' | translate }}</button>
       </div>
     </div>
   </div>

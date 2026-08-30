@@ -12,6 +12,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { PageTitleService } from '../../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
+import { showSuccessToast } from '../../../shared/utils/swal.util';
 
 @Component({
   selector: 'app-class-detail',
@@ -27,7 +28,7 @@ export class ClassDetailComponent implements OnInit, AfterViewInit, OnDestroy {
   showAddChildModal = false;
   availableChildren: any[] = [];
   enrolledChildren: any[] = [];
-  selectedChildId: number | null = null;
+  selectedChildIds: number[] = [];
   showAssignTeacherModal = false;
   availableTeachers: any[] = [];
   selectedTeacherIds: number[] = [];
@@ -76,12 +77,6 @@ export class ClassDetailComponent implements OnInit, AfterViewInit, OnDestroy {
         class: 'btn-btn-outline-secondary btn-cancel-global',
         icon: 'bi bi-arrow-left',
         action: () => this.goBack()
-      },
-      {
-        label: this.translate.instant('CLASSES.EDIT_CLASS'),
-        class: 'btn-edit-global-2',
-        icon: 'bi bi-pencil-square',
-        action: () => this.router.navigate(['/classes/edit', this.classId])
       }
     ];
   }
@@ -124,7 +119,7 @@ export class ClassDetailComponent implements OnInit, AfterViewInit, OnDestroy {
 
   closeAddChildModal() {
     this.showAddChildModal = false;
-    this.selectedChildId = null;
+    this.selectedChildIds = [];
   }
 
   loadAvailableChildren() {
@@ -138,27 +133,21 @@ export class ClassDetailComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   addChildToClass() {
-    if (!this.selectedChildId) return;
+    if (!this.selectedChildIds || this.selectedChildIds.length === 0) return;
 
-    const payload = { classId: this.classId, childId: this.selectedChildId };
+    const payload = { classId: this.classId, childIds: this.selectedChildIds };
     this.http.post(`${ApiConfig.ENDPOINTS.CLASSES}/enroll`, payload).subscribe({
       next: () => {
         this.closeAddChildModal();
         this.loadClass();
-        Swal.fire({
-          icon: 'success',
-          title: 'Success!',
-          text: 'Child enrolled successfully',
-          timer: 2000,
-          showConfirmButton: false
-        });
+        showSuccessToast(this.translate.instant('CLASSES.ENROLL_SUCCESS'));
       },
       error: (error) => {
         console.error('Error enrolling child:', error);
         Swal.fire({
           icon: 'error',
-          title: 'Error!',
-          text: 'Failed to enroll child'
+          title: this.translate.instant('MESSAGES.ERROR'),
+          text: this.translate.instant('CLASSES.ENROLL_ERROR')
         });
       }
     });
@@ -195,8 +184,8 @@ export class ClassDetailComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.selectedTeacherIds || this.selectedTeacherIds.length === 0) {
       Swal.fire({
         icon: 'warning',
-        title: 'Warning',
-        text: 'Please select at least one teacher'
+        title: this.translate.instant('CLASSES.WARNING'),
+        text: this.translate.instant('CLASSES.SELECT_TEACHER_WARNING_TEXT')
       });
       return;
     }
@@ -206,20 +195,14 @@ export class ClassDetailComponent implements OnInit, AfterViewInit, OnDestroy {
       next: () => {
         this.closeAssignTeacherModal();
         this.loadClass();
-        Swal.fire({
-          icon: 'success',
-          title: 'Success!',
-          text: 'Teacher(s) assigned successfully',
-          timer: 2000,
-          showConfirmButton: false
-        });
+        showSuccessToast(this.translate.instant('CLASSES.ASSIGN_TEACHER_SUCCESS'));
       },
       error: (error) => {
         console.error('Error assigning teacher:', error);
         Swal.fire({
           icon: 'error',
-          title: 'Error!',
-          text: 'Failed to assign teacher'
+          title: this.translate.instant('MESSAGES.ERROR'),
+          text: this.translate.instant('CLASSES.ASSIGN_TEACHER_ERROR')
         });
       }
     });
@@ -227,32 +210,27 @@ export class ClassDetailComponent implements OnInit, AfterViewInit, OnDestroy {
 
   removeTeacher(teacherId: number) {
     Swal.fire({
-      title: 'Are you sure?',
-      text: 'Remove this teacher from the class?',
+      title: this.translate.instant('COMMON.ARE_YOU_SURE'),
+      text: this.translate.instant('CLASSES.REMOVE_TEACHER_CONFIRM_TEXT'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
       cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Yes, remove!'
+      confirmButtonText: this.translate.instant('COMMON.YES_REMOVE'),
+      cancelButtonText: this.translate.instant('CLASSES.CANCEL')
     }).then((result) => {
       if (result.isConfirmed) {
         this.http.delete(`${ApiConfig.ENDPOINTS.CLASSES}/${this.classId}/teachers/${teacherId}`).subscribe({
           next: () => {
             this.loadClass();
-            Swal.fire({
-              icon: 'success',
-              title: 'Removed!',
-              text: 'Teacher has been removed',
-              timer: 2000,
-              showConfirmButton: false
-            });
+            showSuccessToast(this.translate.instant('CLASSES.REMOVE_TEACHER_SUCCESS'));
           },
           error: (error) => {
             console.error('Error removing teacher:', error);
             Swal.fire({
               icon: 'error',
-              title: 'Error!',
-              text: 'Failed to remove teacher'
+              title: this.translate.instant('MESSAGES.ERROR'),
+              text: this.translate.instant('CLASSES.REMOVE_TEACHER_ERROR')
             });
           }
         });
@@ -262,32 +240,27 @@ export class ClassDetailComponent implements OnInit, AfterViewInit, OnDestroy {
 
   removeChild(childId: number) {
     Swal.fire({
-      title: 'Are you sure?',
-      text: 'Remove this child from the class?',
+      title: this.translate.instant('COMMON.ARE_YOU_SURE'),
+      text: this.translate.instant('CLASSES.REMOVE_CHILD_CONFIRM_TEXT'),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
       cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Yes, remove!'
+      confirmButtonText: this.translate.instant('COMMON.YES_REMOVE'),
+      cancelButtonText: this.translate.instant('CLASSES.CANCEL')
     }).then((result) => {
       if (result.isConfirmed) {
         this.http.delete(`${ApiConfig.ENDPOINTS.CLASSES}/${this.classId}/children/${childId}`).subscribe({
           next: () => {
             this.loadClass();
-            Swal.fire({
-              icon: 'success',
-              title: 'Removed!',
-              text: 'Child has been removed',
-              timer: 2000,
-              showConfirmButton: false
-            });
+            showSuccessToast(this.translate.instant('CLASSES.REMOVE_CHILD_SUCCESS'));
           },
           error: (error) => {
             console.error('Error removing child:', error);
             Swal.fire({
               icon: 'error',
-              title: 'Error!',
-              text: 'Failed to remove child'
+              title: this.translate.instant('MESSAGES.ERROR'),
+              text: this.translate.instant('CLASSES.REMOVE_CHILD_ERROR')
             });
           }
         });

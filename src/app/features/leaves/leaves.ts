@@ -1,5 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
+import localeIt from '@angular/common/locales/it';
+import localeAr from '@angular/common/locales/ar';
 import { FormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -11,6 +14,10 @@ import { TitlePage, Breadcrumb, TitleAction } from '../../shared/layouts/title-p
 import { Router } from '@angular/router';
 import { PageTitleService } from '../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
+
+registerLocaleData(localeFr);
+registerLocaleData(localeIt);
+registerLocaleData(localeAr);
 
 @Component({
   selector: 'app-leaves',
@@ -25,6 +32,10 @@ export class Leaves implements OnInit, OnDestroy {
   breadcrumbs: Breadcrumb[] = [];
   titleActions: TitleAction[] = [];
   private langChangeSub?: Subscription;
+
+  get currentLocale(): string {
+    return this.translateService.currentLang || this.translateService.defaultLang || 'en';
+  }
 
   // Teacher view state
   balance: LeaveBalanceDto | null = null;

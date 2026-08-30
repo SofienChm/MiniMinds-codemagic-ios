@@ -12,6 +12,7 @@ import { ImageCropperModalComponent } from '../../../shared/components/image-cro
 import { PageTitleService } from '../../../core/services/page-title.service';
 import { SimpleToastService } from '../../../core/services/simple-toast.service';
 import Swal from 'sweetalert2';
+import { showSuccessToast } from '../../../shared/utils/swal.util';
 
 @Component({
   selector: 'app-add-parent',
@@ -27,6 +28,7 @@ export class AddParentComponent implements OnInit, OnDestroy {
   saving = false;
   imagePreview: string | null = null;
   selectedImageFile: File | null = null;
+  showPassword = false;
   parentForm!: FormGroup;
   private langChangeSub?: Subscription;
 
@@ -127,7 +129,8 @@ export class AddParentComponent implements OnInit, OnDestroy {
       work: ['', [Validators.maxLength(100)]],
       zipCode: ['', [Validators.pattern(this.ZIP_CODE_PATTERN)]],
       parentType: [''],
-      isActive: [true]
+      isActive: [true],
+      password: ['', [Validators.minLength(6), Validators.maxLength(100)]]
     });
   }
 
@@ -147,35 +150,20 @@ export class AddParentComponent implements OnInit, OnDestroy {
           this.parentService.uploadParentProfilePicture(createdParent.id, this.selectedImageFile).subscribe({
             next: () => {
               this.saving = false;
-              Swal.fire({
-                icon: 'success',
-                title: this.translate.instant('MESSAGES.SUCCESS'),
-                text: this.translate.instant('MESSAGES.PARENT_CREATED')
-              }).then(() => {
-                this.router.navigate(['/parents']);
-              });
+              showSuccessToast(this.translate.instant('MESSAGES.SUCCESS'));
+              this.router.navigate(['/parents']);
             },
             error: () => {
               // Parent created but profile picture upload failed
               this.saving = false;
-              Swal.fire({
-                icon: 'success',
-                title: this.translate.instant('MESSAGES.SUCCESS'),
-                text: this.translate.instant('MESSAGES.PARENT_CREATED')
-              }).then(() => {
-                this.router.navigate(['/parents']);
-              });
+              showSuccessToast(this.translate.instant('MESSAGES.SUCCESS'));
+              this.router.navigate(['/parents']);
             }
           });
         } else {
           this.saving = false;
-          Swal.fire({
-            icon: 'success',
-            title: this.translate.instant('MESSAGES.SUCCESS'),
-            text: this.translate.instant('MESSAGES.PARENT_CREATED')
-          }).then(() => {
-            this.router.navigate(['/parents']);
-          });
+          showSuccessToast(this.translate.instant('MESSAGES.SUCCESS'));
+          this.router.navigate(['/parents']);
         }
       },
       error: (error) => {
@@ -197,14 +185,22 @@ export class AddParentComponent implements OnInit, OnDestroy {
   private extractErrorMessage(error: any): string {
     // Check for specific error messages from the API
     if (error?.error) {
-      // Handle .NET validation errors format
+      // Handle .NET ModelState validation errors (object keyed by field name)
       if (error.error.errors) {
         const errorMessages: string[] = [];
-        for (const key in error.error.errors) {
-          if (error.error.errors.hasOwnProperty(key)) {
-            const messages = error.error.errors[key];
-            if (Array.isArray(messages)) {
-              errorMessages.push(...messages);
+        if (Array.isArray(error.error.errors)) {
+          // Array of errors (e.g. IdentityResult.Errors / IdentityError objects)
+          errorMessages.push(...this.extractFromArray(error.error.errors));
+        } else if (typeof error.error.errors === 'object') {
+          // Object keyed by field name
+          for (const key in error.error.errors) {
+            if (error.error.errors.hasOwnProperty(key)) {
+              const messages = error.error.errors[key];
+              if (Array.isArray(messages)) {
+                errorMessages.push(...messages);
+              } else if (typeof messages === 'string') {
+                errorMessages.push(messages);
+              }
             }
           }
         }
@@ -218,9 +214,25 @@ export class AddParentComponent implements OnInit, OnDestroy {
         return error.error.message;
       }
 
+      // Handle ASP.NET ProblemDetails format
+      if (error.error.detail) {
+        return error.error.detail;
+      }
+      if (error.error.title) {
+        return error.error.title;
+      }
+
       // Handle string error
       if (typeof error.error === 'string') {
         return error.error;
+      }
+
+      // Handle array error body (e.g. list of IdentityError objects)
+      if (Array.isArray(error.error)) {
+        const extracted = this.extractFromArray(error.error);
+        if (extracted.length > 0) {
+          return extracted.join('\n');
+        }
       }
     }
 
@@ -231,6 +243,23 @@ export class AddParentComponent implements OnInit, OnDestroy {
 
     // Default fallback
     return this.translate.instant('MESSAGES.PARENT_CREATE_ERROR');
+  }
+
+  private extractFromArray(errors: any[]): string[] {
+    const messages: string[] = [];
+    for (const item of errors) {
+      if (!item) continue;
+      if (typeof item === 'string') {
+        messages.push(item);
+      } else if (item.description) {
+        messages.push(item.description);
+      } else if (item.message) {
+        messages.push(item.message);
+      } else if (item.error) {
+        messages.push(typeof item.error === 'string' ? item.error : item.error.message || item.error.description || JSON.stringify(item.error));
+      }
+    }
+    return messages;
   }
 
   cancel(): void {
@@ -347,6 +376,10 @@ export class AddParentComponent implements OnInit, OnDestroy {
   // Getter methods for easy access in template
   get formControls() {
     return this.parentForm.controls;
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
   }
 
   dismissKeyboard(event: Event): void {

@@ -13,6 +13,7 @@ import { TitlePage, Breadcrumb } from '../../../shared/layouts/title-page/title-
 import { HeaderSuperadminComponent } from '../header-superadmin/header';
 import { Location } from '@angular/common';
 import Swal from 'sweetalert2';
+import { showSuccessToast } from '../../../shared/utils/swal.util';
 
 @Component({
   selector: 'app-billing',
@@ -209,12 +210,7 @@ export class Billing implements OnInit, OnDestroy {
         this.submitting = false;
         this.showAddModal = false;
         this.loadData();
-        Swal.fire({
-          icon: 'success',
-          title: this.translate.instant('BILLING.PAYMENT_ADDED'),
-          showConfirmButton: false,
-          timer: 1500
-        });
+        showSuccessToast(this.translate.instant('BILLING.PAYMENT_ADDED'));
       },
       error: (err) => {
         this.submitting = false;

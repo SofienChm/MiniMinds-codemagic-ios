@@ -185,21 +185,21 @@
               <label class="form-label fw-bold">{{ 'SETTINGS.CHILD_PREFIX' | translate }}</label>
               <input type="text" class="form-control" [(ngModel)]="childPrefix" (change)="onPrefixChange('child')"
                 maxlength="20" placeholder="Child, Student, Player">
-              <small class="text-muted">e.g., Child, Student, Player</small>
+              <small class="text-muted">{{ 'SETTINGS.CHILD_PREFIX_HINT' | translate }}</small>
             </div>
 
             <div class="col-md-4 mb-3">
               <label class="form-label fw-bold">{{ 'SETTINGS.PARENT_PREFIX' | translate }}</label>
               <input type="text" class="form-control" [(ngModel)]="parentPrefix" (change)="onPrefixChange('parent')"
                 maxlength="20" placeholder="Parent, Guardian">
-              <small class="text-muted">e.g., Parent, Guardian</small>
+              <small class="text-muted">{{ 'SETTINGS.PARENT_PREFIX_HINT' | translate }}</small>
             </div>
 
             <div class="col-md-4 mb-3">
               <label class="form-label fw-bold">{{ 'SETTINGS.EDUCATOR_PREFIX' | translate }}</label>
               <input type="text" class="form-control" [(ngModel)]="educatorPrefix" (change)="onPrefixChange('educator')"
                 maxlength="20" placeholder="Educator, Teacher, Coach">
-              <small class="text-muted">e.g., Educator, Teacher, Coach</small>
+              <small class="text-muted">{{ 'SETTINGS.EDUCATOR_PREFIX_HINT' | translate }}</small>
             </div>
           </div>
         </div>

@@ -9,6 +9,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { PageTitleService } from '../../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
+import { showSuccessToast } from '../../../shared/utils/swal.util';
 
 @Component({
   selector: 'app-add-menu',
@@ -295,13 +296,7 @@ export class AddMenuComponent implements OnInit, OnDestroy {
           }).toPromise();
         }
 
-        Swal.fire({
-          icon: 'success',
-          title: this.translate.instant('COMMON.SUCCESS'),
-          text: this.translate.instant('FOOD_MENU.MENU_UPDATED'),
-          confirmButtonColor: '#7dd3c0',
-          timer: 2000
-        });
+        showSuccessToast(this.translate.instant('COMMON.SUCCESS'));
       } else {
         // Create new menu
         const createdMenu = await this.foodMenuService.createMenu({
@@ -326,13 +321,7 @@ export class AddMenuComponent implements OnInit, OnDestroy {
           }).toPromise();
         }
 
-        Swal.fire({
-          icon: 'success',
-          title: this.translate.instant('COMMON.SUCCESS'),
-          text: this.translate.instant('FOOD_MENU.MENU_CREATED'),
-          confirmButtonColor: '#7dd3c0',
-          timer: 2000
-        });
+        showSuccessToast(this.translate.instant('COMMON.SUCCESS'));
       }
 
       this.router.navigate(['/food-menu']);

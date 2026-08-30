@@ -1,0 +1,294 @@
+
+
+<ion-content *ngIf="isParent" class="parent-messages">
+  <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="parent-detailchild new-design">
+    <app-parent-child-header-simple
+      [title]="'CHAT_PAGE.TITLE' | translate">
+    </app-parent-child-header-simple>
+  </div>
+
+  <ng-container *ngTemplateOutlet="chatContent"></ng-container>
+</ion-content>
+
+<div *ngIf="!isParent" class="container-fluid mt-4">
+  <app-title-page
+    [title]="'CHAT_PAGE.TITLE' | translate"
+    [subtitle]="'CHAT_PAGE.SUBTITLE' | translate"
+    [breadcrumbs]="breadcrumbs">
+  </app-title-page>
+
+  <ng-container *ngTemplateOutlet="chatContent"></ng-container>
+</div>
+
+<ng-template #chatContent>
+  <div class="px-chat-container"
+       [class.show-list]="isMobile && !hasActiveChat"
+       [class.show-chat]="isMobile && hasActiveChat">
+
+    <!-- Sidebar -->
+    <div class="px-chat-sidebar">
+      <div class="px-chat-sidebar-actions">
+        <button class="px-chat-action-btn" (click)="openNewChatModal()">
+          <i class="bi bi-chat-square-text"></i>
+          <span>{{ 'CHAT_PAGE.NEW_CHAT' | translate }}</span>
+        </button>
+        <button class="px-chat-action-btn" (click)="openNewGroupModal()">
+          <i class="bi bi-people"></i>
+          <span>{{ 'CHAT_PAGE.NEW_GROUP' | translate }}</span>
+        </button>
+      </div>
+
+      <div class="px-chat-sidebar-search">
+        <div class="px-chat-search-wrapper">
+          <i class="bi bi-search px-chat-search-icon"></i>
+          <input type="text" class="px-chat-search-input" [placeholder]="'CHAT_PAGE.SEARCH_CONTACTS' | translate" [(ngModel)]="contactSearchTerm">
+        </div>
+      </div>
+
+      <div class="px-chat-contact-list">
+        <div class="px-chat-contact-empty" *ngIf="(loadingConversations || loadingGroups) && conversations.length === 0 && groups.length === 0">
+          {{ 'COMMON.LOADING' | translate }}
+        </div>
+
+        <div class="px-chat-contact"
+             *ngFor="let item of filteredContacts"
+             [class.active]="isActiveContact(item)"
+             (click)="selectContact(item)">
+          <div class="px-avatar-wrap">
+            <ng-container *ngIf="item.kind === 'group'">
+              <div class="px-avatar px-group-avatar"><i class="bi bi-people-fill"></i></div>
+            </ng-container>
+            <ng-container *ngIf="item.kind === 'conversation'">
+              <img *ngIf="item.profilePictureUrl" class="px-avatar" [src]="getFullUrl(item.profilePictureUrl)" alt="">
+              <div *ngIf="!item.profilePictureUrl" class="px-avatar" [style.background]="avatarColor(item.name)">{{ initials(item.name) }}</div>
+            </ng-container>
+          </div>
+          <div class="px-chat-contact-info">
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="px-chat-contact-name">{{ item.name }}</span>
+              <span class="px-chat-contact-time">{{ formatTime(item.lastMessageAt) }}</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="px-chat-contact-last">{{ item.lastMessage }}</span>
+              <span class="px-chat-unread" *ngIf="item.unreadCount > 0">{{ item.unreadCount }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="px-chat-contact-empty" *ngIf="!loadingConversations && !loadingGroups && conversations.length === 0 && groups.length === 0">
+          {{ 'CHAT_PAGE.NO_CONVERSATIONS' | translate }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Main -->
+    <div class="px-chat-main">
+      <ng-container *ngIf="hasActiveChat; else emptyState">
+        <div class="px-chat-header">
+          <div class="d-flex align-items-center gap-2 gap-sm-3">
+            <button class="px-chat-back-btn" (click)="goBack()">
+              <i class="bi bi-arrow-left"></i>
+            </button>
+
+            <ng-container *ngIf="selectedGroupId !== null; else individualHeader">
+              <div class="px-avatar-wrap">
+                <div class="px-avatar px-group-avatar"><i class="bi bi-people-fill"></i></div>
+              </div>
+              <div>
+                <div class="px-chat-header-name">{{ selectedGroupName }}</div>
+                <div class="px-chat-header-status">{{ selectedGroupMemberCount }} {{ 'CHAT_PAGE.MEMBERS' | translate }}</div>
+              </div>
+            </ng-container>
+            <ng-template #individualHeader>
+              <div class="px-avatar-wrap">
+                <img *ngIf="selectedUserPicture" class="px-avatar" [src]="getFullUrl(selectedUserPicture)" alt="">
+                <div *ngIf="!selectedUserPicture" class="px-avatar" [style.background]="avatarColor(selectedUserName)">{{ initials(selectedUserName) }}</div>
+              </div>
+              <div>
+                <div class="px-chat-header-name">{{ selectedUserName }}</div>
+              </div>
+            </ng-template>
+          </div>
+          <div class="d-flex gap-2">
+            <button class="px-chat-icon-btn" [title]="'CHAT_PAGE.AUDIO_CALL' | translate"><i class="bi bi-telephone"></i></button>
+            <button class="px-chat-icon-btn" [title]="'CHAT_PAGE.VIDEO_CALL' | translate"><i class="bi bi-camera-video"></i></button>
+            <button class="px-chat-icon-btn" [title]="'CHAT_PAGE.INFO' | translate"><i class="bi bi-info-circle"></i></button>
+          </div>
+        </div>
+
+        <div class="px-chat-messages" #messagesContainer (scroll)="onMessagesScroll($event)">
+          <div class="px-chat-older-loader" *ngIf="loadingOlder">
+            <i class="bi bi-arrow-repeat"></i>
+            {{ 'COMMON.LOADING' | translate }}
+          </div>
+
+          <!-- Group messages -->
+          <ng-container *ngIf="selectedGroupId !== null">
+            <div class="px-chat-empty" *ngIf="loadingGroupMessages">
+              {{ 'COMMON.LOADING' | translate }}
+            </div>
+            <div class="px-chat-empty" *ngIf="!loadingGroupMessages && groupMessages.length === 0">
+              <i class="bi bi-chat-dots px-chat-empty-icon"></i>
+              <p>{{ 'CHAT_PAGE.NO_MESSAGES_YET' | translate }}</p>
+            </div>
+            <div class="px-chat-message"
+                 *ngFor="let message of groupMessages"
+                 [class.sent]="isMyGroupMessage(message)"
+                 [class.received]="!isMyGroupMessage(message)">
+              <div class="px-chat-bubble">
+                <div class="px-chat-sender" *ngIf="!isMyGroupMessage(message)">{{ message.senderName }}</div>
+                <div class="px-chat-bubble-text">{{ message.content }}</div>
+                <div class="px-chat-bubble-time">{{ formatTime(message.sentAt) }}</div>
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- Individual messages -->
+          <ng-container *ngIf="selectedGroupId === null && selectedUserId">
+            <div class="px-chat-empty" *ngIf="loadingMessages">
+              {{ 'COMMON.LOADING' | translate }}
+            </div>
+            <div class="px-chat-empty" *ngIf="!loadingMessages && messages.length === 0">
+              <i class="bi bi-chat-dots px-chat-empty-icon"></i>
+              <p>{{ 'CHAT_PAGE.NO_MESSAGES_YET' | translate }}</p>
+            </div>
+            <div class="px-chat-message"
+                 *ngFor="let message of messages"
+                 [class.sent]="isMyMessage(message)"
+                 [class.received]="!isMyMessage(message)">
+              <div class="px-chat-bubble">
+                <div class="px-chat-bubble-text">{{ message.content }}</div>
+                <div class="px-chat-bubble-time">
+                  {{ formatTime(message.sentAt) }}
+                  <span *ngIf="isMyMessage(message) && message.isRead && isLastSentMessage(message)" class="px-chat-seen">
+                    <i class="bi bi-check2-all"></i> {{ 'CHAT_PAGE.SEEN' | translate }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="px-chat-message received" *ngIf="isTyping">
+              <div class="px-chat-bubble px-chat-bubble-typing">
+                <span class="px-chat-typing-dots"><span></span><span></span><span></span></span>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+
+        <div class="px-chat-input">
+          <ng-container *ngIf="selectedGroupId !== null">
+            <button class="px-chat-icon-btn" [title]="'CHAT_PAGE.ATTACH' | translate"><i class="bi bi-paperclip"></i></button>
+            <input type="text" class="px-chat-input-field" [placeholder]="'CHAT_PAGE.TYPE_MESSAGE' | translate"
+                   [(ngModel)]="newMessage" (keydown.enter)="sendGroupMessage()">
+            <button class="px-chat-send-btn" (click)="sendGroupMessage()" [title]="'CHAT_PAGE.SEND' | translate"><i class="bi bi-send"></i></button>
+          </ng-container>
+
+          <ng-container *ngIf="selectedGroupId === null && selectedUserId">
+            <button class="px-chat-icon-btn" [title]="'CHAT_PAGE.ATTACH' | translate"><i class="bi bi-paperclip"></i></button>
+            <button class="px-chat-icon-btn" [title]="'CHAT_PAGE.EMOJI' | translate"><i class="bi bi-emoji-smile"></i></button>
+            <input type="text" class="px-chat-input-field" [placeholder]="'CHAT_PAGE.TYPE_MESSAGE' | translate"
+                   [(ngModel)]="newMessage" (keydown.enter)="sendMessage()" (input)="onTypingInput()">
+            <button class="px-chat-send-btn" (click)="sendMessage()" [title]="'CHAT_PAGE.SEND' | translate"><i class="bi bi-send"></i></button>
+          </ng-container>
+        </div>
+      </ng-container>
+
+      <ng-template #emptyState>
+        <div class="px-chat-empty">
+          <i class="bi bi-chat-dots px-chat-empty-icon"></i>
+          <h3>{{ 'CHAT_PAGE.SELECT_CONVERSATION' | translate }}</h3>
+          <p>{{ 'CHAT_PAGE.CHOOSE_CONTACT' | translate }}</p>
+        </div>
+      </ng-template>
+    </div>
+
+  </div>
+</ng-template>
+
+<!-- New discussion modal -->
+<div class="px-chat-modal-backdrop" *ngIf="showNewChatModal" (click)="closeNewChatModal()">
+  <div class="px-chat-modal" (click)="$event.stopPropagation()">
+    <div class="px-chat-modal-header">
+      <h3>{{ 'CHAT_PAGE.NEW_DISCUSSION_TITLE' | translate }}</h3>
+      <button class="px-chat-icon-btn" (click)="closeNewChatModal()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="px-chat-modal-search">
+      <div class="px-chat-search-wrapper">
+        <i class="bi bi-search px-chat-search-icon"></i>
+        <input type="text" class="px-chat-search-input" [placeholder]="'CHAT_PAGE.SEARCH_USERS' | translate" [(ngModel)]="searchTerm">
+      </div>
+    </div>
+    <div class="px-chat-modal-body">
+      <div class="px-chat-modal-loading" *ngIf="loadingContacts">
+        {{ 'COMMON.LOADING' | translate }}
+      </div>
+      <div class="px-chat-contact" *ngFor="let user of filteredUsers" (click)="startChat(user)">
+        <div class="px-avatar-wrap">
+          <img *ngIf="user.profilePictureUrl" class="px-avatar" [src]="getFullUrl(user.profilePictureUrl)" alt="">
+          <div *ngIf="!user.profilePictureUrl" class="px-avatar" [style.background]="avatarColor(user.name)">{{ initials(user.name) }}</div>
+        </div>
+        <div class="px-chat-contact-info">
+          <div class="px-chat-contact-name">{{ user.name }}</div>
+          <div class="px-chat-contact-last">{{ user.email }}</div>
+        </div>
+      </div>
+      <div class="px-chat-modal-empty" *ngIf="!loadingContacts && filteredUsers.length === 0">
+        {{ 'CHAT_PAGE.NO_USERS' | translate }}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- New group modal -->
+<div class="px-chat-modal-backdrop" *ngIf="showNewGroupModal" (click)="closeNewGroupModal()">
+  <div class="px-chat-modal" (click)="$event.stopPropagation()">
+    <div class="px-chat-modal-header">
+      <h3>{{ 'CHAT_PAGE.NEW_GROUP' | translate }}</h3>
+      <button class="px-chat-icon-btn" (click)="closeNewGroupModal()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="px-chat-modal-body px-chat-group-modal-body">
+
+      <div class="px-chat-group-modes">
+        <button class="px-chat-group-mode" [class.active]="groupMode === 'class'" (click)="groupMode = 'class'">
+          {{ 'CHAT_PAGE.FROM_CLASS' | translate }}
+        </button>
+        <button class="px-chat-group-mode" [class.active]="groupMode === 'manual'" (click)="groupMode = 'manual'">
+          {{ 'CHAT_PAGE.MANUAL' | translate }}
+        </button>
+      </div>
+
+      <ng-container *ngIf="groupMode === 'class'">
+        <div class="px-chat-group-select-container" >
+          <select class="px-chat-group-select" [(ngModel)]="selectedClassId">
+            <option [ngValue]="null" disabled>{{ 'CHAT_PAGE.SELECT_CLASS' | translate }}</option>
+            <option *ngFor="let classItem of classes" [ngValue]="classItem.id">{{ classItem.name }}</option>
+          </select>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="groupMode === 'manual'">
+        <input type="text" class="px-chat-group-input" [placeholder]="'CHAT_PAGE.GROUP_NAME' | translate" [(ngModel)]="groupName">
+        <div class="px-chat-modal-loading" *ngIf="tenantUsers.length === 0">
+          {{ 'COMMON.LOADING' | translate }}
+        </div>
+        <div class="px-chat-member-select" *ngFor="let user of tenantUsers" (click)="toggleMemberSelection(user.id)">
+          <div class="px-avatar-wrap">
+            <img *ngIf="user.profilePictureUrl" class="px-avatar" [src]="getFullUrl(user.profilePictureUrl)" alt="">
+            <div *ngIf="!user.profilePictureUrl" class="px-avatar" [style.background]="avatarColor(user.name)">{{ initials(user.name) }}</div>
+          </div>
+          <div class="px-chat-contact-info">
+            <div class="px-chat-contact-name">{{ user.name }}</div>
+            <div class="px-chat-contact-last">{{ user.email }}</div>
+          </div>
+          <i class="bi" [class.bi-check-circle-fill]="selectedMemberIds.includes(user.id)" [class.bi-circle]="!selectedMemberIds.includes(user.id)"></i>
+        </div>
+      </ng-container>
+    </div>
+    <div class="px-chat-modal-footer">
+      <button class="px-chat-submit-btn" (click)="createGroup()">{{ 'CHAT_PAGE.CREATE_GROUP' | translate }}</button>
+    </div>
+  </div>
+</div>

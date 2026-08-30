@@ -23,6 +23,7 @@ export class AddEducator implements OnInit {
   @ViewChild('imageCropper') imageCropper?: ImageCropperModalComponent;
 
   saving = false;
+  showPassword = false;
   imagePreview: string | null = null;
   selectedImageFile: File | null = null;
   educatorForm!: FormGroup;
@@ -55,6 +56,10 @@ export class AddEducator implements OnInit {
     private translate: TranslateService,
     private simpleToastService: SimpleToastService,
   ) {}
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
 
   ngOnInit(): void {
     this.initBreadcrumbs();

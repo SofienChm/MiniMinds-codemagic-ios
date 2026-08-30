@@ -9,6 +9,7 @@ import { TitlePage, Breadcrumb, TitleAction } from '../../../shared/layouts/titl
 import { ImageCropperModalComponent } from '../../../shared/components/image-cropper-modal/image-cropper-modal.component';
 import Swal from 'sweetalert2';
 import { SimpleToastService } from '../../../core/services/simple-toast.service';
+import { ApiConfig } from '../../../core/config/api.config';
 
 @Component({
   selector: 'app-edit-educator',
@@ -102,7 +103,13 @@ export class EditEducator implements OnInit {
         if (educator.hireDate) {
           this.educator.hireDate = this.formatDateForInput(educator.hireDate);
         }
-        this.imagePreview = educator.profilePicture || null;
+        if (educator.profilePictureUrl) {
+          this.imagePreview = educator.profilePictureUrl.startsWith('http')
+            ? educator.profilePictureUrl
+            : ApiConfig.HUB_URL + educator.profilePictureUrl;
+        } else {
+          this.imagePreview = educator.profilePicture || null;
+        }
         this.loading = false;
       },
       error: (error) => {

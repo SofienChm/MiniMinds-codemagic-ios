@@ -16,6 +16,7 @@ ion-content {
   position: relative;
   width: 100%;
   height: auto;
+  --padding-bottom: env(safe-area-inset-bottom, 0px); // Safe area for parent pages
 }
 
 // ===================================
@@ -1354,6 +1355,16 @@ input.form-control {
     top: 50%;
     transform: translateY(-50%);
     color: var(--primary-color);
+    font-size: 16px;
+    z-index: 2;
+  }
+  .toggle-password {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--primary-color);
+    cursor: pointer;
     font-size: 16px;
     z-index: 2;
   }

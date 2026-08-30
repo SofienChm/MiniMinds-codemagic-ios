@@ -15,16 +15,29 @@ import { GalleryService } from '../gallery/gallery.service';
 import { Photo } from '../gallery/gallery.interface';
 import { LeavesService, LeaveRequestModel } from '../leaves/leaves.service';
 import { FeeService } from '../fee/fee.service';
-import { FeeModel } from '../fee/fee.interface';
+import { StaticFeesService } from '../static-fees/static-fees.service';
 import { BaseChartDirective } from 'ng2-charts';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { CalendarComponent } from '../../shared/components/calendar/calendar.component';
 import { DashboardService, AdminDashboardData, ParentDashboardData } from '../../core/services/dashboard.service';
+import { Chart, ArcElement, Tooltip, Legend, DoughnutController, BarElement, BarController, LinearScale, CategoryScale } from 'chart.js';
 import type { ChartConfiguration } from 'chart.js';
+import { AppCurrencyPipe } from '../../core/services/currency/currency.pipe';
+
+Chart.register(ArcElement, Tooltip, Legend, DoughnutController, BarElement, BarController, LinearScale, CategoryScale);
 import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 import { SkeletonActivityTimelineComponent } from '../../shared/components/skeleton/skeleton-activity-timeline.component';
 import { ApiConfig } from '../../core/config/api.config';
 import { IonContent } from '@ionic/angular/standalone';
+
+interface UnpaidFeeItem {
+  id: string;
+  name: string;
+  amount: number;
+  dueDate: string;
+  status: 'pending' | 'overdue';
+  daysOverdue?: number;
+}
 
 @Component({
   selector: 'app-dashboard',
@@ -36,7 +49,8 @@ import { IonContent } from '@ionic/angular/standalone';
     CalendarComponent,
     SkeletonComponent,
     SkeletonActivityTimelineComponent,
-    IonContent
+    IonContent,
+    AppCurrencyPipe
   ],
   standalone: true,
   templateUrl: './dashboard.html',
@@ -81,7 +95,7 @@ export class Dashboard implements OnInit, OnDestroy {
   upcomingEvents: any[] = [];
   myChildren: any[] = [];
   upcomingLeaves: LeaveRequestModel[] = [];
-  unpaidChildren: FeeModel[] = [];
+  unpaidChildren: UnpaidFeeItem[] = [];
   selectedChildIndex: number = 0;
   todayActivities: DailyActivity[] = [];
   recentPhotos: Photo[] = [];
@@ -298,6 +312,7 @@ export class Dashboard implements OnInit, OnDestroy {
     private leavesService: LeavesService,
     private galleryService: GalleryService,
     private feeService: FeeService,
+    private staticFeesService: StaticFeesService,
     private dashboardService: DashboardService,
     private router: Router,
     private translateService: TranslateService
@@ -308,7 +323,6 @@ export class Dashboard implements OnInit, OnDestroy {
     const user = this.authService.getCurrentUser();
     this.userName = user?.firstName || this.userRole!;
     this.userProfilePicture = user?.profilePicture || '';
-    this.loadChartJS();
     this.initializeCharts();
     this.updateChartLabels();
     this.loadDashboardData();
@@ -321,12 +335,6 @@ export class Dashboard implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.langChangeSub?.unsubscribe();
-  }
-
-  loadChartJS() {
-    import('chart.js').then(({ Chart, ArcElement, Tooltip, Legend, DoughnutController, BarElement, BarController, LinearScale, CategoryScale }) => {
-      Chart.register(ArcElement, Tooltip, Legend, DoughnutController, BarElement, BarController, LinearScale, CategoryScale);
-    });
   }
 
   initializeCharts() {
@@ -616,8 +624,12 @@ export class Dashboard implements OnInit, OnDestroy {
   }
 
   loadAdminTeacherDashboard() {
-    // Use single optimized API call
-    this.dashboardService.getAdminDashboard().pipe(
+    // Teachers use a dedicated scoped endpoint (only their assigned children)
+    const request = this.userRole === 'Teacher'
+      ? this.dashboardService.getTeacherDashboard()
+      : this.dashboardService.getAdminDashboard();
+
+    request.pipe(
       catchError(() => {
         // Fallback to old method if new endpoint fails
         this.loadAdminTeacherDashboardLegacy();
@@ -685,7 +697,10 @@ export class Dashboard implements OnInit, OnDestroy {
         this.upcomingLeaves = data.upcomingLeaves as any;
 
         // Unpaid fees
-        this.unpaidChildren = data.unpaidFees as any;
+        this.unpaidChildren = (data.unpaidFees || [])
+          .map(f => this.toUnpaidItem(f, 'dashboard'))
+          .filter((x): x is UnpaidFeeItem => !!x);
+        this.mergeStaticUnpaidFees();
 
         // Calculate payment stats
         this.calculatePaymentStats(data.stats.totalChildren);
@@ -795,20 +810,75 @@ export class Dashboard implements OnInit, OnDestroy {
 
     this.feeService.getFees().pipe(catchError(() => of([]))).subscribe({
       next: (fees) => {
-        this.unpaidChildren = fees
-          .filter(fee => fee.status === 'pending' || fee.status === 'overdue')
-          .sort((a, b) => {
-            if (a.status === 'overdue' && b.status !== 'overdue') return -1;
-            if (a.status !== 'overdue' && b.status === 'overdue') return 1;
-            return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-          })
+        const unpaid = fees
+          .filter(fee => fee.status === 'pending' || fee.status === 'overdue');
+        this.unpaidChildren = unpaid
+          .map(f => this.toUnpaidItem(f, 'fee'))
+          .filter((x): x is UnpaidFeeItem => !!x)
+          .sort(this.sortUnpaidFees)
           .slice(0, 5);
-        this.loadingStates.fees = false;
+        this.mergeStaticUnpaidFees();
       },
       error: () => {
-        this.loadingStates.fees = false;
+        this.unpaidChildren = [];
+        this.mergeStaticUnpaidFees();
       }
     });
+  }
+
+  sortUnpaidFees(a: UnpaidFeeItem, b: UnpaidFeeItem): number {
+    if (a.status === 'overdue' && b.status !== 'overdue') return -1;
+    if (a.status !== 'overdue' && b.status === 'overdue') return 1;
+    return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+  }
+
+  getUnpaidFeeName(fee: any): string {
+    const name = fee.childName || fee.payerName || fee.name ||
+      [fee.child?.firstName, fee.child?.lastName].filter(Boolean).join(' ') ||
+      fee.title;
+    return name && name.trim() ? name : ('#' + (fee.id ?? ''));
+  }
+
+  toUnpaidItem(fee: any, source: 'fee' | 'static' | 'dashboard'): UnpaidFeeItem | null {
+    const status = (fee.status || '').toLowerCase();
+    if (status === 'paid') return null;
+    const dueDate = fee.dueDate || fee.feeDate;
+    if (!dueDate) return null;
+
+    const now = new Date();
+    const due = new Date(dueDate);
+    const isOverdue = status.includes('overdue') || (status === 'pending' && due.getTime() < now.getTime());
+    const daysOverdue = isOverdue
+      ? Math.max(0, Math.floor((now.getTime() - due.getTime()) / 86400000))
+      : undefined;
+
+    return {
+      id: `${source}-${fee.id}`,
+      name: this.getUnpaidFeeName(fee),
+      amount: fee.amount,
+      dueDate,
+      status: isOverdue ? 'overdue' : 'pending',
+      daysOverdue
+    };
+  }
+
+  mergeStaticUnpaidFees(): void {
+    this.staticFeesService.getStaticFees({ status: 'Pending' })
+      .pipe(catchError(() => of([])))
+      .subscribe({
+        next: (staticFees) => {
+          const staticItems = staticFees
+            .map(f => this.toUnpaidItem(f, 'static'))
+            .filter((x): x is UnpaidFeeItem => !!x);
+          this.unpaidChildren = [...this.unpaidChildren, ...staticItems]
+            .sort(this.sortUnpaidFees)
+            .slice(0, 5);
+          this.loadingStates.fees = false;
+        },
+        error: () => {
+          this.loadingStates.fees = false;
+        }
+      });
   }
 
   setDefaultAttendanceData() {
@@ -1021,6 +1091,13 @@ export class Dashboard implements OnInit, OnDestroy {
       default:
         return '#6c757d !important';
     }
+  }
+
+  translateGender(gender?: string): string {
+    if (!gender) return '';
+    const key = `COMMON.${gender.toUpperCase()}`;
+    const translated = this.translateService.instant(key);
+    return translated !== key ? translated : gender;
   }
 
   // TrackBy functions for ngFor performance optimization

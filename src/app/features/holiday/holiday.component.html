@@ -27,7 +27,7 @@
                 </tr>
                 <tr *ngFor="let holiday of displayedHolidays">
                   <td class="title-table name-last">{{ holiday.name }}</td>
-                  <td>{{ holiday.date | date:'mediumDate' }}</td>
+                  <td>{{ holiday.date | date:'mediumDate':'':currentLocale }}</td>
                   <td>
                     <span class="color-indicator" [style.background-color]="holiday.color"></span>
 
@@ -79,7 +79,7 @@
         <div class="row">
           <div class="col-md-6">
             <strong>{{ 'HOLIDAYS_PAGE.DATE' | translate }}:</strong>
-            <p>{{ selectedHoliday.date | date:'fullDate' }}</p>
+            <p>{{ selectedHoliday.date | date:'fullDate':'':currentLocale }}</p>
           </div>
           <div class="col-md-6">
             <strong>{{ 'HOLIDAYS_PAGE.COLOR' | translate }}:</strong>

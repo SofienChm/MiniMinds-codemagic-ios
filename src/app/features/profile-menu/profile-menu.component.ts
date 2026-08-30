@@ -7,6 +7,7 @@ import { AuthResponse } from '../../core/interfaces/dto/auth-response-dto';
 import { NotificationService } from '../../core/services/notification-service';
 import { MessagesService } from '../../core/services/messages.service';
 import { Subject, takeUntil } from 'rxjs';
+import { ApiConfig } from '../../core/config/api.config';
 
 @Component({
   selector: 'app-profile-menu',
@@ -63,6 +64,26 @@ export class ProfileMenuComponent implements OnInit, OnDestroy {
 
   goBack(): void {
     window.history.back();
+  }
+
+  /**
+   * Get the current user's profile picture URL, preferring file-based URL over Base64
+   */
+  getProfilePictureUrl(): string {
+    if (!this.currentUser) return 'assets/default-avatar.svg';
+    if (this.currentUser.profilePictureUrl && this.currentUser.profilePictureUrl.trim() !== '') {
+      return this.getFullUrl(this.currentUser.profilePictureUrl);
+    }
+    if (this.currentUser.profilePicture && this.currentUser.profilePicture.trim() !== '') {
+      return this.getFullUrl(this.currentUser.profilePicture);
+    }
+    return 'assets/default-avatar.svg';
+  }
+
+  private getFullUrl(path: string): string {
+    if (!path) return '';
+    if (path.startsWith('http') || path.startsWith('data:')) return path;
+    return `${ApiConfig.HUB_URL}${path.startsWith('/') ? '' : '/'}${path}`;
   }
 
   logout(): void {

@@ -69,8 +69,8 @@
 <!-- ==================== ADMIN/TEACHER VIEW - Original Design ==================== -->
 <div class="container mt-4" *ngIf="!isParent">
   <app-title-page
-    title="Photo Gallery"
-    subtitle="View and manage children's photos and memories"
+    [title]="'GALLERY.TITLE' | translate"
+    [subtitle]="'GALLERY.SUBTITLE_ADMIN' | translate"
     icon="bi bi-images"
     [breadcrumbs]="breadcrumbs"
     [actions]="titleActions">
@@ -78,11 +78,11 @@
 
   <!-- Filters -->
   <div class="bg-white p-3 border rounded-1 d-flex align-items-center justify-content-between flex-wrap mb-4">
-    <h4 class="title-filter mb-0">Photos</h4>
+    <h4 class="title-filter mb-0">{{ 'GALLERY.PHOTOS' | translate }}</h4>
     <div class="d-flex align-items-center flex-wrap gap-2">
       <!-- Child Filter -->
       <select class="form-select" style="width: auto;" [(ngModel)]="selectedChildId" (change)="onFilterChange()">
-        <option [ngValue]="null">All Children</option>
+        <option [ngValue]="null">{{ 'GALLERY.ALL_CHILDREN' | translate }}</option>
         <option *ngFor="let child of children" [ngValue]="child.id">
           {{ child.firstName }} {{ child.lastName }}
         </option>
@@ -90,13 +90,13 @@
 
       <!-- Category Filter -->
       <select class="form-select" style="width: auto;" [(ngModel)]="selectedCategory" (change)="onFilterChange()">
-        <option value="">All Categories</option>
+        <option value="">{{ 'GALLERY.ALL_CATEGORIES' | translate }}</option>
         <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
       </select>
 
       <!-- Clear Filters -->
       <button *ngIf="selectedChildId || selectedCategory" class="btn btn-outline-secondary" (click)="clearFilters()">
-        <i class="bi bi-x-lg"></i> Clear
+        <i class="bi bi-x-lg"></i> {{ 'GALLERY.CLEAR' | translate }}
       </button>
 
       <!-- View Toggle -->
@@ -125,12 +125,12 @@
   <!-- Empty State -->
   <div *ngIf="!loading && photos.length === 0" class="text-center py-5">
     <i class="bi bi-images display-1 text-muted"></i>
-    <h5 class="mt-3">No photos found</h5>
+    <h5 class="mt-3">{{ 'GALLERY.NO_PHOTOS' | translate }}</h5>
     <p class="text-muted">
-      {{ selectedChildId || selectedCategory ? 'Try adjusting your filters' : 'Upload some photos to get started' }}
+      {{ selectedChildId || selectedCategory ? ('GALLERY.TRY_ADJUSTING_FILTERS' | translate) : ('GALLERY.UPLOAD_SOME_PHOTOS' | translate) }}
     </p>
     <button *ngIf="canEdit()" class="btn btn-primary" (click)="openUploadModal()">
-      <i class="bi bi-upload me-2"></i>Upload Photos
+      <i class="bi bi-upload me-2"></i>{{ 'GALLERY.UPLOAD_PHOTOS' | translate }}
     </button>
   </div>
 
@@ -147,8 +147,8 @@
         </div>
         <div class="card-body p-3">
           <h6 class="card-title text-truncate mb-1">{{ photo.title || photo.fileName }}</h6>
-          <p class="text-muted small mb-2">
-            <i class="bi bi-person-fill me-1"></i>{{ photo.childName }}
+          <p class="text-muted small mb-2" *ngIf="hasTaggedPeople(photo)">
+            <i class="bi bi-person-fill me-1"></i>{{ getTaggedNames(photo) }}
           </p>
           <p class="text-muted small mb-0">
             <i class="bi bi-calendar me-1"></i>{{ formatDate(photo.createdAt) }}
@@ -156,6 +156,9 @@
         </div>
         <div *ngIf="canEdit()" class="card-footer bg-transparent border-top-0 p-3 pt-0">
           <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-info flex-grow-1" [title]="'GALLERY.TAG_PEOPLE' | translate" (click)="openTagModal(photo); $event.stopPropagation()">
+              <i class="bi bi-people"></i>
+            </button>
             <button class="btn btn-sm btn-outline-primary flex-grow-1 btn-edit" (click)="openEditModal(photo); $event.stopPropagation()">
               <i class="bi bi-pencil"></i>
             </button>
@@ -174,13 +177,13 @@
       <table class="table table-hover mb-0">
         <thead class="table-light">
           <tr>
-            <th style="width: 80px;">Preview</th>
-            <th>Title/Filename</th>
-            <th>Child</th>
-            <th>Category</th>
-            <th>Size</th>
-            <th>Uploaded</th>
-            <th *ngIf="canEdit()" style="width: 120px;">Actions</th>
+            <th style="width: 80px;">{{ 'GALLERY.PREVIEW' | translate }}</th>
+            <th>{{ 'GALLERY.TITLE_FILENAME' | translate }}</th>
+            <th>{{ 'GALLERY.CHILD' | translate }}</th>
+            <th>{{ 'GALLERY.CATEGORY' | translate }}</th>
+            <th>{{ 'GALLERY.SIZE' | translate }}</th>
+            <th>{{ 'GALLERY.UPLOADED' | translate }}</th>
+            <th *ngIf="canEdit()" style="width: 120px;">{{ 'GALLERY.ACTIONS' | translate }}</th>
           </tr>
         </thead>
         <tbody>
@@ -195,12 +198,12 @@
                 {{ photo.description }}
               </p>
             </td>
-            <td>{{ photo.childName }}</td>
+            <td>{{ getTaggedNames(photo) }}</td>
             <td><span class="badge bg-primary">{{ photo.category }}</span></td>
             <td>{{ formatFileSize(photo.fileSize) }}</td>
             <td>
               {{ formatDate(photo.createdAt) }}
-              <p *ngIf="photo.uploadedByName" class="text-muted small mb-0">by {{ photo.uploadedByName }}</p>
+              <p *ngIf="photo.uploadedByName" class="text-muted small mb-0">{{ 'GALLERY.BY' | translate }} {{ photo.uploadedByName }}</p>
             </td>
             <td *ngIf="canEdit()" (click)="$event.stopPropagation()">
               <div class="d-flex gap-1">
@@ -249,7 +252,7 @@
     </button>
     <div class="ios-viewer-title">
       <span class="ios-viewer-date">{{ formatDate(selectedPhoto.createdAt) }}</span>
-      <span class="ios-viewer-child">{{ selectedPhoto.childName }}</span>
+      <span class="ios-viewer-child">{{ getTaggedNames(selectedPhoto) }}</span>
     </div>
     <button class="ios-viewer-action" (click)="downloadPhoto(); $event.stopPropagation()" [disabled]="downloadingImage">
       <i class="bi" [class.bi-arrow-down-circle]="!downloadingImage" [class.bi-hourglass-split]="downloadingImage"></i>
@@ -277,49 +280,49 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">
-          <i class="bi bi-upload me-2"></i>Upload Photos
+          <i class="bi bi-upload me-2"></i>{{ 'GALLERY.UPLOAD_MODAL_TITLE' | translate }}
         </h5>
         <button type="button" class="btn-close" (click)="closeUploadModal()"></button>
       </div>
       <div class="modal-body">
         <div class="row g-3">
           <div class="col-md-6">
-            <label class="form-label">Select Child *</label>
-            <select class="form-select" [(ngModel)]="uploadChildId" required>
-              <option [ngValue]="null" disabled>Choose a child...</option>
+            <label class="form-label">{{ 'GALLERY.SELECT_CHILD_OPTIONAL' | translate }}</label>
+            <select class="form-select" [(ngModel)]="uploadChildId">
+              <option [ngValue]="null">{{ 'GALLERY.NO_CHILD_TAG_LATER' | translate }}</option>
               <option *ngFor="let child of children" [ngValue]="child.id">
                 {{ child.firstName }} {{ child.lastName }}
               </option>
             </select>
           </div>
           <div class="col-md-6">
-            <label class="form-label">Category</label>
+            <label class="form-label">{{ 'GALLERY.CATEGORY' | translate }}</label>
             <select class="form-select" [(ngModel)]="uploadCategory">
               <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
             </select>
           </div>
           <div class="col-12" *ngIf="uploadFiles.length <= 1">
-            <label class="form-label">Title (optional)</label>
-            <input type="text" class="form-control" [(ngModel)]="uploadTitle" placeholder="Enter photo title">
+            <label class="form-label">{{ 'GALLERY.TITLE_OPTIONAL' | translate }}</label>
+            <input type="text" class="form-control" [(ngModel)]="uploadTitle" [placeholder]="'GALLERY.TITLE_PLACEHOLDER' | translate">
           </div>
           <div class="col-12">
-            <label class="form-label">Description (optional)</label>
-            <textarea class="form-control" [(ngModel)]="uploadDescription" rows="2" placeholder="Enter description"></textarea>
+            <label class="form-label">{{ 'GALLERY.DESCRIPTION_OPTIONAL' | translate }}</label>
+            <textarea class="form-control" [(ngModel)]="uploadDescription" rows="2" [placeholder]="'GALLERY.DESCRIPTION_PLACEHOLDER' | translate"></textarea>
           </div>
           <div class="col-12">
-            <label class="form-label">Select Photos *</label>
+            <label class="form-label">{{ 'GALLERY.SELECT_PHOTOS' | translate }}</label>
             <div class="upload-zone p-4 border border-2 border-dashed rounded text-center"
                  (click)="fileInput.click()"
                  (dragover)="$event.preventDefault()"
                  (drop)="$event.preventDefault()">
               <input #fileInput type="file" class="d-none" accept="image/*" multiple (change)="onFileSelect($event)">
               <i class="bi bi-cloud-upload display-4 text-muted"></i>
-              <p class="mb-0 mt-2">Click to select photos or drag and drop</p>
-              <small class="text-muted">Maximum 20 photos, 10MB each. Supported formats: JPEG, PNG, GIF, WebP</small>
+              <p class="mb-0 mt-2">{{ 'GALLERY.CLICK_TO_SELECT' | translate }}</p>
+              <small class="text-muted">{{ 'GALLERY.MAX_PHOTO_LIMIT' | translate }}</small>
             </div>
           </div>
           <div class="col-12" *ngIf="uploadFiles.length > 0">
-            <label class="form-label">Selected Files ({{ uploadFiles.length }})</label>
+            <label class="form-label">{{ 'GALLERY.SELECTED_FILES' | translate }} ({{ uploadFiles.length }})</label>
             <div class="d-flex flex-wrap gap-2">
               <div *ngFor="let file of uploadFiles; let i = index" class="selected-file d-flex align-items-center bg-light rounded p-2">
                 <i class="bi bi-image me-2"></i>
@@ -333,10 +336,10 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="closeUploadModal()" [disabled]="uploading">Cancel</button>
-        <button type="button" class="btn btn-primary" (click)="uploadPhotos()" [disabled]="uploading || !uploadChildId || uploadFiles.length === 0">
+        <button type="button" class="btn btn-secondary" (click)="closeUploadModal()" [disabled]="uploading">{{ 'GALLERY.CANCEL' | translate }}</button>
+        <button type="button" class="action-btn btn-add-global-2 custom-btn-2" (click)="uploadPhotos()" [disabled]="uploading || uploadFiles.length === 0">
           <span *ngIf="uploading" class="spinner-border spinner-border-sm me-2"></span>
-          {{ uploading ? 'Uploading...' : 'Upload' }}
+          {{ uploading ? ('GALLERY.UPLOADING' | translate) : ('GALLERY.UPLOAD' | translate) }}
         </button>
       </div>
     </div>
@@ -356,7 +359,7 @@
         <!-- Loading spinner while fetching full image -->
         <div *ngIf="loadingFullImage" class="position-absolute top-50 start-50 translate-middle">
           <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
+            <span class="visually-hidden">{{ 'GALLERY.LOADING' | translate }}</span>
           </div>
         </div>
         <img *ngIf="selectedPhoto" [src]="getFullImageUrl(selectedPhoto)" [alt]="selectedPhoto.title || selectedPhoto.fileName"
@@ -364,27 +367,30 @@
       </div>
       <div class="modal-footer justify-content-between" *ngIf="selectedPhoto">
         <div class="text-start">
-          <p class="mb-1"><strong>Child:</strong> {{ selectedPhoto.childName }}</p>
-          <p class="mb-1"><strong>Category:</strong> {{ selectedPhoto.category }}</p>
-          <p class="mb-1" *ngIf="selectedPhoto.description"><strong>Description:</strong> {{ selectedPhoto.description }}</p>
+          <p class="mb-1" *ngIf="hasTaggedPeople(selectedPhoto)"><strong>{{ 'GALLERY.PEOPLE' | translate }}</strong> {{ getTaggedNames(selectedPhoto) }}</p>
+          <p class="mb-1"><strong>{{ 'GALLERY.CATEGORY' | translate }}:</strong> {{ selectedPhoto.category }}</p>
+          <p class="mb-1" *ngIf="selectedPhoto.description"><strong>{{ 'GALLERY.DESCRIPTION' | translate }}:</strong> {{ selectedPhoto.description }}</p>
           <p class="mb-0 text-muted small">
-            Uploaded on {{ formatDate(selectedPhoto.createdAt) }}
-            <span *ngIf="selectedPhoto.uploadedByName"> by {{ selectedPhoto.uploadedByName }}</span>
+            {{ 'GALLERY.UPLOADED_ON' | translate }} {{ formatDate(selectedPhoto.createdAt) }}
+            <span *ngIf="selectedPhoto.uploadedByName"> {{ 'GALLERY.BY' | translate }} {{ selectedPhoto.uploadedByName }}</span>
           </p>
         </div>
         <div class="d-flex gap-2 flex-wrap">
           <!-- Download/Save Button - Available to all users -->
-          <button class="btn btn-outline-success" (click)="downloadPhoto()" [disabled]="downloadingImage || loadingFullImage">
+          <button class="btn btn-view" (click)="downloadPhoto()" [disabled]="downloadingImage || loadingFullImage">
             <i class="bi" [class.bi-download]="!downloadingImage" [class.bi-hourglass-split]="downloadingImage" class="me-1"></i>
             {{ downloadingImage ? ('GALLERY.SAVING' | translate) : ('GALLERY.SAVE' | translate) }}
           </button>
-          <!-- Edit & Delete (Admin/Teacher only) -->
+          <!-- Edit, Tag People & Delete (Admin/Teacher only) -->
           <ng-container *ngIf="canEdit()">
-            <button class="btn btn-outline-primary" (click)="openEditModal(selectedPhoto); closePreview()">
-              <i class="bi bi-pencil me-1"></i>{{ 'GALLERY.EDIT' | translate }}
+            <button class="btn btn-sm btn-active" (click)="openTagModal(selectedPhoto)">
+              <i class="bi bi-people"></i>
             </button>
-            <button class="btn btn-outline-danger" (click)="deletePhoto(selectedPhoto)">
-              <i class="bi bi-trash me-1"></i>{{ 'GALLERY.DELETE' | translate }}
+            <button class="btn btn-sm btn-edit" (click)="openEditModal(selectedPhoto); closePreview()">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button class="btn btn-sm btn-remove" (click)="deletePhoto(selectedPhoto)">
+              <i class="bi bi-trash3"></i>
             </button>
           </ng-container>
         </div>
@@ -400,34 +406,76 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">
-          <i class="bi bi-pencil me-2"></i>Edit Photo
+          <i class="bi bi-pencil me-2"></i>{{ 'GALLERY.EDIT_PHOTO' | translate }}
         </h5>
         <button type="button" class="btn-close" (click)="closeEditModal()"></button>
       </div>
       <div class="modal-body">
         <div class="mb-3">
-          <label class="form-label">Title</label>
-          <input type="text" class="form-control" [(ngModel)]="editTitle" placeholder="Enter photo title">
+          <label class="form-label">{{ 'GALLERY.TITLE_LABEL' | translate }}</label>
+          <input type="text" class="form-control" [(ngModel)]="editTitle" [placeholder]="'GALLERY.TITLE_PLACEHOLDER' | translate">
         </div>
         <div class="mb-3">
-          <label class="form-label">Description</label>
-          <textarea class="form-control" [(ngModel)]="editDescription" rows="3" placeholder="Enter description"></textarea>
+          <label class="form-label">{{ 'GALLERY.DESCRIPTION' | translate }}</label>
+          <textarea class="form-control" [(ngModel)]="editDescription" rows="3" [placeholder]="'GALLERY.DESCRIPTION_PLACEHOLDER' | translate"></textarea>
         </div>
         <div class="mb-3">
-          <label class="form-label">Category</label>
+          <label class="form-label">{{ 'GALLERY.CATEGORY' | translate }}</label>
           <select class="form-select" [(ngModel)]="editCategory">
             <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
           </select>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="closeEditModal()">Cancel</button>
-        <button type="button" class="btn btn-primary" (click)="savePhotoEdit()">Save Changes</button>
+        <button type="button" class="btn btn-secondary" (click)="closeEditModal()">{{ 'GALLERY.CANCEL' | translate }}</button>
+        <button type="button" class="action-btn btn-add-global-2 custom-btn-2" (click)="savePhotoEdit()">{{ 'GALLERY.SAVE_CHANGES' | translate }}</button>
       </div>
     </div>
   </div>
 </div>
 <div *ngIf="showEditModal" class="modal-backdrop fade show"></div>
+
+<!-- Tag People Modal -->
+<div class="modal fade" [class.show]="showTagModal" [style.display]="showTagModal ? 'block' : 'none'" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-people me-2"></i>{{ 'GALLERY.TAG_PEOPLE' | translate }}
+        </h5>
+        <button type="button" class="btn-close" (click)="closeTagModal()"></button>
+      </div>
+      <div class="modal-body" style="overflow: visible;">
+        <p class="text-muted small mb-2">{{ 'GALLERY.TAG_MODAL_HELP' | translate }}</p>
+        <ng-select
+          [items]="children"
+          [multiple]="true"
+          [closeOnSelect]="false"
+          bindLabel="firstName"
+          bindValue="id"
+          [(ngModel)]="tagChildIds"
+          [placeholder]="'GALLERY.SELECT_CHILDREN_PLACEHOLDER' | translate"
+          [searchable]="true"
+          [clearable]="true">
+          <ng-template ng-label-tmp let-item="item">
+            {{ item.firstName }} {{ item.lastName }}
+          </ng-template>
+          <ng-template ng-option-tmp let-item="item">
+            {{ item.firstName }} {{ item.lastName }}
+          </ng-template>
+        </ng-select>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeTagModal()" [disabled]="tagSaving">{{ 'GALLERY.CANCEL' | translate }}</button>
+        <button type="button" class="action-btn btn-add-global-2 custom-btn-2" (click)="saveTags()" [disabled]="tagSaving">
+          <span *ngIf="tagSaving" class="spinner-border spinner-border-sm me-2"></span>
+          {{ tagSaving ? ('GALLERY.SAVING' | translate) : ('GALLERY.SAVE_TAGS' | translate) }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div *ngIf="showTagModal" class="modal-backdrop fade show"></div>
 
 <!-- Camera Modal -->
 <div class="modal fade" [class.show]="showCameraModal" [style.display]="showCameraModal ? 'block' : 'none'" tabindex="-1">
@@ -435,7 +483,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">
-          <i class="bi bi-camera me-2"></i>Take Photo
+          <i class="bi bi-camera me-2"></i>{{ 'GALLERY.CAMERA_MODAL_TITLE' | translate }}
         </h5>
         <button type="button" class="btn-close" (click)="closeCameraModal()"></button>
       </div>
@@ -455,7 +503,7 @@
               <!-- Captured Image Preview -->
               <img *ngIf="capturedImage"
                    [src]="capturedImage"
-                   alt="Captured photo"
+                   [alt]="'GALLERY.CAPTURED_PHOTO_ALT' | translate"
                    class="w-100 h-100"
                    style="object-fit: contain;">
               <!-- Hidden Canvas for Capture -->
@@ -472,46 +520,46 @@
             </div>
             <div *ngIf="capturedImage" class="d-flex justify-content-center gap-3">
               <button class="btn btn-outline-secondary" (click)="retakePhoto()">
-                <i class="bi bi-arrow-repeat me-2"></i>Retake
+                <i class="bi bi-arrow-repeat me-2"></i>{{ 'GALLERY.RETAKE' | translate }}
               </button>
             </div>
           </div>
 
           <!-- Form Fields (only show after capture) -->
           <div *ngIf="capturedImage" class="col-md-6">
-            <label class="form-label">Select Child *</label>
-            <select class="form-select" [(ngModel)]="cameraChildId" required>
-              <option [ngValue]="null" disabled>Choose a child...</option>
+            <label class="form-label">{{ 'GALLERY.SELECT_CHILD_OPTIONAL' | translate }}</label>
+            <select class="form-select" [(ngModel)]="cameraChildId">
+              <option [ngValue]="null">{{ 'GALLERY.NO_CHILD_TAG_LATER' | translate }}</option>
               <option *ngFor="let child of children" [ngValue]="child.id">
                 {{ child.firstName }} {{ child.lastName }}
               </option>
             </select>
           </div>
           <div *ngIf="capturedImage" class="col-md-6">
-            <label class="form-label">Category</label>
+            <label class="form-label">{{ 'GALLERY.CATEGORY' | translate }}</label>
             <select class="form-select" [(ngModel)]="cameraCategory">
               <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
             </select>
           </div>
           <div *ngIf="capturedImage" class="col-12">
-            <label class="form-label">Title (optional)</label>
-            <input type="text" class="form-control" [(ngModel)]="cameraTitle" placeholder="Enter photo title">
+            <label class="form-label">{{ 'GALLERY.TITLE_OPTIONAL' | translate }}</label>
+            <input type="text" class="form-control" [(ngModel)]="cameraTitle" [placeholder]="'GALLERY.TITLE_PLACEHOLDER' | translate">
           </div>
           <div *ngIf="capturedImage" class="col-12">
-            <label class="form-label">Description (optional)</label>
-            <textarea class="form-control" [(ngModel)]="cameraDescription" rows="2" placeholder="Enter description"></textarea>
+            <label class="form-label">{{ 'GALLERY.DESCRIPTION_OPTIONAL' | translate }}</label>
+            <textarea class="form-control" [(ngModel)]="cameraDescription" rows="2" [placeholder]="'GALLERY.DESCRIPTION_PLACEHOLDER' | translate"></textarea>
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="closeCameraModal()" [disabled]="uploading">Cancel</button>
+        <button type="button" class="btn btn-secondary" (click)="closeCameraModal()" [disabled]="uploading">{{ 'GALLERY.CANCEL' | translate }}</button>
         <button *ngIf="capturedImage"
                 type="button"
-                class="btn btn-primary"
+                class="action-btn btn-add-global-2 custom-btn-2"
                 (click)="saveCapturedPhoto()"
-                [disabled]="uploading || !cameraChildId">
+                [disabled]="uploading">
           <span *ngIf="uploading" class="spinner-border spinner-border-sm me-2"></span>
-          {{ uploading ? 'Saving...' : 'Save Photo' }}
+          {{ uploading ? ('GALLERY.SAVING' | translate) : ('GALLERY.SAVE_PHOTO' | translate) }}
         </button>
       </div>
     </div>
