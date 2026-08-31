@@ -62,6 +62,12 @@ export class EditParent implements OnInit, OnDestroy {
   titleActions: TitleAction[] = [];
   genders: { value: string; label: string; icon: string }[] = [];
   parentTypes: { value: string; label: string; icon: string }[] = [];
+  currentLocale = 'en';
+  private readonly localeMapping: Record<string, string> = {
+    'fr': 'fr-FR',
+    'it': 'it-IT',
+    'ar': 'ar-SA'
+  };
 
   constructor(
     private fb: FormBuilder,
@@ -77,6 +83,7 @@ export class EditParent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.parentId = Number(this.route.snapshot.paramMap.get('id'));
+    this.currentLocale = this.translate.currentLang ?? this.translate.defaultLang ?? 'en';
     this.pageTitleService.setTitle(this.translate.instant('PARENTS.EDIT_PARENT'));
     this.initBreadcrumbs();
     this.initTitleActions();
@@ -85,7 +92,8 @@ export class EditParent implements OnInit, OnDestroy {
     this.initChildForm();
     this.loadParent();
 
-    this.langChangeSub = this.translate.onLangChange.subscribe(() => {
+    this.langChangeSub = this.translate.onLangChange.subscribe((event) => {
+      this.currentLocale = event.lang;
       this.pageTitleService.setTitle(this.translate.instant('PARENTS.EDIT_PARENT'));
       this.initBreadcrumbs();
       this.initTitleActions();
@@ -585,6 +593,24 @@ export class EditParent implements OnInit, OnDestroy {
       months += 12;
     }
     return { years: years < 0 ? 0 : years, months: months < 0 ? 0 : months };
+  }
+
+  translateGender(gender?: string): string {
+    if (!gender) return '';
+    const key = `COMMON.${gender.toUpperCase()}`;
+    const translated = this.translate.instant(key);
+    return translated !== key ? translated : gender;
+  }
+
+  formatDate(dateString?: string): string {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const locale = this.localeMapping[this.currentLocale] || 'en-US';
+    return date.toLocaleDateString(locale, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   }
 
   private getFullImageUrl(path: string): string {

@@ -48,11 +48,11 @@
           </div>
           <div class="col-md-6 mb-3">
             <strong>{{ 'EDUCATOR_DETAIL.DATE_OF_BIRTH' | translate }}</strong>
-            <p class="mb-0">{{ educator.dateOfBirth | date:'mediumDate' }}</p>
+            <p class="mb-0">{{ formatDate(educator.dateOfBirth) }}</p>
           </div>
           <div class="col-md-6 mb-3">
             <strong>{{ 'EDUCATOR_DETAIL.HIRE_DATE' | translate }}</strong>
-            <p class="mb-0">{{ educator.hireDate | date:'mediumDate' }}</p>
+            <p class="mb-0">{{ formatDate(educator.hireDate) }}</p>
           </div>
           <div class="col-md-6 mb-3">
             <strong>{{ 'EDUCATOR_DETAIL.SALARY' | translate }}</strong>
@@ -87,8 +87,8 @@
                class="rounded-circle me-3" width="60" height="60" alt="Child">
           <div class="flex-grow-1">
             <h6 class="mb-1">{{ child.firstName }} {{ child.lastName }}</h6>
-            <p class="mb-0 text-muted">{{ child.gender }} - {{ getAge(child.dateOfBirth) }} {{ 'EDUCATOR_DETAIL.YEARS_OLD' | translate }}</p>
-            <small class="text-muted">{{ 'EDUCATOR_DETAIL.BORN' | translate }} {{ child.dateOfBirth | date:'mediumDate' }}</small>
+            <p class="mb-0 text-muted">{{ translateGender(child.gender) }} - {{ getAge(child.dateOfBirth) }} {{ 'EDUCATOR_DETAIL.YEARS_OLD' | translate }}</p>
+            <small class="text-muted">{{ 'EDUCATOR_DETAIL.BORN' | translate }} {{ formatDate(child.dateOfBirth) }}</small>
           </div>
           <div class="text-end d-flex gap-2">
             <button class="btn btn-sm btn-remove" (click)="removeChild(child.id!)">
@@ -138,7 +138,7 @@
                   alt="Child Photo">
                 <div class="flex-grow-1">
                   <h6 class="mb-0">{{ child.firstName }} {{ child.lastName }}</h6>
-                  <small class="text-muted">{{ 'EDUCATOR_DETAIL.AGE' | translate }}: {{ getAge(child.dateOfBirth) }} | {{ 'EDUCATOR_DETAIL.GENDER' | translate }}: {{ child.gender }}</small>
+                  <small class="text-muted">{{ 'EDUCATOR_DETAIL.AGE' | translate }}: {{ getAge(child.dateOfBirth) }} | {{ 'EDUCATOR_DETAIL.GENDER' | translate }}: {{ translateGender(child.gender) }}</small>
                 </div>
               </div>
             </button>

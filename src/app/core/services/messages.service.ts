@@ -31,9 +31,13 @@ export interface Conversation {
   userId: string;
   name: string;
   profilePictureUrl?: string;
+  email?: string;
   lastMessage: string;
   lastMessageAt: string;
   unreadCount: number;
+  role?: string;
+  parentId?: number;
+  teacherId?: number;
 }
 
 export interface TenantContact {
@@ -41,6 +45,9 @@ export interface TenantContact {
   name: string;
   email: string;
   profilePictureUrl?: string;
+  role?: string;
+  parentId?: number;
+  teacherId?: number;
 }
 
 export interface ChatMessage {

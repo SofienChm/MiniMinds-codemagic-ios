@@ -54,7 +54,7 @@
           <span *ngIf="messagesUnreadCount > 0" class="notification-status-dot"></span>
         </a>
 
-        <a class="btn btn-header btn-outline-light bg-white btn-icon position-relative-mobile me-1" (click)="toggleNotifications()">
+        <a class="btn btn-header btn-outline-light bg-white btn-icon position-relative-mobile mobile-resp me-1" (click)="toggleNotifications()">
           <i class="bi bi-bell"></i>
           <span *ngIf="unreadCount > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
             {{ unreadCount }}
@@ -87,10 +87,10 @@
               </div>
               <div class="notification-content">
                 <div class="d-flex justify-content-between align-items-start mb-1">
-                  <strong class="notification-title">{{ notification.title }}</strong>
+                  <strong class="notification-title">{{ getTranslatedTitle(notification) }}</strong>
                   <span class="notification-time">{{ getTimeAgo(notification.createdAt) }}</span>
                 </div>
-                <p class="notification-message mb-0">{{ notification.message }}</p>
+                <p class="notification-message mb-0">{{ getTranslatedMessage(notification) }}</p>
                 <small *ngIf="notification.redirectUrl" class="notification-action">
                   <i class="bi bi-arrow-right-circle me-1"></i>{{ 'HEADER.VIEW_DETAILS' | translate }}
                 </small>

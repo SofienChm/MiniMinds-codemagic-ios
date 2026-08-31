@@ -62,6 +62,12 @@ export class Children implements OnInit, OnDestroy {
 
   breadcrumbs: Breadcrumb[] = [];
   titleActions: TitleAction[] = [];
+  currentLocale = 'en';
+  private readonly localeMapping: Record<string, string> = {
+    'fr': 'fr-FR',
+    'it': 'it-IT',
+    'ar': 'ar-SA'
+  };
 
   constructor(
     private childrenService: ChildrenService,
@@ -74,6 +80,7 @@ export class Children implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.userRole = this.authService.getUserRole();
+    this.currentLocale = this.translate.currentLang ?? this.translate.defaultLang ?? 'en';
     this.initBreadcrumbs();
     this.initSelectOptions();
     this.setupTitleActions();
@@ -89,6 +96,24 @@ export class Children implements OnInit, OnDestroy {
 
   isParent(): boolean {
     return this.authService.isParent();
+  }
+
+  translateGender(gender?: string): string {
+    if (!gender) return '';
+    const key = `COMMON.${gender.toUpperCase()}`;
+    const translated = this.translate.instant(key);
+    return translated !== key ? translated : gender;
+  }
+
+  formatDate(dateString?: string): string {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const locale = this.localeMapping[this.currentLocale] || 'en-US';
+    return date.toLocaleDateString(locale, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   }
 
   private initBreadcrumbs(): void {

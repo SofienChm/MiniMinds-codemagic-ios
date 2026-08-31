@@ -37,6 +37,12 @@ export class EducatorDetail implements OnInit {
 
   breadcrumbs: Breadcrumb[] = [];
   titleActions: TitleAction[] = [];
+  currentLocale = 'en';
+  private readonly localeMapping: Record<string, string> = {
+    'fr': 'fr-FR',
+    'it': 'it-IT',
+    'ar': 'ar-SA'
+  };
 
   constructor(
     private educatorService: EducatorService,
@@ -50,13 +56,15 @@ export class EducatorDetail implements OnInit {
 
   ngOnInit() {
     this.educatorId = Number(this.route.snapshot.paramMap.get('id'));
+    this.currentLocale = this.translate.currentLang ?? this.translate.defaultLang ?? 'en';
     this.initBreadcrumbs();
     this.setupTitleActions();
     this.loadEducator();
     this.loadAssignedChildren();
 
     // Update translations when language changes
-    this.translate.onLangChange.subscribe(() => {
+    this.translate.onLangChange.subscribe((event) => {
+      this.currentLocale = event.lang;
       this.initBreadcrumbs();
       this.setupTitleActions();
     });
@@ -127,6 +135,24 @@ export class EducatorDetail implements OnInit {
       age--;
     }
     return age;
+  }
+
+  translateGender(gender?: string): string {
+    if (!gender) return '';
+    const key = `COMMON.${gender.toUpperCase()}`;
+    const translated = this.translate.instant(key);
+    return translated !== key ? translated : gender;
+  }
+
+  formatDate(dateString?: string): string {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const locale = this.localeMapping[this.currentLocale] || 'en-US';
+    return date.toLocaleDateString(locale, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   }
 
   /**

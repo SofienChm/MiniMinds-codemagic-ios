@@ -130,11 +130,11 @@
           </div>
           <div class="info-row">
             <div class="info-label">{{ 'CHILD_DETAIL.BIRTHDAY' | translate }}</div>
-            <div class="info-value">{{ child.dateOfBirth | date:'yyyy/MM/dd' }}</div>
+            <div class="info-value">{{ formatDate(child.dateOfBirth) }}</div>
           </div>
           <div class="info-row">
             <div class="info-label">{{ 'CHILD_DETAIL.GENDER' | translate }}</div>
-            <div class="info-value">{{ child.gender}}</div>
+            <div class="info-value">{{ translateGender(child.gender)}}</div>
           </div>
         </div>
         <div class="info-card card-mobile card mb-3">
@@ -241,11 +241,11 @@
               <dt class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.FULL_NAME' | translate }}</dt>
               <dd class="col-6 description-dt-body-card mb-2">{{ child.firstName }} {{ child.lastName }}</dd>
               <dt class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.GENDER' | translate }}</dt>
-              <dd class="col-6 description-dt-body-card mb-2">{{ child.gender }}</dd>
+              <dd class="col-6 description-dt-body-card mb-2">{{ translateGender(child.gender) }}</dd>
               <dt class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.DATE_OF_BIRTH' | translate }}</dt>
-              <dd class="col-6 description-dt-body-card mb-2">{{ child.dateOfBirth | date:'yy/MM/dd' }}</dd>
+              <dd class="col-6 description-dt-body-card mb-2">{{ formatDate(child.dateOfBirth) }}</dd>
               <dt class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.ENROLLMENT_DATE' | translate }}</dt>
-              <dd class="col-6 description-dt-body-card mb-2">{{ child.enrollmentDate | date:'yy/MM/dd' }}</dd>
+              <dd class="col-6 description-dt-body-card mb-2">{{ formatDate(child.enrollmentDate) }}</dd>
             </dl>
             <div *ngIf="child.medicalNotes || child.allergies">
               <h5 class="mb-3 title-body">{{ 'CHILD_DETAIL.MEDICAL_INFO' | translate }}</h5>
@@ -343,8 +343,7 @@
                       <dd *ngIf="currentChildParent?.parent?.work" class="col-6 description-dt-body-card mb-2">{{
                         currentChildParent?.parent?.work }}</dd>
                       <dt class="col-6 title-dt-body-card mb-3">{{ 'CHILD_DETAIL.CREATED_AT' | translate }}</dt>
-                      <dd class="col-6 description-dt-body-card mb-3">{{ currentChildParent?.parent?.createdAt |
-                        date:'yy/MM/dd' }}</dd>
+                      <dd class="col-6 description-dt-body-card mb-3">{{ formatDate(currentChildParent?.parent?.createdAt) }}</dd>
                       <dt *ngIf="currentChildParent?.parent?.address" class="col-6 title-dt-body-card mb-2">{{
                         'CHILD_DETAIL.ADDRESS' | translate }}</dt>
                       <dd *ngIf="currentChildParent?.parent?.address" class="col-6 description-dt-body-card mb-2">{{
@@ -392,7 +391,7 @@
                       <dd *ngIf="child.parent.work" class="col-6 description-dt-body-card mb-2">{{ child.parent.work }}
                       </dd>
                       <dt class="col-6 title-dt-body-card mb-3">{{ 'CHILD_DETAIL.CREATED_AT' | translate }}</dt>
-                      <dd class="col-6 description-dt-body-card mb-3">{{ child.parent.createdAt | date:'yy/MM/dd' }}
+                      <dd class="col-6 description-dt-body-card mb-3">{{ formatDate(child.parent.createdAt) }}
                       </dd>
                       <dt *ngIf="child.parent.address" class="col-6 title-dt-body-card mb-2">{{ 'CHILD_DETAIL.ADDRESS' |
                         translate }}</dt>

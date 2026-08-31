@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, ElementRef, ViewChild, ChangeDetectorRef, HostListener } from '@angular/core';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -50,6 +51,9 @@ export class ChatComponent implements OnInit, OnDestroy {
   selectedUserId: string | null = null;
   selectedUserName = '';
   selectedUserPicture: string | null = null;
+  selectedUserRole: string | null = null;
+  selectedUserParentId: number | null = null;
+  selectedUserTeacherId: number | null = null;
   selectedGroupId: number | null = null;
   selectedGroupName = '';
   selectedGroupMemberCount = 0;
@@ -92,6 +96,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     private messagesService: MessagesService,
     private notificationService: NotificationService,
     private classesService: ClassesService,
+    private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -186,6 +191,9 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.selectedUserId = conversation.userId;
     this.selectedUserName = conversation.name;
     this.selectedUserPicture = conversation.profilePictureUrl || null;
+    this.selectedUserRole = conversation.role || null;
+    this.selectedUserParentId = conversation.parentId ?? null;
+    this.selectedUserTeacherId = conversation.teacherId ?? null;
     this.loadConversation(conversation.userId);
   }
 
@@ -393,6 +401,9 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.selectedUserId = user.id;
     this.selectedUserName = user.name;
     this.selectedUserPicture = user.profilePictureUrl || null;
+    this.selectedUserRole = user.role || null;
+    this.selectedUserParentId = user.parentId ?? null;
+    this.selectedUserTeacherId = user.teacherId ?? null;
     this.messages = [];
     this.closeNewChatModal();
 
@@ -625,10 +636,23 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.clearSelection();
   }
 
+  goToSelectedUserDetail(): void {
+    if (this.selectedGroupId !== null || !this.selectedUserId) return;
+
+    if (this.selectedUserRole === 'Parent' && this.selectedUserParentId != null) {
+      this.router.navigate(['/parents/detail', this.selectedUserParentId]);
+    } else if (this.selectedUserRole === 'Teacher' && this.selectedUserTeacherId != null) {
+      this.router.navigate(['/educators/detail', this.selectedUserTeacherId]);
+    }
+  }
+
   clearSelection(): void {
     this.selectedUserId = null;
     this.selectedUserName = '';
     this.selectedUserPicture = null;
+    this.selectedUserRole = null;
+    this.selectedUserParentId = null;
+    this.selectedUserTeacherId = null;
     this.selectedGroupId = null;
     this.selectedGroupName = '';
     this.selectedGroupMemberCount = 0;

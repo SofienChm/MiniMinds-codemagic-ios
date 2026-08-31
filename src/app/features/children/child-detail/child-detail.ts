@@ -83,6 +83,13 @@ export class ChildDetail implements OnInit, OnDestroy {
 
   titleActions: TitleAction[] = [];
 
+  currentLocale = 'en';
+  private readonly localeMapping: Record<string, string> = {
+    'fr': 'fr-FR',
+    'it': 'it-IT',
+    'ar': 'ar-SA'
+  };
+
   constructor(
     private childrenService: ChildrenService,
     private parentService: ParentService,
@@ -101,12 +108,14 @@ export class ChildDetail implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.childId = Number(this.route.snapshot.paramMap.get('id'));
+    this.currentLocale = this.translate.currentLang ?? this.translate.defaultLang ?? 'en';
     this.initBreadcrumbs();
     this.setupTitleActions();
     this.loadChild();
 
     // Update translations when language changes
-    this.translate.onLangChange.subscribe(() => {
+    this.translate.onLangChange.subscribe((event) => {
+      this.currentLocale = event.lang;
       this.initBreadcrumbs();
       this.setupTitleActions();
     });
@@ -783,6 +792,24 @@ export class ChildDetail implements OnInit, OnDestroy {
     return new Date(dateString).toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit'
+    });
+  }
+
+  translateGender(gender?: string): string {
+    if (!gender) return '';
+    const key = `COMMON.${gender.toUpperCase()}`;
+    const translated = this.translate.instant(key);
+    return translated !== key ? translated : gender;
+  }
+
+  formatDate(dateString?: string): string {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const locale = this.localeMapping[this.currentLocale] || 'en-US';
+    return date.toLocaleDateString(locale, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     });
   }
 

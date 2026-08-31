@@ -104,20 +104,22 @@
               </div>
             </ng-container>
             <ng-template #individualHeader>
-              <div class="px-avatar-wrap">
-                <img *ngIf="selectedUserPicture" class="px-avatar" [src]="getFullUrl(selectedUserPicture)" alt="">
-                <div *ngIf="!selectedUserPicture" class="px-avatar" [style.background]="avatarColor(selectedUserName)">{{ initials(selectedUserName) }}</div>
-              </div>
-              <div>
-                <div class="px-chat-header-name">{{ selectedUserName }}</div>
-              </div>
-            </ng-template>
-          </div>
-          <div class="d-flex gap-2">
-            <button class="px-chat-icon-btn" [title]="'CHAT_PAGE.AUDIO_CALL' | translate"><i class="bi bi-telephone"></i></button>
-            <button class="px-chat-icon-btn" [title]="'CHAT_PAGE.VIDEO_CALL' | translate"><i class="bi bi-camera-video"></i></button>
-            <button class="px-chat-icon-btn" [title]="'CHAT_PAGE.INFO' | translate"><i class="bi bi-info-circle"></i></button>
-          </div>
+            <div class="px-avatar-wrap">
+              <img *ngIf="selectedUserPicture" class="px-avatar" [src]="getFullUrl(selectedUserPicture)" alt="">
+              <div *ngIf="!selectedUserPicture" class="px-avatar" [style.background]="avatarColor(selectedUserName)">{{ initials(selectedUserName) }}</div>
+            </div>
+            <div>
+              <div class="px-chat-header-name px-chat-header-name-clickable" (click)="goToSelectedUserDetail()">{{ selectedUserName }}</div>
+            </div>
+          </ng-template>
+        </div>
+        <div class="d-flex gap-2">
+           <!-- 
+          <button class="px-chat-icon-btn" [title]="'CHAT_PAGE.AUDIO_CALL' | translate"><i class="bi bi-telephone"></i></button>
+          <button class="px-chat-icon-btn" [title]="'CHAT_PAGE.VIDEO_CALL' | translate"><i class="bi bi-camera-video"></i></button>
+           -->
+          <button *ngIf="selectedUserId" class="px-chat-icon-btn" [title]="'CHAT_PAGE.INFO' | translate" (click)="goToSelectedUserDetail()"><i class="bi bi-info-circle"></i></button>
+        </div>
         </div>
 
         <div class="px-chat-messages" #messagesContainer (scroll)="onMessagesScroll($event)">
@@ -270,7 +272,9 @@
       </ng-container>
 
       <ng-container *ngIf="groupMode === 'manual'">
-        <input type="text" class="px-chat-group-input" [placeholder]="'CHAT_PAGE.GROUP_NAME' | translate" [(ngModel)]="groupName">
+        <div class="search-group-name">
+          <input type="text" class="px-chat-group-input" [placeholder]="'CHAT_PAGE.GROUP_NAME' | translate" [(ngModel)]="groupName">
+        </div>
         <div class="px-chat-modal-loading" *ngIf="tenantUsers.length === 0">
           {{ 'COMMON.LOADING' | translate }}
         </div>

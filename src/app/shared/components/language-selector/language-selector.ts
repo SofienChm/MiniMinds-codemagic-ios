@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, HostListener, inject, signal } from '@angular/core';
 import { LanguageService } from '../../../core/services/langauge-service';
+import { AuthService } from '../../../core/services/auth';
 
 @Component({
   selector: 'app-language-selector',
@@ -11,6 +12,7 @@ import { LanguageService } from '../../../core/services/langauge-service';
 })
 export class LanguageSelector {
   private readonly languageService = inject(LanguageService);
+  private readonly authService = inject(AuthService);
   private readonly elementRef = inject(ElementRef);
 
   availableLanguages = ['en', 'fr', 'it', 'ar'];
@@ -30,6 +32,12 @@ export class LanguageSelector {
   changeLanguage(lang: string) {
     this.languageService.use(lang);
     this.showMenu.set(false);
+
+    // Persist the language to the backend so server-side (push) notifications
+    // can be localized for this user.
+    if (this.authService.isAuthenticated()) {
+      this.authService.updateLanguage(lang).subscribe({ error: () => {} });
+    }
   }
 
   getFlag(lang: string): string {

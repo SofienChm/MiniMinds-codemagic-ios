@@ -380,14 +380,12 @@
               <div class="flex-grow-1">
                 <h6 class="mb-1">{{ child.firstName }} {{ child.lastName }}</h6>
                 <p class="mb-0 text-muted">
-                  {{ child.gender }} -
+                  {{ translateGender(child.gender) }} -
                   @if( calculateAge(child.dateOfBirth).years > 0){
                   {{ calculateAge(child.dateOfBirth).years}} {{ 'EDIT_PARENT.YEARS' | translate }}
                   }
-                  @if( calculateAge(child.dateOfBirth).years <= 0){ {{ calculateAge(child.dateOfBirth).months}} months
-                    old }  </p>
-                    <small class="text-muted">{{ 'EDIT_PARENT.BORN' | translate }}: {{ child.dateOfBirth |
-                      date:'mediumDate' }}</small>
+                  @if( calculateAge(child.dateOfBirth).years <= 0){ {{ calculateAge(child.dateOfBirth).months}} {{ 'EDIT_PARENT.MONTHS_OLD' | translate }} }  </p>
+                    <small class="text-muted">{{ 'EDIT_PARENT.BORN' | translate }}: {{ formatDate(child.dateOfBirth) }}</small>
               </div>
               <div class="text-end">
                 <button class="btn btn-outline-primary btn-sm me-2" [routerLink]="['/children/edit', child.id]">

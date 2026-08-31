@@ -7,7 +7,7 @@ import { PushNotificationService } from '../../../core/services/push-notificatio
 import { Notification } from '../../../core/interfaces/notification.interface';
 import { CommonModule } from '@angular/common';
 import { LanguageSelector } from '../../components/language-selector/language-selector';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MessagesService } from '../../../core/services/messages.service';
 import { PageTitleService } from '../../../core/services/page-title.service';
 import { Subject, takeUntil } from 'rxjs';
@@ -39,7 +39,8 @@ export class Header implements OnInit, OnDestroy {
     private pushNotificationService: PushNotificationService,
     private messagesService: MessagesService,
     private pageTitleService: PageTitleService,
-    private router: Router
+    private router: Router,
+    private translate: TranslateService
   ) {}
 
   ngOnInit(): void {
@@ -210,6 +211,36 @@ export class Header implements OnInit, OnDestroy {
       'system': 'icon-system'
     };
     return classes[type.toLowerCase()] || 'icon-default';
+  }
+
+  getTranslatedTitle(notification: Notification): string {
+    if (notification.titleKey) {
+      const params = this.parseMessageParams(notification.messageParams);
+      const translated = this.translate.instant(notification.titleKey, params);
+      return translated === notification.titleKey ? notification.title : translated;
+    }
+    return notification.title;
+  }
+
+  getTranslatedMessage(notification: Notification): string {
+    if (notification.messageKey) {
+      const params = this.parseMessageParams(notification.messageParams);
+      const translated = this.translate.instant(notification.messageKey, params);
+      return translated === notification.messageKey ? notification.message : translated;
+    }
+    return notification.message;
+  }
+
+  private parseMessageParams(messageParams?: string | Record<string, string>): Record<string, string> {
+    if (!messageParams) return {};
+    if (typeof messageParams === 'string') {
+      try {
+        return JSON.parse(messageParams);
+      } catch {
+        return {};
+      }
+    }
+    return messageParams;
   }
 
   getTimeAgo(dateString: string): string {

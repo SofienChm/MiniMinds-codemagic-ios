@@ -96,7 +96,7 @@
                   </div>
                   <div>
                     <p class="mb-0 information-title">{{ 'CHILDREN.GENDER' | translate }}</p>
-                    <p class="mb-0 information-description">{{ child.gender }}</p>
+                    <p class="mb-0 information-description">{{ translateGender(child.gender) }}</p>
                   </div>
                 </div>
               </div>
@@ -273,7 +273,7 @@
             </div>
             <div>
               <p class="mb-0 information-title">{{ 'CHILDREN.GENDER' | translate }}</p>
-              <p class="mb-0 information-description">{{ child.gender }}</p>
+              <p class="mb-0 information-description">{{ translateGender(child.gender) }}</p>
             </div>
           </div>
         </div>
@@ -345,9 +345,9 @@
                   <span>{{ child.firstName }} {{ child.lastName }}</span>
                 </td>
                 <td>{{ getAgeDisplay(child.dateOfBirth) }}</td>
-                <td>{{ child.gender }}</td>
+                <td>{{ translateGender(child.gender) }}</td>
                 <td>{{ child.parent?.firstName }} {{ child.parent?.lastName }}</td>
-                <td>{{ child.enrollmentDate | date:'shortDate' }}</td>
+                <td>{{ formatDate(child.enrollmentDate) }}</td>
                 <td>
                   <div class="d-flex gap-1" (click)="$event.stopPropagation()">
                     <button class="btn btn-sm btn-view" (click)="viewDetails(child)">
