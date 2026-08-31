@@ -79,6 +79,15 @@ export class FcmPushNotificationService {
 
       // Register with FCM
       await PushNotifications.register();
+
+      // Ensure the device token is bound to the currently logged-in user.
+      // The `registration` listener only re-fires when FCM issues/refreshes a
+      // token; on a re-login the same token is often returned without a new
+      // `registration` event. Explicitly re-registering here guarantees the
+      // token is re-bound to the new user even in that case.
+      if (this.fcmToken) {
+        await this.registerTokenWithBackend(this.fcmToken);
+      }
     } catch (error) {
       this.initialized = false; // Allow retry on next launch
       console.error('Error initializing push notifications:', error);
@@ -252,6 +261,20 @@ export class FcmPushNotificationService {
    */
   getToken(): string | null {
     return this.fcmToken;
+  }
+
+  /**
+   * Re-bind the current device token to the logged-in user.
+   * The backend keys device tokens on the token value and overwrites the owner,
+   * so calling this on login guarantees this device's notifications are routed
+   * to the newly authenticated user even when the `registration` listener does
+   * not re-fire (e.g. FCM returns the same token on re-register).
+   */
+  async rebindTokenToCurrentUser(): Promise<void> {
+    if (!this.isSupported() || !this.fcmToken) {
+      return;
+    }
+    await this.registerTokenWithBackend(this.fcmToken);
   }
 
   /**

@@ -18,7 +18,7 @@ import { ApiConfig } from '../../core/config/api.config';
 })
 export class ProfileMenuComponent implements OnInit, OnDestroy {
   currentUser: AuthResponse | null = null;
-  messageUnreadCount = 0;
+  chatUnreadCount = 0;
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -35,15 +35,17 @@ export class ProfileMenuComponent implements OnInit, OnDestroy {
     }
     this.currentUser = this.authService.getCurrentUser();
 
-    // Load initial unread count
-    this.loadMessageUnreadCount();
+    // Load chat (conversations + groups) unread count
+    this.loadChatUnreadCount();
 
-    // Subscribe to real-time updates via SignalR
-    this.notificationService.messageUnreadCount$
+    // Refresh chat unread count on incoming chat/group messages
+    this.notificationService.chatMessageReceived$
       .pipe(takeUntil(this.destroy$))
-      .subscribe(count => {
-        this.messageUnreadCount = count;
-      });
+      .subscribe(() => this.loadChatUnreadCount());
+
+    this.notificationService.groupMessageReceived$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.loadChatUnreadCount());
   }
 
   ngOnDestroy(): void {
@@ -51,10 +53,28 @@ export class ProfileMenuComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  private loadMessageUnreadCount(): void {
-    this.messagesService.getUnreadCount().subscribe({
-      next: (count) => this.messageUnreadCount = count,
-      error: () => this.messageUnreadCount = 0
+  private loadChatUnreadCount(): void {
+    this.messagesService.getConversations().subscribe({
+      next: (conversations) => {
+        const conversationUnread = conversations.reduce((sum, c) => sum + (c.unreadCount || 0), 0);
+        this.messagesService.getChatGroups().subscribe({
+          next: (groups) => {
+            const groupUnread = groups.reduce((sum, g) => sum + (g.unreadCount || 0), 0);
+            this.chatUnreadCount = conversationUnread + groupUnread;
+          },
+          error: () => {
+            this.chatUnreadCount = conversationUnread;
+          }
+        });
+      },
+      error: () => {
+        this.messagesService.getChatGroups().subscribe({
+          next: (groups) => {
+            this.chatUnreadCount = groups.reduce((sum, g) => sum + (g.unreadCount || 0), 0);
+          },
+          error: () => this.chatUnreadCount = 0
+        });
+      }
     });
   }
 

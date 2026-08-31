@@ -41,12 +41,12 @@
           <span>{{ 'PROFILE_MENU.PAYMENTS' | translate }}</span>
         </div>
 
-        <div class="menu-item" (click)="navigateTo('/messages')">
+        <div class="menu-item" (click)="navigateTo('/chat')">
           <div class="icon-circle message">
             <i class="bi bi-chat-dots"></i>
-            <span class="badge-count" *ngIf="messageUnreadCount > 0">{{ messageUnreadCount }}</span>
+            <span class="badge-count" *ngIf="chatUnreadCount > 0">{{ chatUnreadCount }}</span>
           </div>
-          <span>{{ 'PROFILE_MENU.MESSAGES' | translate }}</span>
+          <span>{{ 'SIDEBAR.MENU.CHAT' | translate }}</span>
         </div>
 
         <div class="menu-item" (click)="navigateTo('/calendar')">

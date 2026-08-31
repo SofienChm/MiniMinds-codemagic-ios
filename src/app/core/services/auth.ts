@@ -52,9 +52,12 @@ export class AuthService {
           console.error('Failed to extract userId from token', e);
         }
 
-        this.currentUserSubject.next(response);
-
-        // Unregister FCM if switching accounts (e.g. parent → admin without explicit logout)
+        // Unregister FCM for the PREVIOUS user BEFORE emitting the new one.
+        // Order matters: emitting first triggers app.ts's initialize() while the
+        // FCM service is still flagged `initialized` from the prior session, so
+        // it would silently skip and never re-bind the token to the new user.
+        // Unregistering first resets that state so initialize() re-registers
+        // the device token under the new user's identity.
         const existingUser = this.getCurrentUser();
         if (existingUser) {
           try {
@@ -67,6 +70,8 @@ export class AuthService {
             console.error('Error unregistering FCM on account switch:', error);
           }
         }
+
+        this.currentUserSubject.next(response);
 
         // Pre-load tenant features for non-SuperAdmin users
         // This ensures features are loaded before navigation and sidebar rendering
