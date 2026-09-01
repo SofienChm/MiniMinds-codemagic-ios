@@ -201,6 +201,33 @@ export class FeeComponent implements OnInit, AfterViewInit, OnDestroy {
     this.router.navigate(['/static-fees', id]);
   }
 
+  get combinedSummary() {
+    const feeTotal = this.summary?.totalAmount || 0;
+    const feePaid = this.summary?.paidAmount || 0;
+    const feePending = this.summary?.pendingAmount || 0;
+    const feeOverdue = this.summary?.overdueAmount || 0;
+    const feeCount = this.summary?.totalFees || 0;
+    const feePaidCount = this.summary?.paidFees || 0;
+    const feePendingCount = this.summary?.pendingFees || 0;
+    const feeOverdueCount = this.summary?.overdueFees || 0;
+
+    const staticPaid = this.staticFees.filter(f => f.status === 'Paid').reduce((sum, f) => sum + f.amount, 0);
+    const staticPending = this.staticFees.filter(f => f.status === 'Pending').reduce((sum, f) => sum + f.amount, 0);
+    const staticPaidCount = this.staticFees.filter(f => f.status === 'Paid').length;
+    const staticPendingCount = this.staticFees.filter(f => f.status === 'Pending').length;
+
+    return {
+      totalFees: feeCount + this.staticFees.length,
+      paidFees: feePaidCount + staticPaidCount,
+      pendingFees: feePendingCount + staticPendingCount,
+      overdueFees: feeOverdueCount,
+      totalAmount: feeTotal + staticPaid + staticPending,
+      paidAmount: feePaid + staticPaid,
+      pendingAmount: feePending + staticPending,
+      overdueAmount: feeOverdue
+    };
+  }
+
   get combinedFees(): Array<{ id: number; type: string; title: string; amount: number; date: string; status: string; statusClass: string; navigate: () => void }> {
     const normal = this.fees.map(f => ({
       id: f.id!,

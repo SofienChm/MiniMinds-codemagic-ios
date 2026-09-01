@@ -27,6 +27,54 @@
     </div>
   </div>
 
+  <!-- Stats Cards -->
+  <div class="row mb-3 g-2">
+    <div class="col-6 col-md-3">
+      <div class="card card-body stats-card present">
+        <div class="stats-icon mb-2">
+          <i class="bi bi-person-check"></i>
+        </div>
+        <div class="stats-content">
+          <h3>{{ stats.totalPresent }}</h3>
+          <p>{{ 'ATTENDANCE_PAGE.PRESENT_TODAY' | translate }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card card-body stats-card absent">
+        <div class="stats-icon mb-2">
+          <i class="bi bi-person-x"></i>
+        </div>
+        <div class="stats-content">
+          <h3>{{ stats.totalAbsent }}</h3>
+          <p>{{ 'ATTENDANCE_PAGE.ABSENT_TODAY' | translate }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card card-body stats-card checkin">
+        <div class="stats-icon mb-2">
+          <i class="bi bi-clock"></i>
+        </div>
+        <div class="stats-content">
+          <h3>{{ stats.checkInsToday }}</h3>
+          <p>{{ 'ATTENDANCE_PAGE.CHECK_INS' | translate }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card card-body stats-card checkout">
+        <div class="stats-icon mb-2">
+          <i class="bi bi-box-arrow-right"></i>
+        </div>
+        <div class="stats-content">
+          <h3>{{ stats.checkOutsToday }}</h3>
+          <p>{{ 'ATTENDANCE_PAGE.CHECK_OUTS' | translate }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Children Attendance List -->
   <div class="card flex-fill card-general card-recently mb-3">
     <div class="card-header d-flex justify-content-between align-items-center">

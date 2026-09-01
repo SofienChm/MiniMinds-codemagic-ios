@@ -1,13 +1,19 @@
+<div *ngIf="isParent" class="parent-detailchild font-inter">
+  <app-parent-child-header-simple
+    [title]="'FEES_PAGE.FEE_RECEIPT' | translate"
+  >
+  </app-parent-child-header-simple>
+</div>
 <div class="container-fluid mt-4">
-  <app-title-page
-    [title]="'STATIC_FEES_PAGE.FEE_RECEIPT' | translate"
-    [subtitle]="'STATIC_FEES_PAGE.VIEW_FEE_DETAILS' | translate"
+  <app-title-page *ngIf="!isParent"
+    [title]="'FEES_PAGE.FEE_RECEIPT' | translate"
+    [subtitle]="'FEES_PAGE.VIEW_FEE_DETAILS' | translate"
     icon="bi bi-receipt"
     [breadcrumbs]="breadcrumbs"
     [actions]="getActions()">
   </app-title-page>
-</div>
 
+</div>
 <div class="container-fluid mt-4">
 
   <div *ngIf="loading" class="text-center py-5">

@@ -10,6 +10,8 @@ import { StaticFeesService, StaticFeeModel } from '../static-fees.service';
 import { AppCurrencyPipe } from '../../../core/services/currency/currency.pipe';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ApiConfig } from '../../../core/config/api.config';
+import { AuthService } from '../../../core/services/auth';
+import { ParentChildHeaderSimpleComponent } from '../../../shared/components/parent-child-header-simple/parent-child-header-simple.component';
 import { SKIP_ERROR_HANDLER } from '../../../core/interceptors/error.interceptor';
 import { PageTitleService } from '../../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
@@ -17,7 +19,7 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-static-fee-detail',
   standalone: true,
-  imports: [CommonModule, TitlePage, AppCurrencyPipe, TranslateModule],
+  imports: [CommonModule, TitlePage, AppCurrencyPipe, TranslateModule, ParentChildHeaderSimpleComponent],
   templateUrl: './static-fee-detail.html',
   styleUrls: ['./static-fee-detail.scss']
 })
@@ -36,6 +38,7 @@ export class StaticFeeDetailComponent implements OnInit, OnDestroy {
     private staticFeesService: StaticFeesService,
     private http: HttpClient,
     private translateService: TranslateService,
+    private authService: AuthService,
     private pageTitleService: PageTitleService
   ) {
     registerLocaleData(localeFr);
@@ -63,6 +66,9 @@ export class StaticFeeDetailComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.langChangeSub?.unsubscribe();
+  }
+  get isParent(): boolean {
+    return this.authService.isParent();
   }
 
   private updateTranslatedContent(): void {

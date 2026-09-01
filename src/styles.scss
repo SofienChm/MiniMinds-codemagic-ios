@@ -1133,6 +1133,9 @@ input.form-control {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 24px;
+      @media screen and (max-width: 576px) {
+        grid-template-columns: 1fr;
+      }
 
       .full-width {
         grid-column: 1 / -1;

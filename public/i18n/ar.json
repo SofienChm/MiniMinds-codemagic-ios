@@ -916,7 +916,19 @@
     "SELECT_CLASS": "اختر فصلاً",
     "GROUP_NAME": "اسم المجموعة",
     "CREATE_GROUP": "إنشاء المجموعة",
-    "MEMBERS": "أعضاء"
+    "MEMBERS": "أعضاء",
+    "CHECK_ALL": "تحديد الكل",
+    "UNCHECK_ALL": "إلغاء تحديد الكل",
+    "GROUP_MEMBERS": "أعضاء المجموعة",
+    "NO_MEMBERS": "لم يتم العثور على أعضاء",
+    "ATTACHMENT": "مرفق",
+    "REMOVE": "إزالة",
+    "UPLOADING": "جارٍ الرفع...",
+    "ATTACH_TYPE_ERROR": "نوع الملف غير مسموح به. يُقبل فقط PDF و Word و Excel والصور (JPG و PNG و GIF و WEBP).",
+    "ATTACH_TOO_LARGE": "الملف كبير جدًا. الحد الأقصى هو 10 ميجابايت.",
+    "ATTACH_UPLOAD_FAILED": "فشل الرفع. حاول مرة أخرى.",
+    "ATTACH_SEND_FAILED": "فشل إرسال المرفق. حاول مرة أخرى.",
+    "ATTACH_OPEN_FAILED": "تعذر فتح المرفق. حاول مرة أخرى."
   },
   "RECLAMATIONS_PAGE": {
     "TITLE": "الشكاوى",

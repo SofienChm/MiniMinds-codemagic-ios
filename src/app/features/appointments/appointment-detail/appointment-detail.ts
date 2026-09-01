@@ -12,6 +12,7 @@ import { PageTitleService } from '../../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
 import { showSuccessToast } from '../../../shared/utils/swal.util';
+import { ParentChildHeaderSimpleComponent } from '../../../shared/components/parent-child-header-simple/parent-child-header-simple.component';
 
 registerLocaleData(localeFr);
 registerLocaleData(localeIt);
@@ -20,7 +21,7 @@ registerLocaleData(localeAr);
 @Component({
   selector: 'app-appointment-detail',
   standalone: true,
-  imports: [CommonModule, TitlePage, TranslateModule, RouterModule],
+  imports: [CommonModule, TitlePage, TranslateModule, RouterModule, ParentChildHeaderSimpleComponent],
   templateUrl: './appointment-detail.html',
   styleUrls: ['./appointment-detail.scss']
 })

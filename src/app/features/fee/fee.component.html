@@ -18,8 +18,8 @@
                 </div>
                 <div class="flex-grow-1 ms-3">
                   <h6 class="mb-0 total">{{ 'FEES_PAGE.TOTAL_FEES' | translate }}</h6>
-                  <h4 class="mb-0 spent">{{ summary.totalAmount | appCurrency }}</h4>
-                  <small class="text-muted number">{{ summary.totalFees }} {{ 'FEES_PAGE.FEES' | translate }}</small>
+                  <h4 class="mb-0 spent">{{ combinedSummary.totalAmount | appCurrency }}</h4>
+                  <small class="text-muted number">{{ combinedSummary.totalFees }} {{ 'FEES_PAGE.FEES' | translate }}</small>
                 </div>
               </div>
             </div>
@@ -36,8 +36,8 @@
                   </div>
                   <div class="flex-grow-1 ms-3">
                     <h6 class="mb-0 total">{{ 'FEES_PAGE.PAID' | translate }}</h6>
-                    <h4 class="mb-0 spent">{{ summary.paidAmount | appCurrency }}</h4>
-                    <small class="text-muted number">{{ summary.paidFees }} {{ 'FEES_PAGE.FEES' | translate }}</small>
+                    <h4 class="mb-0 spent">{{ combinedSummary.paidAmount | appCurrency }}</h4>
+                    <small class="text-muted number">{{ combinedSummary.paidFees }} {{ 'FEES_PAGE.FEES' | translate }}</small>
                   </div>
                 </div>
               </div>
@@ -54,8 +54,8 @@
                   </div>
                   <div class="flex-grow-1 ms-3">
                     <h6 class="mb-0 total">{{ 'FEES_PAGE.PENDING' | translate }}</h6>
-                    <h4 class="mb-0 spent">{{ summary.pendingAmount | appCurrency }}</h4>
-                    <small class="text-muted number">{{ summary.pendingFees }} {{ 'FEES_PAGE.FEES' | translate }}</small>
+                    <h4 class="mb-0 spent">{{ combinedSummary.pendingAmount | appCurrency }}</h4>
+                    <small class="text-muted number">{{ combinedSummary.pendingFees }} {{ 'FEES_PAGE.FEES' | translate }}</small>
                   </div>
                 </div>
               </div>
@@ -72,8 +72,8 @@
                   </div>
                   <div class="flex-grow-1 ms-3">
                     <h6 class="mb-0 total">{{ 'FEES_PAGE.OVERDUE' | translate }}</h6>
-                    <h4 class="mb-0 spent">{{ summary.overdueAmount | appCurrency }}</h4>
-                    <small class="text-muted number">{{ summary.overdueFees }} {{ 'FEES_PAGE.FEES' | translate }}</small>
+                    <h4 class="mb-0 spent">{{ combinedSummary.overdueAmount | appCurrency }}</h4>
+                    <small class="text-muted number">{{ combinedSummary.overdueFees }} {{ 'FEES_PAGE.FEES' | translate }}</small>
                   </div>
                 </div>
               </div>

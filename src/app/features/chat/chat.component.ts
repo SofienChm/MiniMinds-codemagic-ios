@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, ElementRef, ViewChild, ChangeDetectorRef, HostListener } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -12,7 +12,7 @@ import { NotificationService } from '../../core/services/notification-service';
 import { ClassesService } from '../classes/classes.service';
 import {
   MessagesService, Conversation, TenantContact, ChatMessage, ConversationPage,
-  ChatGroup, GroupChatMessage, GroupMessagePage
+  ChatGroup, ChatGroupDetail, GroupChatMessage, GroupMessagePage
 } from '../../core/services/messages.service';
 import { ParentChildHeaderSimpleComponent } from '../../shared/components/parent-child-header-simple/parent-child-header-simple.component';
 import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
@@ -60,6 +60,9 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   showNewChatModal = false;
   showNewGroupModal = false;
+  showGroupMembersModal = false;
+  groupMembers: ChatGroupDetail['members'] = [];
+  loadingGroupMembers = false;
   groupMode: 'class' | 'manual' = 'class';
   selectedClassId: number | null = null;
   groupName = '';
@@ -69,6 +72,25 @@ export class ChatComponent implements OnInit, OnDestroy {
   searchTerm = '';
   contactSearchTerm = '';
   currentUserId = '';
+
+  // Chat attachments (R2-backed)
+  pendingFile: File | null = null;
+  pendingFilePreviewUrl: string | null = null;
+  uploadingAttachment = false;
+  attachmentError = '';
+  viewerImageUrl: string | null = null;
+  viewerImageName: string | null = null;
+  private objectUrls: string[] = [];
+  static readonly ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf', 'doc', 'docx', 'xls', 'xlsx'];
+  static readonly ALLOWED_MIME_TYPES = [
+    'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+    'application/pdf',
+    'application/msword',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  ];
+  static readonly MAX_FILE_SIZE = 10 * 1024 * 1024;
 
   loadingConversations = false;
   loadingMessages = false;
@@ -87,6 +109,9 @@ export class ChatComponent implements OnInit, OnDestroy {
   isMobile = window.innerWidth < 768;
   private typingTimer: any;
 
+  private pendingSenderId: string | null = null;
+  private pendingGroupId: number | null = null;
+
   private subscriptions: Subscription[] = [];
 
   constructor(
@@ -97,6 +122,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     private notificationService: NotificationService,
     private classesService: ClassesService,
     private router: Router,
+    private route: ActivatedRoute,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -105,6 +131,13 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.currentUserId = this.authService.getUserId() || '';
     this.loadConversations();
     this.loadGroups();
+
+    const routeSub = this.route.queryParams.subscribe(params => {
+      this.pendingSenderId = params['senderId'] || null;
+      const groupId = params['groupId'];
+      this.pendingGroupId = groupId ? Number(groupId) : null;
+    });
+    this.subscriptions.push(routeSub);
 
     const langSub = this.translateService.onLangChange.subscribe(() => {
       this.updateTranslations();
@@ -135,6 +168,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     clearTimeout(this.typingTimer);
+    this.releaseObjectUrls();
   }
 
   get hasActiveChat(): boolean {
@@ -166,6 +200,7 @@ export class ChatComponent implements OnInit, OnDestroy {
       next: (conversations) => {
         this.conversations = conversations;
         this.loadingConversations = false;
+        this.autoOpenConversationFromParams();
       },
       error: () => {
         this.loadingConversations = false;
@@ -179,11 +214,55 @@ export class ChatComponent implements OnInit, OnDestroy {
       next: (groups) => {
         this.groups = groups;
         this.loadingGroups = false;
+        this.autoOpenGroupFromParams();
       },
       error: () => {
         this.loadingGroups = false;
       }
     });
+  }
+
+  private autoOpenConversationFromParams(): void {
+    if (!this.pendingSenderId) return;
+
+    const conversation = this.conversations.find(c => c.userId === this.pendingSenderId);
+    if (conversation) {
+      this.pendingSenderId = null;
+      this.pendingGroupId = null;
+      this.selectConversation(conversation);
+      return;
+    }
+
+    if (this.pendingGroupId) return;
+
+    this.messagesService.getContacts().subscribe({
+      next: (users) => {
+        const contact = users.find(u => u.id === this.pendingSenderId);
+        if (contact) {
+          this.pendingSenderId = null;
+          this.pendingGroupId = null;
+          this.startChat(contact);
+          this.loadConversation(contact.id);
+        } else {
+          this.pendingSenderId = null;
+        }
+      },
+      error: () => {
+        this.pendingSenderId = null;
+      }
+    });
+  }
+
+  private autoOpenGroupFromParams(): void {
+    if (this.pendingGroupId === null) return;
+    const group = this.groups.find(g => g.id === this.pendingGroupId);
+    if (group) {
+      this.pendingSenderId = null;
+      this.pendingGroupId = null;
+      this.selectGroup(group);
+    } else {
+      this.pendingGroupId = null;
+    }
   }
 
   selectConversation(conversation: Conversation): void {
@@ -354,12 +433,44 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.showNewGroupModal = false;
   }
 
+  openGroupMembers(): void {
+    if (this.selectedGroupId === null) return;
+    this.showGroupMembersModal = true;
+    this.loadingGroupMembers = true;
+    this.messagesService.getChatGroup(this.selectedGroupId).subscribe({
+      next: (detail) => {
+        this.groupMembers = detail.members;
+        this.loadingGroupMembers = false;
+      },
+      error: () => {
+        this.loadingGroupMembers = false;
+      }
+    });
+  }
+
+  closeGroupMembersModal(): void {
+    this.showGroupMembersModal = false;
+    this.groupMembers = [];
+  }
+
   toggleMemberSelection(userId: string): void {
     const index = this.selectedMemberIds.indexOf(userId);
     if (index > -1) {
       this.selectedMemberIds.splice(index, 1);
     } else {
       this.selectedMemberIds.push(userId);
+    }
+  }
+
+  get allMembersSelected(): boolean {
+    return this.tenantUsers.length > 0 && this.selectedMemberIds.length === this.tenantUsers.length;
+  }
+
+  toggleAllMembers(): void {
+    if (this.allMembersSelected) {
+      this.selectedMemberIds = [];
+    } else {
+      this.selectedMemberIds = this.tenantUsers.map(u => u.id);
     }
   }
 
@@ -421,7 +532,12 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   sendMessage(): void {
     const content = this.newMessage.trim();
-    if (!content || !this.selectedUserId) return;
+    if ((!content && !this.pendingFile) || !this.selectedUserId) return;
+
+    if (this.pendingFile) {
+      this.uploadThenSendIndividual(content);
+      return;
+    }
 
     clearTimeout(this.typingTimer);
     this.notificationService.sendTyping(this.selectedUserId, false);
@@ -436,9 +552,45 @@ export class ChatComponent implements OnInit, OnDestroy {
     });
   }
 
+  private uploadThenSendIndividual(content: string): void {
+    const file = this.pendingFile;
+    if (!file || !this.selectedUserId) return;
+    this.uploadingAttachment = true;
+    this.attachmentError = '';
+
+    this.messagesService.uploadChatAttachment(file).subscribe({
+      next: (res) => {
+        this.uploadingAttachment = false;
+        this.discardPendingFile();
+        this.messagesService.chatSendMessage(this.selectedUserId!, content, {
+          attachmentKey: res.attachmentKey,
+          attachmentName: res.attachmentName,
+          attachmentType: res.attachmentType,
+          attachmentSize: res.attachmentSize
+        }).subscribe({
+          next: () => {
+            this.newMessage = '';
+            this.loadConversation(this.selectedUserId!);
+            this.loadConversations();
+          },
+          error: () => this.attachmentError = this.translateService.instant('CHAT_PAGE.ATTACH_SEND_FAILED')
+        });
+      },
+      error: (err) => {
+        this.uploadingAttachment = false;
+        this.attachmentError = err?.error?.error || this.translateService.instant('CHAT_PAGE.ATTACH_UPLOAD_FAILED');
+      }
+    });
+  }
+
   sendGroupMessage(): void {
     const content = this.newMessage.trim();
-    if (!content || this.selectedGroupId === null) return;
+    if ((!content && !this.pendingFile) || this.selectedGroupId === null) return;
+
+    if (this.pendingFile) {
+      this.uploadThenSendGroup(content);
+      return;
+    }
 
     this.messagesService.sendChatGroupMessage(this.selectedGroupId, content).subscribe({
       next: () => {
@@ -447,6 +599,227 @@ export class ChatComponent implements OnInit, OnDestroy {
         this.loadGroups();
       },
       error: () => {}
+    });
+  }
+
+  private uploadThenSendGroup(content: string): void {
+    const file = this.pendingFile;
+    if (!file || this.selectedGroupId === null) return;
+    this.uploadingAttachment = true;
+    this.attachmentError = '';
+
+    this.messagesService.uploadChatAttachment(file).subscribe({
+      next: (res) => {
+        this.uploadingAttachment = false;
+        this.discardPendingFile();
+        this.messagesService.sendChatGroupMessage(this.selectedGroupId!, content, {
+          attachmentKey: res.attachmentKey,
+          attachmentName: res.attachmentName,
+          attachmentType: res.attachmentType,
+          attachmentSize: res.attachmentSize
+        }).subscribe({
+          next: () => {
+            this.newMessage = '';
+            this.loadGroupMessages(this.selectedGroupId!);
+            this.loadGroups();
+          },
+          error: () => this.attachmentError = this.translateService.instant('CHAT_PAGE.ATTACH_SEND_FAILED')
+        });
+      },
+      error: (err) => {
+        this.uploadingAttachment = false;
+        this.attachmentError = err?.error?.error || this.translateService.instant('CHAT_PAGE.ATTACH_UPLOAD_FAILED');
+      }
+    });
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files && input.files[0];
+    input.value = '';
+    if (!file) return;
+
+    if (!this.validateFile(file)) {
+      this.discardPendingFile();
+      return;
+    }
+
+    this.pendingFile = file;
+    this.attachmentError = '';
+    this.releaseObjectUrls();
+    if (file.type.startsWith('image/')) {
+      this.pendingFilePreviewUrl = URL.createObjectURL(file);
+      this.objectUrls.push(this.pendingFilePreviewUrl);
+    } else {
+      this.pendingFilePreviewUrl = null;
+    }
+  }
+
+  private validateFile(file: File): boolean {
+    const ext = (file.name.split('.').pop() || '').toLowerCase();
+    if (!ChatComponent.ALLOWED_EXTENSIONS.includes(ext)) {
+      this.attachmentError = this.translateService.instant('CHAT_PAGE.ATTACH_TYPE_ERROR');
+      return false;
+    }
+    if (!ChatComponent.ALLOWED_MIME_TYPES.includes(file.type.toLowerCase())) {
+      this.attachmentError = this.translateService.instant('CHAT_PAGE.ATTACH_TYPE_ERROR');
+      return false;
+    }
+    if (file.size > ChatComponent.MAX_FILE_SIZE) {
+      this.attachmentError = this.translateService.instant('CHAT_PAGE.ATTACH_TOO_LARGE');
+      return false;
+    }
+    return true;
+  }
+
+  discardPendingFile(): void {
+    this.releaseObjectUrls();
+    this.pendingFile = null;
+    this.pendingFilePreviewUrl = null;
+    this.attachmentError = '';
+  }
+
+  private releaseObjectUrls(): void {
+    this.objectUrls.forEach(u => URL.revokeObjectURL(u));
+    this.objectUrls = [];
+    this.attachmentBlobUrls.forEach(u => URL.revokeObjectURL(u));
+    this.attachmentBlobUrls.clear();
+  }
+
+  private saveObjectUrl(url: string): void {
+    this.objectUrls.push(url);
+  }
+
+  formatFileSize(bytes?: number): string {
+    if (bytes == null) return '';
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
+  isImageAttachment(type?: string): boolean {
+    return !!type && type.startsWith('image/');
+  }
+
+  attachmentUrl(message: any, group = false): string {
+    const id = message?.id;
+    if (id == null) return '';
+    return `${ApiConfig.ENDPOINTS.MESSAGES}/attachment/${id}?group=${group ? 'true' : 'false'}`;
+  }
+
+  attachmentIcon(type?: string): string {
+    const t = (type || '').toLowerCase();
+    if (t.includes('pdf')) return 'bi-file-earmark-pdf';
+    if (t.includes('spreadsheet') || t.includes('ms-excel') || t.includes('xls')) return 'bi-file-earmark-excel';
+    if (t.includes('word') || t.includes('msword')) return 'bi-file-earmark-word';
+    if (t.startsWith('image/')) return 'bi-file-earmark-image';
+    return 'bi-file-earmark';
+  }
+
+  private attachmentBlobUrls = new Map<number, string>();
+
+  private attachmentKey(message: any, group: boolean): number {
+    return message && message.id != null ? (group ? 2000000000 + message.id : message.id) : -1;
+  }
+
+  imageSrc(message: any, group = false): string {
+    const key = this.attachmentKey(message, group);
+    if (key < 0) return '';
+    const url = this.attachmentBlobUrls.get(key);
+    if (url) return url;
+    this.loadImageAttachment(message, group);
+    return '';
+  }
+
+  private loadImageAttachment(message: any, group: boolean): void {
+    const key = this.attachmentKey(message, group);
+    if (key < 0 || this.attachmentBlobUrls.has(key)) return;
+
+    this.messagesService.downloadChatAttachment(message.id, group).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        this.attachmentBlobUrls.set(key, url);
+        this.saveObjectUrl(url);
+        this.cdr.detectChanges();
+      },
+      error: () => { /* leave blank; image simply won't render */ }
+    });
+  }
+
+  openAttachment(message: any, group = false): void {
+    if (!message || message.id == null) return;
+
+    // Images open full-screen inside the chat (Messenger-style lightbox).
+    if (this.isImageAttachment(message.attachmentType)) {
+      this.openImageViewer(message, group);
+      return;
+    }
+
+    this.messagesService.downloadChatAttachment(message.id, group).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        this.saveObjectUrl(url);
+        window.open(url, '_blank');
+        setTimeout(() => URL.revokeObjectURL(url), 30000);
+      },
+      error: () => {
+        this.attachmentError = this.translateService.instant('CHAT_PAGE.ATTACH_OPEN_FAILED');
+      }
+    });
+  }
+
+  openImageViewer(message: any, group = false): void {
+    const existing = this.attachmentBlobUrls.get(this.attachmentKey(message, group));
+    if (existing) {
+      this.viewerImageUrl = existing;
+      this.viewerImageName = message.attachmentName || 'image';
+      return;
+    }
+    this.messagesService.downloadChatAttachment(message.id, group).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        this.saveObjectUrl(url);
+        this.viewerImageUrl = url;
+        this.viewerImageName = message.attachmentName || 'image';
+      },
+      error: () => {
+        this.attachmentError = this.translateService.instant('CHAT_PAGE.ATTACH_OPEN_FAILED');
+      }
+    });
+  }
+
+  closeImageViewer(): void {
+    this.viewerImageUrl = null;
+    this.viewerImageName = null;
+  }
+
+  downloadImageFromViewer(): void {
+    if (!this.viewerImageUrl) return;
+    const a = document.createElement('a');
+    a.href = this.viewerImageUrl;
+    a.download = this.viewerImageName || 'image';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  downloadAttachment(message: any, group = false): void {
+    if (!message || message.id == null) return;
+    this.messagesService.downloadChatAttachment(message.id, group).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        this.saveObjectUrl(url);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = message.attachmentName || 'attachment';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 30000);
+      },
+      error: () => {
+        this.attachmentError = this.translateService.instant('CHAT_PAGE.ATTACH_OPEN_FAILED');
+      }
     });
   }
 
@@ -469,7 +842,12 @@ export class ChatComponent implements OnInit, OnDestroy {
           senderId: data.senderId,
           content: data.content,
           sentAt: data.sentAt,
-          isRead: false
+          isRead: false,
+          attachmentUrl: data.attachmentUrl,
+          attachmentName: data.attachmentName,
+          attachmentType: data.attachmentType,
+          attachmentSize: data.attachmentSize,
+          attachmentExpiresAt: data.attachmentExpiresAt
         });
         this.scrollToBottom();
       } else {
@@ -487,7 +865,12 @@ export class ChatComponent implements OnInit, OnDestroy {
         senderId: data.senderId,
         senderName: data.senderName,
         content: data.content,
-        sentAt: data.sentAt
+        sentAt: data.sentAt,
+        attachmentUrl: data.attachmentUrl,
+        attachmentName: data.attachmentName,
+        attachmentType: data.attachmentType,
+        attachmentSize: data.attachmentSize,
+        attachmentExpiresAt: data.attachmentExpiresAt
       });
       this.scrollToBottom();
     }
@@ -659,6 +1042,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.messages = [];
     this.groupMessages = [];
     this.isTyping = false;
+    this.discardPendingFile();
   }
 
   private scrollToBottom(): void {

@@ -14,6 +14,7 @@ import { ParentChildHeaderComponent } from '../../../shared/components/parent-ch
 import { ImageCropperModalComponent } from '../../../shared/components/image-cropper-modal/image-cropper-modal.component';
 import Swal from 'sweetalert2';
 import { SimpleToastService } from '../../../core/services/simple-toast.service';
+import { ApiConfig } from '../../../core/config/api.config';
 
 @Component({
   selector: 'app-edit-children',
@@ -30,6 +31,7 @@ export class EditChildren implements OnInit {
   loading = false;
   imagePreview: string | null = null;
   selectedImageFile: File | null = null;
+  imageRemoved = false;
   childId: number = 0;
   parents: ParentModel[] = [];
   childForm!: FormGroup;
@@ -177,7 +179,7 @@ export class EditChildren implements OnInit {
         };
 
         // Prefer file-based URL for preview, fallback to Base64
-        this.imagePreview = childData.profilePictureUrl || childData.profilePicture || null;
+        this.imagePreview = this.getProfilePictureUrl(childData);
         this.loading = false;
       },
       error: (error) => {
@@ -199,45 +201,31 @@ export class EditChildren implements OnInit {
     if (this.isParent()) {
       this.saving = true;
 
+      // If the existing image was removed, delete it first
+      if (this.imageRemoved && this.child.id) {
+        this.child.profilePicture = undefined;
+        this.childrenService.deleteChildProfilePicture(this.child.id).subscribe({
+          next: () => this.finishParentUpdate(),
+          error: () => this.finishParentUpdate()
+        });
+        return;
+      }
+
       // If a new image was selected, upload it separately
       if (this.selectedImageFile && this.child.id) {
         this.childrenService.uploadChildProfilePicture(this.child.id, this.selectedImageFile).subscribe({
           next: () => {
             // Clear the profilePicture from the child object since it's now file-based
             this.child.profilePicture = undefined;
-            this.childrenService.updateChild(this.child).subscribe({
-              next: () => {
-                this.saving = false;
-                this.router.navigate(['/children']);
-              },
-              error: () => {
-                this.saving = false;
-              }
-            });
+            this.finishParentUpdate();
           },
           error: () => {
             // Continue with update even if image upload fails
-            this.childrenService.updateChild(this.child).subscribe({
-              next: () => {
-                this.saving = false;
-                this.router.navigate(['/children']);
-              },
-              error: () => {
-                this.saving = false;
-              }
-            });
+            this.finishParentUpdate();
           }
         });
       } else {
-        this.childrenService.updateChild(this.child).subscribe({
-          next: () => {
-            this.saving = false;
-            this.router.navigate(['/children']);
-          },
-          error: () => {
-            this.saving = false;
-          }
-        });
+        this.finishParentUpdate();
       }
       return;
     }
@@ -250,13 +238,22 @@ export class EditChildren implements OnInit {
 
     this.saving = true;
     const childData: ChildModel = this.childForm.value;
+    childData.profilePicture = undefined;
+
+    // Image removal takes precedence over any other action
+    if (this.imageRemoved && this.childId) {
+      this.childrenService.deleteChildProfilePicture(this.childId).subscribe({
+        next: () => this.saveChildData(childData),
+        error: () => this.saveChildData(childData)
+      });
+      return;
+    }
 
     // If a new image was selected, upload it separately
     if (this.selectedImageFile && this.childId) {
       this.childrenService.uploadChildProfilePicture(this.childId, this.selectedImageFile).subscribe({
         next: () => {
           // Clear the profilePicture from the form since it's now file-based
-          childData.profilePicture = undefined;
           this.saveChildData(childData);
         },
         error: () => {
@@ -287,6 +284,18 @@ export class EditChildren implements OnInit {
         this.simpleToastService.error(
           this.translate.instant('EDIT_CHILD.UPDATE_ERROR')
         );
+      }
+    });
+  }
+
+  private finishParentUpdate(): void {
+    this.childrenService.updateChild(this.child).subscribe({
+      next: () => {
+        this.saving = false;
+        this.router.navigate(['/children']);
+      },
+      error: () => {
+        this.saving = false;
       }
     });
   }
@@ -334,6 +343,7 @@ export class EditChildren implements OnInit {
 
     // For parent mobile version, use simple file reading (no cropper)
     if (this.isParent()) {
+      this.imageRemoved = false;
       const reader = new FileReader();
       reader.onload = (e: ProgressEvent<FileReader>) => {
         const result = e.target?.result as string;
@@ -364,6 +374,7 @@ export class EditChildren implements OnInit {
     }
 
     // Open image cropper modal
+    this.imageRemoved = false;
     this.selectedImageFile = file;
     if (this.imageCropper) {
       this.imageCropper.show();
@@ -371,6 +382,7 @@ export class EditChildren implements OnInit {
   }
 
   onImageCropped(croppedImage: string): void {
+    this.imageRemoved = false;
     this.imagePreview = croppedImage;
     // Don't store Base64 in form - we'll upload the file separately
     this.childForm.patchValue({ profilePicture: '' });
@@ -396,6 +408,7 @@ export class EditChildren implements OnInit {
   }
 
   removeImage(): void {
+    this.imageRemoved = true;
     this.resetFileInput();
   }
 
@@ -411,6 +424,31 @@ export class EditChildren implements OnInit {
   private getReadableFileSize(): string {
     const sizeInMB = this.MAX_FILE_SIZE / (1024 * 1024);
     return `${sizeInMB}MB`;
+  }
+
+  /**
+   * Resolve the profile picture source for preview, preferring the file-based
+   * URL (converted to a full URL) over the legacy Base64 value.
+   */
+  private getProfilePictureUrl(childData: ChildModel): string | null {
+    if (childData.profilePictureUrl && childData.profilePictureUrl.trim() !== '') {
+      return this.getFullUrl(childData.profilePictureUrl);
+    }
+    if (childData.profilePicture && childData.profilePicture.trim() !== '') {
+      return childData.profilePicture;
+    }
+    return null;
+  }
+
+  /**
+   * Convert a relative server path to a full URL using the API base.
+   */
+  private getFullUrl(path: string): string {
+    if (!path) return '';
+    if (path.startsWith('http') || path.startsWith('data:')) {
+      return path;
+    }
+    return `${ApiConfig.HUB_URL}${path.startsWith('/') ? '' : '/'}${path}`;
   }
 
   private markFormGroupTouched(): void {

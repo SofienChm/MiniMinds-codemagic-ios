@@ -326,12 +326,12 @@ export const routes: Routes = [
       {
         path: 'static-fees',
         loadComponent: () => import('./features/static-fees/static-fees').then(m => m.StaticFeesComponent),
-        canActivate: [roleGuard('Admin', 'Parent'), FEES_FEATURE]
+        canActivate: [roleGuard('Admin'), FEES_FEATURE]
       },
       {
         path: 'static-fees/add',
         loadComponent: () => import('./features/static-fees/add-static-fee/add-static-fee').then(m => m.AddStaticFeeComponent),
-        canActivate: [roleGuard('Admin', 'Parent'), FEES_FEATURE]
+        canActivate: [roleGuard('Admin'), FEES_FEATURE]
       },
       {
         path: 'static-fees/:id',

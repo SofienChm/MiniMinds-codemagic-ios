@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AttendanceService } from '../attendance.service';
-import { Attendance } from '../attendance.interface';
+import { Attendance, AttendanceStats } from '../attendance.interface';
 import { TitlePage, TitleAction } from '../../../shared/layouts/title-page/title-page';
 import { ChildrenService } from '../../children/children.service';
 import { ChildModel } from '../../children/children.interface';
@@ -35,6 +35,7 @@ export class AttendanceList implements OnInit, OnDestroy {
   childrenWithStatus: ChildAttendanceStatus[] = [];
   children: ChildModel[] = [];
   attendances: Attendance[] = [];
+  stats: AttendanceStats = { totalPresent: 0, totalAbsent: 0, checkInsToday: 0, checkOutsToday: 0 };
   searchTerm = '';
   loading = false;
   private langChangeSub?: Subscription;
@@ -129,6 +130,20 @@ export class AttendanceList implements OnInit, OnDestroy {
         this.buildChildrenWithStatus();
         this.loading = false;
         this.cdr.detectChanges();
+      }
+    });
+
+    this.loadTodayStats();
+  }
+
+  loadTodayStats(): void {
+    this.attendanceService.getTodayStats().subscribe({
+      next: (stats) => {
+        this.stats = stats;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Error loading stats:', error?.message || error);
       }
     });
   }

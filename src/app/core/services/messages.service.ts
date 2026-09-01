@@ -56,6 +56,33 @@ export interface ChatMessage {
   content: string;
   sentAt: string;
   isRead: boolean;
+  attachmentUrl?: string;
+  attachmentName?: string;
+  attachmentType?: string;
+  attachmentSize?: number;
+  attachmentExpiresAt?: string;
+}
+
+export interface GroupChatMessage {
+  id: number;
+  senderId: string;
+  senderName: string;
+  content: string;
+  sentAt: string;
+  attachmentUrl?: string;
+  attachmentName?: string;
+  attachmentType?: string;
+  attachmentSize?: number;
+  attachmentExpiresAt?: string;
+}
+
+export interface AttachmentUploadResult {
+  success: boolean;
+  attachmentKey: string;
+  attachmentName: string;
+  attachmentType: string;
+  attachmentSize: number;
+  attachmentExpiresAt: string;
 }
 
 export interface ConversationPage {
@@ -83,14 +110,6 @@ export interface ChatGroupDetail {
   createdAt: string;
   isAdmin: boolean;
   members: { id: string; name: string; profilePictureUrl?: string }[];
-}
-
-export interface GroupChatMessage {
-  id: number;
-  senderId: string;
-  senderName: string;
-  content: string;
-  sentAt: string;
 }
 
 export interface GroupMessagePage {
@@ -146,8 +165,27 @@ export class MessagesService {
     return this.http.get<ConversationPage>(`${this.apiUrl}/conversation/${userId}?page=${page}&pageSize=${pageSize}`);
   }
 
-  chatSendMessage(recipientId: string, content: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/chat/send`, { recipientId, content });
+  chatSendMessage(recipientId: string, content: string, attachment?: { attachmentKey: string; attachmentName: string; attachmentType: string; attachmentSize: number }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/chat/send`, {
+      recipientId,
+      content,
+      attachmentKey: attachment?.attachmentKey,
+      attachmentName: attachment?.attachmentName,
+      attachmentType: attachment?.attachmentType,
+      attachmentSize: attachment?.attachmentSize
+    });
+  }
+
+  uploadChatAttachment(file: File): Observable<AttachmentUploadResult> {
+    const formData = new FormData();
+    formData.append('file', file, file.name);
+    return this.http.post<AttachmentUploadResult>(`${this.apiUrl}/chat/upload`, formData);
+  }
+
+  downloadChatAttachment(messageId: number, group = false): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/attachment/${messageId}?group=${group ? 'true' : 'false'}`, {
+      responseType: 'blob'
+    });
   }
 
   sendMessage(data: { recipientId?: string, subject: string, content: string, recipientType: string, parentMessageId?: number }): Observable<any> {
@@ -166,8 +204,14 @@ export class MessagesService {
     return this.http.get<GroupMessagePage>(`${this.groupsApiUrl}/${id}/messages?page=${page}&pageSize=${pageSize}`);
   }
 
-  sendChatGroupMessage(id: number, content: string): Observable<any> {
-    return this.http.post(`${this.groupsApiUrl}/${id}/messages`, { content });
+  sendChatGroupMessage(id: number, content: string, attachment?: { attachmentKey: string; attachmentName: string; attachmentType: string; attachmentSize: number }): Observable<any> {
+    return this.http.post(`${this.groupsApiUrl}/${id}/messages`, {
+      content,
+      attachmentKey: attachment?.attachmentKey,
+      attachmentName: attachment?.attachmentName,
+      attachmentType: attachment?.attachmentType,
+      attachmentSize: attachment?.attachmentSize
+    });
   }
 
   createChatGroup(data: CreateChatGroupRequest): Observable<any> {

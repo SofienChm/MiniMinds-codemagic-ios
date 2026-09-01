@@ -2,6 +2,7 @@ import { Component, inject, OnInit, OnDestroy, signal, NgZone } from '@angular/c
 import { Router, RouterOutlet } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { AuthService } from './core/services/auth';
+import { RegionalSettingsService } from './core/services/currency/regional-settings.service';
 import { FcmPushNotificationService } from './core/services/fcm-push-notification.service';
 import { NetworkService } from './core/services/network.service';
 import { StatusBarService } from './core/services/status-bar.service';
@@ -22,6 +23,7 @@ export class App implements OnInit, OnDestroy {
   protected readonly title = signal('miniminds-web');
   private translate = inject(TranslateService);
   private authService = inject(AuthService);
+  private regionalSettingsService = inject(RegionalSettingsService);
   private fcmService = inject(FcmPushNotificationService);
   private networkService = inject(NetworkService); // Initialize network monitoring
   private statusBarService = inject(StatusBarService); // Initialize status bar
@@ -55,11 +57,21 @@ export class App implements OnInit, OnDestroy {
       if (user && this.fcmService.isSupported()) {
         this.initializePushNotifications();
       }
+
+      // Load daycare regional settings (e.g. currency) for the logged-in user
+      if (user) {
+        this.regionalSettingsService.loadRegionalSettings();
+      }
     });
 
     // Also check if already logged in on app start
     if (this.authService.isAuthenticated() && this.fcmService.isSupported()) {
       this.initializePushNotifications();
+    }
+
+    // Load daycare regional settings on page refresh (no login event fired)
+    if (this.authService.isAuthenticated()) {
+      this.regionalSettingsService.loadRegionalSettings();
     }
   }
 

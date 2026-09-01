@@ -965,7 +965,19 @@
     "SELECT_CLASS": "Seleziona una classe",
     "GROUP_NAME": "Nome del gruppo",
     "CREATE_GROUP": "Crea gruppo",
-    "MEMBERS": "membri"
+    "MEMBERS": "membri",
+    "CHECK_ALL": "Seleziona tutto",
+    "UNCHECK_ALL": "Deseleziona tutto",
+    "GROUP_MEMBERS": "Membri del gruppo",
+    "NO_MEMBERS": "Nessun membro trovato",
+    "ATTACHMENT": "Allegato",
+    "REMOVE": "Rimuovi",
+    "UPLOADING": "Caricamento...",
+    "ATTACH_TYPE_ERROR": "Tipo di file non consentito. Sono accettati solo PDF, Word, Excel e immagini (JPG, PNG, GIF, WEBP).",
+    "ATTACH_TOO_LARGE": "File troppo grande. La dimensione massima è 10 MB.",
+    "ATTACH_UPLOAD_FAILED": "Caricamento non riuscito. Riprova.",
+    "ATTACH_SEND_FAILED": "Invio dell'allegato non riuscito. Riprova.",
+    "ATTACH_OPEN_FAILED": "Impossibile aprire l'allegato. Riprova."
   },
   "RECLAMATIONS_PAGE": {
     "TITLE": "Reclami",

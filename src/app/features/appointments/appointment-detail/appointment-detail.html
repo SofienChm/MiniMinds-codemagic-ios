@@ -1,5 +1,11 @@
+<div *ngIf="isParent" class="parent-detailchild font-inter">
+  <app-parent-child-header-simple
+    [title]="'FEES_PAGE.FEE_RECEIPT' | translate"
+  >
+  </app-parent-child-header-simple>
+</div>
 <div class="container-fluid mt-4">
-  <app-title-page
+  <app-title-page *ngIf="!isParent"
     [title]="appointment?.title || ('APPOINTMENTS_PAGE.DETAILS' | translate)"
     [subtitle]="'APPOINTMENTS_PAGE.DETAIL_SUBTITLE' | translate"
     [icon]="'bi bi-calendar-check'"

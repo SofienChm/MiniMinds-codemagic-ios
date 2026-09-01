@@ -40,7 +40,7 @@ export class PushNotificationService {
     notification.onclick = () => {
       window.focus();
       if (options?.data?.redirectUrl) {
-        this.router.navigate([options.data.redirectUrl]);
+        this.router.navigateByUrl(options.data.redirectUrl);
       }
       notification.close();
     };

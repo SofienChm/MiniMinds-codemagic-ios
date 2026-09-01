@@ -445,6 +445,25 @@ ion-content.parent-messages {
   max-height: 420px;
 }
 
+.px-chat-select-all {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid #f1f5f9;
+  background: #f8fafc;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.px-chat-select-all > i {
+  font-size: 20px;
+  color: #7db9ff;
+}
+
 .px-chat-member-select {
   display: flex;
   align-items: center;
@@ -614,4 +633,218 @@ ion-content.parent-messages {
   text-align: center;
   color: #64748b;
   font-size: 13px;
+}
+
+/* ===== Attachments ===== */
+.px-chat-hidden-file {
+  display: none;
+}
+
+.px-chat-attach-preview {
+  padding: 8px 20px 0;
+}
+
+.px-chat-pending-file {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  max-width: 280px;
+}
+
+.px-chat-pending-thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.px-chat-pending-file > i {
+  font-size: 26px;
+  color: #7db9ff;
+}
+
+.px-chat-attach-uploading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 4px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.px-chat-attach-error {
+  padding: 6px 4px;
+  color: #ef4444;
+  font-size: 13px;
+}
+
+.px-chat-spin {
+  animation: px-chat-rotate 1s linear infinite;
+}
+
+@keyframes px-chat-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Bubble attachments */
+.px-chat-attachment {
+  margin-bottom: 4px;
+  max-width: 260px;
+}
+
+.px-chat-file {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.px-chat-message.sent .px-chat-file {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.px-chat-file > i {
+  font-size: 26px;
+  color: #7db9ff;
+  flex-shrink: 0;
+}
+
+.px-chat-message.sent .px-chat-file > i {
+  color: #fff;
+}
+
+.px-chat-file-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.px-chat-file-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: inherit;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.px-chat-file-size {
+  font-size: 11px;
+  opacity: 0.75;
+  margin-top: 1px;
+}
+
+.px-chat-file-download {
+  font-size: 16px;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.px-chat-image {
+  display: block;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.px-chat-image img {
+  display: block;
+  max-width: 260px;
+  max-height: 260px;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+@media (max-width: 480px) {
+  .px-chat-image img {
+    max-width: 200px;
+    max-height: 200px;
+  }
+  .px-chat-attachment {
+    max-width: 200px;
+  }
+}
+
+.px-chat-image-viewer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.px-chat-image-viewer-img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 4px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+}
+
+.px-chat-image-viewer-close,
+.px-chat-image-viewer-download {
+  position: fixed;
+  top: 16px;
+  z-index: 2001;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.px-chat-image-viewer-close:hover,
+.px-chat-image-viewer-download:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.px-chat-image-viewer-close {
+  right: 16px;
+}
+
+.px-chat-image-viewer-download {
+  right: 64px;
+}
+
+.px-chat-image-viewer-name {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #fff;
+  font-size: 14px;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 6px 14px;
+  border-radius: 16px;
+  max-width: 80%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

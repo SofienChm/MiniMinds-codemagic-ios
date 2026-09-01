@@ -185,7 +185,7 @@ export class FcmPushNotificationService {
         this.router.navigate(['/fees']);
         break;
       case 'Message':
-        this.router.navigate(['/messages']);
+        this.router.navigate(['/chat']);
         break;
       case 'Attendance':
       case 'CheckIn':

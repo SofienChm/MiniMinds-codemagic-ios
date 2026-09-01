@@ -118,6 +118,7 @@
           <button class="px-chat-icon-btn" [title]="'CHAT_PAGE.AUDIO_CALL' | translate"><i class="bi bi-telephone"></i></button>
           <button class="px-chat-icon-btn" [title]="'CHAT_PAGE.VIDEO_CALL' | translate"><i class="bi bi-camera-video"></i></button>
            -->
+          <button *ngIf="selectedGroupId !== null" class="px-chat-icon-btn" [title]="'CHAT_PAGE.MEMBERS' | translate" (click)="openGroupMembers()"><i class="bi bi-people"></i></button>
           <button *ngIf="selectedUserId" class="px-chat-icon-btn" [title]="'CHAT_PAGE.INFO' | translate" (click)="goToSelectedUserDetail()"><i class="bi bi-info-circle"></i></button>
         </div>
         </div>
@@ -143,7 +144,20 @@
                  [class.received]="!isMyGroupMessage(message)">
               <div class="px-chat-bubble">
                 <div class="px-chat-sender" *ngIf="!isMyGroupMessage(message)">{{ message.senderName }}</div>
-                <div class="px-chat-bubble-text">{{ message.content }}</div>
+                <div class="px-chat-attachment" *ngIf="message.attachmentUrl">
+                  <a *ngIf="!isImageAttachment(message.attachmentType)" class="px-chat-file" (click)="openAttachment(message, true)" role="button" tabindex="0">
+                    <i class="bi {{ attachmentIcon(message.attachmentType) }}"></i>
+                    <div class="px-chat-file-info">
+                      <span class="px-chat-file-name">{{ message.attachmentName || 'CHAT_PAGE.ATTACHMENT' | translate }}</span>
+                      <span class="px-chat-file-size">{{ formatFileSize(message.attachmentSize) }}</span>
+                    </div>
+                    <i class="bi bi-download px-chat-file-download"></i>
+                  </a>
+                  <a *ngIf="isImageAttachment(message.attachmentType)" class="px-chat-image" (click)="openAttachment(message, true)" role="button" tabindex="0">
+                    <img [src]="imageSrc(message, true)" [alt]="message.attachmentName || 'image'" loading="lazy">
+                  </a>
+                </div>
+                <div class="px-chat-bubble-text" *ngIf="message.content">{{ message.content }}</div>
                 <div class="px-chat-bubble-time">{{ formatTime(message.sentAt) }}</div>
               </div>
             </div>
@@ -163,7 +177,20 @@
                  [class.sent]="isMyMessage(message)"
                  [class.received]="!isMyMessage(message)">
               <div class="px-chat-bubble">
-                <div class="px-chat-bubble-text">{{ message.content }}</div>
+                <div class="px-chat-attachment" *ngIf="message.attachmentUrl">
+                  <a *ngIf="!isImageAttachment(message.attachmentType)" class="px-chat-file" (click)="openAttachment(message, false)" role="button" tabindex="0">
+                    <i class="bi {{ attachmentIcon(message.attachmentType) }}"></i>
+                    <div class="px-chat-file-info">
+                      <span class="px-chat-file-name">{{ message.attachmentName || 'CHAT_PAGE.ATTACHMENT' | translate }}</span>
+                      <span class="px-chat-file-size">{{ formatFileSize(message.attachmentSize) }}</span>
+                    </div>
+                    <i class="bi bi-download px-chat-file-download"></i>
+                  </a>
+                  <a *ngIf="isImageAttachment(message.attachmentType)" class="px-chat-image" (click)="openAttachment(message, false)" role="button" tabindex="0">
+                    <img [src]="imageSrc(message, false)" [alt]="message.attachmentName || 'image'" loading="lazy">
+                  </a>
+                </div>
+                <div class="px-chat-bubble-text" *ngIf="message.content">{{ message.content }}</div>
                 <div class="px-chat-bubble-time">
                   {{ formatTime(message.sentAt) }}
                   <span *ngIf="isMyMessage(message) && message.isRead && isLastSentMessage(message)" class="px-chat-seen">
@@ -180,20 +207,40 @@
           </ng-container>
         </div>
 
+        <div class="px-chat-attach-preview" *ngIf="pendingFile || uploadingAttachment">
+          <div class="px-chat-pending-file" *ngIf="pendingFile">
+            <ng-container *ngIf="isImageAttachment(pendingFile.type); else fileTile">
+              <img class="px-chat-pending-thumb" [src]="pendingFilePreviewUrl || ''" alt="">
+            </ng-container>
+            <ng-template #fileTile>
+              <i class="bi {{ attachmentIcon(pendingFile.type) }}"></i>
+            </ng-template>
+            <div class="px-chat-file-info">
+              <span class="px-chat-file-name">{{ pendingFile.name }}</span>
+              <span class="px-chat-file-size">{{ formatFileSize(pendingFile.size) }}</span>
+            </div>
+            <button class="px-chat-icon-btn" (click)="discardPendingFile()" [title]="'CHAT_PAGE.REMOVE' | translate"><i class="bi bi-x-lg"></i></button>
+          </div>
+          <div class="px-chat-attach-uploading" *ngIf="uploadingAttachment">
+            <i class="bi bi-arrow-repeat px-chat-spin"></i> {{ 'CHAT_PAGE.UPLOADING' | translate }}
+          </div>
+          <div class="px-chat-attach-error" *ngIf="attachmentError">{{ attachmentError }}</div>
+        </div>
+
         <div class="px-chat-input">
+          <input #fileInput type="file" class="px-chat-hidden-file" accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx" (change)="onFileSelected($event)">
+          <button class="px-chat-icon-btn" [title]="'CHAT_PAGE.ATTACH' | translate" (click)="fileInput.click()" [disabled]="uploadingAttachment"><i class="bi bi-paperclip"></i></button>
+
           <ng-container *ngIf="selectedGroupId !== null">
-            <button class="px-chat-icon-btn" [title]="'CHAT_PAGE.ATTACH' | translate"><i class="bi bi-paperclip"></i></button>
             <input type="text" class="px-chat-input-field" [placeholder]="'CHAT_PAGE.TYPE_MESSAGE' | translate"
                    [(ngModel)]="newMessage" (keydown.enter)="sendGroupMessage()">
-            <button class="px-chat-send-btn" (click)="sendGroupMessage()" [title]="'CHAT_PAGE.SEND' | translate"><i class="bi bi-send"></i></button>
+            <button class="px-chat-send-btn" (click)="sendGroupMessage()" [title]="'CHAT_PAGE.SEND' | translate" [disabled]="uploadingAttachment"><i class="bi bi-send"></i></button>
           </ng-container>
 
           <ng-container *ngIf="selectedGroupId === null && selectedUserId">
-            <button class="px-chat-icon-btn" [title]="'CHAT_PAGE.ATTACH' | translate"><i class="bi bi-paperclip"></i></button>
-            <button class="px-chat-icon-btn" [title]="'CHAT_PAGE.EMOJI' | translate"><i class="bi bi-emoji-smile"></i></button>
             <input type="text" class="px-chat-input-field" [placeholder]="'CHAT_PAGE.TYPE_MESSAGE' | translate"
                    [(ngModel)]="newMessage" (keydown.enter)="sendMessage()" (input)="onTypingInput()">
-            <button class="px-chat-send-btn" (click)="sendMessage()" [title]="'CHAT_PAGE.SEND' | translate"><i class="bi bi-send"></i></button>
+            <button class="px-chat-send-btn" (click)="sendMessage()" [title]="'CHAT_PAGE.SEND' | translate" [disabled]="uploadingAttachment"><i class="bi bi-send"></i></button>
           </ng-container>
         </div>
       </ng-container>
@@ -278,6 +325,10 @@
         <div class="px-chat-modal-loading" *ngIf="tenantUsers.length === 0">
           {{ 'COMMON.LOADING' | translate }}
         </div>
+        <div class="px-chat-select-all" *ngIf="tenantUsers.length > 0" (click)="toggleAllMembers()">
+          <span>{{ allMembersSelected ? ('CHAT_PAGE.UNCHECK_ALL' | translate) : ('CHAT_PAGE.CHECK_ALL' | translate) }}</span>
+          <i class="bi" [class.bi-check-circle-fill]="allMembersSelected" [class.bi-circle]="!allMembersSelected"></i>
+        </div>
         <div class="px-chat-member-select" *ngFor="let user of tenantUsers" (click)="toggleMemberSelection(user.id)">
           <div class="px-avatar-wrap">
             <img *ngIf="user.profilePictureUrl" class="px-avatar" [src]="getFullUrl(user.profilePictureUrl)" alt="">
@@ -295,4 +346,39 @@
       <button class="px-chat-submit-btn" (click)="createGroup()">{{ 'CHAT_PAGE.CREATE_GROUP' | translate }}</button>
     </div>
   </div>
+</div>
+
+<!-- Group members modal -->
+<div class="px-chat-modal-backdrop" *ngIf="showGroupMembersModal" (click)="closeGroupMembersModal()">
+  <div class="px-chat-modal" (click)="$event.stopPropagation()">
+    <div class="px-chat-modal-header">
+      <h3>{{ 'CHAT_PAGE.GROUP_MEMBERS' | translate }}</h3>
+      <button class="px-chat-icon-btn" (click)="closeGroupMembersModal()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="px-chat-modal-body">
+      <div class="px-chat-modal-loading" *ngIf="loadingGroupMembers">
+        {{ 'COMMON.LOADING' | translate }}
+      </div>
+      <div class="px-chat-contact" *ngFor="let member of groupMembers">
+        <div class="px-avatar-wrap">
+          <img *ngIf="member.profilePictureUrl" class="px-avatar" [src]="getFullUrl(member.profilePictureUrl)" alt="">
+          <div *ngIf="!member.profilePictureUrl" class="px-avatar" [style.background]="avatarColor(member.name)">{{ initials(member.name) }}</div>
+        </div>
+        <div class="px-chat-contact-info">
+          <div class="px-chat-contact-name">{{ member.name }}</div>
+        </div>
+      </div>
+      <div class="px-chat-modal-empty" *ngIf="!loadingGroupMembers && groupMembers.length === 0">
+        {{ 'CHAT_PAGE.NO_MEMBERS' | translate }}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Image viewer (Messenger-style fullscreen) -->
+<div class="px-chat-image-viewer" *ngIf="viewerImageUrl" (click)="closeImageViewer()">
+  <button class="px-chat-image-viewer-close" (click)="closeImageViewer()"><i class="bi bi-x-lg"></i></button>
+  <button class="px-chat-image-viewer-download" (click)="$event.stopPropagation(); downloadImageFromViewer()"><i class="bi bi-download"></i></button>
+  <img class="px-chat-image-viewer-img" [src]="viewerImageUrl" [alt]="viewerImageName || 'image'">
+  <div class="px-chat-image-viewer-name" *ngIf="viewerImageName">{{ viewerImageName }}</div>
 </div>

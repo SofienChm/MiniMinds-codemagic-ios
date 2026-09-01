@@ -966,7 +966,19 @@
     "SELECT_CLASS": "Select a class",
     "GROUP_NAME": "Group name",
     "CREATE_GROUP": "Create group",
-    "MEMBERS": "members"
+    "MEMBERS": "members",
+    "CHECK_ALL": "Select all",
+    "UNCHECK_ALL": "Deselect all",
+    "GROUP_MEMBERS": "Group Members",
+    "NO_MEMBERS": "No members found",
+    "ATTACHMENT": "Attachment",
+    "REMOVE": "Remove",
+    "UPLOADING": "Uploading...",
+    "ATTACH_TYPE_ERROR": "This file type is not allowed. Only PDF, Word, Excel and images (JPG, PNG, GIF, WEBP) are accepted.",
+    "ATTACH_TOO_LARGE": "File is too large. Maximum size is 10 MB.",
+    "ATTACH_UPLOAD_FAILED": "Upload failed. Please try again.",
+    "ATTACH_SEND_FAILED": "Failed to send the attachment. Please try again.",
+    "ATTACH_OPEN_FAILED": "Failed to open the attachment. Please try again."
   },
   "RECLAMATIONS_PAGE": {
     "TITLE": "Reclamations",
