@@ -11,8 +11,10 @@ import { AppointmentsService, AppointmentModel } from '../appointments.service';
 import { PageTitleService } from '../../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
-import { showSuccessToast } from '../../../shared/utils/swal.util';
+import { SimpleToastService } from '../../../core/services/simple-toast.service';
 import { ParentChildHeaderSimpleComponent } from '../../../shared/components/parent-child-header-simple/parent-child-header-simple.component';
+import { SkeletonComponent } from '../../../shared/components/skeleton/skeleton.component';
+import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
 
 registerLocaleData(localeFr);
 registerLocaleData(localeIt);
@@ -21,7 +23,7 @@ registerLocaleData(localeAr);
 @Component({
   selector: 'app-appointment-detail',
   standalone: true,
-  imports: [CommonModule, TitlePage, TranslateModule, RouterModule, ParentChildHeaderSimpleComponent],
+  imports: [CommonModule, TitlePage, TranslateModule, RouterModule, ParentChildHeaderSimpleComponent, SkeletonComponent, IonContent, IonRefresher, IonRefresherContent],
   templateUrl: './appointment-detail.html',
   styleUrls: ['./appointment-detail.scss']
 })
@@ -49,7 +51,8 @@ export class AppointmentDetail implements OnInit, OnDestroy {
     private authService: AuthService,
     private appointmentsService: AppointmentsService,
     private translateService: TranslateService,
-    private pageTitleService: PageTitleService
+    private pageTitleService: PageTitleService,
+    private simpleToastService: SimpleToastService
   ) {}
 
   ngOnInit(): void {
@@ -152,6 +155,19 @@ export class AppointmentDetail implements OnInit, OnDestroy {
     });
   }
 
+  // Pull-to-refresh handler for Ionic refresher
+  onRefresh(event?: any): void {
+    if (this.appointment) {
+      this.loadAppointment(this.appointment.id);
+    }
+    setTimeout(() => {
+      // Complete the Ionic refresher
+      if (event?.target) {
+        event.target.complete();
+      }
+    }, 500);
+  }
+
   approve(): void {
     if (!this.appointment) return;
 
@@ -166,7 +182,7 @@ export class AppointmentDetail implements OnInit, OnDestroy {
       if (result.isConfirmed && this.appointment) {
         this.appointmentsService.approveAppointment(this.appointment.id).subscribe({
           next: () => {
-            showSuccessToast(this.translateService.instant('APPOINTMENTS_PAGE.APPROVED'));
+            this.simpleToastService.success(this.translateService.instant('APPOINTMENTS_PAGE.APPROVED'));
             this.loadAppointment(this.appointment!.id);
           },
           error: (err) => {
@@ -197,7 +213,7 @@ export class AppointmentDetail implements OnInit, OnDestroy {
       if (result.isConfirmed && this.appointment) {
         this.appointmentsService.rejectAppointment(this.appointment.id, { rejectionReason: result.value }).subscribe({
           next: () => {
-            showSuccessToast(this.translateService.instant('APPOINTMENTS_PAGE.REJECTED'));
+            this.simpleToastService.success(this.translateService.instant('APPOINTMENTS_PAGE.REJECTED'));
             this.loadAppointment(this.appointment!.id);
           },
           error: (err) => {
@@ -227,7 +243,7 @@ export class AppointmentDetail implements OnInit, OnDestroy {
       if (result.isConfirmed && this.appointment) {
         this.appointmentsService.completeAppointment(this.appointment.id, { notes: result.value }).subscribe({
           next: () => {
-            showSuccessToast(this.translateService.instant('APPOINTMENTS_PAGE.COMPLETED'));
+            this.simpleToastService.success(this.translateService.instant('APPOINTMENTS_PAGE.COMPLETED'));
             this.loadAppointment(this.appointment!.id);
           },
           error: (err) => {
@@ -257,7 +273,7 @@ export class AppointmentDetail implements OnInit, OnDestroy {
       if (result.isConfirmed && this.appointment) {
         this.appointmentsService.cancelMyAppointment(this.appointment.id).subscribe({
           next: () => {
-            showSuccessToast(this.translateService.instant('APPOINTMENTS_PAGE.CANCELLED'));
+            this.simpleToastService.success(this.translateService.instant('APPOINTMENTS_PAGE.CANCELLED'));
             this.loadAppointment(this.appointment!.id);
           },
           error: (err) => {

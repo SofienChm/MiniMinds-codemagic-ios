@@ -13,7 +13,7 @@ import { HttpClient } from '@angular/common/http';
 import { ApiConfig } from '../../../core/config/api.config';
 import { AppCurrencyPipe } from '../../../core/services/currency/currency.pipe';
 import Swal from 'sweetalert2';
-import { showSuccessToast } from '../../../shared/utils/swal.util';
+import { SimpleToastService } from '../../../core/services/simple-toast.service';
 
 @Component({
   selector: 'app-educator-detail',
@@ -51,7 +51,8 @@ export class EducatorDetail implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private http: HttpClient,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private simpleToastService: SimpleToastService
   ) {}
 
   ngOnInit() {
@@ -225,7 +226,7 @@ export class EducatorDetail implements OnInit {
         this.assigningChild = false;
         this.closeAddChildModal();
         this.loadAssignedChildren();
-        showSuccessToast(this.translate.instant('MESSAGES.SUCCESS'));
+        this.simpleToastService.success(this.translate.instant('MESSAGES.SUCCESS'));
       },
       error: (error) => {
         this.assigningChild = false;
@@ -255,7 +256,7 @@ export class EducatorDetail implements OnInit {
         this.http.delete(`${ApiConfig.ENDPOINTS.EDUCATORS}/${this.educatorId}/remove-child/${childId}`).subscribe({
           next: () => {
             this.loadAssignedChildren();
-            showSuccessToast(this.translate.instant('MESSAGES.SUCCESS'));
+            this.simpleToastService.success(this.translate.instant('MESSAGES.SUCCESS'));
           },
           error: (error) => {
             console.error('Error removing child:', error);

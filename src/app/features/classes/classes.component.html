@@ -64,7 +64,7 @@
 
 <!-- Detail Modal -->
 <div class="modal fade" [class.show]="showDetailModal" [style.display]="showDetailModal ? 'block' : 'none'" *ngIf="showDetailModal">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">{{ selectedClass?.name }}</h5>
@@ -102,7 +102,7 @@
 
 <!-- Edit Modal -->
 <div class="modal fade" [class.show]="showEditModal" [style.display]="showEditModal ? 'block' : 'none'" *ngIf="showEditModal">
-  <div class="modal-dialog modal-lg">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">{{ 'CLASSES.EDIT_CLASS' | translate }}</h5>

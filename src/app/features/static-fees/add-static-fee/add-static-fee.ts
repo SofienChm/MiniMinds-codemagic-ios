@@ -9,9 +9,9 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { PageTitleService } from '../../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
-import { showSuccessToast } from '../../../shared/utils/swal.util';
 import { HttpClient } from '@angular/common/http';
 import { ApiConfig } from '../../../core/config/api.config';
+import { SimpleToastService } from '../../../core/services/simple-toast.service';
 
 interface ParentOption {
   id: number;
@@ -64,7 +64,8 @@ export class AddStaticFeeComponent implements OnInit, OnDestroy {
     private router: Router,
     private translateService: TranslateService,
     private pageTitleService: PageTitleService,
-    private http: HttpClient
+    private http: HttpClient,
+    private simpleToastService: SimpleToastService
   ) {}
 
   ngOnInit(): void {
@@ -88,7 +89,7 @@ export class AddStaticFeeComponent implements OnInit, OnDestroy {
     const today = new Date().toISOString().split('T')[0];
 
     this.staticFeeForm = this.fb.group({
-      title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(200)]],
+      title: ['', [Validators.maxLength(200)]],
       description: ['', [Validators.maxLength(1000)]],
       amount: [null, [Validators.required, Validators.min(0.01)]],
       payerName: ['', [Validators.maxLength(200)]],
@@ -284,7 +285,7 @@ export class AddStaticFeeComponent implements OnInit, OnDestroy {
 
     this.staticFeesService.createStaticFee(dto).subscribe({
       next: () => {
-        showSuccessToast(this.translateService.instant('STATIC_FEES_PAGE.SUCCESS'));
+        this.simpleToastService.success(this.translateService.instant('STATIC_FEES_PAGE.FEE_CREATED'));
         this.router.navigate(['/static-fees']);
       },
       error: (err) => {

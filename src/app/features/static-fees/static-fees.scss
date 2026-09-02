@@ -85,58 +85,15 @@
 
 // Button styles
 .btn-warning-custom {
-  background-color: #fff3cd;
-  border-color: #ffc107;
-  color: #856404;
+  background: var(--secondary-color);
+  color: white;
+  transition: ease-in 0.3s;
 
   &:hover {
-    background-color: #ffc107;
-    border-color: #ffc107;
-    color: #000;
-  }
-}
-
-.btn-view {
-  background-color: #e7f1ff;
-  border-color: #e7f1ff;
-  color: #fff;
-
-  &:hover {
-    background-color: #0d6efd;
-    color: white;
-  }
-}
-
-.btn-edit {
-  background-color: #fff3cd;
-  border-color: #fff3cd;
-  color: #856404;
-
-  &:hover {
-    background-color: #ffc107;
-    color: #000;
-  }
-}
-
-.btn-active {
-  background-color: #d1e7dd;
-  border-color: #d1e7dd;
-  color: #0f5132;
-
-  &:hover {
-    background-color: #198754;
-    color: white;
-  }
-}
-
-.btn-remove {
-  background-color: #f8d7da;
-  border-color: #f8d7da;
-  color: #842029;
-
-  &:hover {
-    background-color: #dc3545;
-    color: white;
+    border: 1px solid var(--secondary-color) !important;
+    background: white;
+    color: var(--secondary-color);
+    transition: ease-out 0.3s;
   }
 }
 
@@ -189,17 +146,6 @@
       background-color: #f8f9fa;
     }
   }
-}
-
-// Status badges
-.bg-success-2 {
-  background-color: #d1e7dd;
-  color: #0f5132;
-}
-
-.bg-warning-2 {
-  background-color: #fff3cd;
-  color: #856404;
 }
 
 // Modal improvements

@@ -83,7 +83,16 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
               return throwError(() => error);
             }
 
-            // For other endpoints, this is a session expiry
+            // For other endpoints, this could be a session expiry OR a recoverable
+            // expired access token. If a refresh token exists, DON'T destroy the
+            // session here - the auth interceptor already tried to refresh, and a
+            // proactive refresh may still recover login. Only log the user out when
+            // there is genuinely no way to recover (no refresh token at all).
+            if (localStorage.getItem('refreshToken')) {
+              console.warn('[Error] 401 with refresh token available - session protected, not logging out');
+              return throwError(() => error);
+            }
+
             errorMessage = 'Your session has expired. Please login again.';
             if (sessionExpiredShowing) {
               return throwError(() => error);

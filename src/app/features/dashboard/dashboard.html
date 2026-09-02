@@ -268,7 +268,7 @@
         </div>
         <div class="card calendar-dashbord shadow-sm mb-3">
           <div class="">
-            <app-calendar [events]="upcomingEvents"></app-calendar>
+            <app-calendar [events]="upcomingEvents" [holidays]="holidays"></app-calendar>
           </div>
         </div>
         <div class="card card-general upcoming-events-desk shadow-sm mb-3">
@@ -346,7 +346,7 @@
                   </thead>
                   <tbody>
                     <tr *ngFor="let fee of unpaidChildren; trackBy: trackById">
-                      <td class="text-nowrap">
+                      <td class="text-nowrap name-last">
                         <img loading="lazy" src="assets/child.png" alt="child" class="img-fluid img-student me-2" style="width: 30px; height: 30px; border-radius: 50%;">
                         {{ fee.name }}
                       </td>

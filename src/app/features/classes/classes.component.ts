@@ -11,7 +11,7 @@ import { EducatorService } from '../educator/educator.service';
 import { EducatorModel } from '../educator/educator.interface';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
-import { showSuccessToast } from '../../shared/utils/swal.util';
+import { SimpleToastService } from '../../core/services/simple-toast.service';
 
 @Component({
   selector: 'app-classes',
@@ -37,7 +37,8 @@ export class ClassesComponent implements OnInit, OnDestroy {
     private router: Router,
     private fb: FormBuilder,
     private translate: TranslateService,
-    private pageTitleService: PageTitleService
+    private pageTitleService: PageTitleService,
+    private simpleToastService: SimpleToastService
   ) {
     this.classForm = this.fb.group({
       name: ['', [Validators.required, Validators.maxLength(100)]],
@@ -139,7 +140,7 @@ export class ClassesComponent implements OnInit, OnDestroy {
         next: () => {
           this.closeEditModal();
           this.loadClasses();
-          showSuccessToast(this.translate.instant('CLASSES.UPDATE_SUCCESS'));
+          this.simpleToastService.success(this.translate.instant('CLASSES.UPDATE_SUCCESS'));
         },
         error: (error) => {
           console.error('Error updating class:', error);

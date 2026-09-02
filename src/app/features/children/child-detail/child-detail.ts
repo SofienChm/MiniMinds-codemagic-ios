@@ -11,7 +11,7 @@ import { AuthService } from '../../../core/services/auth';
 import { TitlePage, TitleAction, Breadcrumb } from '../../../shared/layouts/title-page/title-page';
 import { HttpClient } from '@angular/common/http';
 import Swal from 'sweetalert2';
-import { showSuccessToast } from '../../../shared/utils/swal.util';
+import { SimpleToastService } from '../../../core/services/simple-toast.service';
 import { ApiConfig } from '../../../core/config/api.config';
 import { ParentChildHeaderComponent } from '../../../shared/components/parent-child-header/parent-child-header.component';
 import { Location } from '@angular/common';
@@ -103,7 +103,8 @@ export class ChildDetail implements OnInit, OnDestroy {
     private geolocationService: GeolocationService,
     private qrScannerService: QrScannerService,
     private cdr: ChangeDetectorRef,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    private simpleToastService: SimpleToastService
   ) {}
 
   ngOnInit() {
@@ -330,7 +331,7 @@ export class ChildDetail implements OnInit, OnDestroy {
       next: () => {
         this.closeAddParentModal();
         this.loadChild();
-        showSuccessToast(this.translate.instant('MESSAGES.SUCCESS'));
+        this.simpleToastService.success(this.translate.instant('MESSAGES.SUCCESS'));
       },
       error: (error) => {
         console.error('Error adding parent:', error);
@@ -358,7 +359,7 @@ export class ChildDetail implements OnInit, OnDestroy {
         this.http.delete(`${ApiConfig.ENDPOINTS.CHILDREN}/remove-parent/${childParentId}`).subscribe({
           next: () => {
             this.loadChild();
-            showSuccessToast(this.translate.instant('CHILD_DETAIL.REMOVED_TITLE'));
+            this.simpleToastService.success(this.translate.instant('CHILD_DETAIL.REMOVED_TITLE'));
           },
           error: (error) => {
             console.error('Error removing parent:', error);

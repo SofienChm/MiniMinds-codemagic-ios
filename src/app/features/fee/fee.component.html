@@ -343,7 +343,7 @@
 
 <!-- Add Fee Modal -->
 <div class="modal fade" [class.show]="showAddFeeModal" [style.display]="showAddFeeModal ? 'block' : 'none'" *ngIf="showAddFeeModal">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">{{ 'FEES_PAGE.ADD_NEW_FEE' | translate }}</h5>
@@ -394,7 +394,7 @@
 
 <!-- Bulk Monthly Fee Modal -->
 <div class="modal fade" [class.show]="showBulkFeeModal" [style.display]="showBulkFeeModal ? 'block' : 'none'" *ngIf="showBulkFeeModal">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">{{ 'FEES_PAGE.CREATE_MONTHLY_FEES' | translate }}</h5>
@@ -430,7 +430,7 @@
 
 <!-- Payment Modal -->
 <div class="modal fade" [class.show]="showPaymentModal" [style.display]="showPaymentModal ? 'block' : 'none'" *ngIf="showPaymentModal && selectedFee">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">{{ 'FEES_PAGE.MARK_FEE_PAID' | translate }}</h5>

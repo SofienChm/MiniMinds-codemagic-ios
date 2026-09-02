@@ -47,6 +47,10 @@ export class App implements OnInit, OnDestroy {
     // Handle initial navigation for mobile apps
     this.handleMobileStartup();
 
+    // Proactively renew the session on app startup/resume when the access token
+    // is expired but a refresh token exists, so the user never gets logged out.
+    this.authService.trySilentRefresh();
+
     this.userSubscription = this.authService.currentUser$.subscribe(user => {
       if (user?.preferredLanguage) {
         this.translate.use(user.preferredLanguage);

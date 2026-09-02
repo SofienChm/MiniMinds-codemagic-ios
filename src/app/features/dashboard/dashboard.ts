@@ -14,6 +14,8 @@ import { DailyActivity } from '../daily-activities/daily-activity.interface';
 import { GalleryService } from '../gallery/gallery.service';
 import { Photo } from '../gallery/gallery.interface';
 import { LeavesService, LeaveRequestModel } from '../leaves/leaves.service';
+import { HolidayService } from '../holiday/holiday.service';
+import { Holiday } from '../holiday/holiday.interface';
 import { FeeService } from '../fee/fee.service';
 import { StaticFeesService } from '../static-fees/static-fees.service';
 import { BaseChartDirective } from 'ng2-charts';
@@ -93,6 +95,7 @@ export class Dashboard implements OnInit, OnDestroy {
 
   recentChildren: any[] = [];
   upcomingEvents: any[] = [];
+  holidays: Holiday[] = [];
   myChildren: any[] = [];
   upcomingLeaves: LeaveRequestModel[] = [];
   unpaidChildren: UnpaidFeeItem[] = [];
@@ -310,6 +313,7 @@ export class Dashboard implements OnInit, OnDestroy {
     private attendanceService: AttendanceService,
     private dailyActivityService: DailyActivityService,
     private leavesService: LeavesService,
+    private holidayService: HolidayService,
     private galleryService: GalleryService,
     private feeService: FeeService,
     private staticFeesService: StaticFeesService,
@@ -571,6 +575,17 @@ export class Dashboard implements OnInit, OnDestroy {
     });
   }
 
+  loadHolidays() {
+    this.holidayService.getHolidays().pipe(catchError(() => of([]))).subscribe({
+      next: (holidays) => {
+        this.holidays = holidays;
+      },
+      error: () => {
+        this.holidays = [];
+      }
+    });
+  }
+
   loadTodayActivities(childId: number) {
     this.loadingStates.activities = true;
     const today = new Date().toISOString().split('T')[0];
@@ -625,6 +640,7 @@ export class Dashboard implements OnInit, OnDestroy {
 
   loadAdminTeacherDashboard() {
     // Teachers use a dedicated scoped endpoint (only their assigned children)
+    this.loadHolidays();
     const request = this.userRole === 'Teacher'
       ? this.dashboardService.getTeacherDashboard()
       : this.dashboardService.getAdminDashboard();

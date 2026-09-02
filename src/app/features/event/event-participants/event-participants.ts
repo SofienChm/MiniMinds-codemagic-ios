@@ -15,7 +15,7 @@ import { TitlePage, Breadcrumb, TitleAction } from '../../../shared/layouts/titl
 import { PageTitleService } from '../../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
-import { showSuccessToast } from '../../../shared/utils/swal.util';
+import { SimpleToastService } from '../../../core/services/simple-toast.service';
 
 @Component({
   selector: 'app-event-participants',
@@ -45,7 +45,8 @@ export class EventParticipants implements OnInit, OnDestroy {
     private eventService: EventService,
     public authService: AuthService,
     private translate: TranslateService,
-    private pageTitleService: PageTitleService
+    private pageTitleService: PageTitleService,
+    private simpleToastService: SimpleToastService
   ) {}
 
   ngOnInit() {
@@ -148,7 +149,7 @@ export class EventParticipants implements OnInit, OnDestroy {
         this.selectedChildId = 0;
         this.loadParticipants();
         this.saving = false;
-        showSuccessToast(this.translate.instant('MESSAGES.SUCCESS'));
+        this.simpleToastService.success(this.translate.instant('MESSAGES.SUCCESS'));
       },
       error: (error) => {
         console.error('Error adding participant:', error);
@@ -177,7 +178,7 @@ export class EventParticipants implements OnInit, OnDestroy {
         this.participantsService.removeParticipant(participantId).subscribe({
           next: () => {
             this.loadParticipants();
-            showSuccessToast(this.translate.instant('MESSAGES.SUCCESS'));
+            this.simpleToastService.success(this.translate.instant('MESSAGES.SUCCESS'));
           },
           error: (error) => {
             console.error('Error removing participant:', error);
@@ -213,7 +214,7 @@ export class EventParticipants implements OnInit, OnDestroy {
     this.participantsService.approveParticipant(participantId).subscribe({
       next: () => {
         this.loadParticipants();
-        showSuccessToast(this.translate.instant('MESSAGES.SUCCESS'));
+        this.simpleToastService.success(this.translate.instant('MESSAGES.SUCCESS'));
       },
       error: (error) => {
         console.error('Error approving participant:', error);
@@ -230,7 +231,7 @@ export class EventParticipants implements OnInit, OnDestroy {
     this.participantsService.rejectParticipant(participantId).subscribe({
       next: () => {
         this.loadParticipants();
-        showSuccessToast(this.translate.instant('MESSAGES.SUCCESS'));
+        this.simpleToastService.success(this.translate.instant('MESSAGES.SUCCESS'));
       },
       error: (error) => {
         console.error('Error rejecting participant:', error);
@@ -281,7 +282,7 @@ export class EventParticipants implements OnInit, OnDestroy {
         this.participantsService.requestCancellation(participantId).subscribe({
           next: () => {
             this.loadParticipants();
-            showSuccessToast(this.translate.instant('MESSAGES.SUCCESS'));
+            this.simpleToastService.success(this.translate.instant('MESSAGES.SUCCESS'));
           },
           error: (error) => {
             console.error('Error requesting cancellation:', error);
@@ -311,7 +312,7 @@ export class EventParticipants implements OnInit, OnDestroy {
         this.participantsService.approveCancellation(participantId).subscribe({
           next: () => {
             this.loadParticipants();
-            showSuccessToast(this.translate.instant('MESSAGES.SUCCESS'));
+            this.simpleToastService.success(this.translate.instant('MESSAGES.SUCCESS'));
           },
           error: (error) => {
             console.error('Error approving cancellation:', error);
@@ -341,7 +342,7 @@ export class EventParticipants implements OnInit, OnDestroy {
         this.participantsService.rejectCancellation(participantId).subscribe({
           next: () => {
             this.loadParticipants();
-            showSuccessToast(this.translate.instant('MESSAGES.SUCCESS'));
+            this.simpleToastService.success(this.translate.instant('MESSAGES.SUCCESS'));
           },
           error: (error) => {
             console.error('Error rejecting cancellation:', error);

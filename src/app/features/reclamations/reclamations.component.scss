@@ -101,7 +101,8 @@ ion-content.parent-reclamations {
 .menu-item.active .badge { background: linear-gradient(135deg, #a8c5ff 0%, #7dd3c0 100%); color: #fff; }
 .menu-card-fixed { position: sticky; top: 20px; }
 
-.reclamations-table { width: 100%; border-collapse: collapse; height: 100%; }
+.reclamations-responsive { min-height: 0; }
+.reclamations-table { width: 100%; min-width: 760px; border-collapse: collapse; height: 100%; }
 .reclamations-table thead { background: linear-gradient(135deg, rgba(168, 197, 255, 0.2) 0%, rgba(125, 211, 192, 0.2) 100%); }
 .reclamations-table th { padding: 12px; text-align: left; font-weight: 600; font-size: 14px; color: #0e567d; border-bottom: 2px solid #e2e8f0; }
 .checkbox-col { width: 40px; text-align: center; }
@@ -217,6 +218,9 @@ ion-content.parent-reclamations {
     .panel {
         height: 100%;
         margin-bottom: 1rem;
+    }
+    .reclamations-table tbody {
+        height: auto;
     }
 }
 

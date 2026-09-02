@@ -1427,6 +1427,14 @@ input.form-control {
 // table 
 
 .card-recently{
+  &.fee-history {
+    .name-last {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      max-width: 150px; 
+    }
+  }
   .card-header{
     border-color: #E9EDF4;
     position: relative;

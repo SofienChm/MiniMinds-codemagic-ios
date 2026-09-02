@@ -12,7 +12,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { PageTitleService } from '../../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
-import { showSuccessToast } from '../../../shared/utils/swal.util';
+import { SimpleToastService } from '../../../core/services/simple-toast.service';
 
 @Component({
   selector: 'app-class-detail',
@@ -45,7 +45,8 @@ export class ClassDetailComponent implements OnInit, AfterViewInit, OnDestroy {
     private route: ActivatedRoute,
     private http: HttpClient,
     private translate: TranslateService,
-    private pageTitleService: PageTitleService
+    private pageTitleService: PageTitleService,
+    private simpleToastService: SimpleToastService
   ) {}
 
   ngOnInit() {
@@ -140,7 +141,7 @@ export class ClassDetailComponent implements OnInit, AfterViewInit, OnDestroy {
       next: () => {
         this.closeAddChildModal();
         this.loadClass();
-        showSuccessToast(this.translate.instant('CLASSES.ENROLL_SUCCESS'));
+        this.simpleToastService.success(this.translate.instant('CLASSES.ENROLL_SUCCESS'));
       },
       error: (error) => {
         console.error('Error enrolling child:', error);
@@ -195,7 +196,7 @@ export class ClassDetailComponent implements OnInit, AfterViewInit, OnDestroy {
       next: () => {
         this.closeAssignTeacherModal();
         this.loadClass();
-        showSuccessToast(this.translate.instant('CLASSES.ASSIGN_TEACHER_SUCCESS'));
+        this.simpleToastService.success(this.translate.instant('CLASSES.ASSIGN_TEACHER_SUCCESS'));
       },
       error: (error) => {
         console.error('Error assigning teacher:', error);
@@ -223,7 +224,7 @@ export class ClassDetailComponent implements OnInit, AfterViewInit, OnDestroy {
         this.http.delete(`${ApiConfig.ENDPOINTS.CLASSES}/${this.classId}/teachers/${teacherId}`).subscribe({
           next: () => {
             this.loadClass();
-            showSuccessToast(this.translate.instant('CLASSES.REMOVE_TEACHER_SUCCESS'));
+            this.simpleToastService.success(this.translate.instant('CLASSES.REMOVE_TEACHER_SUCCESS'));
           },
           error: (error) => {
             console.error('Error removing teacher:', error);
@@ -253,7 +254,7 @@ export class ClassDetailComponent implements OnInit, AfterViewInit, OnDestroy {
         this.http.delete(`${ApiConfig.ENDPOINTS.CLASSES}/${this.classId}/children/${childId}`).subscribe({
           next: () => {
             this.loadClass();
-            showSuccessToast(this.translate.instant('CLASSES.REMOVE_CHILD_SUCCESS'));
+            this.simpleToastService.success(this.translate.instant('CLASSES.REMOVE_CHILD_SUCCESS'));
           },
           error: (error) => {
             console.error('Error removing child:', error);

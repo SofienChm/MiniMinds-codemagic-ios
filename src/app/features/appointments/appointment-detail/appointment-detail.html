@@ -1,11 +1,113 @@
-<div *ngIf="isParent" class="parent-detailchild font-inter">
-  <app-parent-child-header-simple
-    [title]="'FEES_PAGE.FEE_RECEIPT' | translate"
-  >
-  </app-parent-child-header-simple>
-</div>
-<div class="container-fluid mt-4">
-  <app-title-page *ngIf="!isParent"
+<!-- ==================== PARENT MOBILE VIEW ==================== -->
+<ion-content *ngIf="isParent" class="parent-appointment-detail">
+  <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="parent-detailchild font-inter">
+    <app-parent-child-header-simple [title]="'APPOINTMENTS_PAGE.DETAILS' | translate">
+    </app-parent-child-header-simple>
+
+    <!-- Loading Skeleton -->
+    <div *ngIf="loading" class="pad-body">
+      <div *ngFor="let i of [1,2,3]" class="pad-card">
+        <app-skeleton [height]="24" [width]="'55%'" class="mb-3"></app-skeleton>
+        <div class="d-flex gap-2 mb-3">
+          <app-skeleton [height]="24" [width]="'90px'" borderRadius="12px"></app-skeleton>
+          <app-skeleton [height]="24" [width]="'90px'" borderRadius="12px"></app-skeleton>
+        </div>
+        <app-skeleton [height]="16" [width]="'80%'" class="mb-2"></app-skeleton>
+        <app-skeleton [height]="16" [width]="'60%'" class="mb-2"></app-skeleton>
+        <app-skeleton [height]="16" [width]="'70%'"></app-skeleton>
+      </div>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage && !loading" class="alert alert-danger pad-error">
+      <i class="bi bi-exclamation-triangle me-2"></i>{{ errorMessage }}
+    </div>
+
+    <!-- Content -->
+    <div *ngIf="appointment && !loading" class="pad-body">
+      <!-- Hero Card -->
+      <div class="pad-hero-card">
+        <h2 class="pad-title">{{ appointment.title }}</h2>
+        <div class="pad-badges">
+          <span class="badge" [ngClass]="getStatusBadgeClass(appointment.status)">
+            {{ 'APPOINTMENTS_PAGE.' + appointment.status.toUpperCase() | translate }}
+          </span>
+          <span class="badge" [ngClass]="getTypeBadgeClass(appointment.type)">
+            {{ 'APPOINTMENTS_PAGE.TYPE_' + appointment.type.toUpperCase() | translate }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Info Card -->
+      <div class="pad-card">
+        <div class="pad-row">
+          <i class="bi bi-calendar-event pad-icon"></i>
+          <div class="pad-col">
+            <span class="pad-label">{{ 'APPOINTMENTS_PAGE.DATE' | translate }}</span>
+            <span class="pad-value">{{ appointment.appointmentDate | date:'fullDate':undefined:currentLocale }}</span>
+          </div>
+        </div>
+        <div class="pad-row">
+          <i class="bi bi-clock pad-icon"></i>
+          <div class="pad-col">
+            <span class="pad-label">{{ 'APPOINTMENTS_PAGE.TIME' | translate }}</span>
+            <span class="pad-value">{{ appointment.startTime }} - {{ appointment.endTime }}</span>
+          </div>
+        </div>
+        <div class="pad-row">
+          <i class="bi bi-person-heart pad-icon"></i>
+          <div class="pad-col">
+            <span class="pad-label">{{ 'APPOINTMENTS_PAGE.CHILD' | translate }}</span>
+            <span class="pad-value">{{ appointment.childName || ('APPOINTMENTS_PAGE.NOT_SPECIFIED' | translate) }}</span>
+          </div>
+        </div>
+        <div class="pad-row">
+          <i class="bi bi-person-badge pad-icon"></i>
+          <div class="pad-col">
+            <span class="pad-label">{{ 'APPOINTMENTS_PAGE.TEACHER' | translate }}</span>
+            <span class="pad-value">{{ appointment.teacherName || ('APPOINTMENTS_PAGE.ANY_AVAILABLE' | translate) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Description Card -->
+      <div class="pad-card" *ngIf="appointment.description">
+        <h3 class="pad-section-title">{{ 'APPOINTMENTS_PAGE.DESCRIPTION' | translate }}</h3>
+        <p class="pad-text">{{ appointment.description }}</p>
+      </div>
+
+      <!-- Notes / Rejection Card -->
+      <div class="pad-card" *ngIf="appointment.notes || appointment.rejectionReason">
+        <div *ngIf="appointment.notes" class="mb-3">
+          <h3 class="pad-section-title">{{ 'APPOINTMENTS_PAGE.MEETING_NOTES' | translate }}</h3>
+          <p class="pad-text">{{ appointment.notes }}</p>
+        </div>
+        <div *ngIf="appointment.rejectionReason">
+          <h3 class="pad-section-title text-danger">{{ 'APPOINTMENTS_PAGE.REJECTION_REASON' | translate }}</h3>
+          <p class="pad-text text-danger">{{ appointment.rejectionReason }}</p>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="pad-actions" *ngIf="appointment.status === 'Pending' || appointment.status === 'Approved'">
+        <button *ngIf="appointment.status === 'Pending'" class="pad-btn pad-btn-edit" [routerLink]="['/appointments/edit', appointment.id]">
+          <i class="bi bi-pencil me-2"></i>{{ 'APPOINTMENTS_PAGE.EDIT' | translate }}
+        </button>
+        <button class="pad-btn pad-btn-cancel" (click)="cancelAppointment()">
+          <i class="bi bi-x-circle me-2"></i>{{ 'APPOINTMENTS_PAGE.CANCEL_APPOINTMENT' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+</ion-content>
+
+<!-- ==================== ADMIN/TEACHER VIEW ==================== -->
+<div class="container-fluid mt-4" *ngIf="!isParent">
+  <app-title-page
     [title]="appointment?.title || ('APPOINTMENTS_PAGE.DETAILS' | translate)"
     [subtitle]="'APPOINTMENTS_PAGE.DETAIL_SUBTITLE' | translate"
     [icon]="'bi bi-calendar-check'"
@@ -118,7 +220,7 @@
           </h5>
         </div>
         <div class="card-body">
-          <div class="person-item mb-3" *ngIf="!isParent">
+          <div class="person-item mb-3">
             <div class="person-icon bg-primary-light">
               <i class="bi bi-person-fill text-primary"></i>
             </div>
@@ -183,8 +285,8 @@
         </div>
       </div>
 
-      <!-- Quick Actions for Parent -->
-      <div *ngIf="isParent && (appointment.status === 'Pending' || appointment.status === 'Approved')" class="card card-general mt-4">
+      <!-- Quick Actions -->
+      <div *ngIf="appointment.status === 'Pending' || appointment.status === 'Approved'" class="card card-general mt-4">
         <div class="card-header">
           <h5 class="mb-0">
             <i class="bi bi-lightning me-2"></i>

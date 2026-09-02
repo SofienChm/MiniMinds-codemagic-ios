@@ -7,6 +7,10 @@ import { LoginRequest } from '../interfaces/dto/login-request-dto';
 import { RegisterRequest } from '../interfaces/dto/register-request-dto';
 import { ApiConfig } from '../../core/config/api.config';
 
+// Single-flight guard so concurrent trySilentRefresh() calls share one refresh
+// request instead of double-submitting (the backend rotates/revokes tokens).
+let silentRefreshInFlight: Promise<boolean> | null = null;
+
 @Injectable({
   providedIn: 'root'
 })
@@ -185,6 +189,122 @@ export class AuthService {
 
     // Access token is missing/expired, but a refresh token can silently renew the session
     return !!this.getRefreshToken();
+  }
+
+  /**
+   * True when the access token is expired (or nearly so) but a refresh token is
+   * still available to recover the session. Used to decide whether a proactive
+   * refresh is needed on app startup/resume.
+   */
+  isAccessTokenExpiredWithRefreshAvailable(): boolean {
+    const token = this.getToken();
+    if (!token) {
+      return !!this.getRefreshToken();
+    }
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const expiryTime = payload.exp * 1000;
+      // Sixty-second buffer: treat as expired a bit before the hard limit
+      return expiryTime <= (Date.now() + 60000);
+    } catch {
+      return true;
+    }
+  }
+
+  /**
+   * Best-effort silent session renewal. Refreshes the access token when it is
+   * expired/missing but a refresh token exists, so the user never gets logged out.
+   *
+   * Hardened so a user is ONLY logged out when the session is genuinely gone
+   * (refresh token truly expired/revoked by the server). Transient network or
+   * server errors NEVER clear the session - they are retried, and if the device
+   * is offline the existing (expired) tokens are kept so the user stays on the
+   * app and is re-synced once connectivity returns.
+   *
+   * Resolves true when the session is healthy/recoverable, false only when the
+   * refresh token is genuinely invalid (so callers may fall back to logout).
+   */
+  async trySilentRefresh(): Promise<boolean> {
+    const refreshToken = this.getRefreshToken();
+    if (!refreshToken) {
+      return false;
+    }
+    // Access token still valid - nothing to do
+    if (!this.isAccessTokenExpiredWithRefreshAvailable()) {
+      return true;
+    }
+
+    const { NetworkService } = await import('./network.service');
+    const network = this.injector.get(NetworkService);
+    if (!network.isConnected) {
+      // Offline - never log the user out. Keep the local session so they stay in
+      // the app and will be re-authenticated seamlessly when connectivity returns.
+      console.warn('[Auth] Offline - keeping session, will refresh when back online');
+      return true;
+    }
+
+    // The backend rotates tokens. Guard the request against double-submit from
+    // any in-flight refresh so a concurrent call doesn't use a just-revoked token.
+    const promise = (() => {
+      if (silentRefreshInFlight) {
+        return silentRefreshInFlight;
+      }
+      const p = this.performSilentRefresh();
+      silentRefreshInFlight = p.finally(() => (silentRefreshInFlight = null));
+      return silentRefreshInFlight;
+    })();
+
+    return promise;
+  }
+
+  /**
+   * Execute a refresh session with retry/backoff. Never clears the session on
+   * network/server errors - only when the server definitively rejects the token
+   * (i.e. it is truly expired or revoked).
+   */
+  private async performSilentRefresh(): Promise<boolean> {
+    const maxAttempts = 3;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        await firstValueFrom(this.refreshSession());
+        return true;
+      } catch (error: any) {
+        const status = error?.status;
+        const isNetworkError = status === 0 || error instanceof ErrorEvent;
+
+        if (status === 401 || status === 400) {
+          // Server definitively rejected the token - session is truly gone.
+          // Only now is it safe (and correct) to log the user out.
+          console.error('[Auth] Refresh token rejected by server, session expired:', error);
+          this.clearSession();
+          return false;
+        }
+
+        // Network or server hiccup (5xx, timeout, offline). Do NOT log out.
+        console.warn(`[Auth] Silent refresh attempt ${attempt}/${maxAttempts} failed`, error);
+        if (attempt < maxAttempts) {
+          const delayMs = 1000 * Math.pow(2, attempt - 1); // 1s, 2s backoff
+          await this.delay(delayMs);
+        } else {
+          // Give up for now but keep the session so a later refresh can recover.
+          console.warn('[Auth] Silent refresh retries exhausted - keeping session for later recovery');
+          return true;
+        }
+      }
+    }
+    return true;
+  }
+
+  private clearSession(): void {
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('userId');
+    this.currentUserSubject.next(null);
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   getCurrentUser(): AuthResponse | null {

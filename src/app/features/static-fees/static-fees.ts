@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
 import { CommonModule, registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
 import localeIt from '@angular/common/locales/it';
@@ -12,9 +12,9 @@ import { StaticFeesService, StaticFeeModel, StaticFeeSummary } from './static-fe
 import { AppCurrencyPipe } from '../../core/services/currency/currency.pipe';
 import { PageTitleService } from '../../core/services/page-title.service';
 import { PermissionService } from '../../core/services/permission.service';
+import { SimpleToastService } from '../../core/services/simple-toast.service';
 import { Subscription, firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
-import { showSuccessToast } from '../../shared/utils/swal.util';
 import { ExportUtil } from '../../shared/utils/export.util';
 
 @Component({
@@ -24,7 +24,8 @@ import { ExportUtil } from '../../shared/utils/export.util';
   templateUrl: './static-fees.html',
   styleUrls: ['./static-fees.scss']
 })
-export class StaticFeesComponent implements OnInit, OnDestroy {
+export class StaticFeesComponent implements OnInit, AfterViewInit, OnDestroy {
+  private tooltipInstances: any[] = [];
   private langChangeSub?: Subscription;
 
   fees: StaticFeeModel[] = [];
@@ -74,7 +75,8 @@ export class StaticFeesComponent implements OnInit, OnDestroy {
     private staticFeesService: StaticFeesService,
     private translateService: TranslateService,
     private pageTitleService: PageTitleService,
-    private permissionService: PermissionService
+    private permissionService: PermissionService,
+    private simpleToastService: SimpleToastService
   ) {
     registerLocaleData(localeFr);
     registerLocaleData(localeIt);
@@ -92,8 +94,28 @@ export class StaticFeesComponent implements OnInit, OnDestroy {
     });
   }
 
+  ngAfterViewInit() {
+    this.initTooltips();
+  }
+
   ngOnDestroy() {
+    this.disposeTooltips();
     this.langChangeSub?.unsubscribe();
+  }
+
+  initTooltips() {
+    setTimeout(() => {
+      this.disposeTooltips();
+      const tooltipTriggerList = Array.from(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      this.tooltipInstances = tooltipTriggerList.map(el => new (window as any).bootstrap.Tooltip(el, {
+        trigger: 'hover'
+      }));
+    }, 100);
+  }
+
+  disposeTooltips() {
+    this.tooltipInstances.forEach(tooltip => tooltip?.dispose());
+    this.tooltipInstances = [];
   }
 
   updateTranslatedContent(): void {
@@ -172,6 +194,7 @@ export class StaticFeesComponent implements OnInit, OnDestroy {
       this.loadSummary()
     ]).finally(() => {
       this.loading = false;
+      this.initTooltips();
     });
   }
 
@@ -347,9 +370,7 @@ export class StaticFeesComponent implements OnInit, OnDestroy {
         this.showBulkFeeModal = false;
         this.bulkSubmitting = false;
         this.loadData();
-        showSuccessToast(
-          this.translateService.instant('STATIC_FEES_PAGE.BULK_CREATED', { count: result.count })
-        );
+        this.simpleToastService.success(this.translateService.instant('STATIC_FEES_PAGE.BULK_CREATED', { count: result.count }));
       },
       error: (err) => {
         this.bulkSubmitting = false;
@@ -393,7 +414,7 @@ export class StaticFeesComponent implements OnInit, OnDestroy {
       next: () => {
         this.showPaymentModal = false;
         this.loadData();
-        showSuccessToast(this.translateService.instant('STATIC_FEES_PAGE.SUCCESS'));
+        this.simpleToastService.success(this.translateService.instant('STATIC_FEES_PAGE.FEE_MARKED_PAID'));
       },
       error: (err) => {
         Swal.fire({
@@ -420,7 +441,7 @@ export class StaticFeesComponent implements OnInit, OnDestroy {
         this.staticFeesService.markAsPending(fee.id).subscribe({
           next: () => {
             this.loadData();
-            showSuccessToast(this.translateService.instant('STATIC_FEES_PAGE.SUCCESS'));
+            this.simpleToastService.success(this.translateService.instant('STATIC_FEES_PAGE.FEE_MARKED_PENDING'));
           },
           error: (err) => {
             Swal.fire({
@@ -449,7 +470,7 @@ export class StaticFeesComponent implements OnInit, OnDestroy {
         this.staticFeesService.deleteStaticFee(fee.id).subscribe({
           next: () => {
             this.loadData();
-            showSuccessToast(this.translateService.instant('STATIC_FEES_PAGE.DELETED'));
+            this.simpleToastService.success(this.translateService.instant('STATIC_FEES_PAGE.FEE_DELETED_SUCCESS'));
           },
           error: (err) => {
             Swal.fire({

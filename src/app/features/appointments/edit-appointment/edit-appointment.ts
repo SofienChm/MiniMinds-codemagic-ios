@@ -11,7 +11,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { PageTitleService } from '../../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
-import { showSuccessToast } from '../../../shared/utils/swal.util';
+import { SimpleToastService } from '../../../core/services/simple-toast.service';
 
 interface ChildOption {
   id: number;
@@ -57,7 +57,8 @@ export class EditAppointment implements OnInit, OnDestroy {
     private router: Router,
     private route: ActivatedRoute,
     private translateService: TranslateService,
-    private pageTitleService: PageTitleService
+    private pageTitleService: PageTitleService,
+    private simpleToastService: SimpleToastService
   ) {
     this.generateTimeSlots();
     this.setMinDate();
@@ -268,7 +269,7 @@ export class EditAppointment implements OnInit, OnDestroy {
 
     this.appointmentsService.updateMyAppointment(this.appointmentId, dto).subscribe({
       next: () => {
-        showSuccessToast(this.translateService.instant('APPOINTMENTS_PAGE.SUCCESS'));
+        this.simpleToastService.success(this.translateService.instant('APPOINTMENTS_PAGE.SUCCESS'));
         this.router.navigate(['/appointments']);
       },
       error: (err) => {

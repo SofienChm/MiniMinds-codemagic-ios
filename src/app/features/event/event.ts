@@ -14,7 +14,7 @@ import { AppCurrencyPipe } from '../../core/services/currency/currency.pipe';
 import { PageTitleService } from '../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
-import { showSuccessToast } from '../../shared/utils/swal.util';
+import { SimpleToastService } from '../../core/services/simple-toast.service';
 import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
 import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
 import { ApiConfig } from '../../core/config/api.config';
@@ -57,7 +57,8 @@ export class Event implements OnInit, OnDestroy {
     private authService: AuthService,
     private router: Router,
     private translate: TranslateService,
-    private pageTitleService: PageTitleService
+    private pageTitleService: PageTitleService,
+    private simpleToastService: SimpleToastService
   ) {}
 
   ngOnInit() {
@@ -180,7 +181,7 @@ export class Event implements OnInit, OnDestroy {
       if (result.isConfirmed) {
         this.eventService.deleteEvent(id).subscribe({
           next: () => {
-            showSuccessToast(this.translate.instant('MESSAGES.SUCCESS'));
+            this.simpleToastService.success(this.translate.instant('MESSAGES.SUCCESS'));
             this.loadEvents();
           },
           error: (error) => {

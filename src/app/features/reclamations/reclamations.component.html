@@ -264,7 +264,8 @@
         </div>
         <div class="panel-body">
           <div *ngIf="!showNewReclamationModal && !showModal">
-            <table class="reclamations-table" *ngIf="activeReclamations.length > 0">
+            <div class="table-responsive custom-table reclamations-responsive" *ngIf="activeReclamations.length > 0">
+            <table class="reclamations-table">
               <thead>
                 <tr>
                   <th class="checkbox-col">
@@ -314,6 +315,7 @@
                 </tr>
               </tbody>
             </table>
+            </div>
             <div class="empty-state" *ngIf="activeReclamations.length === 0">
               <p class="empty-cell">{{ 'RECLAMATIONS_PAGE.NO_RECLAMATIONS' | translate }}</p>
             </div>

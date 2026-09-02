@@ -1,9 +1,111 @@
-<app-parent-child-header-simple *ngIf="isParent"
-  [title]="'APPOINTMENTS_PAGE.TITLE' | translate"
->
-</app-parent-child-header-simple>
-<div class="container-fluid mt-4">
-  <app-title-page *ngIf="!isParent"
+<!-- ==================== PARENT MOBILE VIEW ==================== -->
+<ion-content *ngIf="isParent" class="parent-appointments">
+  <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="parent-detailchild font-inter">
+    <app-parent-child-header-simple [title]="'APPOINTMENTS_PAGE.TITLE' | translate">
+      <button class="pa-header-add" (click)="navigateToAdd()" [title]="'APPOINTMENTS_PAGE.BOOK_APPOINTMENT' | translate">
+        <i class="bi bi-plus-lg"></i>
+      </button>
+    </app-parent-child-header-simple>
+
+    <!-- Status Filter -->
+    <div class="pa-filter-section" *ngIf="!loading">
+      <button
+        class="pa-filter-pill"
+        [class.active]="selectedStatus === status.value"
+        *ngFor="let status of statusOptions"
+        (click)="setStatusFilter(status.value)">
+        <i class="bi {{ status.icon }}"></i>
+        <span>{{ status.label }}</span>
+      </button>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage && !loading" class="alert alert-danger pa-error">
+      <i class="bi bi-exclamation-triangle me-2"></i>{{ errorMessage }}
+    </div>
+
+    <!-- Loading Skeleton -->
+    <div *ngIf="loading" class="pa-list">
+      <div *ngFor="let i of [1,2,3]" class="pa-card">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <app-skeleton [height]="20" [width]="'55%'"></app-skeleton>
+          <app-skeleton [height]="24" [width]="'80px'" borderRadius="12px"></app-skeleton>
+        </div>
+        <app-skeleton [height]="16" [width]="'45%'" class="mb-2"></app-skeleton>
+        <app-skeleton [height]="16" [width]="'70%'" class="mb-2"></app-skeleton>
+        <app-skeleton [height]="16" [width]="'60%'"></app-skeleton>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!loading && appointments.length === 0" class="pa-empty-state">
+      <i class="bi bi-calendar-x"></i>
+      <h3>{{ 'APPOINTMENTS_PAGE.NO_APPOINTMENTS' | translate }}</h3>
+      <button class="custom-btn-2 btn-add-global-2" (click)="navigateToAddAppointment()">
+        <i class="bi bi-plus-circle me-2"></i>{{ 'APPOINTMENTS_PAGE.BOOK_FIRST_APPOINTMENT' | translate }}
+      </button>
+    </div>
+
+    <!-- Appointment Cards -->
+    <div *ngIf="!loading && appointments.length > 0" class="pa-list">
+      <div *ngFor="let apt of displayedAppointments; trackBy: trackById" class="pa-card" (click)="viewDetails(apt)">
+        <div class="pa-card-header">
+          <span class="pa-card-title">{{ apt.title }}</span>
+          <span class="badge" [ngClass]="getStatusBadgeClass(apt.status)">
+            {{ 'APPOINTMENTS_PAGE.' + apt.status.toUpperCase() | translate }}
+          </span>
+        </div>
+
+        <div class="pa-type-badge">
+          <span class="badge" [ngClass]="getTypeBadgeClass(apt.type)">
+            {{ 'APPOINTMENTS_PAGE.TYPE_' + apt.type.toUpperCase() | translate }}
+          </span>
+        </div>
+
+        <div class="pa-card-row">
+          <i class="bi bi-calendar-event"></i>
+          <span>{{ apt.appointmentDate | date:'mediumDate' }}</span>
+          <span class="pa-row-time">{{ apt.startTime }} - {{ apt.endTime }}</span>
+        </div>
+        <div class="pa-card-row">
+          <i class="bi bi-person-heart"></i>
+          <span>{{ 'APPOINTMENTS_PAGE.CHILD' | translate }}: {{ apt.childName || ('APPOINTMENTS_PAGE.NOT_SPECIFIED' | translate) }}</span>
+        </div>
+        <div class="pa-card-row">
+          <i class="bi bi-person-badge"></i>
+          <span>{{ 'APPOINTMENTS_PAGE.TEACHER' | translate }}: {{ apt.teacherName || ('APPOINTMENTS_PAGE.ANY_AVAILABLE' | translate) }}</span>
+        </div>
+
+        <div class="pa-card-actions" (click)="$event.stopPropagation()">
+          <button class="pa-action-btn pa-action-view" (click)="viewDetails(apt)">
+            <i class="bi bi-eye"></i><span>{{ 'APPOINTMENTS_PAGE.VIEW_DETAILS' | translate }}</span>
+          </button>
+          <button *ngIf="apt.status === 'Pending'" class="pa-action-btn pa-action-edit" (click)="editAppointment(apt)">
+            <i class="bi bi-pencil"></i><span>{{ 'APPOINTMENTS_PAGE.EDIT' | translate }}</span>
+          </button>
+          <button *ngIf="apt.status === 'Pending' || apt.status === 'Approved'" class="pa-action-btn pa-action-cancel" (click)="cancelAppointment(apt)">
+            <i class="bi bi-x-lg"></i><span>{{ 'APPOINTMENTS_PAGE.CANCEL_APPOINTMENT' | translate }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Load More -->
+      <div class="pa-load-more">
+        <button class="custom-btn-2 btn-add-border" (click)="loadMore()" *ngIf="hasMore()">
+          <i class="bi bi-plus-circle me-2"></i>{{ 'APPOINTMENTS_PAGE.LOAD_MORE' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+</ion-content>
+
+<!-- ==================== ADMIN/TEACHER VIEW ==================== -->
+<div class="container-fluid mt-4" *ngIf="!isParent">
+  <app-title-page
     [title]="'APPOINTMENTS_PAGE.TITLE' | translate"
     [subtitle]="'APPOINTMENTS_PAGE.SUBTITLE' | translate"
     [icon]="'bi bi-calendar-check'"
@@ -56,7 +158,7 @@
           <thead class="table-light">
             <tr>
               <th>{{ 'APPOINTMENTS_PAGE.TITLE_LABEL' | translate }}</th>
-              <th *ngIf="!isParent">{{ 'APPOINTMENTS_PAGE.PARENT' | translate }}</th>
+              <th>{{ 'APPOINTMENTS_PAGE.PARENT' | translate }}</th>
               <th>{{ 'APPOINTMENTS_PAGE.CHILD' | translate }}</th>
               <th>{{ 'APPOINTMENTS_PAGE.TEACHER' | translate }}</th>
               <th>{{ 'APPOINTMENTS_PAGE.TYPE' | translate }}</th>
@@ -71,7 +173,7 @@
               <td>
                 <span class="fw-medium">{{ apt.title }}</span>
               </td>
-              <td *ngIf="!isParent">
+              <td>
                 <span class="text-muted">{{ apt.parentName || '-' }}</span>
               </td>
               <td>
@@ -100,24 +202,6 @@
                           [title]="'APPOINTMENTS_PAGE.VIEW_DETAILS' | translate">
                     <i class="bi bi-eye"></i>
                   </button>
-
-                  <!-- Parent Actions -->
-                  <ng-container *ngIf="isParent">
-                    <!-- Edit (only pending) -->
-                    <button *ngIf="apt.status === 'Pending'"
-                            class="btn btn-sm btn-edit"
-                            (click)="editAppointment(apt)"
-                            [title]="'APPOINTMENTS_PAGE.EDIT' | translate">
-                      <i class="bi bi-pencil"></i>
-                    </button>
-                    <!-- Cancel (pending or approved) -->
-                    <button *ngIf="apt.status === 'Pending' || apt.status === 'Approved'"
-                            class="btn btn-sm btn-remove"
-                            (click)="cancelAppointment(apt)"
-                            [title]="'APPOINTMENTS_PAGE.CANCEL_APPOINTMENT' | translate">
-                      <i class="bi bi-x-lg"></i>
-                    </button>
-                  </ng-container>
 
                   <!-- Admin/Teacher Actions -->
                   <ng-container *ngIf="isAdmin || isTeacher">
@@ -153,17 +237,10 @@
         <div class="text-center py-5">
           <i class="bi bi-calendar-x fs-1 text-muted mb-3 d-block"></i>
           <p class="text-muted mb-0">{{ 'APPOINTMENTS_PAGE.NO_APPOINTMENTS' | translate }}</p>
-          <button *ngIf="isParent" class="action-btn custom-btn-2 btn-add-global-2 mt-4 mx-auto" (click)="navigateToAddAppointment()">
-            <i class="bi bi-plus-circle me-2"></i>{{ 'APPOINTMENTS_PAGE.BOOK_FIRST_APPOINTMENT' | translate }}
-          </button>
         </div>
       </ng-template>
     </div>
   </div>
-  <!-- Add Appointments -->
-  <button *ngIf="isParent" class="action-btn btn-add-global-2 custom-btn-2 mx-auto" (click)="navigateToAdd()">
-    <i class="bi bi-plus-lg me-2"></i>{{ 'APPOINTMENTS_PAGE.BOOK_APPOINTMENT' | translate }}
-  </button>
   <!-- Load More Button -->
   <div *ngIf="hasMore()" class="text-center d-flex justify-content-center mt-3">
     <button class="custom-btn-2 btn-add-border mb-4" (click)="loadMore()">

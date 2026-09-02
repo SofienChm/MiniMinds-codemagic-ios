@@ -9,14 +9,16 @@ import { TitlePage, Breadcrumb, TitleAction } from '../../shared/layouts/title-p
 import { Router } from '@angular/router';
 import { PageTitleService } from '../../core/services/page-title.service';
 import { ParentChildHeaderSimpleComponent } from '../../shared/components/parent-child-header-simple/parent-child-header-simple.component';   
+import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
+import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
-import { showSuccessToast } from '../../shared/utils/swal.util';
+import { SimpleToastService } from '../../core/services/simple-toast.service';
 
 @Component({
   selector: 'app-appointments',
   standalone: true,
-  imports: [CommonModule, FormsModule, TitlePage, NgSelectModule, TranslateModule, ParentChildHeaderSimpleComponent],
+  imports: [CommonModule, FormsModule, TitlePage, NgSelectModule, TranslateModule, ParentChildHeaderSimpleComponent, SkeletonComponent, IonContent, IonRefresher, IonRefresherContent],
   templateUrl: './appointments.html',
   styleUrls: ['./appointments.scss']
 })
@@ -48,7 +50,8 @@ export class Appointments implements OnInit, OnDestroy {
     private appointmentsService: AppointmentsService,
     private router: Router,
     private translateService: TranslateService,
-    private pageTitleService: PageTitleService
+    private pageTitleService: PageTitleService,
+    private simpleToastService: SimpleToastService
   ) {}
 
   ngOnInit(): void {
@@ -137,6 +140,23 @@ export class Appointments implements OnInit, OnDestroy {
     this.updateDisplayedAppointments();
   }
 
+  // Pull-to-refresh handler for Ionic refresher
+  onRefresh(event?: any): void {
+    this.loadAppointments();
+    setTimeout(() => {
+      // Complete the Ionic refresher
+      if (event?.target) {
+        event.target.complete();
+      }
+    }, 500);
+  }
+
+  setStatusFilter(status: string): void {
+    if (this.selectedStatus === status) return;
+    this.selectedStatus = status;
+    this.loadAppointments();
+  }
+
   hasMore(): boolean {
     return this.displayedAppointments.length < this.appointments.length;
   }
@@ -158,7 +178,7 @@ export class Appointments implements OnInit, OnDestroy {
       if (result.isConfirmed) {
         this.appointmentsService.approveAppointment(appointment.id).subscribe({
           next: () => {
-            showSuccessToast(this.translateService.instant('APPOINTMENTS_PAGE.APPROVED'));
+            this.simpleToastService.success(this.translateService.instant('APPOINTMENTS_PAGE.APPROVED'));
             this.loadAppointments();
           },
           error: (err) => {
@@ -187,7 +207,7 @@ export class Appointments implements OnInit, OnDestroy {
       if (result.isConfirmed) {
         this.appointmentsService.rejectAppointment(appointment.id, { rejectionReason: result.value }).subscribe({
           next: () => {
-            showSuccessToast(this.translateService.instant('APPOINTMENTS_PAGE.REJECTED'));
+            this.simpleToastService.success(this.translateService.instant('APPOINTMENTS_PAGE.REJECTED'));
             this.loadAppointments();
           },
           error: (err) => {
@@ -215,7 +235,7 @@ export class Appointments implements OnInit, OnDestroy {
       if (result.isConfirmed) {
         this.appointmentsService.completeAppointment(appointment.id, { notes: result.value }).subscribe({
           next: () => {
-            showSuccessToast(this.translateService.instant('APPOINTMENTS_PAGE.COMPLETED'));
+            this.simpleToastService.success(this.translateService.instant('APPOINTMENTS_PAGE.COMPLETED'));
             this.loadAppointments();
           },
           error: (err) => {
@@ -244,7 +264,7 @@ export class Appointments implements OnInit, OnDestroy {
       if (result.isConfirmed) {
         this.appointmentsService.cancelMyAppointment(appointment.id).subscribe({
           next: () => {
-            showSuccessToast(this.translateService.instant('APPOINTMENTS_PAGE.CANCELLED'));
+            this.simpleToastService.success(this.translateService.instant('APPOINTMENTS_PAGE.CANCELLED'));
             this.loadAppointments();
           },
           error: (err) => {

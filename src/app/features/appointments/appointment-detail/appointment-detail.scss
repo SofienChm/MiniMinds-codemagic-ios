@@ -222,3 +222,156 @@
     color: #fff;
   }
 }
+
+/* ===== Parent Mobile View ===== */
+ion-content.parent-appointment-detail {
+  --background: #ffffff;
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  display: block !important;
+  position: relative !important;
+  min-height: calc(100vh - 95px) !important;
+
+  .inner-scroll {
+    display: block !important;
+  }
+}
+
+.pad-body {
+  padding: 0 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.pad-hero-card {
+  background: linear-gradient(135deg, #B8E6F0 0%, #D4F1E8 100%);
+  border-radius: 16px;
+  padding: 20px;
+  color: #212529;
+
+  .pad-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 12px;
+    color: #212529;
+  }
+
+  .pad-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    .badge {
+      font-weight: 500;
+      font-size: 12px;
+      border-radius: 50px;
+      padding: 0.5em 1em;
+    }
+  }
+}
+
+.pad-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 16px;
+}
+
+.pad-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  .pad-icon {
+    color: #7dd3c0;
+    font-size: 18px;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .pad-col {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .pad-label {
+    font-size: 12px;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+
+  .pad-value {
+    font-size: 15px;
+    font-weight: 500;
+    color: #212529;
+  }
+}
+
+.pad-section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #212529;
+  margin: 0 0 8px;
+}
+
+.pad-text {
+  font-size: 14px;
+  color: #495057;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.pad-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  .pad-btn {
+    min-height: 46px;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pad-btn-edit {
+    background-color: #e7f1ff;
+    color: #0056b3;
+
+    &:hover {
+      background-color: #cce5ff;
+    }
+  }
+
+  .pad-btn-cancel {
+    background-color: #f8d7da;
+    color: #721c24;
+
+    &:hover {
+      background-color: #f5c6cb;
+    }
+  }
+}
+
+.pad-error {
+  margin: 0 16px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+}

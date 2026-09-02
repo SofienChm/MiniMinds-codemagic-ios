@@ -138,10 +138,254 @@
     border: 1px solid #7dd3c0;
     color: #7dd3c0;
     background: transparent;
+    width: 100%;
 
     &:hover {
       background-color: #7dd3c0;
       color: white;
     }
   }
+
+  &.btn-add-global-2 {
+    background-color: #7dd3c0;
+    color: white;
+    border: none;
+
+    &:hover {
+      background-color: #5cbfa7;
+    }
+  }
+}
+
+/* ===== Parent Mobile View ===== */
+ion-content.parent-appointments {
+  --background: #ffffff;
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  display: block !important;
+  position: relative !important;
+  min-height: calc(100vh - 95px) !important;
+
+  .inner-scroll {
+    display: block !important;
+  }
+}
+
+.pa-header-add {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7db9ff 0%, #7dd3c0 100%);
+  color: #fff;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.pa-filter-section {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 16px 12px;
+  margin: 20px 0 8px;
+
+  .pa-filter-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    padding: 8px 14px;
+    border: 1px solid #e9ecef;
+    border-radius: 50px;
+    background: #fff;
+    color: #6c757d;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: all 0.2s;
+
+    &.active {
+      background: linear-gradient(135deg, #7db9ff 0%, #7dd3c0 100%);
+      border-color: transparent;
+      color: #fff;
+    }
+  }
+}
+
+.pa-list {
+  display: flex;
+  flex-direction: column;
+  padding: 0 16px;
+}
+
+.pa-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 16px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:active {
+    transform: scale(0.99);
+  }
+}
+
+.pa-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+
+  .pa-card-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #212529;
+    line-height: 1.3;
+  }
+
+  .badge {
+    font-weight: 500;
+    font-size: 12px;
+    border-radius: 50px;
+    flex-shrink: 0;
+    padding: 0.4em 0.8em;
+  }
+}
+
+.pa-type-badge {
+  margin-bottom: 10px;
+
+  .badge {
+    font-weight: 500;
+    font-size: 12px;
+    border-radius: 50px;
+    padding: 0.4em 0.8em;
+  }
+}
+
+.pa-card-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #495057;
+  margin-bottom: 8px;
+
+  i {
+    color: #7dd3c0;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+
+  .pa-row-time {
+    margin-left: auto;
+    color: #6c757d;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+}
+
+.pa-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 12px;
+
+  .pa-action-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 0;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    min-height: 42px;
+
+    span {
+      flex-shrink: 0;
+    }
+  }
+
+  .pa-action-view {
+    background-color: #e7f1ff;
+    color: #0056b3;
+
+    &:hover {
+      background-color: #cce5ff;
+    }
+  }
+
+  .pa-action-edit {
+    background-color: #fff3cd;
+    color: #856404;
+
+    &:hover {
+      background-color: #ffeeba;
+    }
+  }
+
+  .pa-action-cancel {
+    background-color: #f8d7da;
+    color: #721c24;
+
+    &:hover {
+      background-color: #f5c6cb;
+    }
+  }
+}
+
+.pa-load-more {
+  padding: 4px 0 24px;
+
+  button {
+    width: 100%;
+    border-radius: 14px;
+    background: #4886ed;
+    border: 1px solid #4886ed;
+    color: #fff;
+    margin-top: 14px;
+  }
+}
+
+.pa-empty-state {
+  text-align: center;
+  padding: 40px 24px;
+
+  i {
+    font-size: 52px;
+    color: #ced4da;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #6c757d;
+    margin-bottom: 16px;
+  }
+
+  .btn-add-global-2 {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.6rem 1.5rem;
+  }
+}
+
+.pa-error {
+  margin: 0 16px 12px;
+  border-radius: 8px;
+  font-size: 14px;
 }

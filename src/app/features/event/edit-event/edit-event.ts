@@ -10,7 +10,7 @@ import { TitlePage, Breadcrumb, TitleAction } from '../../../shared/layouts/titl
 import { PageTitleService } from '../../../core/services/page-title.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
-import { showSuccessToast } from '../../../shared/utils/swal.util';
+import { SimpleToastService } from '../../../core/services/simple-toast.service';
 import { ApiConfig } from '../../../core/config/api.config';
 
 @Component({
@@ -46,7 +46,8 @@ export class EditEvent implements OnInit, OnDestroy {
     private router: Router,
     private route: ActivatedRoute,
     private translate: TranslateService,
-    private pageTitleService: PageTitleService
+    private pageTitleService: PageTitleService,
+    private simpleToastService: SimpleToastService
   ) {}
 
   ngOnInit(): void {
@@ -266,7 +267,7 @@ export class EditEvent implements OnInit, OnDestroy {
     this.eventService.updateEvent(eventData).subscribe({
       next: () => {
         this.saving = false;
-        showSuccessToast(this.translate.instant('MESSAGES.SUCCESS'));
+        this.simpleToastService.success(this.translate.instant('MESSAGES.SUCCESS'));
         this.router.navigate(['/events']);
       },
       error: (error) => {
