@@ -1,4 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
+import Swiper from 'swiper/bundle';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -49,6 +50,7 @@ export class Gallery implements OnInit, OnDestroy {
   @ViewChild('canvasElement') canvasElement!: ElementRef<HTMLCanvasElement>;
   @ViewChild('nativeCameraInput') nativeCameraInput!: ElementRef<HTMLInputElement>;
   @ViewChild('pullToRefresh') pullToRefresh!: PullToRefreshComponent;
+  @ViewChild('swiperContainer', { static: false }) swiperContainer!: ElementRef<HTMLDivElement>;
 
   photos: Photo[] = [];
   children: ChildModel[] = [];
@@ -79,6 +81,8 @@ export class Gallery implements OnInit, OnDestroy {
   // Preview modal
   showPreviewModal = false;
   selectedPhoto: Photo | null = null;
+  previewIndex = 0;
+  private previewSwiper: any = null;
 
   // Tag people modal
   showTagModal = false;
@@ -142,6 +146,7 @@ export class Gallery implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.langChangeSub?.unsubscribe();
     this.stopCamera();
+    this.destroyPreviewSwiper();
   }
 
   private setupBreadcrumbs(): void {
@@ -296,16 +301,12 @@ export class Gallery implements OnInit, OnDestroy {
           this.uploading = false;
           this.closeUploadModal();
           this.loadPhotos();
-          showSuccessToast(this.translate.instant('GALLERY.SUCCESS'));
+          this.simpleToastService.success(this.translate.instant('GALLERY.SUCCESS'));
         },
         error: (error) => {
           console.error('Error uploading photo:', error);
           this.uploading = false;
-          Swal.fire({
-            icon: 'error',
-            title: this.translate.instant('GALLERY.UPLOAD_FAILED'),
-            text: this.translate.instant('GALLERY.UPLOAD_PHOTO_ERROR')
-          });
+          this.simpleToastService.error(this.translate.instant('GALLERY.UPLOAD_PHOTO_ERROR'));
         }
       });
     } else {
@@ -321,23 +322,17 @@ export class Gallery implements OnInit, OnDestroy {
           this.closeUploadModal();
           this.loadPhotos();
           if (response.errors && response.errors.length > 0) {
-            Swal.fire({
-              icon: 'warning',
-              title: this.translate.instant('GALLERY.PARTIAL_UPLOAD'),
-              html: `${this.translate.instant('GALLERY.UPLOADED_PHOTOS_COUNT', { count: response.uploaded.length })}<br>${this.translate.instant('GALLERY.ERRORS')}: ${response.errors.join(', ')}`
-            });
+            this.simpleToastService.warning(
+              `${this.translate.instant('GALLERY.UPLOADED_PHOTOS_COUNT', { count: response.uploaded.length })} — ${this.translate.instant('GALLERY.ERRORS')}: ${response.errors.join(', ')}`
+            );
           } else {
-            showSuccessToast(this.translate.instant('GALLERY.SUCCESS'));
+            this.simpleToastService.success(this.translate.instant('GALLERY.SUCCESS'));
           }
         },
         error: (error) => {
           console.error('Error uploading photos:', error);
           this.uploading = false;
-          Swal.fire({
-            icon: 'error',
-            title: this.translate.instant('GALLERY.UPLOAD_FAILED'),
-            text: this.translate.instant('GALLERY.UPLOAD_PHOTOS_ERROR')
-          });
+          this.simpleToastService.error(this.translate.instant('GALLERY.UPLOAD_PHOTOS_ERROR'));
         }
       });
     }
@@ -643,40 +638,72 @@ export class Gallery implements OnInit, OnDestroy {
     return new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
   }
 
-  // Preview modal - fetches full resolution image
-  openPreview(photo: Photo) {
-    this.selectedPhoto = photo;
+  // Preview modal - no full-resolution fetch needed (full file URLs are already loaded)
+  openPreview(index: number) {
+    if (!this.photos[index]) return;
+    this.previewIndex = index;
+    this.selectedPhoto = this.photos[index];
     this.showPreviewModal = true;
 
-    // If we have a file-based URL, no need to fetch - image loads directly
-    if (photo.imageUrl) {
-      this.loadingFullImage = false;
+    // Images load directly from their file URLs (available in the loaded photos list),
+    // so there is no extra per-image API call and no large response payload.
+    this.loadingFullImage = false;
+    this.previewSwiper = null;
+
+    // Wait for the viewer DOM (swiper) to render before initializing.
+    this.initPreviewSwiper();
+  }
+
+  private initPreviewSwiper() {
+    if (this.previewSwiper) return;
+
+    // The viewer mounts asynchronously (it's behind an *ngIf), so wait until the
+    // container exists and has a real size before initializing the carousel.
+    const container = this.swiperContainer?.nativeElement;
+    if (!container || !this.showPreviewModal || container.clientHeight === 0) {
+      setTimeout(() => this.initPreviewSwiper(), 30);
       return;
     }
+    if (this.photos.length === 0) return;
 
-    // For Base64-based photos, fetch full resolution from API
-    this.loadingFullImage = true;
-    this.galleryService.getPhoto(photo.id).subscribe({
-      next: (fullPhoto) => {
-        if (this.selectedPhoto && this.selectedPhoto.id === photo.id) {
-          this.selectedPhoto = {
-            ...this.selectedPhoto,
-            imageData: fullPhoto.imageData,
-            imageUrl: fullPhoto.imageUrl
-          };
+    this.previewSwiper = new Swiper(container, {
+      initialSlide: this.previewIndex,
+      direction: 'horizontal',
+      slidesPerView: 1,
+      loop: false,
+      spaceBetween: 0,
+      speed: 250,
+      // Native lazy image loading with adjacent-slide preload. Only images near the
+      // active slide load, keeping the DOM light and avoiding large simultaneous fetches.
+      lazyPreload: true,
+      watchSlidesProgress: true,
+      on: {
+        init: () => {
+          // Re-measure once layout settles so slides get their real dimensions.
+          setTimeout(() => this.previewSwiper?.update(), 50);
+        },
+        slideChange: (swiper: any) => {
+          const realIndex = swiper.realIndex ?? swiper.activeIndex;
+          if (this.photos[realIndex]) {
+            this.selectedPhoto = this.photos[realIndex];
+            this.previewIndex = realIndex;
+          }
         }
-        this.loadingFullImage = false;
-      },
-      error: (error) => {
-        console.error('Error loading full image:', error);
-        this.loadingFullImage = false;
       }
     });
+  }
+
+  private destroyPreviewSwiper() {
+    if (this.previewSwiper) {
+      this.previewSwiper.destroy(true, true);
+      this.previewSwiper = null;
+    }
   }
 
   closePreview() {
     this.showPreviewModal = false;
     this.selectedPhoto = null;
+    this.destroyPreviewSwiper();
   }
 
   /**

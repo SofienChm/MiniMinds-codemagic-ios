@@ -35,6 +35,7 @@ export class Sidebar implements OnInit, OnDestroy {
   userRole: string | null = null;
   private subscriptions: Subscription[] = [];
   private enabledFeatures: string[] = [];
+  private hiddenFeatures: string[] = [];
   private featuresLoaded = false;
 
   constructor(
@@ -53,8 +54,9 @@ export class Sidebar implements OnInit, OnDestroy {
 
     // Load enabled features then setup menu
     const featureSub = this.featureService.loadFeaturesIfNeeded().subscribe({
-      next: (features) => {
-        this.enabledFeatures = features;
+      next: (data) => {
+        this.enabledFeatures = data.enabled;
+        this.hiddenFeatures = data.hidden || [];
         this.featuresLoaded = true;
         this.setupMenuItems();
       },
@@ -62,6 +64,7 @@ export class Sidebar implements OnInit, OnDestroy {
         // On error, show no features (fail closed for security)
         // This forces the user to reload or re-login
         this.enabledFeatures = [];
+        this.hiddenFeatures = [];
         this.featuresLoaded = true;
         this.setupMenuItems();
       }
@@ -74,13 +77,17 @@ export class Sidebar implements OnInit, OnDestroy {
   }
 
   /**
-   * Check if a feature is enabled for the current tenant
+   * Check if a feature is enabled for the current tenant.
+   * Hidden (CSS-hide) features are treated as hidden: they remain functional
+   * on the backend but are not shown in the sidebar.
    */
   private isFeatureEnabled(featureCode?: string): boolean {
     // If no feature code specified, always show (core items without feature code)
     if (!featureCode) return true;
     // If features not loaded yet, hide optional features (fail closed for security)
     if (!this.featuresLoaded) return false;
+    // Hidden features (CSS-hide) are not shown in the sidebar
+    if (this.hiddenFeatures.includes(featureCode)) return false;
     // Check if feature is in enabled list
     return this.enabledFeatures.includes(featureCode);
   }

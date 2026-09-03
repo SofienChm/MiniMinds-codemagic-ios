@@ -25,6 +25,8 @@ import { DashboardService, AdminDashboardData, ParentDashboardData } from '../..
 import { Chart, ArcElement, Tooltip, Legend, DoughnutController, BarElement, BarController, LinearScale, CategoryScale } from 'chart.js';
 import type { ChartConfiguration } from 'chart.js';
 import { AppCurrencyPipe } from '../../core/services/currency/currency.pipe';
+import { TenantFeatureService } from '../../core/services/tenant-feature.service';
+import { FeatureCodes } from '../../core/interfaces/dto/tenant-dto';
 
 Chart.register(ArcElement, Tooltip, Legend, DoughnutController, BarElement, BarController, LinearScale, CategoryScale);
 import { SkeletonComponent } from '../../shared/components/skeleton/skeleton.component';
@@ -318,6 +320,7 @@ export class Dashboard implements OnInit, OnDestroy {
     private feeService: FeeService,
     private staticFeesService: StaticFeesService,
     private dashboardService: DashboardService,
+    private featureService: TenantFeatureService,
     private router: Router,
     private translateService: TranslateService
   ) {}
@@ -712,11 +715,17 @@ export class Dashboard implements OnInit, OnDestroy {
         // Upcoming leaves
         this.upcomingLeaves = data.upcomingLeaves as any;
 
-        // Unpaid fees
-        this.unpaidChildren = (data.unpaidFees || [])
-          .map(f => this.toUnpaidItem(f, 'dashboard'))
-          .filter((x): x is UnpaidFeeItem => !!x);
-        this.mergeStaticUnpaidFees();
+        // Unpaid fees (merge enabled fee sources only)
+        // When the FEES feature is enabled, initial dashboard items and the live
+        // feeService.getFees() call both read the same Fees table, so skip the
+        // initial items to avoid showing each fee twice.
+        const feesFeatureEnabled = this.featureService.isFeatureEnabled(FeatureCodes.FEES);
+        this.loadUnpaidFees(
+          (data.unpaidFees || [])
+            .filter(() => !feesFeatureEnabled)
+            .map(f => this.toUnpaidItem(f, 'dashboard'))
+            .filter((x): x is UnpaidFeeItem => !!x)
+        );
 
         // Calculate payment stats
         this.calculatePaymentStats(data.stats.totalChildren);
@@ -824,22 +833,75 @@ export class Dashboard implements OnInit, OnDestroy {
       }
     });
 
-    this.feeService.getFees().pipe(catchError(() => of([]))).subscribe({
-      next: (fees) => {
-        const unpaid = fees
-          .filter(fee => fee.status === 'pending' || fee.status === 'overdue');
-        this.unpaidChildren = unpaid
-          .map(f => this.toUnpaidItem(f, 'fee'))
-          .filter((x): x is UnpaidFeeItem => !!x)
-          .sort(this.sortUnpaidFees)
-          .slice(0, 5);
-        this.mergeStaticUnpaidFees();
-      },
-      error: () => {
-        this.unpaidChildren = [];
-        this.mergeStaticUnpaidFees();
-      }
+    this.loadUnpaidFees([]);
+  }
+
+  /**
+   * Load unpaid fees from the enabled fee sources only.
+   *   - fees enabled      -> load from FeeService
+   *   - static_fees enabled -> load from StaticFeesService
+   *   - both enabled      -> load and merge both
+   *   - neither enabled   -> show nothing
+   */
+  loadUnpaidFees(initial: UnpaidFeeItem[] = []): void {
+    // Ensure the tenant feature list is loaded so we can decide which sources to use
+    this.featureService.loadFeaturesIfNeeded().subscribe({
+      next: () => this.loadEnabledUnpaidFees(initial),
+      error: () => this.loadEnabledUnpaidFees(initial)
     });
+  }
+
+  private loadEnabledUnpaidFees(initial: UnpaidFeeItem[]): void {
+    const feesEnabled = this.featureService.isFeatureEnabled(FeatureCodes.FEES);
+    const staticEnabled = this.featureService.isFeatureEnabled(FeatureCodes.STATIC_FEES);
+
+    // Initial items only come from the fee source, so only keep them when fees is enabled
+    let combined: UnpaidFeeItem[] = feesEnabled ? [...initial] : [];
+    let remaining = 0;
+
+    const finalize = () => {
+      this.unpaidChildren = combined.sort(this.sortUnpaidFees).slice(0, 5);
+      this.loadingStates.fees = false;
+    };
+
+    const merge = (items: UnpaidFeeItem[]) => {
+      combined = combined.concat(items);
+      if (--remaining === 0) finalize();
+    };
+
+    if (!feesEnabled && !staticEnabled) {
+      finalize();
+      return;
+    }
+
+    if (feesEnabled) {
+      remaining++;
+      this.feeService.getFees().pipe(catchError(() => of([]))).subscribe({
+        next: (fees) => {
+          const items = (fees as any[])
+            .filter(fee => fee.status === 'pending' || fee.status === 'overdue')
+            .map(f => this.toUnpaidItem(f, 'fee'))
+            .filter((x): x is UnpaidFeeItem => !!x);
+          merge(items);
+        },
+        error: () => merge([])
+      });
+    }
+
+    if (staticEnabled) {
+      remaining++;
+      this.staticFeesService.getStaticFees({ status: 'Pending' })
+        .pipe(catchError(() => of([])))
+        .subscribe({
+          next: (staticFees) => {
+            const items = staticFees
+              .map(f => this.toUnpaidItem(f, 'static'))
+              .filter((x): x is UnpaidFeeItem => !!x);
+            merge(items);
+          },
+          error: () => merge([])
+        });
+    }
   }
 
   sortUnpaidFees(a: UnpaidFeeItem, b: UnpaidFeeItem): number {
@@ -876,25 +938,6 @@ export class Dashboard implements OnInit, OnDestroy {
       status: isOverdue ? 'overdue' : 'pending',
       daysOverdue
     };
-  }
-
-  mergeStaticUnpaidFees(): void {
-    this.staticFeesService.getStaticFees({ status: 'Pending' })
-      .pipe(catchError(() => of([])))
-      .subscribe({
-        next: (staticFees) => {
-          const staticItems = staticFees
-            .map(f => this.toUnpaidItem(f, 'static'))
-            .filter((x): x is UnpaidFeeItem => !!x);
-          this.unpaidChildren = [...this.unpaidChildren, ...staticItems]
-            .sort(this.sortUnpaidFees)
-            .slice(0, 5);
-          this.loadingStates.fees = false;
-        },
-        error: () => {
-          this.loadingStates.fees = false;
-        }
-      });
   }
 
   setDefaultAttendanceData() {

@@ -531,21 +531,50 @@
 .ios-viewer-content {
   flex: 1;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: stretch;
+  justify-content: stretch;
   overflow: hidden;
   position: relative;
+  min-height: 0;
+}
 
-  img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    transition: opacity 0.3s ease;
+// Swiper carousel - fills the viewer content area
+.ios-viewer-swiper {
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
 
-    &.loading {
-      opacity: 0.3;
-    }
-  }
+.ios-viewer-swiper .swiper-wrapper {
+  align-items: center;
+}
+
+.ios-viewer-swiper .swiper-slide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background: #000;
+  overflow: hidden;
+  position: relative;
+}
+
+.ios-viewer-slide {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ios-viewer-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 .ios-viewer-loading {

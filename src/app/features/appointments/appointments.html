@@ -82,13 +82,13 @@
 
         <div class="pa-card-actions" (click)="$event.stopPropagation()">
           <button class="pa-action-btn pa-action-view" (click)="viewDetails(apt)">
-            <i class="bi bi-eye"></i><span>{{ 'APPOINTMENTS_PAGE.VIEW_DETAILS' | translate }}</span>
+            <i class="bi bi-eye"></i>
           </button>
           <button *ngIf="apt.status === 'Pending'" class="pa-action-btn pa-action-edit" (click)="editAppointment(apt)">
-            <i class="bi bi-pencil"></i><span>{{ 'APPOINTMENTS_PAGE.EDIT' | translate }}</span>
+            <i class="bi bi-pencil"></i>
           </button>
           <button *ngIf="apt.status === 'Pending' || apt.status === 'Approved'" class="pa-action-btn pa-action-cancel" (click)="cancelAppointment(apt)">
-            <i class="bi bi-x-lg"></i><span>{{ 'APPOINTMENTS_PAGE.CANCEL_APPOINTMENT' | translate }}</span>
+            <i class="bi bi-x-lg"></i>
           </button>
         </div>
       </div>

@@ -44,7 +44,7 @@
   <div *ngIf="!loading && photos.length > 0" class="ios-photo-grid">
     <div *ngFor="let photo of photos; let i = index"
          class="ios-photo-item"
-         (click)="openPreview(photo)"
+         (click)="openPreview(i)"
          [style.animation-delay]="(i * 30) + 'ms'">
       <img [src]="getPhotoUrl(photo)" [alt]="photo.title || 'Photo'" loading="lazy">
       <div class="ios-photo-overlay">
@@ -136,9 +136,9 @@
 
   <!-- Grid View -->
   <div *ngIf="!loading && viewMode === 'grid' && photos.length > 0" class="row g-4">
-    <div *ngFor="let photo of photos" class="col-xl-3 col-lg-4 col-md-6">
+    <div *ngFor="let photo of photos; let i = index" class="col-xl-3 col-lg-4 col-md-6">
       <div class="card h-100 photo-card">
-        <div class="photo-container position-relative" (click)="openPreview(photo)">
+        <div class="photo-container position-relative" (click)="openPreview(i)">
           <img [src]="getPhotoUrl(photo)" [alt]="photo.title || photo.fileName" class="card-img-top photo-thumbnail">
           <div class="photo-overlay">
             <i class="bi bi-zoom-in"></i>
@@ -187,7 +187,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let photo of photos" (click)="openPreview(photo)" style="cursor: pointer;">
+          <tr *ngFor="let photo of photos; let i = index" (click)="openPreview(i)" style="cursor: pointer;">
             <td>
               <img [src]="getPhotoUrl(photo)" [alt]="photo.title || photo.fileName"
                    class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
@@ -259,15 +259,21 @@
     </button>
   </div>
 
+  <!-- Swipeable photo carousel -->
   <div class="ios-viewer-content" (click)="$event.stopPropagation()">
-    <div *ngIf="loadingFullImage" class="ios-viewer-loading">
-      <div class="ios-spinner"></div>
+    <div class="ios-viewer-swiper" #swiperContainer *ngIf="photos.length > 0">
+      <div class="swiper-wrapper">
+        <div class="swiper-slide" *ngFor="let photo of photos; let i = index">
+          <div class="ios-viewer-slide">
+            <img loading="lazy" [src]="getFullImageUrl(photo)" [alt]="photo.title || 'Photo'">
+          </div>
+        </div>
+      </div>
     </div>
-    <img [src]="getFullImageUrl(selectedPhoto)" [alt]="selectedPhoto.title || 'Photo'" [class.loading]="loadingFullImage">
   </div>
 
   <div class="ios-viewer-footer" (click)="$event.stopPropagation()">
-    <button class="ios-footer-btn" (click)="downloadPhoto()" [disabled]="downloadingImage || loadingFullImage">
+    <button class="ios-footer-btn" (click)="downloadPhoto()" [disabled]="downloadingImage">
       <i class="bi bi-download"></i>
       <span>{{ 'GALLERY.SAVE' | translate }}</span>
     </button>

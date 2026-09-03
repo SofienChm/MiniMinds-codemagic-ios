@@ -31,8 +31,8 @@ export class TenantFeatures implements OnInit, OnDestroy {
   breadcrumbs: Breadcrumb[] = [];
   private subscriptions: Subscription[] = [];
 
-  // Track pending changes
-  pendingChanges: Map<string, boolean> = new Map();
+  // Track pending changes (feature -> enabled + hidden state)
+  pendingChanges: Map<string, { isEnabled: boolean; isHidden: boolean }> = new Map();
   hasChanges = false;
 
   constructor(
@@ -132,40 +132,73 @@ export class TenantFeatures implements OnInit, OnDestroy {
   }
 
   onFeatureToggle(feature: TenantFeature): void {
-    // Show warning for core features but still allow toggle
-    if (feature.isCore && feature.isEnabled) {
-      Swal.fire({
-        title: this.translate.instant('SUPER_ADMIN.DISABLE_CORE_FEATURE'),
-        text: this.translate.instant('SUPER_ADMIN.DISABLE_CORE_FEATURE_WARNING'),
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: this.translate.instant('COMMON.YES_DISABLE'),
-        cancelButtonText: this.translate.instant('COMMON.CANCEL')
-      }).then((result) => {
-        if (result.isConfirmed) {
-          feature.isEnabled = false;
-          this.pendingChanges.set(feature.featureCode, false);
-          this.hasChanges = this.pendingChanges.size > 0;
-        }
-      });
+    // Turning the feature ON - enable it and reset hidden state
+    if (!feature.isEnabled) {
+      feature.isEnabled = true;
+      feature.isHidden = false;
+      this.pendingChanges.set(feature.featureCode, { isEnabled: true, isHidden: false });
+      this.hasChanges = this.pendingChanges.size > 0;
       return;
     }
 
-    // Toggle the feature
-    feature.isEnabled = !feature.isEnabled;
-    this.pendingChanges.set(feature.featureCode, feature.isEnabled);
-    this.hasChanges = this.pendingChanges.size > 0;
+    // Turning the feature OFF - ask how to disable it
+    Swal.fire({
+      title: this.translate.instant('SUPER_ADMIN.DISABLE_FEATURE_TITLE', { feature: feature.featureName }),
+      text: this.translate.instant('SUPER_ADMIN.DISABLE_FEATURE_MESSAGE'),
+      icon: 'warning',
+      showCancelButton: true,
+      showDenyButton: true,
+      confirmButtonColor: '#d33',
+      denyButtonColor: '#6c757d',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: this.translate.instant('SUPER_ADMIN.DISABLE_CORE_OPTION'),
+      denyButtonText: this.translate.instant('SUPER_ADMIN.HIDE_CSS_OPTION'),
+      cancelButtonText: this.translate.instant('COMMON.CANCEL'),
+      html: this.buildDisableOptionsHtml()
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Disable (Core) - fully disable the feature
+        feature.isEnabled = false;
+        feature.isHidden = false;
+        this.pendingChanges.set(feature.featureCode, { isEnabled: false, isHidden: false });
+        this.hasChanges = this.pendingChanges.size > 0;
+      } else if (result.isDenied) {
+        // Hide (CSS) - keep enabled and functional, just hide it
+        feature.isEnabled = true;
+        feature.isHidden = true;
+        this.pendingChanges.set(feature.featureCode, { isEnabled: true, isHidden: true });
+        this.hasChanges = this.pendingChanges.size > 0;
+      }
+    });
+  }
+
+  private buildDisableOptionsHtml(): string {
+    const coreDesc = this.translate.instant('SUPER_ADMIN.DISABLE_CORE_OPTION_DESC');
+    const cssDesc = this.translate.instant('SUPER_ADMIN.HIDE_CSS_OPTION_DESC');
+    const core = this.translate.instant('SUPER_ADMIN.DISABLE_CORE_OPTION');
+    const css = this.translate.instant('SUPER_ADMIN.HIDE_CSS_OPTION');
+    return `
+      <div class="disable-options">
+        <div class="disable-option">
+          <strong>${css}</strong>
+          <p class="mb-0 small text-muted">${cssDesc}</p>
+        </div>
+        <div class="disable-option">
+          <strong>${core}</strong>
+          <p class="mb-0 small text-muted">${coreDesc}</p>
+        </div>
+      </div>
+    `;
   }
 
   saveChanges(): void {
     if (!this.hasChanges || this.saving) return;
 
     this.saving = true;
-    const toggles: FeatureToggle[] = Array.from(this.pendingChanges.entries()).map(([code, enabled]) => ({
+    const toggles: FeatureToggle[] = Array.from(this.pendingChanges.entries()).map(([code, changes]) => ({
       featureCode: code,
-      isEnabled: enabled
+      isEnabled: changes.isEnabled,
+      isHidden: changes.isHidden
     }));
 
     const sub = this.tenantFeatureService.updateTenantFeatures(this.tenantId, { features: toggles }).subscribe({

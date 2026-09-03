@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { Notification } from '../interfaces/notification.interface';
 import { ApiConfig } from '../../core/config/api.config';
 import { PushNotificationService } from './push-notification.service';
+import { SimpleToastService } from './simple-toast.service';
 import { BadgeService } from './badge.service';
 import * as signalR from '@microsoft/signalr';
 
@@ -33,6 +34,7 @@ export class NotificationService {
     private http: HttpClient,
     private router: Router,
     private pushNotificationService: PushNotificationService,
+    private simpleToastService: SimpleToastService,
     private badgeService: BadgeService
   ) {
     this.loadUnreadCount();
@@ -153,6 +155,14 @@ export class NotificationService {
       console.log('[SignalR] ReceiveNewMessage', data);
       this.chatMessageReceivedSubject.next(data);
 
+      // Always show an in-app toast so new messages are visible on iOS, where the
+      // Web Notification API is unavailable. Falls back gracefully on Android/web too.
+      const sender = data.senderName || 'New Message';
+      const preview = data.subject
+        ? `${sender}: ${data.subject}`
+        : (data.content ? `${sender}: ${data.content}` : sender);
+      this.simpleToastService.show(preview, 5000);
+
       if (this.pushNotificationService.getPermission() === 'granted') {
         this.pushNotificationService.showNotification('New Message', {
           body: `${data.senderName}: ${data.subject}`,
@@ -176,6 +186,11 @@ export class NotificationService {
     this.hubConnection.on('ReceiveGroupMessage', (data: any) => {
       console.log('[SignalR] ReceiveGroupMessage', data);
       this.groupMessageReceivedSubject.next(data);
+
+      // In-app toast so group messages are visible on iOS foreground (Web Notification API unavailable).
+      const sender = data.senderName || 'New Message';
+      const preview = data.content ? `${sender}: ${data.content}` : sender;
+      this.simpleToastService.show(preview, 5000);
     });
 
     this.hubConnection

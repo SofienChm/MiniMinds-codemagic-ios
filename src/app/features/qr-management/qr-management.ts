@@ -130,29 +130,42 @@ export class QrManagement implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async generateQrCodeImage(type: 'checkIn' | 'checkOut', code: string): Promise<void> {
-    // Wait for view to be ready
-    setTimeout(async () => {
-      const canvas = type === 'checkIn' ? this.checkInCanvas : this.checkOutCanvas;
-      if (!canvas?.nativeElement) return;
+    // Use custom URL scheme for reliable native app handling on mobile
+    // This works more reliably than https:// URLs which require App Links verification
+    // Format: miniminds://qr-action/CODE
+    const qrUrl = `miniminds://qr-action/${code}`;
 
-      // Use custom URL scheme for reliable native app handling on mobile
-      // This works more reliably than https:// URLs which require App Links verification
-      // Format: miniminds://qr-action/CODE
-      const qrUrl = `miniminds://qr-action/${code}`;
+    // The canvas can be missing/not-yet-rendered when re-navigating to this page.
+    // Retry until it is available instead of relying on a fixed setTimeout, which
+    // silently gives up and leaves the QR area blank/white.
+    await this.waitForCanvas(type);
+    const canvas = type === 'checkIn' ? this.checkInCanvas : this.checkOutCanvas;
+    if (!canvas?.nativeElement) return;
 
-      try {
-        await QRCode.toCanvas(canvas.nativeElement, qrUrl, {
-          width: 280,
-          margin: 2,
-          color: {
-            dark: type === 'checkIn' ? '#4caf50' : '#f44336',
-            light: '#ffffff'
-          }
-        });
-      } catch (err) {
-        console.error(`Failed to generate ${type} QR code:`, err);
-      }
-    }, 100);
+    try {
+      await QRCode.toCanvas(canvas.nativeElement, qrUrl, {
+        width: 280,
+        margin: 2,
+        color: {
+          dark: type === 'checkIn' ? '#4caf50' : '#f44336',
+          light: '#ffffff'
+        }
+      });
+    } catch (err) {
+      console.error(`Failed to generate ${type} QR code:`, err);
+    }
+  }
+
+  private waitForCanvas(type: 'checkIn' | 'checkOut', attempts = 0): Promise<boolean> {
+    const canvas = type === 'checkIn' ? this.checkInCanvas : this.checkOutCanvas;
+    if (canvas?.nativeElement) return Promise.resolve(true);
+    if (attempts >= 20) {
+      console.warn(`QR ${type} canvas not available after retries`);
+      return Promise.resolve(false);
+    }
+    return new Promise((resolve) => {
+      setTimeout(() => resolve(this.waitForCanvas(type, attempts + 1)), 50);
+    });
   }
 
   regenerateQrCodes(): void {

@@ -33,8 +33,8 @@ export const featureGuard = (requiredFeature: FeatureCode | string): CanActivate
 
     // Load features and check
     return featureService.loadFeaturesIfNeeded().pipe(
-      map(features => {
-        if (features.includes(requiredFeature)) {
+      map(data => {
+        if (data.enabled.includes(requiredFeature)) {
           return true;
         }
         return router.createUrlTree(['/403']);
@@ -76,8 +76,8 @@ export const featuresGuard = (...requiredFeatures: (FeatureCode | string)[]): Ca
 
     // Load features and check
     return featureService.loadFeaturesIfNeeded().pipe(
-      map(features => {
-        const allEnabled = requiredFeatures.every(f => features.includes(f));
+      map(data => {
+        const allEnabled = requiredFeatures.every(f => data.enabled.includes(f));
         if (allEnabled) {
           return true;
         }
@@ -119,8 +119,8 @@ export const anyFeatureGuard = (...requiredFeatures: (FeatureCode | string)[]): 
 
     // Load features and check
     return featureService.loadFeaturesIfNeeded().pipe(
-      map(features => {
-        const anyEnabled = requiredFeatures.some(f => features.includes(f));
+      map(data => {
+        const anyEnabled = requiredFeatures.some(f => data.enabled.includes(f));
         if (anyEnabled) {
           return true;
         }

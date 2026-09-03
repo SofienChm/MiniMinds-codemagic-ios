@@ -10,6 +10,7 @@ import {
 import { Preferences } from '@capacitor/preferences';
 import { BehaviorSubject } from 'rxjs';
 import { DeviceTokenService } from './device-token.service';
+import { SimpleToastService } from './simple-toast.service';
 
 @Injectable({
   providedIn: 'root',
@@ -27,6 +28,7 @@ export class FcmPushNotificationService {
   constructor(
     private router: Router,
     private deviceTokenService: DeviceTokenService,
+    private simpleToastService: SimpleToastService,
   ) {}
 
   /**
@@ -131,11 +133,19 @@ export class FcmPushNotificationService {
     });
 
     // On notification received while app is in foreground
+    // iOS does NOT auto-display foreground notifications, so we render an in-app
+    // toast/banner ourselves. This covers chat and all other push types.
     PushNotifications.addListener(
       'pushNotificationReceived',
       (notification: PushNotificationSchema) => {
         console.log('Push notification received in foreground:', notification);
         this.notificationReceivedSubject.next(notification);
+
+        const title = notification.title || 'New Message';
+        const body = notification.body || '';
+        if (title) {
+          this.simpleToastService.show(body ? `${title}: ${body}` : title, 5000);
+        }
       }
     );
 

@@ -68,6 +68,7 @@ export interface TenantFeature {
   category: string;
   isEnabled: boolean;
   isCore: boolean;
+  isHidden: boolean;
 }
 
 export interface TenantFeaturesResponse {
@@ -79,6 +80,7 @@ export interface TenantFeaturesResponse {
 export interface FeatureToggle {
   featureCode: string;
   isEnabled: boolean;
+  isHidden?: boolean;
 }
 
 export interface UpdateTenantFeaturesRequest {
@@ -93,11 +95,16 @@ export interface AvailableFeature {
   isCore: boolean;
 }
 
+export interface MyFeaturesDto {
+  enabled: string[];
+  hidden: string[];
+}
+
 // Feature codes enum for type safety
 export const FeatureCodes = {
   // Core Features
   DASHBOARD: 'dashboard',
-  MESSAGES: 'messages',
+  CHAT: 'chat',
   CALENDAR: 'calendar',
   CHILDREN: 'children',
   PARENTS: 'parents',
@@ -120,7 +127,7 @@ export const FeatureCodes = {
   AI_ASSISTANT: 'ai_assistant',
   BASIC_AI: 'basic_ai',
   APPOINTMENTS: 'appointments',
-  CHAT: 'chat'
+  MESSAGES: 'messages'
 } as const;
 
 export type FeatureCode = typeof FeatureCodes[keyof typeof FeatureCodes];

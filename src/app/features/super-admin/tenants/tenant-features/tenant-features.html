@@ -59,6 +59,7 @@
                   <td>
                     <strong>{{ feature.featureName }}</strong>
                     <span *ngIf="feature.isCore" class="badge bg-warning text-dark ms-2 small">Core</span>
+                    <span *ngIf="feature.isHidden" class="badge bg-secondary ms-2 small">{{ 'SUPER_ADMIN.HIDDEN_FEATURE' | translate }}</span>
                   </td>
                   <td class="text-muted">{{ feature.description }}</td>
                   <td class="text-center">
