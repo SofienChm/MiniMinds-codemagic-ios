@@ -538,30 +538,24 @@
   min-height: 0;
 }
 
-// Swiper carousel - fills the viewer content area
-.ios-viewer-swiper {
+// Track carousel - fills the viewer content area
+.ios-viewer-track-wrapper {
+  flex: 1;
   width: 100%;
   height: 100%;
-  flex: 1;
-  position: relative;
   overflow: hidden;
+  position: relative;
 }
 
-.ios-viewer-swiper .swiper-wrapper {
-  align-items: center;
-}
-
-.ios-viewer-swiper .swiper-slide {
+.ios-viewer-track {
   display: flex;
-  align-items: center;
-  justify-content: center;
   height: 100%;
-  background: #000;
-  overflow: hidden;
-  position: relative;
+  transition: transform 0.25s ease;
+  will-change: transform;
 }
 
 .ios-viewer-slide {
+  flex: 0 0 100%;
   width: 100%;
   height: 100%;
   display: flex;
@@ -575,6 +569,42 @@
   object-fit: contain;
   user-select: none;
   -webkit-user-drag: none;
+}
+
+.ios-viewer-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  &:hover:not(:disabled) {
+    background: rgba(0, 0, 0, 0.7);
+  }
+
+  &.ios-viewer-prev {
+    left: 12px;
+  }
+
+  &.ios-viewer-next {
+    right: 12px;
+  }
 }
 
 .ios-viewer-loading {

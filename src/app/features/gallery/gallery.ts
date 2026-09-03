@@ -1,5 +1,4 @@
 import { Component, OnInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
-import Swiper from 'swiper/bundle';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -50,7 +49,6 @@ export class Gallery implements OnInit, OnDestroy {
   @ViewChild('canvasElement') canvasElement!: ElementRef<HTMLCanvasElement>;
   @ViewChild('nativeCameraInput') nativeCameraInput!: ElementRef<HTMLInputElement>;
   @ViewChild('pullToRefresh') pullToRefresh!: PullToRefreshComponent;
-  @ViewChild('swiperContainer', { static: false }) swiperContainer!: ElementRef<HTMLDivElement>;
 
   photos: Photo[] = [];
   children: ChildModel[] = [];
@@ -82,7 +80,6 @@ export class Gallery implements OnInit, OnDestroy {
   showPreviewModal = false;
   selectedPhoto: Photo | null = null;
   previewIndex = 0;
-  private previewSwiper: any = null;
 
   // Tag people modal
   showTagModal = false;
@@ -146,7 +143,6 @@ export class Gallery implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.langChangeSub?.unsubscribe();
     this.stopCamera();
-    this.destroyPreviewSwiper();
   }
 
   private setupBreadcrumbs(): void {
@@ -648,62 +644,26 @@ export class Gallery implements OnInit, OnDestroy {
     // Images load directly from their file URLs (available in the loaded photos list),
     // so there is no extra per-image API call and no large response payload.
     this.loadingFullImage = false;
-    this.previewSwiper = null;
-
-    // Wait for the viewer DOM (swiper) to render before initializing.
-    this.initPreviewSwiper();
   }
 
-  private initPreviewSwiper() {
-    if (this.previewSwiper) return;
-
-    // The viewer mounts asynchronously (it's behind an *ngIf), so wait until the
-    // container exists and has a real size before initializing the carousel.
-    const container = this.swiperContainer?.nativeElement;
-    if (!container || !this.showPreviewModal || container.clientHeight === 0) {
-      setTimeout(() => this.initPreviewSwiper(), 30);
-      return;
-    }
-    if (this.photos.length === 0) return;
-
-    this.previewSwiper = new Swiper(container, {
-      initialSlide: this.previewIndex,
-      direction: 'horizontal',
-      slidesPerView: 1,
-      loop: false,
-      spaceBetween: 0,
-      speed: 250,
-      // Native lazy image loading with adjacent-slide preload. Only images near the
-      // active slide load, keeping the DOM light and avoiding large simultaneous fetches.
-      lazyPreload: true,
-      watchSlidesProgress: true,
-      on: {
-        init: () => {
-          // Re-measure once layout settles so slides get their real dimensions.
-          setTimeout(() => this.previewSwiper?.update(), 50);
-        },
-        slideChange: (swiper: any) => {
-          const realIndex = swiper.realIndex ?? swiper.activeIndex;
-          if (this.photos[realIndex]) {
-            this.selectedPhoto = this.photos[realIndex];
-            this.previewIndex = realIndex;
-          }
-        }
-      }
-    });
+  // Simple carousel navigation (no external dependency)
+  private selectPreview(index: number) {
+    if (index < 0 || index >= this.photos.length) return;
+    this.previewIndex = index;
+    this.selectedPhoto = this.photos[index];
   }
 
-  private destroyPreviewSwiper() {
-    if (this.previewSwiper) {
-      this.previewSwiper.destroy(true, true);
-      this.previewSwiper = null;
-    }
+  previewPrev() {
+    this.selectPreview(this.previewIndex - 1);
+  }
+
+  previewNext() {
+    this.selectPreview(this.previewIndex + 1);
   }
 
   closePreview() {
     this.showPreviewModal = false;
     this.selectedPhoto = null;
-    this.destroyPreviewSwiper();
   }
 
   /**
