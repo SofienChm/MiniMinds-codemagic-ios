@@ -1,9 +1,11 @@
 package com.miniminds.app;
 
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import com.getcapacitor.BridgeActivity;
@@ -19,7 +21,19 @@ public class MainActivity extends BridgeActivity {
         // White status bar with dark icons
         Window window = getWindow();
         window.setStatusBarColor(Color.WHITE);
-        window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+        
+        // Enable edge-to-edge display for Android 10+ (API 29+)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.setNavigationBarColor(Color.WHITE);
+            window.setNavigationBarContrastEnforced(false);
+        }
+        
+        // Set light status bar and navigation bar
+        int flags = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            flags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+        }
+        window.getDecorView().setSystemUiVisibility(flags);
 
         // Enable autofill for the WebView (password manager support)
         WebView webView = getBridge().getWebView();

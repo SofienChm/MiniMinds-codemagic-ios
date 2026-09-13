@@ -22,6 +22,14 @@ allprojects {
         google()
         mavenCentral()
     }
+
+    // Force 16 KB page size compatible versions across ALL submodules
+    configurations.all {
+        resolutionStrategy {
+            force 'com.google.mlkit:barcode-scanning:17.3.0'
+            force 'com.google.android.gms:play-services-code-scanner:16.1.0'
+        }
+    }
 }
 
 task clean(type: Delete) {

@@ -5,17 +5,41 @@
 # For more details, see
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Keep Capacitor classes
+-keep class com.getcapacitor.** { *; }
+-keepclassmembers class com.getcapacitor.** { *; }
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Keep Cordova classes
+-keep class org.apache.cordova.** { *; }
+-keepclassmembers class org.apache.cordova.** { *; }
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Keep Firebase classes
+-keep class com.google.firebase.** { *; }
+-keep class com.google.android.gms.** { *; }
+
+# Keep WebView JavaScript interfaces
+-keepclassmembers class * {
+    @android.webkit.JavascriptInterface <methods>;
+}
+
+# Keep native methods
+-keepclasseswithmembernames class * {
+    native <methods>;
+}
+
+# Preserve line numbers for debugging stack traces
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
+
+# Keep custom plugins
+-keep class com.miniminds.app.** { *; }
+
+# AndroidX
+-keep class androidx.** { *; }
+-keep interface androidx.** { *; }
+
+# Prevent obfuscation of models/data classes if using Gson/Jackson
+-keepclassmembers class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+}
+
