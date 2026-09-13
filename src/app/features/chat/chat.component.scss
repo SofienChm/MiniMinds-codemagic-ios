@@ -502,7 +502,7 @@ ion-content.parent-messages {
 /* Responsive: mobile shows one pane at a time */
 @media (max-width: 767px) {
   .px-chat-container {
-    height: calc(100vh - 160px);
+    height: calc(100vh - 200px);
   }
 
   .px-chat-sidebar,
