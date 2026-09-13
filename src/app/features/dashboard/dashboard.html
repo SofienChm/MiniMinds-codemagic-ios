@@ -318,7 +318,7 @@
             </div>
           </div>
         </div>
-        <div class="card card-general card-recently fee-history shadow-sm mb-3">
+        <div class="card card-general card-recently fee-history shadow-sm mb-3" *ngIf="userRole === 'Admin'">
           <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>{{ 'DASHBOARD.UNPAID_CHILDREN' | translate }}</h5>
             <a [routerLink]="['/fees']" class="view-all btn btn-sm btn-outline-primary">{{ 'DASHBOARD.VIEW_ALL' | translate }}</a>

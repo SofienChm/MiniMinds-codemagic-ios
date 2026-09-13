@@ -48,10 +48,10 @@
 
       <!-- Notifications -->
       <div class="position-relative d-flex align-items-center gap-2" style="overflow: visible;">
-        <!-- Messages Icon with unread dot -->
-        <a routerLink="/messages" class="btn btn-header btn-outline-light bg-white btn-icon position-relative me-1">
+        <!-- Chat Icon with unread dot -->
+        <a routerLink="/chat" class="btn btn-header btn-outline-light bg-white btn-icon position-relative me-1">
           <i class="bi bi-chat-dots"></i>
-          <span *ngIf="messagesUnreadCount > 0" class="notification-status-dot"></span>
+          <span *ngIf="chatUnreadCount > 0" class="notification-status-dot"></span>
         </a>
 
         <a class="btn btn-header btn-outline-light bg-white btn-icon position-relative-mobile mobile-resp me-1" (click)="toggleNotifications()">

@@ -1,3 +1,13 @@
+.form-group {
+  min-width: 0;
+}
+
+input[type="date"].form-input,
+input[type="time"].form-input {
+  min-width: 0;
+  box-sizing: border-box;
+}
+
 @media (max-width: 380px) {
  
   .card-add-pages .add-form .form-grid .form-input {

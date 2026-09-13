@@ -7,6 +7,8 @@ import { TitlePage, Breadcrumb, TitleAction } from '../../../shared/layouts/titl
 import { AuthService } from '../../../core/services/auth';
 import { AppointmentsService, CreateAppointmentDto, TeacherOption } from '../appointments.service';
 import { ChildrenService } from '../../children/children.service';
+import { ParentService } from '../../parent/parent.service';
+import { ParentModel } from '../../parent/parent.interface';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { PageTitleService } from '../../../core/services/page-title.service';
 import { ParentChildHeaderSimpleComponent } from '../../../shared/components/parent-child-header-simple/parent-child-header-simple.component';   
@@ -32,6 +34,8 @@ export class AddAppointment implements OnInit, OnDestroy {
   private langChangeSub?: Subscription;
 
   isParent = false;
+  isAdmin = false;
+  isTeacher = false;
   appointmentForm!: FormGroup;
   submitting = false;
   errorMessage = '';
@@ -39,6 +43,7 @@ export class AddAppointment implements OnInit, OnDestroy {
   // Options for dropdowns
   teachers: TeacherOption[] = [];
   children: ChildOption[] = [];
+  parents: ParentModel[] = [];
   appointmentTypes: Array<{ value: string; label: string }> = [];
 
   // Time options
@@ -52,6 +57,7 @@ export class AddAppointment implements OnInit, OnDestroy {
     private authService: AuthService,
     private appointmentsService: AppointmentsService,
     private childrenService: ChildrenService,
+    private parentService: ParentService,
     private router: Router,
     private translateService: TranslateService,
     private pageTitleService: PageTitleService,
@@ -63,11 +69,17 @@ export class AddAppointment implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.pageTitleService.setTitle(this.translateService.instant('APPOINTMENTS_PAGE.BOOK_APPOINTMENT'));
+    this.isParent = this.authService.isParent();
+    this.isAdmin = this.authService.isAdmin();
+    this.isTeacher = this.authService.isTeacher();
     this.initForm();
     this.loadTeachers();
-    this.loadChildren();
+    if (this.isAdmin || this.isTeacher) {
+      this.loadParents();
+    } else {
+      this.loadChildren();
+    }
     this.updateTranslatedContent();
-    this.isParent = this.authService.isParent();
     
     this.langChangeSub = this.translateService.onLangChange.subscribe(() => {
       this.updateTranslatedContent();
@@ -84,12 +96,20 @@ export class AddAppointment implements OnInit, OnDestroy {
       title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(200)]],
       description: ['', [Validators.maxLength(1000)]],
       type: ['General', Validators.required],
+      parentId: [null],
       childId: [null],
       teacherId: [null],
       appointmentDate: ['', Validators.required],
       startTime: ['', Validators.required],
       endTime: ['', Validators.required]
     });
+
+    const isStaff = this.isAdmin || this.isTeacher;
+    const parentIdControl = this.appointmentForm.get('parentId');
+    if (isStaff && parentIdControl) {
+      parentIdControl.setValidators([Validators.required]);
+      parentIdControl.updateValueAndValidity();
+    }
   }
 
   private generateTimeSlots(): void {
@@ -140,12 +160,37 @@ export class AddAppointment implements OnInit, OnDestroy {
     });
   }
 
-  loadChildren(): void {
+  loadParents(): void {
+    this.parentService.loadParents().subscribe({
+      next: (list) => this.parents = list || [],
+      error: () => this.parents = []
+    });
+  }
+
+  onParentChange(): void {
+    const parentId = this.appointmentForm.get('parentId')?.value;
+    const childControl = this.appointmentForm.get('childId');
+    childControl?.setValue(null);
+    if (parentId) {
+      this.loadChildren(parentId);
+    } else {
+      this.children = [];
+    }
+  }
+
+  loadChildren(parentId?: number): void {
     // Load children using the ChildrenService
     // The backend filters children based on the user's role (parents only see their own children)
     this.childrenService.loadChildren().subscribe({
       next: (list) => {
-        this.children = (list || []).map(c => ({
+        let filtered = list || [];
+        if (parentId) {
+          filtered = filtered.filter(c =>
+            c.parentId === parentId ||
+            (c.childParents && c.childParents.some(cp => cp.parentId === parentId))
+          );
+        }
+        this.children = filtered.map(c => ({
           id: c.id!,
           fullName: `${c.firstName} ${c.lastName}`
         }));
@@ -211,6 +256,7 @@ export class AddAppointment implements OnInit, OnDestroy {
       title: formValue.title.trim(),
       description: formValue.description?.trim() || undefined,
       type: formValue.type,
+      parentId: formValue.parentId || undefined,
       childId: formValue.childId || undefined,
       teacherId: formValue.teacherId || undefined,
       appointmentDate: formValue.appointmentDate,

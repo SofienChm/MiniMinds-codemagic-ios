@@ -23,7 +23,7 @@ export class Header implements OnInit, OnDestroy {
   @Output() mobileMenuToggle = new EventEmitter<void>();
   currentUser: AuthResponse | null = null;
   unreadCount = 0;
-  messagesUnreadCount = 0;
+  chatUnreadCount = 0;
   showNotifications = false;
   showUserMenu = false;
   showQuickLinks = false;
@@ -50,7 +50,7 @@ export class Header implements OnInit, OnDestroy {
     
     if (this.currentUser) {
       this.loadNotifications();
-      this.loadMessagesUnreadCount();
+      this.loadChatUnreadCount();
       
       const token = localStorage.getItem('token');
       let userId = localStorage.getItem('userId');
@@ -99,7 +99,7 @@ export class Header implements OnInit, OnDestroy {
     this.notificationService.messageUnreadCount$
       .pipe(takeUntil(this.destroy$))
       .subscribe(count => {
-        this.messagesUnreadCount = count;
+        this.chatUnreadCount = count;
       });
 
     }
@@ -123,13 +123,23 @@ export class Header implements OnInit, OnDestroy {
     }
   }
 
-  loadMessagesUnreadCount(): void {
-    this.messagesService.getUnreadCount().subscribe({
-      next: (count) => {
-        this.messagesUnreadCount = count;
+  loadChatUnreadCount(): void {
+    let total = 0;
+    this.messagesService.getConversations().subscribe({
+      next: (conversations) => {
+        total += conversations.reduce((sum, c) => sum + (c.unreadCount || 0), 0);
+        this.messagesService.getChatGroups().subscribe({
+          next: (groups) => {
+            total += groups.reduce((sum, g) => sum + (g.unreadCount || 0), 0);
+            this.chatUnreadCount = total;
+          },
+          error: () => {
+            this.chatUnreadCount = total;
+          }
+        });
       },
       error: () => {
-        this.messagesUnreadCount = 0;
+        this.chatUnreadCount = 0;
       }
     });
   }

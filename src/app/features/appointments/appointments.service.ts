@@ -26,6 +26,7 @@ export interface AppointmentModel {
 }
 
 export interface CreateAppointmentDto {
+  parentId?: number;
   childId?: number;
   teacherId?: number;
   title: string;

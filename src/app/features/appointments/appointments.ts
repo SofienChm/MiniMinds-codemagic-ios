@@ -82,12 +82,13 @@ export class Appointments implements OnInit, OnDestroy {
       { label: this.translateService.instant('APPOINTMENTS_PAGE.APPOINTMENTS') }
     ];
 
-    // Only parents can add appointments
-    
-    if (this.isParent) {
+    // Parents book appointments; admins/teachers can also create them on a parent's behalf
+    if (this.isParent || this.isAdmin || this.isTeacher) {
       this.titleActions = [
         {
-          label: this.translateService.instant('APPOINTMENTS_PAGE.BOOK_APPOINTMENT'),
+          label: this.translateService.instant(
+            this.isParent ? 'APPOINTMENTS_PAGE.BOOK_APPOINTMENT' : 'APPOINTMENTS_PAGE.CREATE_APPOINTMENT'
+          ),
           class: 'btn-add-global-2',
           action: () => this.router.navigate(['/appointments/add'])
         }

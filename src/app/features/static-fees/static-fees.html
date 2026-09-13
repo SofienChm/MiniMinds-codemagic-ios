@@ -274,6 +274,27 @@
             </div>
           </div>
           <div class="mb-3">
+            <label class="form-label">{{ 'STATIC_FEES_PAGE.EXCLUDE_CHILDREN' | translate }}</label>
+            <ng-select
+              [(ngModel)]="bulkExcludedChildIds"
+              [items]="bulkChildren"
+              bindLabel="fullName"
+              bindValue="id"
+              [multiple]="true"
+              [clearable]="true"
+              [loading]="loadingBulkChildren"
+              name="bulkExcludedChildren"
+              [placeholder]="'STATIC_FEES_PAGE.EXCLUDE_CHILDREN_PLACEHOLDER' | translate">
+              <ng-template ng-option-tmp let-item="item">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-person-fill me-2"></i>
+                  <span>{{ item.fullName }}</span>
+                </div>
+              </ng-template>
+            </ng-select>
+            <small class="text-muted">{{ 'STATIC_FEES_PAGE.EXCLUDE_CHILDREN_HINT' | translate }}</small>
+          </div>
+          <div class="mb-3">
             <label class="form-label">{{ 'STATIC_FEES_PAGE.PAYMENT_METHOD' | translate }}</label>
             <select class="form-select" [(ngModel)]="bulkFee.paymentMethod" name="paymentMethod">
               <option value="Cash">{{ 'STATIC_FEES_PAGE.METHOD_CASH' | translate }}</option>

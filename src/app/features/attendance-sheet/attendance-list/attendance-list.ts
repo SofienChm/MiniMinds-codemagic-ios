@@ -16,6 +16,7 @@ import { GeolocationService, GeolocationPosition } from '../../../core/services/
 import { SchoolSettings } from '../../qr-checkin/qr-checkin.interface';
 import { QrScannerService } from '../../../core/services/qr-scanner.service';
 import { ApiConfig } from '../../../core/config/api.config';
+import { ExportUtil } from '../../../shared/utils/export.util';
 
 interface ChildAttendanceStatus {
   child: ChildModel;
@@ -37,6 +38,7 @@ export class AttendanceList implements OnInit, OnDestroy {
   attendances: Attendance[] = [];
   stats: AttendanceStats = { totalPresent: 0, totalAbsent: 0, checkInsToday: 0, checkOutsToday: 0 };
   searchTerm = '';
+  selectedDate: string = new Date().toISOString().split('T')[0];
   loading = false;
   private langChangeSub?: Subscription;
 
@@ -69,6 +71,25 @@ export class AttendanceList implements OnInit, OnDestroy {
     private ngZone: NgZone
   ) {
     this.titleActions = [
+      {
+        label: this.translate.instant('COMMON.EXPORT'),
+        class: 'btn btn-light me-2',
+        action: () => {},
+        dropdown: {
+          items: [
+            {
+              label: this.translate.instant('COMMON.EXPORT_PDF'),
+              icon: 'bi bi-file-earmark-pdf',
+              action: () => this.exportToPDF()
+            },
+            {
+              label: this.translate.instant('COMMON.EXPORT_EXCEL'),
+              icon: 'bi bi-file-earmark-excel',
+              action: () => this.exportToExcel()
+            }
+          ]
+        }
+      },
       {
         label: this.translate.instant('ATTENDANCE_LIST.SCAN_QR'),
         icon: 'bi bi-qr-code-scan',
@@ -107,7 +128,7 @@ export class AttendanceList implements OnInit, OnDestroy {
     this.childrenService.loadChildren().subscribe({
       next: (children) => {
         this.children = children;
-        this.loadTodayAttendance();
+        this.loadAttendanceForDate(this.selectedDate);
       },
       error: (error) => {
         console.error('Error loading children:', error?.message || error);
@@ -117,8 +138,15 @@ export class AttendanceList implements OnInit, OnDestroy {
     });
   }
 
-  loadTodayAttendance(): void {
-    this.attendanceService.getTodayAttendance().subscribe({
+  onDateChange(): void {
+    if (!this.selectedDate) {
+      this.selectedDate = new Date().toISOString().split('T')[0];
+    }
+    this.loadAttendanceForDate(this.selectedDate);
+  }
+
+  loadAttendanceForDate(date: string): void {
+    this.attendanceService.getAttendanceByDate(date).subscribe({
       next: (attendances) => {
         this.attendances = attendances;
         this.buildChildrenWithStatus();
@@ -176,6 +204,9 @@ export class AttendanceList implements OnInit, OnDestroy {
       next: (attendance) => {
         item.attendance = attendance;
         item.isCheckedIn = true;
+        if (attendance && !this.attendances.some(a => a.id === attendance.id)) {
+          this.attendances = [...this.attendances, attendance];
+        }
         this.cdr.detectChanges();
       },
       error: (error) => {
@@ -192,8 +223,7 @@ export class AttendanceList implements OnInit, OnDestroy {
         item.isCheckedIn = false;
         item.attendance = undefined;
         this.cdr.detectChanges();
-      },
-      error: (error) => {
+      },      error: (error) => {
         console.error('Error checking out:', error?.message || error);
       }
     });
@@ -201,6 +231,31 @@ export class AttendanceList implements OnInit, OnDestroy {
 
   refresh(): void {
     this.loadData();
+  }
+
+  exportToPDF(): void {
+    ExportUtil.exportToPDF(this.buildExportData(), this.getExportTitle());
+  }
+
+  exportToExcel(): void {
+    ExportUtil.exportToExcel(this.buildExportData(), this.getExportTitle());
+  }
+
+  private getExportTitle(): string {
+    const title = this.translate.instant('ATTENDANCE_LIST.EXPORT_TITLE');
+    return `${title} - ${this.selectedDate}`;
+  }
+
+  private buildExportData(): { [key: string]: string }[] {
+    return this.childrenWithStatus.map(item => {
+      const isPresent = this.attendances.some(a => a.childId === item.child.id);
+      return {
+        [this.translate.instant('ATTENDANCE_LIST.NAME')]: `${item.child.firstName} ${item.child.lastName}`,
+        [this.translate.instant('ATTENDANCE_LIST.STATUS')]: isPresent
+          ? this.translate.instant('ATTENDANCE_LIST.PRESENT')
+          : this.translate.instant('ATTENDANCE_LIST.ABSENT')
+      };
+    });
   }
 
   // QR Scanner Methods

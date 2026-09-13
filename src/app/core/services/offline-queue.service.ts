@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpRequest } from '@angular/common/http';
+import { HttpRequest, HttpHeaders, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 export interface QueuedRequest {
@@ -172,8 +172,8 @@ export class OfflineQueueService {
             item.request.url,
             item.request.body,
             {
-              headers: item.request.headers,
-              params: item.request.params,
+              headers: new HttpHeaders(item.request.headers),
+              params: new HttpParams({ fromString: this.paramsToString(item.request.params) }),
               responseType: item.request.responseType,
               withCredentials: item.request.withCredentials
             }
@@ -246,9 +246,20 @@ export class OfflineQueueService {
    */
   private serializeHeaders(headers: any): any {
     const serialized: any = {};
-    headers.keys().forEach((key: string) => {
-      serialized[key] = headers.get(key);
-    });
+    if (!headers) {
+      return serialized;
+    }
+
+    if (typeof headers.keys === 'function') {
+      headers.keys().forEach((key: string) => {
+        serialized[key] = headers.get(key);
+      });
+    } else {
+      Object.keys(headers).forEach((key: string) => {
+        serialized[key] = headers[key];
+      });
+    }
+
     return serialized;
   }
 
@@ -257,10 +268,38 @@ export class OfflineQueueService {
    */
   private serializeParams(params: any): any {
     const serialized: any = {};
-    params.keys().forEach((key: string) => {
-      serialized[key] = params.get(key);
-    });
+    if (!params) {
+      return serialized;
+    }
+
+    if (typeof params.keys === 'function') {
+      params.keys().forEach((key: string) => {
+        serialized[key] = params.get(key);
+      });
+    } else {
+      Object.keys(params).forEach((key: string) => {
+        serialized[key] = params[key];
+      });
+    }
+
     return serialized;
+  }
+
+  /**
+   * Convert stored params object back into a query-string for HttpParams
+   */
+  private paramsToString(params: any): string {
+    if (!params) {
+      return '';
+    }
+
+    if (typeof params.keys === 'function') {
+      return params.keys().map((key: string) => `${key}=${params.get(key)}`).join('&');
+    }
+
+    return Object.keys(params)
+      .map((key: string) => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
+      .join('&');
   }
 
   /**

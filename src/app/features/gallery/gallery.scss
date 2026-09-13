@@ -363,21 +363,31 @@
   }
 }
 
-// Photo Grid - iPhone Style
-.ios-photo-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2px;
-  padding: 0 2px;
+// Photo Grid - iPhone Style (virtualized)
+.ios-grid-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+
+  cdk-virtual-scroll-viewport {
+    height: 100%;
+  }
+}
+
+.ios-virtual-row {
+  display: flex;
+  overflow: hidden;
 }
 
 .ios-photo-item {
   aspect-ratio: 1;
+  flex-shrink: 0;
   position: relative;
   overflow: hidden;
   cursor: pointer;
-  animation: ios-fade-in 0.3s ease forwards;
-  opacity: 0;
+  animation: none;
+  opacity: 1;
 
   img {
     width: 100%;
@@ -416,26 +426,38 @@
   }
 }
 
-// Load More Button
-.ios-load-more {
-  padding: 20px;
-  text-align: center;
+// Infinite scroll load-more indicator (overlaid on the virtual grid)
+.load-more-indicator {
+  position: absolute;
+  bottom: 16px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
 }
 
-.ios-load-more-btn {
-  padding: 12px 32px;
-  border-radius: 22px;
-  border: none;
-  background: white;
-  color: #007aff;
-  font-size: 15px;
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: all 0.2s ease;
+// ==================== iOS-Style Gallery for Parent View ====================
 
-  &:active {
-    transform: scale(0.95);
-    background: #f2f2f7;
+.ios-gallery-container {
+  background: #f2f2f7;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-bottom: 0;
+}
+
+.infinite-sentinel-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .ios-spinner {
+    width: 28px;
+    height: 28px;
+    border-width: 2px;
   }
 }
 
@@ -457,7 +479,9 @@
   right: 0;
   bottom: 0;
   background: #000;
-  z-index: 9999;
+  // Below Bootstrap modals (1055) and SweetAlert2 (1060) so the tag/edit/delete
+  // dialogs opened from the viewer render on top of it.
+  z-index: 1040;
   display: flex;
   flex-direction: column;
   animation: ios-viewer-open 0.3s ease;
@@ -548,27 +572,34 @@
 }
 
 .ios-viewer-track {
-  display: flex;
+  position: relative;
   height: 100%;
   transition: transform 0.25s ease;
   will-change: transform;
 }
 
 .ios-viewer-slide {
-  flex: 0 0 100%;
+  position: absolute;
+  top: 0;
+  bottom: 0;
   width: 100%;
-  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
-.ios-viewer-slide img {
+.ios-viewer-slide .ios-viewer-img {
   width: 100%;
   height: 100%;
   object-fit: contain;
   user-select: none;
   -webkit-user-drag: none;
+  opacity: 1;
+  transition: opacity 0.2s ease;
+  // Let the page handle all touch gestures (pan/pinch) so the browser never
+  // scrolls or zooms the document behind the full-screen viewer.
+  touch-action: none;
 }
 
 .ios-viewer-nav {
@@ -612,6 +643,20 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+
+.ios-viewer-counter {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 12px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  pointer-events: none;
 }
 
 .ios-spinner {
@@ -668,22 +713,59 @@
   }
 }
 
-// Responsive adjustments for larger screens
-@media (min-width: 768px) {
-  .ios-photo-grid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 3px;
-    padding: 0 3px;
+.ios-footer-btn.ios-footer-danger {
+  color: #ff453a;
+}
+
+// Admin virtual grid - rows of fixed-height cards that mirror the old row g-4 layout
+.admin-grid-scroll {
+  position: relative;
+  height: calc(100dvh - 190px);
+  min-height: 300px;
+  overflow: hidden;
+
+  cdk-virtual-scroll-viewport {
+    height: 100%;
   }
 }
 
-@media (min-width: 1024px) {
-  .ios-photo-grid {
-    grid-template-columns: repeat(5, 1fr);
-    gap: 4px;
-    padding: 0 4px;
-  }
+.virtual-admin-row {
+  display: flex;
+  overflow: hidden;
+}
 
+.virtual-admin-cell {
+  flex-shrink: 0;
+
+  .photo-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    .photo-container {
+      flex: none;
+    }
+
+    .card-body {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .card-footer {
+      flex: none;
+    }
+  }
+}
+
+// Card thumbnails stay square on small screens even though the virtual grid
+// manages row height directly (the old 4/3 override no longer applies).
+.photo-container {
+  aspect-ratio: 1;
+}
+
+// Responsive adjustments for larger screens
+@media (min-width: 1024px) {
   .ios-photo-item {
     border-radius: 4px;
   }

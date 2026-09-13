@@ -11,14 +11,21 @@
   <div class="card mb-4">
     <div class="card-body">
       <div class="row align-items-center">
-        <div class="col-md-8 mb-2 mb-md-0">
+        <div class="col-md-3 mb-2 mb-md-0">
           <input
             type="text"
             class="form-control"
             [placeholder]="'ATTENDANCE_LIST.SEARCH_PLACEHOLDER' | translate"
             [(ngModel)]="searchTerm">
         </div>
-        <div class="col-md-4 d-flex justify-content-md-end">
+        <div class="col-md-3 mb-2 mb-md-0">
+          <input
+            type="date"
+            class="form-control"
+            [(ngModel)]="selectedDate"
+            (change)="onDateChange()">
+        </div>
+        <div class="col-md-6 d-flex justify-content-md-end">
           <button class="custom-btn-2 btn-add-global-2" (click)="refresh()">
             <i class="bi bi-arrow-clockwise"></i> {{ 'ATTENDANCE_LIST.REFRESH' | translate }}
           </button>

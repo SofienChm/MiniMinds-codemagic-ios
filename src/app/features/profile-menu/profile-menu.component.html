@@ -84,7 +84,7 @@
           <span>{{ 'PROFILE_MENU.GALLERY' | translate }}</span>
         </div>
 
-        <div class="menu-item" (click)="navigateTo('/food-menu/parent')">
+        <div class="menu-item" *ngIf="showFoodMenu" (click)="navigateTo('/food-menu/parent')">
           <div class="icon-circle food">
             <i class="bi bi-fork-knife"></i>
           </div>

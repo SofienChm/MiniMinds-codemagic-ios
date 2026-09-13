@@ -6,8 +6,10 @@ import { AuthService } from '../../core/services/auth';
 import { AuthResponse } from '../../core/interfaces/dto/auth-response-dto';
 import { NotificationService } from '../../core/services/notification-service';
 import { MessagesService } from '../../core/services/messages.service';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, combineLatest } from 'rxjs';
 import { ApiConfig } from '../../core/config/api.config';
+import { TenantFeatureService } from '../../core/services/tenant-feature.service';
+import { FeatureCodes } from '../../core/interfaces/dto/tenant-dto';
 
 @Component({
   selector: 'app-profile-menu',
@@ -19,13 +21,15 @@ import { ApiConfig } from '../../core/config/api.config';
 export class ProfileMenuComponent implements OnInit, OnDestroy {
   currentUser: AuthResponse | null = null;
   chatUnreadCount = 0;
+  showFoodMenu = false;
   private destroy$ = new Subject<void>();
 
   constructor(
     private authService: AuthService,
     private router: Router,
     private notificationService: NotificationService,
-    private messagesService: MessagesService
+    private messagesService: MessagesService,
+    private tenantFeatureService: TenantFeatureService
   ) {}
 
   ngOnInit(): void {
@@ -34,6 +38,21 @@ export class ProfileMenuComponent implements OnInit, OnDestroy {
       return;
     }
     this.currentUser = this.authService.getCurrentUser();
+
+    // Hide food menu when the food feature is disabled or hidden for this tenant
+    this.tenantFeatureService.loadFeaturesIfNeeded()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe();
+
+    combineLatest([
+      this.tenantFeatureService.enabledFeatures$,
+      this.tenantFeatureService.hiddenFeatures$
+    ])
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(([enabled, hidden]) => {
+        this.showFoodMenu = enabled.includes(FeatureCodes.FOOD_MENU)
+          && !hidden.includes(FeatureCodes.FOOD_MENU);
+      });
 
     // Load chat (conversations + groups) unread count
     this.loadChatUnreadCount();

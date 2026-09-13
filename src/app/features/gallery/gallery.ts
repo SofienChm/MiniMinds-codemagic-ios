@@ -1,7 +1,8 @@
-import { Component, OnInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ScrollingModule, CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { Photo, PhotosResponse, PHOTO_CATEGORIES } from './gallery.interface';
 import { GalleryService } from './gallery.service';
@@ -39,16 +40,21 @@ const IMAGE_QUALITY = 0.8; // 80% quality - good balance between size and qualit
     ParentChildHeaderSimpleComponent,
     PullToRefreshComponent,
     SkeletonPhotoGridComponent,
-    NgSelectModule
+    NgSelectModule,
+    ScrollingModule
   ],
   templateUrl: './gallery.html',
   styleUrl: './gallery.scss'
 })
-export class Gallery implements OnInit, OnDestroy {
+export class Gallery implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('videoElement') videoElement!: ElementRef<HTMLVideoElement>;
   @ViewChild('canvasElement') canvasElement!: ElementRef<HTMLCanvasElement>;
   @ViewChild('nativeCameraInput') nativeCameraInput!: ElementRef<HTMLInputElement>;
   @ViewChild('pullToRefresh') pullToRefresh!: PullToRefreshComponent;
+  @ViewChild('lightbox') lightboxEl!: ElementRef<HTMLDivElement>;
+  @ViewChild('parentGridHost') parentGridHost!: ElementRef<HTMLDivElement>;
+  @ViewChild('adminGridHost') adminGridHost!: ElementRef<HTMLDivElement>;
+  @ViewChild(CdkVirtualScrollViewport) virtualScroll!: CdkVirtualScrollViewport;
 
   photos: Photo[] = [];
   children: ChildModel[] = [];
@@ -67,6 +73,18 @@ export class Gallery implements OnInit, OnDestroy {
   pageSize = 20;
   totalPages = 1;
   totalCount = 0;
+  loadingMore = false;
+
+  // Virtual-grid state (CDK virtual scroll over rows of square tiles)
+  gridRows: Photo[][] = [];
+  gridColumns = 3;
+  rowHeight = 1;
+  cellWidth = 1;
+  gridGap = 2;
+  private readonly adminCardInfoHeight = 160;
+  private resizeObserver?: ResizeObserver;
+  private measureRetries = 0;
+  private measurePoll?: ReturnType<typeof setInterval>;
 
   // Upload modal
   showUploadModal = false;
@@ -105,6 +123,7 @@ export class Gallery implements OnInit, OnDestroy {
 
   // Loading state for preview modal
   loadingFullImage = false;
+  private imgLoadTimer?: ReturnType<typeof setTimeout>;
 
   breadcrumbs: Breadcrumb[] = [];
   titleActions: TitleAction[] = [];
@@ -113,7 +132,26 @@ export class Gallery implements OnInit, OnDestroy {
   // Download state
   downloadingImage = false;
 
+  // Lightbox swipe gesture state
+  private touchStartX = 0;
+  private touchStartY = 0;
+  private readonly swipeThreshold = 50;
+
+  // Lightbox pin zoom state (1 = fit, up to 3 = max)
+  zoomScale = 1;
+  zoomOriginX = 50;
+  zoomOriginY = 50;
+  panX = 0;
+  panY = 0;
+  private touchMode: 'none' | 'pan' | 'pinch' = 'none';
+  private pinchStartDistance = 0;
+  private pinchStartScale = 1;
+  private panStartX = 0;
+  private panStartY = 0;
+  private lastTapTime = 0;
+
   constructor(
+    private elementRef: ElementRef<HTMLElement>,
     private galleryService: GalleryService,
     private childrenService: ChildrenService,
     private authService: AuthService,
@@ -122,7 +160,8 @@ export class Gallery implements OnInit, OnDestroy {
     private translate: TranslateService,
     private pageTitleService: PageTitleService,
     private imageDownloadService: ImageDownloadService,
-    private simpleToastService: SimpleToastService
+    private simpleToastService: SimpleToastService,
+    private ngZone: NgZone
   ) {}
 
   ngOnInit() {
@@ -140,9 +179,20 @@ export class Gallery implements OnInit, OnDestroy {
     });
   }
 
+  ngAfterViewInit() {
+    this.setupGridObserver();
+    // First measure immediately: the container exists here, so geometry is
+    // resolved before photos arrive (never starts from 1px defaults).
+    this.applyGridMetricsOnActiveHost();
+    this.startMeasurePoll();
+  }
+
   ngOnDestroy() {
     this.langChangeSub?.unsubscribe();
     this.stopCamera();
+    this.resizeObserver?.disconnect();
+    if (this.measurePoll) clearInterval(this.measurePoll);
+    if (this.imgLoadTimer) clearTimeout(this.imgLoadTimer);
   }
 
   private setupBreadcrumbs(): void {
@@ -188,8 +238,9 @@ export class Gallery implements OnInit, OnDestroy {
     });
   }
 
-  loadPhotos() {
+    loadPhotos() {
     this.loading = true;
+
     this.galleryService.getPhotos(
       this.currentPage,
       this.pageSize,
@@ -201,6 +252,13 @@ export class Gallery implements OnInit, OnDestroy {
         this.totalCount = response.totalCount;
         this.totalPages = response.totalPages;
         this.loading = false;
+        this.loadingMore = false;
+        this.rebuildGridRows();
+        this.frame(() => {
+          this.applyGridMetricsOnActiveHost();
+          this.setupGridObserver();
+          this.fillViewportIfShort();
+        });
       },
       error: (error) => {
         console.error('Error loading photos:', error);
@@ -228,23 +286,207 @@ export class Gallery implements OnInit, OnDestroy {
 
   setViewMode(mode: 'grid' | 'list') {
     this.viewMode = mode;
+    this.frame(() => this.setupGridObserver());
   }
 
-  // Pagination
-  goToPage(page: number) {
-    if (page >= 1 && page <= this.totalPages) {
-      this.currentPage = page;
-      this.loadPhotos();
+  // Infinite scroll - appends the next page when the virtual grid nears its end.
+  loadMorePhotos() {
+    if (this.loading || this.loadingMore || this.currentPage >= this.totalPages) return;
+
+    this.loadingMore = true;
+    this.galleryService.getPhotos(
+      this.currentPage + 1,
+      this.pageSize,
+      this.selectedChildId || undefined,
+      this.selectedCategory || undefined
+    ).subscribe({
+      next: (response: PhotosResponse) => {
+        this.photos = [...this.photos, ...response.data];
+        this.currentPage = response.page;
+        this.totalCount = response.totalCount;
+        this.totalPages = response.totalPages;
+        this.loadingMore = false;
+        const start = this.gridRows.length;
+        this.rebuildGridRows();
+        // Keep pulling pages until the viewport is filled if they fit on screen.
+        this.frame(() => {
+          this.applyGridMetricsOnActiveHost();
+          this.fillViewportIfShort();
+        });
+      },
+      error: (error) => {
+        console.error('Error loading more photos:', error);
+        this.loadingMore = false;
+      }
+    });
+  }
+
+  // Re-derives the row-based view model from the flat photos array.
+  private rebuildGridRows(): void {
+    const cols = this.gridColumns;
+    const rows: Photo[][] = [];
+    for (let i = 0; i < this.photos.length; i += cols) {
+      rows.push(this.photos.slice(i, i + cols));
+    }
+    this.gridRows = rows;
+  }
+
+  photoIndex(rowIdx: number, colIdx: number): number {
+    return rowIdx * this.gridColumns + colIdx;
+  }
+
+  trackRow(index: number): number {
+    return index;
+  }
+
+  // CDK fires this with the first visible row index as the user scrolls.
+  onGridScroll(rowIndex: number): void {
+    if (rowIndex >= this.gridRows.length - 3) {
+      this.loadMorePhotos();
     }
   }
 
-  previousPage() {
-    this.goToPage(this.currentPage - 1);
+  // List (admin) view infinite scroll - plain scroll-listener near the end.
+  onListScroll(event: Event): void {
+    const el = event.target as HTMLElement;
+    if (el.scrollHeight - el.scrollTop - el.clientHeight < 300) {
+      this.loadMorePhotos();
+    }
   }
 
-  nextPage() {
-    this.goToPage(this.currentPage + 1);
+  // If the loaded rows still fit inside the viewport, fetch the next page.
+  private fillViewportIfShort(): void {
+    if (!this.virtualScroll) return;
+    if (this.virtualScroll.measureScrollOffset('bottom') <= 0) {
+      this.loadMorePhotos();
+    }
   }
+
+  // Virtual-grid geometry: prefer the real grid host (exact tile-box width) and
+  // fall back to the always-present page container, then re-measure on any
+  // resize/orientation change so CDK's fixed itemSize stays in sync with CSS.
+  private setupGridObserver(): void {
+    if (typeof ResizeObserver === 'undefined') return;
+    if (!this.resizeObserver) {
+      // Run the measure inside the zone so the gridRows/cellWidth updates
+      // always trigger change detection and re-render with real sizes.
+      this.resizeObserver = new ResizeObserver(() => {
+        this.ngZone.run(() => this.applyGridMetricsOnActiveHost());
+      });
+    }
+    this.resizeObserver.disconnect();
+    const target = this.measureTarget();
+    if (target) this.resizeObserver.observe(target.el);
+  }
+
+  // Returns the element whose width determines the tile size.
+  // Parent view: .ios-grid-scroll (grid host) or .ios-gallery-container (shell).
+  // Admin view:  .admin-grid-scroll (grid host) or .gallery-admin-shell (shell).
+  // Grid hosts give the exact content width; shells need no measurement dance
+  // and exist before any photo renders, so either source always resolves.
+  private measureTarget(): { el: HTMLElement; isParent: boolean; isShell: boolean } | null {
+    if (this.isParent) {
+      const host = this.parentGridHost?.nativeElement;
+      if (host?.isConnected) return { el: host, isParent: true, isShell: false };
+      const el = this.elementRef.nativeElement.querySelector<HTMLElement>('.ios-gallery-container')
+        ?? document.querySelector<HTMLElement>('app-gallery .ios-gallery-container');
+      return el ? { el, isParent: true, isShell: true } : null;
+    }
+    const host = this.adminGridHost?.nativeElement;
+    if (host?.isConnected) return { el: host, isParent: false, isShell: false };
+    const el = this.elementRef.nativeElement.querySelector<HTMLElement>('.gallery-admin-shell')
+      ?? document.querySelector<HTMLElement>('app-gallery .gallery-admin-shell');
+    return el ? { el, isParent: false, isShell: true } : null;
+  }
+
+  private applyGridMetrics(target: { el: HTMLElement; isParent: boolean; isShell: boolean }): void {
+    const { el: host, isParent } = target;
+    if (!host.isConnected) return;
+
+    // Shells are Bootstrap containers with 12px gutters on each side; the grid
+    // hosts themselves already have their exact content-box width.
+    const rawWidth = host.getBoundingClientRect().width;
+    const width = target.isParent
+      ? rawWidth
+      : target.isShell
+        ? Math.max(1, rawWidth - 24)
+        : rawWidth;
+    // Not laid out yet. Retry on the next frame instead of silently keeping the
+    // 1px defaults (which renders dot-sized tiles).
+    if (!width || width < 40) {
+      if (this.measureRetries < 12) {
+        this.measureRetries++;
+        this.frame(() => this.applyGridMetrics(target));
+      } else {
+        console.warn('[gallery] measure stuck: container never laid out', width);
+      }
+      return;
+    }
+    this.measureRetries = 0;
+
+    const gap = target.isParent
+      ? (width >= 1024 ? 4 : width >= 768 ? 3 : 2)
+      : 24;
+    const cols = this.computeGridColumns(target.isParent, width);
+
+    this.gridColumns = cols;
+    this.gridGap = gap;
+    this.cellWidth = Math.max(1, Math.floor((width - gap * (cols - 1)) / cols));
+    // Parent rows are square tiles; admin rows add a fixed card caption block.
+    this.rowHeight = target.isParent
+      ? this.cellWidth
+      : this.cellWidth + this.adminCardInfoHeight + gap;
+
+    console.log(`[gallery] measured ${Math.round(width)}px (${target.isParent ? 'parent' : 'admin'}) -> ${cols} cols, cell ${this.cellWidth}px`);
+
+    this.rebuildGridRows();
+
+    this.frame(() => {
+      this.virtualScroll?.checkViewportSize();
+      this.fillViewportIfShort();
+    });
+  }
+
+  private computeGridColumns(isParentHost: boolean, width: number): number {
+    if (isParentHost) {
+      if (width >= 1024) return 5;
+      if (width >= 768) return 4;
+      return 3;
+    }
+    if (width >= 1140) return 4;
+    if (width >= 900) return 3;
+    if (width >= 660) return 2;
+    return 1;
+  }
+
+  private frame(fn: () => void): void {
+    setTimeout(() => this.ngZone.run(fn), 0);
+  }
+
+  // Measure whichever target is currently rendered (parent or admin).
+  private applyGridMetricsOnActiveHost(): void {
+    const target = this.measureTarget();
+    if (target) this.applyGridMetrics(target);
+  }
+
+  // Safety net: if for any reason the frame/observer measurements never land
+  // (animations, deferred render, edge-case query misses), poll a few times so
+  // the grid always converges to real sizes instead of sitting at 1px dots.
+  private startMeasurePoll(): void {
+    if (this.measurePoll) return;
+    let ticks = 0;
+    this.measurePoll = setInterval(() => {
+      ticks++;
+      if (this.cellWidth > 40 || ticks > 40) {
+        clearInterval(this.measurePoll!);
+        this.measurePoll = undefined;
+        return;
+      }
+      this.ngZone.run(() => this.applyGridMetricsOnActiveHost());
+    }, 250);
+  }
+
+
 
   // Upload modal
   openUploadModal() {
@@ -634,16 +876,24 @@ export class Gallery implements OnInit, OnDestroy {
     return new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
   }
 
-  // Preview modal - no full-resolution fetch needed (full file URLs are already loaded)
+  // Full-screen gallery lightbox.
+  // Only the current photo is rendered (plus a windowed neighbor track for smooth swipes);
+  // adjacent full-res images are prefetched in the background so navigation is instant.
   openPreview(index: number) {
     if (!this.photos[index]) return;
     this.previewIndex = index;
     this.selectedPhoto = this.photos[index];
     this.showPreviewModal = true;
+    this.loadingFullImage = true;
+    this.armImageLoadFallback();
+    this.resetZoom();
+    this.prefetchNeighbors();
 
-    // Images load directly from their file URLs (available in the loaded photos list),
-    // so there is no extra per-image API call and no large response payload.
-    this.loadingFullImage = false;
+    // Lock background scroll while the viewer is open.
+    document.body.style.overflow = 'hidden';
+
+    // Focus the lightbox so keyboard navigation (arrows/escape) works immediately.
+    setTimeout(() => this.lightboxEl?.nativeElement?.focus(), 0);
   }
 
   // Simple carousel navigation (no external dependency)
@@ -651,6 +901,10 @@ export class Gallery implements OnInit, OnDestroy {
     if (index < 0 || index >= this.photos.length) return;
     this.previewIndex = index;
     this.selectedPhoto = this.photos[index];
+    this.loadingFullImage = true;
+    this.armImageLoadFallback();
+    this.resetZoom();
+    this.prefetchNeighbors();
   }
 
   previewPrev() {
@@ -664,6 +918,179 @@ export class Gallery implements OnInit, OnDestroy {
   closePreview() {
     this.showPreviewModal = false;
     this.selectedPhoto = null;
+    this.resetZoom();
+    document.body.style.overflow = '';
+  }
+
+  onImageLoaded(offset: number) {
+    // Only clear the spinner when the currently-viewed image finishes loading.
+    if (offset === this.previewIndex) {
+      this.loadingFullImage = false;
+    }
+  }
+
+  onImageError(offset: number) {
+    // A broken/slow image must never trap the viewer on the spinner.
+    if (offset === this.previewIndex) {
+      this.loadingFullImage = false;
+    }
+  }
+
+  // If the full image doesn't fire `load` (broken URL, hung response, cache
+  // quirk), drop the spinner after 6s rather than leaving the viewer stuck.
+  private armImageLoadFallback(): void {
+    if (this.imgLoadTimer) clearTimeout(this.imgLoadTimer);
+    this.imgLoadTimer = setTimeout(() => {
+      this.loadingFullImage = false;
+    }, 1000);
+  }
+
+  // Render only a window of 3 slides (prev/current/next) to keep DOM & memory low.
+  get visibleSlides(): { photo: Photo; offset: number }[] {
+    const slides: { photo: Photo; offset: number }[] = [];
+    for (let i = this.previewIndex - 1; i <= this.previewIndex + 1; i++) {
+      if (i >= 0 && i < this.photos.length) {
+        slides.push({ photo: this.photos[i], offset: i });
+      }
+    }
+    return slides;
+  }
+
+  trackSlide(index: number, slide: { photo: Photo; offset: number }): number {
+    return slide.offset;
+  }
+
+  // Preload the adjacent full-res images so swiping feels instant.
+  private prefetchNeighbors() {
+    [this.previewIndex - 1, this.previewIndex + 1].forEach(i => {
+      const photo = this.photos[i];
+      if (!photo || !photo.imageUrl) return;
+      const img = new Image();
+      img.src = this.resolveImageUrl(photo.imageUrl);
+    });
+  }
+
+  // Return the CSS transform for the currently viewed image (unzoomed = none).
+  getViewerTransform(): string {
+    if (this.zoomScale <= 1 && this.panX === 0 && this.panY === 0) return '';
+    return `translate(${this.panX}px, ${this.panY}px) scale(${this.zoomScale})`;
+  }
+
+  private resetZoom() {
+    this.zoomScale = 1;
+    this.zoomOriginX = 50;
+    this.zoomOriginY = 50;
+    this.panX = 0;
+    this.panY = 0;
+    this.touchMode = 'none';
+  }
+
+  private touchDistance(event: TouchEvent): number {
+    const a = event.touches[0];
+    const b = event.touches[1];
+    return Math.hypot(b.clientX - a.clientX, b.clientY - a.clientY);
+  }
+
+  // Unified touch handling: pinch-to-zoom, one-finger pan when zoomed,
+  // swipe navigation when unzoomed, and double-tap zoom.
+  onViewerTouchStart(event: TouchEvent) {
+    if (event.touches.length === 2) {
+      this.touchMode = 'pinch';
+      this.pinchStartDistance = this.touchDistance(event);
+      this.pinchStartScale = this.zoomScale;
+      return;
+    }
+    if (event.touches.length === 1) {
+      this.touchMode = 'pan';
+      const t = event.touches[0];
+      this.touchStartX = t.clientX;
+      this.touchStartY = t.clientY;
+      this.panStartX = this.panX;
+      this.panStartY = this.panY;
+    }
+  }
+
+  onViewerTouchMove(event: TouchEvent) {
+    if (this.touchMode === 'pinch' && event.touches.length >= 2) {
+      event.preventDefault();
+      const dist = this.touchDistance(event);
+      this.zoomScale = Math.min(3, Math.max(1, this.pinchStartScale * (dist / this.pinchStartDistance)));
+      return;
+    }
+    if (this.touchMode === 'pan' && this.zoomScale > 1 && event.touches.length === 1) {
+      event.preventDefault();
+      const t = event.touches[0];
+      this.panX = this.panStartX + (t.clientX - this.touchStartX);
+      this.panY = this.panStartY + (t.clientY - this.touchStartY);
+    }
+  }
+
+  onViewerTouchEnd(event: TouchEvent) {
+    if (this.touchMode === 'pinch') {
+      this.touchMode = 'none';
+      if (this.zoomScale <= 1) this.resetZoom();
+      return;
+    }
+
+    // Detect double-tap before swipe logic so a quick tap never triggers navigation.
+    const t = event.changedTouches[0];
+    const now = Date.now();
+    const isTap = t && Math.hypot(t.clientX - this.touchStartX, t.clientY - this.touchStartY) < 10;
+
+    if (isTap && now - this.lastTapTime < 300) {
+      this.lastTapTime = 0;
+      this.toggleZoomAt(t);
+      this.touchMode = 'none';
+      return;
+    }
+    if (isTap) {
+      this.lastTapTime = now;
+    } else {
+      this.lastTapTime = 0;
+    }
+
+    if (this.zoomScale > 1) {
+      // Pan ends here; never swipe-navigate while zoomed.
+      this.touchMode = 'none';
+      return;
+    }
+
+    // Unzoomed: horizontal swipe navigation.
+    const deltaX = t.clientX - this.touchStartX;
+    const deltaY = t.clientY - this.touchStartY;
+    if (Math.abs(deltaX) < this.swipeThreshold || Math.abs(deltaX) < Math.abs(deltaY)) {
+      this.touchMode = 'none';
+      return;
+    }
+    if (deltaX < 0) {
+      this.previewNext();
+    } else {
+      this.previewPrev();
+    }
+    this.touchMode = 'none';
+  }
+
+  private toggleZoomAt(t: Touch) {
+    if (this.zoomScale > 1) {
+      this.resetZoom();
+      return;
+    }
+    this.zoomScale = 2.5;
+    this.zoomOriginX = (t.clientX / window.innerWidth) * 100;
+    this.zoomOriginY = (t.clientY / window.innerHeight) * 100;
+    this.panX = 0;
+    this.panY = 0;
+  }
+
+  // Keyboard navigation (arrows + escape).
+  onLightboxKeydown(event: KeyboardEvent) {
+    if (event.key === 'ArrowLeft') {
+      this.previewPrev();
+    } else if (event.key === 'ArrowRight') {
+      this.previewNext();
+    } else if (event.key === 'Escape') {
+      this.closePreview();
+    }
   }
 
   /**
@@ -674,7 +1101,7 @@ export class Gallery implements OnInit, OnDestroy {
 
     // Prefer file-based URL, fallback to Base64
     const imageUrl = this.selectedPhoto.imageUrl
-      ? ApiConfig.HUB_URL + this.selectedPhoto.imageUrl
+      ? this.resolveImageUrl(this.selectedPhoto.imageUrl)
       : null;
     const imageData = this.selectedPhoto.imageData || this.selectedPhoto.thumbnailData;
 
@@ -915,7 +1342,7 @@ export class Gallery implements OnInit, OnDestroy {
   getPhotoUrl(photo: Photo): string {
     // Prefer file-based URL for gallery view (fast loading)
     if (photo.thumbnailUrl) {
-      return ApiConfig.HUB_URL + photo.thumbnailUrl;
+      return this.resolveImageUrl(photo.thumbnailUrl);
     }
     // Fallback to Base64 for backward compatibility
     return photo.thumbnailData || '';
@@ -924,10 +1351,15 @@ export class Gallery implements OnInit, OnDestroy {
   getFullImageUrl(photo: Photo): string {
     // Prefer file-based URL for full resolution view
     if (photo.imageUrl) {
-      return ApiConfig.HUB_URL + photo.imageUrl;
+      return this.resolveImageUrl(photo.imageUrl);
     }
     // Fallback to Base64 for backward compatibility
     return photo.imageData || photo.thumbnailData || '';
+  }
+
+  // Absolute URLs (e.g. R2 presigned URLs) are used as-is; relative paths get the API host prefix.
+  private resolveImageUrl(url: string): string {
+    return /^https?:\/\//i.test(url) ? url : ApiConfig.HUB_URL + url;
   }
 
   formatFileSize(bytes: number): string {

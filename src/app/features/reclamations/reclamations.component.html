@@ -130,6 +130,8 @@
     </div>
 
     <!-- Reply Input (for recipient) -->
+    <!-- commentthis fonctionality temporary
+
     <div class="nd-reply-input-section" *ngIf="!selectedReclamation.isResolved && selectedReclamation.recipientId === currentUserId">
       <div class="nd-reply-input-container">
         <textarea class="nd-reply-textarea"
@@ -140,7 +142,7 @@
         </button>
       </div>
     </div>
-
+    -->
     <!-- Back Button -->
     <button class="nd-back-btn" (click)="closeModal()">
       <i class="bi bi-arrow-left"></i>
@@ -180,9 +182,11 @@
   </div>
 
   <!-- Floating Action Button -->
+   <!-- comment this fonctionality temporary 
   <button class="nd-fab" (click)="openNewReclamationModal()" *ngIf="!showNewReclamationModal && !showModal">
     <i class="bi bi-pencil"></i>
   </button>
+  -->
   </div>
 </ion-content>
 

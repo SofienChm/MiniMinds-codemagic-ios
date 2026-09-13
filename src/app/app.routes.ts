@@ -311,7 +311,7 @@ export const routes: Routes = [
       {
         path: 'appointments/add',
         loadComponent: () => import('./features/appointments/add-appointment/add-appointment').then(m => m.AddAppointment),
-        canActivate: [roleGuard('Parent')]
+        canActivate: [roleGuard('Parent', 'Admin', 'Teacher')]
       },
       {
         path: 'appointments/edit/:id',
@@ -331,6 +331,11 @@ export const routes: Routes = [
       {
         path: 'static-fees/add',
         loadComponent: () => import('./features/static-fees/add-static-fee/add-static-fee').then(m => m.AddStaticFeeComponent),
+        canActivate: [roleGuard('Admin'), FEES_FEATURE]
+      },
+      {
+        path: 'static-fees/add-group',
+        loadComponent: () => import('./features/static-fees/add-static-fee-group/add-static-fee-group').then(m => m.AddStaticFeeGroupComponent),
         canActivate: [roleGuard('Admin'), FEES_FEATURE]
       },
       {

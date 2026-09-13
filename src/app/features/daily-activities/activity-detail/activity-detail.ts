@@ -508,8 +508,10 @@ export class ActivityDetail implements OnInit, OnDestroy {
       .subscribe({
         next: (photo) => {
           if (photo.imageUrl) {
-            // File-based URL - construct full URL using API base
-            this.fullImageData = ApiConfig.HUB_URL + photo.imageUrl;
+            // File-based URL - absolute (e.g. R2 presigned) URLs are used as-is
+            this.fullImageData = /^https?:\/\//i.test(photo.imageUrl)
+              ? photo.imageUrl
+              : ApiConfig.HUB_URL + photo.imageUrl;
           } else {
             // Fallback to Base64 data
             this.fullImageData = photo.imageData || null;
@@ -578,8 +580,10 @@ export class ActivityDetail implements OnInit, OnDestroy {
    */
   getThumbnailSrc(photo: ActivityPhoto): string {
     if (photo.thumbnailUrl) {
-      // File-based URL - construct full URL using API base
-      return ApiConfig.HUB_URL + photo.thumbnailUrl;
+      // File-based URL - absolute (e.g. R2 presigned) URLs are used as-is
+      return /^https?:\/\//i.test(photo.thumbnailUrl)
+        ? photo.thumbnailUrl
+        : ApiConfig.HUB_URL + photo.thumbnailUrl;
     }
     // Fallback to Base64 data
     return photo.thumbnailData || '';

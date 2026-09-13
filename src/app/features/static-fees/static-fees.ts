@@ -16,6 +16,8 @@ import { SimpleToastService } from '../../core/services/simple-toast.service';
 import { Subscription, firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
 import { ExportUtil } from '../../shared/utils/export.util';
+import { HttpClient } from '@angular/common/http';
+import { ApiConfig } from '../../core/config/api.config';
 
 @Component({
   selector: 'app-static-fees',
@@ -51,6 +53,9 @@ export class StaticFeesComponent implements OnInit, AfterViewInit, OnDestroy {
   // Bulk modal
   showBulkFeeModal = false;
   bulkSubmitting = false;
+  loadingBulkChildren = false;
+  bulkChildren: Array<{ id: number; fullName: string }> = [];
+  bulkExcludedChildIds: number[] = [];
   bulkFee = {
     title: '',
     amount: 0,
@@ -76,7 +81,8 @@ export class StaticFeesComponent implements OnInit, AfterViewInit, OnDestroy {
     private translateService: TranslateService,
     private pageTitleService: PageTitleService,
     private permissionService: PermissionService,
-    private simpleToastService: SimpleToastService
+    private simpleToastService: SimpleToastService,
+    private http: HttpClient
   ) {
     registerLocaleData(localeFr);
     registerLocaleData(localeIt);
@@ -149,6 +155,12 @@ export class StaticFeesComponent implements OnInit, AfterViewInit, OnDestroy {
         icon: 'bi bi-calendar-plus',
         class: 'custom-btn-2 btn-edit-global-2 me-2',
         action: () => this.openBulkFeeModal()
+      },
+      {
+        label: this.translateService.instant('STATIC_FEES_PAGE.ADD_GROUP_FEE'),
+        icon: 'bi bi-people-fill',
+        class: 'custom-btn-2 btn-edit-global-2 me-2',
+        action: () => this.navigateToAddGroup()
       },
       {
         label: this.translateService.instant('STATIC_FEES_PAGE.ADD_STATIC_FEE'),
@@ -352,7 +364,26 @@ export class StaticFeesComponent implements OnInit, AfterViewInit, OnDestroy {
       paymentMethod: 'Cash',
       category: 'Monthly'
     };
+
+    this.bulkChildren = [];
+    this.bulkExcludedChildIds = [];
     this.showBulkFeeModal = true;
+
+    // Load all children so the admin can choose which to exclude from the bulk
+    this.loadingBulkChildren = true;
+    this.http.get<any[]>(`${ApiConfig.ENDPOINTS.CHILDREN}`).subscribe({
+      next: (list) => {
+        this.bulkChildren = list.map(c => ({
+          id: c.id,
+          fullName: `${c.firstName} ${c.lastName}`
+        }));
+        this.loadingBulkChildren = false;
+      },
+      error: () => {
+        this.bulkChildren = [];
+        this.loadingBulkChildren = false;
+      }
+    });
   }
 
   createBulkFees(): void {
@@ -364,7 +395,8 @@ export class StaticFeesComponent implements OnInit, AfterViewInit, OnDestroy {
       amount: this.bulkFee.amount,
       feeDate: this.bulkFee.feeDate,
       paymentMethod: this.bulkFee.paymentMethod,
-      category: this.bulkFee.category
+      category: this.bulkFee.category,
+      excludedChildIds: this.bulkExcludedChildIds
     }).subscribe({
       next: (result) => {
         this.showBulkFeeModal = false;
@@ -387,6 +419,10 @@ export class StaticFeesComponent implements OnInit, AfterViewInit, OnDestroy {
 
   navigateToAdd() {
     this.router.navigate(['/static-fees/add']);
+  }
+
+  navigateToAddGroup() {
+    this.router.navigate(['/static-fees/add-group']);
   }
 
   viewDetail(fee: StaticFeeModel) {

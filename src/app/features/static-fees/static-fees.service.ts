@@ -78,6 +78,24 @@ export interface MarkPaidDto {
   notes?: string;
 }
 
+export interface CreateGroupStaticFeeDto {
+  title: string;
+  description?: string;
+  amount: number;
+  payerName?: string;
+  payerEmail?: string;
+  payerPhone?: string;
+  parentId?: number;
+  childIds: number[];
+  status?: string;
+  paymentMethod?: string;
+  referenceNumber?: string;
+  feeDate?: string;
+  paidDate?: string;
+  notes?: string;
+  category?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -161,9 +179,16 @@ export class StaticFeesService {
     return this.http.get<{ reference: string }>(`${this.apiUrl}/generate-reference`);
   }
 
-  // Create bulk monthly fees for all parents
-  createBulkMonthlyFees(data: { title: string; description?: string; amount: number; feeDate: string; paymentMethod?: string; category?: string }): Observable<{ count: number }> {
+  // Create bulk monthly fees for all children (with optional exclusions)
+  createBulkMonthlyFees(data: { title: string; description?: string; amount: number; feeDate: string; paymentMethod?: string; category?: string; childIds?: number[]; excludedChildIds?: number[] }): Observable<{ count: number }> {
     return this.http.post<{ count: number }>(`${this.apiUrl}/bulk-monthly`, data).pipe(
+      tap(() => this.refreshData())
+    );
+  }
+
+  // Create group static fees (one fee per selected child)
+  createGroupFees(dto: CreateGroupStaticFeeDto): Observable<{ count: number }> {
+    return this.http.post<{ count: number }>(`${this.apiUrl}/group`, dto).pipe(
       tap(() => this.refreshData())
     );
   }

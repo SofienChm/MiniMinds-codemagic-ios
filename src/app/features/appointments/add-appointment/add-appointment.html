@@ -58,6 +58,33 @@
         </div>
 
         <div class="row">
+          <!-- Parent (required for admin/teacher) -->
+          <div class="col-md-6 mb-3" *ngIf="isAdmin || isTeacher">
+            <label class="form-label">
+              {{ 'APPOINTMENTS_PAGE.SELECT_PARENT' | translate }}
+              <span class="text-danger">*</span>
+            </label>
+            <ng-select
+              formControlName="parentId"
+              [items]="parents"
+              bindLabel="firstName"
+              bindValue="id"
+              [clearable]="true"
+              [searchable]="true"
+              [placeholder]="'APPOINTMENTS_PAGE.SELECT_PARENT' | translate"
+              (change)="onParentChange()">
+              <ng-template ng-option-tmp let-item="item">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-person-fill me-2"></i>
+                  <span>{{ item.firstName }} {{ item.lastName }}</span>
+                </div>
+              </ng-template>
+            </ng-select>
+            <div class="invalid-feedback d-block" *ngIf="isFieldInvalid('parentId')">
+              {{ getFieldError('parentId') }}
+            </div>
+          </div>
+
           <!-- Child (Optional) -->
           <div class="col-md-6 mb-3">
             <label class="form-label">

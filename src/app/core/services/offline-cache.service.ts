@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpResponse } from '@angular/common/http';
+import { HttpResponse, HttpHeaders } from '@angular/common/http';
 
 export interface CachedResponse {
   url: string;
@@ -148,7 +148,7 @@ export class OfflineCacheService {
         // Reconstruct HttpResponse
         const response = new HttpResponse({
           body: item.response.body,
-          headers: item.response.headers,
+          headers: new HttpHeaders(item.response.headers),
           status: item.response.status,
           statusText: item.response.statusText,
           url: item.response.url
@@ -216,9 +216,20 @@ export class OfflineCacheService {
    */
   private serializeHeaders(headers: any): any {
     const serialized: any = {};
-    headers.keys().forEach((key: string) => {
-      serialized[key] = headers.get(key);
-    });
+    if (!headers) {
+      return serialized;
+    }
+
+    if (typeof headers.keys === 'function') {
+      headers.keys().forEach((key: string) => {
+        serialized[key] = headers.get(key);
+      });
+    } else {
+      Object.keys(headers).forEach((key: string) => {
+        serialized[key] = headers[key];
+      });
+    }
+
     return serialized;
   }
 
