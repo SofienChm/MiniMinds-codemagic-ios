@@ -978,7 +978,9 @@
     "ATTACH_TOO_LARGE": "File is too large. Maximum size is 10 MB.",
     "ATTACH_UPLOAD_FAILED": "Upload failed. Please try again.",
     "ATTACH_SEND_FAILED": "Failed to send the attachment. Please try again.",
-    "ATTACH_OPEN_FAILED": "Failed to open the attachment. Please try again."
+    "ATTACH_OPEN_FAILED": "Failed to open the attachment. Please try again.",
+    "ATTACH_LOAD_FAILED": "Image could not be loaded.",
+    "SEND_FAILED": "Message could not be sent. Please try again."
   },
   "RECLAMATIONS_PAGE": {
     "TITLE": "Reclamations",

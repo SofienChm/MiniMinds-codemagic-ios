@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { ApiConfig } from '../../core/config/api.config';
+import { SKIP_ERROR_HANDLER } from '../../core/interceptors/error.interceptor';
 
 export interface MailMessage {
   id: number;
@@ -186,6 +187,19 @@ export class MessagesService {
     return this.http.get(`${this.apiUrl}/attachment/${messageId}?group=${group ? 'true' : 'false'}`, {
       responseType: 'blob'
     });
+  }
+
+  /**
+   * Resolve a chat attachment to a short-lived R2 presigned URL.
+   * Fetches JSON ({ url, expiresInSeconds }) — the actual bytes download directly
+   * from R2/CDN, which is far faster and more reliable on mobile.
+   */
+  getChatAttachmentUrl(messageId: number, group = false): Observable<{ url: string; expiresInSeconds: number }> {
+    const silentHeaders = new HttpHeaders().set(SKIP_ERROR_HANDLER, 'true');
+    return this.http.get<{ url: string; expiresInSeconds: number }>(
+      `${this.apiUrl}/attachment/${messageId}?group=${group ? 'true' : 'false'}`,
+      { headers: silentHeaders }
+    );
   }
 
   sendMessage(data: { recipientId?: string, subject: string, content: string, recipientType: string, parentMessageId?: number }): Observable<any> {

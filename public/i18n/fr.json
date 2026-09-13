@@ -983,7 +983,9 @@
     "ATTACH_TOO_LARGE": "Fichier trop volumineux. La taille maximale est de 10 Mo.",
     "ATTACH_UPLOAD_FAILED": "L'envoi a échoué. Veuillez réessayer.",
     "ATTACH_SEND_FAILED": "Échec de l'envoi de la pièce jointe. Veuillez réessayer.",
-    "ATTACH_OPEN_FAILED": "Impossible d'ouvrir la pièce jointe. Veuillez réessayer."
+    "ATTACH_OPEN_FAILED": "Impossible d'ouvrir la pièce jointe. Veuillez réessayer.",
+    "ATTACH_LOAD_FAILED": "Impossible de charger l'image.",
+    "SEND_FAILED": "Impossible d'envoyer le message. Veuillez réessayer."
   },
   "RECLAMATIONS_PAGE": {
     "TITLE": "Réclamations",

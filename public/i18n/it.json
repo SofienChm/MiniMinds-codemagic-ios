@@ -977,7 +977,9 @@
     "ATTACH_TOO_LARGE": "File troppo grande. La dimensione massima è 10 MB.",
     "ATTACH_UPLOAD_FAILED": "Caricamento non riuscito. Riprova.",
     "ATTACH_SEND_FAILED": "Invio dell'allegato non riuscito. Riprova.",
-    "ATTACH_OPEN_FAILED": "Impossibile aprire l'allegato. Riprova."
+    "ATTACH_OPEN_FAILED": "Impossibile aprire l'allegato. Riprova.",
+    "ATTACH_LOAD_FAILED": "Impossibile caricare l'immagine.",
+    "SEND_FAILED": "Impossibile inviare il messaggio. Riprova."
   },
   "RECLAMATIONS_PAGE": {
     "TITLE": "Reclami",

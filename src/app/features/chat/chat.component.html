@@ -1,5 +1,3 @@
-
-
 <ion-content *ngIf="isParent" class="parent-messages">
   <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
     <ion-refresher-content></ion-refresher-content>
@@ -50,12 +48,19 @@
       </div>
 
       <div class="px-chat-contact-list">
-        <div class="px-chat-contact-empty" *ngIf="(loadingConversations || loadingGroups) && conversations.length === 0 && groups.length === 0">
-          {{ 'COMMON.LOADING' | translate }}
+        <!-- Loading skeletons -->
+        <div class="px-chat-loading-list" *ngIf="(loadingConversations || loadingGroups) && conversations.length === 0 && groups.length === 0">
+          <div class="px-chat-loading-row" *ngFor="let _ of [0,1,2,3]">
+            <app-skeleton [height]="42" [width]="'42px'" [circle]="true"></app-skeleton>
+            <div class="px-chat-loading-lines">
+              <app-skeleton [height]="14" [width]="'70%'"></app-skeleton>
+              <app-skeleton [height]="12" [width]="'45%'"></app-skeleton>
+            </div>
+          </div>
         </div>
 
         <div class="px-chat-contact"
-             *ngFor="let item of filteredContacts"
+             *ngFor="let item of filteredContacts; trackBy: trackByContact"
              [class.active]="isActiveContact(item)"
              (click)="selectContact(item)">
           <div class="px-avatar-wrap">
@@ -131,15 +136,17 @@
 
           <!-- Group messages -->
           <ng-container *ngIf="selectedGroupId !== null">
-            <div class="px-chat-empty" *ngIf="loadingGroupMessages">
-              {{ 'COMMON.LOADING' | translate }}
+            <div class="px-chat-loading-messages" *ngIf="loadingGroupMessages">
+              <app-skeleton [height]="60" [width]="'55%'"></app-skeleton>
+              <app-skeleton [height]="80" [width]="'40%'"></app-skeleton>
+              <app-skeleton [height]="60" [width]="'60%'"></app-skeleton>
             </div>
             <div class="px-chat-empty" *ngIf="!loadingGroupMessages && groupMessages.length === 0">
               <i class="bi bi-chat-dots px-chat-empty-icon"></i>
               <p>{{ 'CHAT_PAGE.NO_MESSAGES_YET' | translate }}</p>
             </div>
             <div class="px-chat-message"
-                 *ngFor="let message of groupMessages"
+                 *ngFor="let message of groupMessages; trackBy: trackByGroupMessage"
                  [class.sent]="isMyGroupMessage(message)"
                  [class.received]="!isMyGroupMessage(message)">
               <div class="px-chat-bubble">
@@ -154,7 +161,13 @@
                     <i class="bi bi-download px-chat-file-download"></i>
                   </a>
                   <a *ngIf="isImageAttachment(message.attachmentType)" class="px-chat-image" (click)="openAttachment(message, true)" role="button" tabindex="0">
-                    <img [src]="imageSrc(message, true)" [alt]="message.attachmentName || 'image'" loading="lazy">
+                    <app-skeleton *ngIf="imageLoading(message, true)" [height]="160" [width]="'100%'"></app-skeleton>
+                    <div class="px-chat-image-error" *ngIf="imageFailed(message, true)">
+                      <i class="bi bi-image"></i>
+                      <span>{{ 'CHAT_PAGE.ATTACH_LOAD_FAILED' | translate }}</span>
+                    </div>
+                    <img *ngIf="!imageLoading(message, true) && !imageFailed(message, true) && imageUrl(message, true)"
+                         [src]="imageUrl(message, true)" [alt]="message.attachmentName || 'image'" loading="lazy">
                   </a>
                 </div>
                 <div class="px-chat-bubble-text" *ngIf="message.content">{{ message.content }}</div>
@@ -165,15 +178,17 @@
 
           <!-- Individual messages -->
           <ng-container *ngIf="selectedGroupId === null && selectedUserId">
-            <div class="px-chat-empty" *ngIf="loadingMessages">
-              {{ 'COMMON.LOADING' | translate }}
+            <div class="px-chat-loading-messages" *ngIf="loadingMessages">
+              <app-skeleton [height]="60" [width]="'55%'"></app-skeleton>
+              <app-skeleton [height]="80" [width]="'40%'"></app-skeleton>
+              <app-skeleton [height]="60" [width]="'60%'"></app-skeleton>
             </div>
             <div class="px-chat-empty" *ngIf="!loadingMessages && messages.length === 0">
               <i class="bi bi-chat-dots px-chat-empty-icon"></i>
               <p>{{ 'CHAT_PAGE.NO_MESSAGES_YET' | translate }}</p>
             </div>
             <div class="px-chat-message"
-                 *ngFor="let message of messages"
+                 *ngFor="let message of messages; trackBy: trackByMessage"
                  [class.sent]="isMyMessage(message)"
                  [class.received]="!isMyMessage(message)">
               <div class="px-chat-bubble">
@@ -187,7 +202,13 @@
                     <i class="bi bi-download px-chat-file-download"></i>
                   </a>
                   <a *ngIf="isImageAttachment(message.attachmentType)" class="px-chat-image" (click)="openAttachment(message, false)" role="button" tabindex="0">
-                    <img [src]="imageSrc(message, false)" [alt]="message.attachmentName || 'image'" loading="lazy">
+                    <app-skeleton *ngIf="imageLoading(message, false)" [height]="160" [width]="'100%'"></app-skeleton>
+                    <div class="px-chat-image-error" *ngIf="imageFailed(message, false)">
+                      <i class="bi bi-image"></i>
+                      <span>{{ 'CHAT_PAGE.ATTACH_LOAD_FAILED' | translate }}</span>
+                    </div>
+                    <img *ngIf="!imageLoading(message, false) && !imageFailed(message, false) && imageUrl(message, false)"
+                         [src]="imageUrl(message, false)" [alt]="message.attachmentName || 'image'" loading="lazy">
                   </a>
                 </div>
                 <div class="px-chat-bubble-text" *ngIf="message.content">{{ message.content }}</div>
@@ -233,7 +254,7 @@
 
           <ng-container *ngIf="selectedGroupId !== null">
             <input type="text" class="px-chat-input-field" [placeholder]="'CHAT_PAGE.TYPE_MESSAGE' | translate"
-                   [(ngModel)]="newMessage" (keydown.enter)="sendGroupMessage()">
+                   [(ngModel)]="newMessage" (keydown.enter)="sendGroupMessage()" (input)="onTypingInput()">
             <button class="px-chat-send-btn" (click)="sendGroupMessage()" [title]="'CHAT_PAGE.SEND' | translate" [disabled]="uploadingAttachment"><i class="bi bi-send"></i></button>
           </ng-container>
 
@@ -272,7 +293,9 @@
     </div>
     <div class="px-chat-modal-body">
       <div class="px-chat-modal-loading" *ngIf="loadingContacts">
-        {{ 'COMMON.LOADING' | translate }}
+        <app-skeleton [height]="48" [width]="'90%'"></app-skeleton>
+        <app-skeleton [height]="48" [width]="'90%'"></app-skeleton>
+        <app-skeleton [height]="48" [width]="'90%'"></app-skeleton>
       </div>
       <div class="px-chat-contact" *ngFor="let user of filteredUsers" (click)="startChat(user)">
         <div class="px-avatar-wrap">

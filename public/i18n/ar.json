@@ -928,7 +928,9 @@
     "ATTACH_TOO_LARGE": "الملف كبير جدًا. الحد الأقصى هو 10 ميجابايت.",
     "ATTACH_UPLOAD_FAILED": "فشل الرفع. حاول مرة أخرى.",
     "ATTACH_SEND_FAILED": "فشل إرسال المرفق. حاول مرة أخرى.",
-    "ATTACH_OPEN_FAILED": "تعذر فتح المرفق. حاول مرة أخرى."
+    "ATTACH_OPEN_FAILED": "تعذر فتح المرفق. حاول مرة أخرى.",
+    "ATTACH_LOAD_FAILED": "تعذر تحميل الصورة.",
+    "SEND_FAILED": "تعذر إرسال الرسالة. حاول مرة أخرى."
   },
   "RECLAMATIONS_PAGE": {
     "TITLE": "الشكاوى",

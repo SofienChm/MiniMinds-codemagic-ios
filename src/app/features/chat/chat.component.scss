@@ -848,3 +848,59 @@ ion-content.parent-messages {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* ===== Loading skeletons (reuse existing design tokens) ===== */
+.px-chat-loading-list {
+  padding: 8px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.px-chat-loading-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.px-chat-loading-lines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.px-chat-loading-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* In-bubble image loading / failure states */
+.px-chat-image {
+  min-height: 140px;
+}
+
+.px-chat-image::ng-deep .skeleton {
+  border-radius: 10px;
+}
+
+.px-chat-image-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 140px;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 10px;
+  color: #94a3b8;
+  font-size: 2rem;
+
+  span {
+    font-size: 0.8rem;
+    text-align: center;
+    padding: 0 8px;
+  }
+}

@@ -3,12 +3,14 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { Subscription } from 'rxjs';
+import { Subscription, Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { TitlePage, Breadcrumb } from '../../shared/layouts/title-page/title-page';
 import { PageTitleService } from '../../core/services/page-title.service';
 import { AuthService } from '../../core/services/auth';
 import { ApiConfig } from '../../core/config/api.config';
 import { NotificationService } from '../../core/services/notification-service';
+import { SimpleToastService } from '../../core/services/simple-toast.service';
 import { ClassesService } from '../classes/classes.service';
 import {
   MessagesService, Conversation, TenantContact, ChatMessage, ConversationPage,
@@ -16,6 +18,7 @@ import {
 } from '../../core/services/messages.service';
 import { ParentChildHeaderSimpleComponent } from '../../shared/components/parent-child-header-simple/parent-child-header-simple.component';
 import { IonContent, IonRefresher, IonRefresherContent } from '@ionic/angular/standalone';
+import { SkeletonComponent } from '../../shared/components/skeleton';
 
 interface ChatListItem {
   kind: 'group' | 'conversation';
@@ -28,10 +31,19 @@ interface ChatListItem {
   conversation?: Conversation;
 }
 
+interface AttachmentUrlEntry {
+  url: string;
+  expiresAt: number;
+}
+
+const GROUP_KEY_OFFSET = 2000000000;
+const TYPING_THROTTLE_MS = 1000;
+const TYPING_STOP_MS = 1500;
+
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule, TitlePage, ParentChildHeaderSimpleComponent, IonContent, IonRefresher, IonRefresherContent],
+  imports: [CommonModule, FormsModule, TranslateModule, TitlePage, ParentChildHeaderSimpleComponent, IonContent, IonRefresher, IonRefresherContent, SkeletonComponent],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss'
 })
@@ -73,7 +85,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   contactSearchTerm = '';
   currentUserId = '';
 
-  // Chat attachments (R2-backed)
+  // Chat attachments (R2-backed, served via short-lived presigned URLs)
   pendingFile: File | null = null;
   pendingFilePreviewUrl: string | null = null;
   uploadingAttachment = false;
@@ -81,6 +93,10 @@ export class ChatComponent implements OnInit, OnDestroy {
   viewerImageUrl: string | null = null;
   viewerImageName: string | null = null;
   private objectUrls: string[] = [];
+  private sentImageUrls = new Set<string>();
+  private attachmentUrlCache = new Map<number, AttachmentUrlEntry>();
+  private attachmentUrlLoading = new Set<number>();
+  private attachmentFailedKeys = new Set<number>();
   static readonly ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf', 'doc', 'docx', 'xls', 'xlsx'];
   static readonly ALLOWED_MIME_TYPES = [
     'image/jpeg', 'image/png', 'image/gif', 'image/webp',
@@ -108,6 +124,8 @@ export class ChatComponent implements OnInit, OnDestroy {
   isTyping = false;
   isMobile = window.innerWidth < 768;
   private typingTimer: any;
+  private lastTypingSentAt = 0;
+  private tempIdCounter = 0;
 
   private pendingSenderId: string | null = null;
   private pendingGroupId: number | null = null;
@@ -120,6 +138,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private messagesService: MessagesService,
     private notificationService: NotificationService,
+    private simpleToastService: SimpleToastService,
     private classesService: ClassesService,
     private router: Router,
     private route: ActivatedRoute,
@@ -168,7 +187,8 @@ export class ChatComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subscriptions.forEach(sub => sub.unsubscribe());
     clearTimeout(this.typingTimer);
-    this.releaseObjectUrls();
+    this.objectUrls.forEach(u => URL.revokeObjectURL(u));
+    this.sentImageUrls.forEach(u => URL.revokeObjectURL(u));
   }
 
   get hasActiveChat(): boolean {
@@ -530,6 +550,8 @@ export class ChatComponent implements OnInit, OnDestroy {
     }
   }
 
+  // ===== Send (optimistic: the message appears instantly, then reconciles with the server) =====
+
   sendMessage(): void {
     const content = this.newMessage.trim();
     if ((!content && !this.pendingFile) || !this.selectedUserId) return;
@@ -539,16 +561,27 @@ export class ChatComponent implements OnInit, OnDestroy {
       return;
     }
 
-    clearTimeout(this.typingTimer);
-    this.notificationService.sendTyping(this.selectedUserId, false);
+    const temp: ChatMessage = {
+      id: this.nextTempId(),
+      senderId: this.currentUserId,
+      content,
+      sentAt: new Date().toISOString(),
+      isRead: false
+    };
+    this.messages = [...this.messages, temp];
+    this.newMessage = '';
+    this.stopTyping();
+    this.scrollToBottom();
 
     this.messagesService.chatSendMessage(this.selectedUserId, content).subscribe({
-      next: () => {
-        this.newMessage = '';
-        this.loadConversation(this.selectedUserId!);
-        this.loadConversations();
+      next: (res) => {
+        this.replaceTempMessage(temp.id, res?.messageId);
+        this.upsertConversationPreview({ userId: this.selectedUserId! }, content, temp.sentAt);
       },
-      error: () => {}
+      error: () => {
+        this.removeTempMessage(temp.id);
+        this.simpleToastService.error(this.translateService.instant('CHAT_PAGE.SEND_FAILED'));
+      }
     });
   }
 
@@ -560,20 +593,29 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     this.messagesService.uploadChatAttachment(file).subscribe({
       next: (res) => {
-        this.uploadingAttachment = false;
+        const temp = this.buildOptimisticIndividualAttachment(file, res, content);
+        this.messages = [...this.messages, temp];
+        this.cacheSentImageUrl(temp, false);
         this.discardPendingFile();
+        this.uploadingAttachment = false;
+        this.newMessage = '';
+        this.stopTyping();
+        this.scrollToBottom();
+
         this.messagesService.chatSendMessage(this.selectedUserId!, content, {
           attachmentKey: res.attachmentKey,
           attachmentName: res.attachmentName,
           attachmentType: res.attachmentType,
           attachmentSize: res.attachmentSize
         }).subscribe({
-          next: () => {
-            this.newMessage = '';
-            this.loadConversation(this.selectedUserId!);
-            this.loadConversations();
+          next: (sendRes) => {
+            this.replaceTempMessage(temp.id, sendRes?.messageId);
+            this.upsertConversationPreview({ userId: this.selectedUserId! }, content || '[Attachment]', temp.sentAt);
           },
-          error: () => this.attachmentError = this.translateService.instant('CHAT_PAGE.ATTACH_SEND_FAILED')
+          error: () => {
+            this.removeTempMessage(temp.id);
+            this.simpleToastService.error(this.translateService.instant('CHAT_PAGE.ATTACH_SEND_FAILED'));
+          }
         });
       },
       error: (err) => {
@@ -592,13 +634,27 @@ export class ChatComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const temp: GroupChatMessage = {
+      id: this.nextTempId(),
+      senderId: this.currentUserId,
+      senderName: '',
+      content,
+      sentAt: new Date().toISOString()
+    };
+    this.groupMessages = [...this.groupMessages, temp];
+    this.newMessage = '';
+    this.stopTyping();
+    this.scrollToBottom();
+
     this.messagesService.sendChatGroupMessage(this.selectedGroupId, content).subscribe({
-      next: () => {
-        this.newMessage = '';
-        this.loadGroupMessages(this.selectedGroupId!);
-        this.loadGroups();
+      next: (res) => {
+        this.replaceTempMessage(temp.id, res?.messageId);
+        this.upsertGroupPreview(this.selectedGroupId!, content, temp.sentAt);
       },
-      error: () => {}
+      error: () => {
+        this.removeTempMessage(temp.id);
+        this.simpleToastService.error(this.translateService.instant('CHAT_PAGE.SEND_FAILED'));
+      }
     });
   }
 
@@ -610,20 +666,29 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     this.messagesService.uploadChatAttachment(file).subscribe({
       next: (res) => {
-        this.uploadingAttachment = false;
+        const temp = this.buildOptimisticGroupAttachment(file, res, content);
+        this.groupMessages = [...this.groupMessages, temp];
+        this.cacheSentImageUrl(temp, true);
         this.discardPendingFile();
+        this.uploadingAttachment = false;
+        this.newMessage = '';
+        this.stopTyping();
+        this.scrollToBottom();
+
         this.messagesService.sendChatGroupMessage(this.selectedGroupId!, content, {
           attachmentKey: res.attachmentKey,
           attachmentName: res.attachmentName,
           attachmentType: res.attachmentType,
           attachmentSize: res.attachmentSize
         }).subscribe({
-          next: () => {
-            this.newMessage = '';
-            this.loadGroupMessages(this.selectedGroupId!);
-            this.loadGroups();
+          next: (sendRes) => {
+            this.replaceTempMessage(temp.id, sendRes?.messageId);
+            this.upsertGroupPreview(this.selectedGroupId!, content || '[Attachment]', temp.sentAt);
           },
-          error: () => this.attachmentError = this.translateService.instant('CHAT_PAGE.ATTACH_SEND_FAILED')
+          error: () => {
+            this.removeTempMessage(temp.id);
+            this.simpleToastService.error(this.translateService.instant('CHAT_PAGE.ATTACH_SEND_FAILED'));
+          }
         });
       },
       error: (err) => {
@@ -632,6 +697,136 @@ export class ChatComponent implements OnInit, OnDestroy {
       }
     });
   }
+
+  private buildOptimisticIndividualAttachment(file: File, res: any, content: string): ChatMessage {
+    const isImage = file.type.startsWith('image/');
+    return {
+      id: this.nextTempId(),
+      senderId: this.currentUserId,
+      content,
+      sentAt: new Date().toISOString(),
+      isRead: false,
+      attachmentUrl: isImage ? URL.createObjectURL(file) : 'attached',
+      attachmentName: res.attachmentName,
+      attachmentType: res.attachmentType,
+      attachmentSize: res.attachmentSize
+    };
+  }
+
+  private buildOptimisticGroupAttachment(file: File, res: any, content: string): GroupChatMessage {
+    const isImage = file.type.startsWith('image/');
+    return {
+      id: this.nextTempId(),
+      senderId: this.currentUserId,
+      senderName: '',
+      content,
+      sentAt: new Date().toISOString(),
+      attachmentUrl: isImage ? URL.createObjectURL(file) : 'attached',
+      attachmentName: res.attachmentName,
+      attachmentType: res.attachmentType,
+      attachmentSize: res.attachmentSize
+    };
+  }
+
+  private cacheSentImageUrl(message: ChatMessage | GroupChatMessage, group: boolean): void {
+    if (!message.attachmentUrl || !this.isImageAttachment(message.attachmentType)) return;
+    this.attachmentUrlCache.set(
+      this.keyFor(message.id, group),
+      { url: message.attachmentUrl, expiresAt: Number.MAX_SAFE_INTEGER }
+    );
+    if (message.attachmentUrl.startsWith('blob:')) {
+      this.sentImageUrls.add(message.attachmentUrl);
+    }
+  }
+
+  private replaceTempMessage(tempId: number, realId?: number): void {
+    if (realId == null) {
+      this.removeTempMessage(tempId);
+      return;
+    }
+    // Migrate any locally-cached optimistic image URL to the server message id.
+    for (const group of [false, true]) {
+      const entry = this.attachmentUrlCache.get(this.keyFor(tempId, group));
+      if (entry) {
+        this.attachmentUrlCache.set(this.keyFor(realId, group), entry);
+        this.attachmentUrlCache.delete(this.keyFor(tempId, group));
+      }
+    }
+
+    const idx = this.messages.findIndex(m => m.id === tempId);
+    if (idx >= 0) {
+      const msg = this.messages[idx];
+      this.messages[idx] = { ...msg, id: realId, attachmentUrl: msg.attachmentUrl || (msg.attachmentName ? 'attached' : undefined) };
+      this.messages = [...this.messages];
+    }
+
+    const gIdx = this.groupMessages.findIndex(m => m.id === tempId);
+    if (gIdx >= 0) {
+      const msg = this.groupMessages[gIdx];
+      this.groupMessages[gIdx] = { ...msg, id: realId, attachmentUrl: msg.attachmentUrl || (msg.attachmentName ? 'attached' : undefined) };
+      this.groupMessages = [...this.groupMessages];
+    }
+  }
+
+  private removeTempMessage(tempId: number): void {
+    this.messages = this.messages.filter(m => m.id !== tempId);
+    this.groupMessages = this.groupMessages.filter(m => m.id !== tempId);
+  }
+
+  private nextTempId(): number {
+    this.tempIdCounter--;
+    return this.tempIdCounter;
+  }
+
+  private stopTyping(): void {
+    if (!this.selectedUserId) return;
+    clearTimeout(this.typingTimer);
+    this.lastTypingSentAt = 0;
+    this.notificationService.sendTyping(this.selectedUserId, false);
+  }
+
+  private upsertConversationPreview(contact: Partial<Conversation>, content: string, sentAt: string, unread = false): void {
+    const userId = contact.userId ?? this.selectedUserId;
+    if (!userId || userId === this.currentUserId) return;
+
+    const lastMessage = content || '[Attachment]';
+    const existing = this.conversations.find(c => c.userId === userId);
+    if (existing) {
+      existing.lastMessage = lastMessage;
+      existing.lastMessageAt = sentAt;
+      existing.unreadCount = unread ? (existing.unreadCount || 0) + 1 : 0;
+    } else {
+      this.conversations.push({
+        userId,
+        name: contact.name || this.selectedUserName || 'Unknown',
+        profilePictureUrl: contact.profilePictureUrl || this.selectedUserPicture || undefined,
+        lastMessage,
+        lastMessageAt: sentAt,
+        unreadCount: unread ? 1 : 0,
+        role: contact.role || this.selectedUserRole || undefined,
+        parentId: contact.parentId ?? this.selectedUserParentId ?? undefined,
+        teacherId: contact.teacherId ?? this.selectedUserTeacherId ?? undefined
+      });
+    }
+    this.conversations = [...this.conversations].sort(this.byLastMessageDesc);
+  }
+
+  private upsertGroupPreview(groupId: number, content: string, sentAt: string, unread = false): void {
+    const existing = this.groups.find(g => g.id === groupId);
+    const lastMessage = content || '[Attachment]';
+    if (existing) {
+      existing.lastMessage = lastMessage;
+      existing.lastMessageAt = sentAt;
+      existing.unreadCount = unread ? (existing.unreadCount || 0) + 1 : 0;
+      this.groups = [...this.groups].sort(this.byLastMessageDesc);
+    }
+  }
+
+  private byLastMessageDesc(a: { lastMessageAt?: string }, b: { lastMessageAt?: string }): number {
+    return (b.lastMessageAt ? new Date(b.lastMessageAt).getTime() : 0) - (a.lastMessageAt ? new Date(a.lastMessageAt).getTime() : 0);
+  }
+
+  // ===== Attachments (presigned URLs, never proxied bytes) =====
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -680,14 +875,12 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   private releaseObjectUrls(): void {
-    this.objectUrls.forEach(u => URL.revokeObjectURL(u));
-    this.objectUrls = [];
-    this.attachmentBlobUrls.forEach(u => URL.revokeObjectURL(u));
-    this.attachmentBlobUrls.clear();
-  }
-
-  private saveObjectUrl(url: string): void {
-    this.objectUrls.push(url);
+    this.objectUrls.forEach(u => {
+      if (!this.sentImageUrls.has(u)) {
+        URL.revokeObjectURL(u);
+      }
+    });
+    this.objectUrls = [...this.sentImageUrls];
   }
 
   formatFileSize(bytes?: number): string {
@@ -701,12 +894,6 @@ export class ChatComponent implements OnInit, OnDestroy {
     return !!type && type.startsWith('image/');
   }
 
-  attachmentUrl(message: any, group = false): string {
-    const id = message?.id;
-    if (id == null) return '';
-    return `${ApiConfig.ENDPOINTS.MESSAGES}/attachment/${id}?group=${group ? 'true' : 'false'}`;
-  }
-
   attachmentIcon(type?: string): string {
     const t = (type || '').toLowerCase();
     if (t.includes('pdf')) return 'bi-file-earmark-pdf';
@@ -716,38 +903,78 @@ export class ChatComponent implements OnInit, OnDestroy {
     return 'bi-file-earmark';
   }
 
-  private attachmentBlobUrls = new Map<number, string>();
-
-  private attachmentKey(message: any, group: boolean): number {
-    return message && message.id != null ? (group ? 2000000000 + message.id : message.id) : -1;
+  private keyFor(id: number, group: boolean): number {
+    return group ? GROUP_KEY_OFFSET + id : id;
   }
 
-  imageSrc(message: any, group = false): string {
+  private attachmentKey(message: any, group: boolean): number {
+    return message && message.id != null ? this.keyFor(message.id, group) : -1;
+  }
+
+  imageUrl(message: any, group = false): string {
+    if (!message || message.id == null) return '';
     const key = this.attachmentKey(message, group);
     if (key < 0) return '';
-    const url = this.attachmentBlobUrls.get(key);
-    if (url) return url;
-    this.loadImageAttachment(message, group);
+    const cached = this.attachmentUrlCache.get(key);
+    if (cached && cached.expiresAt > Date.now()) return cached.url;
+    this.ensureAttachmentUrl(message, group);
     return '';
   }
 
-  private loadImageAttachment(message: any, group: boolean): void {
-    const key = this.attachmentKey(message, group);
-    if (key < 0 || this.attachmentBlobUrls.has(key)) return;
+  imageLoading(message: any, group = false): boolean {
+    return this.attachmentUrlLoading.has(this.attachmentKey(message, group));
+  }
 
-    this.messagesService.downloadChatAttachment(message.id, group).subscribe({
-      next: (blob) => {
-        const url = URL.createObjectURL(blob);
-        this.attachmentBlobUrls.set(key, url);
-        this.saveObjectUrl(url);
+  imageFailed(message: any, group = false): boolean {
+    return this.attachmentFailedKeys.has(this.attachmentKey(message, group));
+  }
+
+  private ensureAttachmentUrl(message: any, group: boolean): void {
+    const key = this.attachmentKey(message, group);
+    if (key < 0 || this.attachmentUrlLoading.has(key)) return;
+    const cached = this.attachmentUrlCache.get(key);
+    if (cached && cached.expiresAt > Date.now()) return;
+
+    this.attachmentUrlLoading.add(key);
+    this.attachmentFailedKeys.delete(key);
+    this.messagesService.getChatAttachmentUrl(message.id, group).subscribe({
+      next: (res) => {
+        this.attachmentUrlCache.set(key, {
+          url: res.url,
+          expiresAt: Date.now() + (res.expiresInSeconds || 900) * 1000
+        });
+        this.attachmentUrlLoading.delete(key);
         this.cdr.detectChanges();
       },
-      error: () => { /* leave blank; image simply won't render */ }
+      error: () => {
+        this.attachmentUrlLoading.delete(key);
+        this.attachmentFailedKeys.add(key);
+        this.cdr.detectChanges();
+      }
     });
+  }
+
+  private resolveAttachmentUrl(message: any, group: boolean): Observable<string> {
+    if (!message || message.id == null) return of('');
+    const key = this.attachmentKey(message, group);
+    const cached = this.attachmentUrlCache.get(key);
+    if (cached && cached.expiresAt > Date.now()) return of(cached.url);
+
+    return this.messagesService.getChatAttachmentUrl(message.id, group).pipe(
+      map(res => {
+        this.attachmentUrlCache.set(key, {
+          url: res.url,
+          expiresAt: Date.now() + (res.expiresInSeconds || 900) * 1000
+        });
+        return res.url;
+      })
+    );
   }
 
   openAttachment(message: any, group = false): void {
     if (!message || message.id == null) return;
+    // Pending message (id still negative): nothing to open yet.
+    if (message.id < 0) return;
 
     // Images open full-screen inside the chat (Messenger-style lightbox).
     if (this.isImageAttachment(message.attachmentType)) {
@@ -755,37 +982,48 @@ export class ChatComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.messagesService.downloadChatAttachment(message.id, group).subscribe({
-      next: (blob) => {
-        const url = URL.createObjectURL(blob);
-        this.saveObjectUrl(url);
+    this.resolveAttachmentUrl(message, group).subscribe({
+      next: (url) => {
+        if (!url) {
+          this.simpleToastService.error(this.translateService.instant('CHAT_PAGE.ATTACH_OPEN_FAILED'));
+          return;
+        }
         window.open(url, '_blank');
-        setTimeout(() => URL.revokeObjectURL(url), 30000);
       },
       error: () => {
-        this.attachmentError = this.translateService.instant('CHAT_PAGE.ATTACH_OPEN_FAILED');
+        this.simpleToastService.error(this.translateService.instant('CHAT_PAGE.ATTACH_OPEN_FAILED'));
       }
     });
   }
 
   openImageViewer(message: any, group = false): void {
-    const existing = this.attachmentBlobUrls.get(this.attachmentKey(message, group));
-    if (existing) {
-      this.viewerImageUrl = existing;
+    if (!message || message.id == null) return;
+    if (message.id < 0) return;
+
+    const cached = this.resolveAttachmentCache(message, group);
+    if (cached) {
+      this.viewerImageUrl = cached;
       this.viewerImageName = message.attachmentName || 'image';
       return;
     }
-    this.messagesService.downloadChatAttachment(message.id, group).subscribe({
-      next: (blob) => {
-        const url = URL.createObjectURL(blob);
-        this.saveObjectUrl(url);
+    this.resolveAttachmentUrl(message, group).subscribe({
+      next: (url) => {
+        if (!url) return;
         this.viewerImageUrl = url;
         this.viewerImageName = message.attachmentName || 'image';
       },
       error: () => {
-        this.attachmentError = this.translateService.instant('CHAT_PAGE.ATTACH_OPEN_FAILED');
+        this.simpleToastService.error(this.translateService.instant('CHAT_PAGE.ATTACH_OPEN_FAILED'));
       }
     });
+  }
+
+  private resolveAttachmentCache(message: any, group: boolean): string | null {
+    const key = this.attachmentKey(message, group);
+    const cached = this.attachmentUrlCache.get(key);
+    if (cached && cached.expiresAt > Date.now()) return cached.url;
+    if (cached) this.attachmentUrlCache.delete(key);
+    return null;
   }
 
   closeImageViewer(): void {
@@ -798,27 +1036,29 @@ export class ChatComponent implements OnInit, OnDestroy {
     const a = document.createElement('a');
     a.href = this.viewerImageUrl;
     a.download = this.viewerImageName || 'image';
+    a.target = '_blank';
+    a.rel = 'noopener';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
   }
 
   downloadAttachment(message: any, group = false): void {
-    if (!message || message.id == null) return;
-    this.messagesService.downloadChatAttachment(message.id, group).subscribe({
-      next: (blob) => {
-        const url = URL.createObjectURL(blob);
-        this.saveObjectUrl(url);
+    if (!message || message.id == null || message.id < 0) return;
+    this.resolveAttachmentUrl(message, group).subscribe({
+      next: (url) => {
+        if (!url) return;
         const a = document.createElement('a');
         a.href = url;
         a.download = message.attachmentName || 'attachment';
+        a.target = '_blank';
+        a.rel = 'noopener';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 30000);
       },
       error: () => {
-        this.attachmentError = this.translateService.instant('CHAT_PAGE.ATTACH_OPEN_FAILED');
+        this.simpleToastService.error(this.translateService.instant('CHAT_PAGE.ATTACH_OPEN_FAILED'));
       }
     });
   }
@@ -832,11 +1072,18 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   private handleIncomingMessage(data: any): void {
-    console.log('[Chat] incoming message event', data);
-    this.loadConversations();
+    if (data?.senderId) {
+      const active = this.selectedUserId !== null && data.senderId === this.selectedUserId;
+      this.upsertConversationPreview(
+        { userId: data.senderId, name: data.senderName },
+        data.content || (data.attachmentUrl ? '[Attachment]' : ''),
+        data.sentAt ?? new Date().toISOString(),
+        !active
+      );
+    }
 
     if (data?.senderId && this.selectedUserId && data.senderId === this.selectedUserId) {
-      if (data.content) {
+      if (data.content || data.attachmentUrl) {
         this.messages.push({
           id: data.messageId,
           senderId: data.senderId,
@@ -857,9 +1104,17 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   private handleGroupMessage(data: any): void {
-    this.loadGroups();
+    const active = data?.groupId != null && this.selectedGroupId !== null && data.groupId === this.selectedGroupId;
+    if (data?.groupId != null) {
+      this.upsertGroupPreview(
+        data.groupId,
+        data.content || (data.attachmentUrl ? '[Attachment]' : ''),
+        data.sentAt ?? new Date().toISOString(),
+        !active
+      );
+    }
 
-    if (data?.groupId && this.selectedGroupId !== null && data.groupId === this.selectedGroupId) {
+    if (active) {
       this.groupMessages.push({
         id: data.messageId,
         senderId: data.senderId,
@@ -894,11 +1149,16 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   onTypingInput(): void {
     if (!this.selectedUserId) return;
-    this.notificationService.sendTyping(this.selectedUserId, true);
+    const now = Date.now();
+    if (now - this.lastTypingSentAt >= TYPING_THROTTLE_MS) {
+      this.lastTypingSentAt = now;
+      this.notificationService.sendTyping(this.selectedUserId, true);
+    }
     clearTimeout(this.typingTimer);
     this.typingTimer = setTimeout(() => {
       this.notificationService.sendTyping(this.selectedUserId!, false);
-    }, 1500);
+      this.lastTypingSentAt = 0;
+    }, TYPING_STOP_MS);
   }
 
   isLastSentMessage(message: ChatMessage): boolean {
@@ -962,6 +1222,20 @@ export class ChatComponent implements OnInit, OnDestroy {
     } else {
       this.selectConversation(item.conversation!);
     }
+  }
+
+  trackByContact(_: number, item: ChatListItem): string {
+    return item.kind === 'group'
+      ? `g-${item.group!.id}`
+      : `c-${item.conversation!.userId}`;
+  }
+
+  trackByMessage(_: number, message: ChatMessage): number {
+    return message.id;
+  }
+
+  trackByGroupMessage(_: number, message: GroupChatMessage): number {
+    return message.id;
   }
 
   initials(name: string): string {
@@ -1042,6 +1316,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.messages = [];
     this.groupMessages = [];
     this.isTyping = false;
+    this.stopTyping();
     this.discardPendingFile();
   }
 
